@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Notes</string>
 
+    <string name="editTextNoteHint">Enter Text</string>
+    <string name="titleEditText">Enter Title</string>
 
+    <string name="saveButton">Save</string>
     
 </resources>

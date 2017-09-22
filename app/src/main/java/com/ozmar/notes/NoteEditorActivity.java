@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
 import android.widget.EditText;
 
 public class NoteEditorActivity extends AppCompatActivity {
@@ -12,6 +13,10 @@ public class NoteEditorActivity extends AppCompatActivity {
     EditText editText;
 
     int noteID;
+
+    public void saveNote(View view){
+        // Save note to permanent storage
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

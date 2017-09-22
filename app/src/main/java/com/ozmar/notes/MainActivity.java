@@ -2,9 +2,12 @@ package com.ozmar.notes;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     static ArrayAdapter arrayAdapter;
 
     public void addNote(View view) {
-        Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
+        Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
         startActivity(intent);
     }
 
@@ -46,6 +49,32 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        try {
+            SQLiteDatabase userNotesDatabase = MainActivity.this.openOrCreateDatabase("User Notes", MODE_PRIVATE, null);
+            userNotesDatabase.execSQL("CREATE TABLE IF NOT EXISTS userNotes (title VARCHAR, content VARCHAR");
+//            userNotesDatabase.execSQL("INSERT INTO userNotes (title, content) VALUES ('Test Title', 'Test Content')");
+
+            Cursor c = userNotesDatabase.rawQuery("SELECT * FROM useNotesDatabase", null);
+
+            int titleIndex = c.getColumnIndex("title");
+            int contentIndex = c.getColumnIndex("content");
+
+            c.moveToFirst();
+            while(c != null) {
+                Log.i("Title", c.getString(titleIndex));
+                Log.i("Content", c.getString(contentIndex));
+
+                c.moveToNext();
+            }
+
+            c.close();
+
+        }
+        catch(Exception e) {
+
+        }
+
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
