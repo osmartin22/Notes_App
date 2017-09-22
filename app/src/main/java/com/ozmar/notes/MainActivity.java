@@ -22,6 +22,11 @@ public class MainActivity extends AppCompatActivity {
     static ArrayList<String> notes = new ArrayList<>();
     static ArrayAdapter arrayAdapter;
 
+    public void addNote(View view) {
+        Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
+        startActivity(intent);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
         listView = (ListView)findViewById(R.id.listVIew);
         notes.add("Example Notes");
-        arrayAdapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, notes );
+        arrayAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, notes );
         listView.setAdapter(arrayAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -67,25 +72,26 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.add_note_menu, menu);
-
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        super.onOptionsItemSelected(item);
-
-        if(item.getItemId() == R.id.add_note) {
-            Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
-            startActivity(intent);
-
-            return true;
-        }
-
-        return false;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater menuInflater = getMenuInflater();
+//        menuInflater.inflate(R.menu.add_note_menu, menu);
+//
+//        return super.onCreateOptionsMenu(menu);
+//    }
+//
+//    // To use for menu button on action bar
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        super.onOptionsItemSelected(item);
+//
+//        if(item.getItemId() == R.id.add_note) {
+//            Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
+//            startActivity(intent);
+//
+//            return true;
+//        }
+//
+//        return false;
+//    }
 }
