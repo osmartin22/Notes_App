@@ -1,3 +1,5 @@
+package com.ozmar.notes;
+
 /**
  * Created by ozmar on 9/21/2017.
  */
@@ -10,6 +12,11 @@ public class SingleNote {
 
     public SingleNote() {
 
+    }
+
+    public SingleNote(String title, String content) {
+        this._title = title;
+        this._content = content;
     }
 
     public SingleNote(int id, String title, String content) {

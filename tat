@@ -1,0 +1,23 @@
+[33mcommit 3722b64f278b938381dbfb00b7066f618d835ecf[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: osmartin22 <oemartinez@ucdavis.edu>
+Date:   Fri Sep 22 15:00:48 2017 -0700
+
+    Database is working. Not implemented to the app yet. Only tested by manually inserting at onCreate() and displaying with log();
+
+[33mcommit 3d9a872b0cd99271193dc02b68ef66271b4460e6[m[33m ([m[1;31morigin/master[m[33m)[m
+Author: osmartin22 <oemartinez@ucdavis.edu>
+Date:   Fri Sep 22 00:15:04 2017 -0700
+
+    Started creating helper for database to store user notes
+
+[33mcommit 127f7ddeda5d06a31c08ea5fde8d38f8116ea78d[m
+Author: osmartin22 <oemartinez@ucdavis.edu>
+Date:   Thu Sep 21 21:22:14 2017 -0700
+
+    Added floaterActionButtn(Plus) for adding notes instead of the menu
+
+[33mcommit 7b6998808a574a692b609b1870599bf1ec29ce1b[m
+Author: osmartin22 <oemartinez@ucdavis.edu>
+Date:   Thu Sep 21 18:41:15 2017 -0700
+
+    First Commit. Notes App does not use permanent storage yet. Can add or delete notes

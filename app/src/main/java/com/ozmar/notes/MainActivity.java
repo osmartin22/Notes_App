@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     ListView listView;
@@ -50,30 +51,49 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        try {
-            SQLiteDatabase userNotesDatabase = MainActivity.this.openOrCreateDatabase("User Notes", MODE_PRIVATE, null);
-            userNotesDatabase.execSQL("CREATE TABLE IF NOT EXISTS userNotes (title VARCHAR, content VARCHAR");
-//            userNotesDatabase.execSQL("INSERT INTO userNotes (title, content) VALUES ('Test Title', 'Test Content')");
 
-            Cursor c = userNotesDatabase.rawQuery("SELECT * FROM useNotesDatabase", null);
+        DatabaseHandler db = new DatabaseHandler(this);
+        Log.d("Insert: ", "Inserting ..");
+        db.addNote(new SingleNote("Test 1 Title", "Test 1 Content"));
+        db.addNote(new SingleNote("Test 2 Title", "Test 2 Content"));
+        db.addNote(new SingleNote("Test 3 Title", "Test 3 Content"));
+        db.addNote(new SingleNote("Test 4 Title", "Test 4 Content"));
 
-            int titleIndex = c.getColumnIndex("title");
-            int contentIndex = c.getColumnIndex("content");
+        Log.d("Reading: ", "Reading all contacts..");
+        List<SingleNote> notesList = db.getAllNotes();
 
-            c.moveToFirst();
-            while(c != null) {
-                Log.i("Title", c.getString(titleIndex));
-                Log.i("Content", c.getString(contentIndex));
-
-                c.moveToNext();
-            }
-
-            c.close();
-
+        for(SingleNote note : notesList) {
+            String log = "ID: " + note.get_id() + ", Title: " + note.get_title() + ", Content: " + note.get_content();
+            Log.d("User Note: ", log);
         }
-        catch(Exception e) {
 
-        }
+
+
+
+//        try {
+//            SQLiteDatabase userNotesDatabase = MainActivity.this.openOrCreateDatabase("User Notes", MODE_PRIVATE, null);
+//            userNotesDatabase.execSQL("CREATE TABLE IF NOT EXISTS userNotes (title VARCHAR, content VARCHAR");
+////            userNotesDatabase.execSQL("INSERT INTO userNotes (title, content) VALUES ('Test Title', 'Test Content')");
+//
+//            Cursor c = userNotesDatabase.rawQuery("SELECT * FROM useNotesDatabase", null);
+//
+//            int titleIndex = c.getColumnIndex("title");
+//            int contentIndex = c.getColumnIndex("content");
+//
+//            c.moveToFirst();
+//            while(c != null) {
+//                Log.i("Title", c.getString(titleIndex));
+//                Log.i("Content", c.getString(contentIndex));
+//
+//                c.moveToNext();
+//            }
+//
+//            c.close();
+//
+//        }
+//        catch(Exception e) {
+//
+//        }
 
 
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {

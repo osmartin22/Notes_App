@@ -1,15 +1,13 @@
+package com.ozmar.notes;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-import java.util.Currency;
+import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Created by ozmar on 9/21/2017.
- */
 
 public class DatabaseHandler extends SQLiteOpenHelper{
 
@@ -28,8 +26,8 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String CREATE_USER_NOTES_TABLE = "CREATE TABLE" + TABLE_USER_NOTES + "(" + KEY_ID
-                + " INTEGER PRIMARY KEY," + KEY_TITLE + "TEXT," + KEY_CONTENT + ")";
+        String CREATE_USER_NOTES_TABLE = "CREATE TABLE " + TABLE_USER_NOTES + "(" + KEY_ID
+                + " INTEGER PRIMARY KEY, "  + KEY_TITLE + " TEXT, " + KEY_CONTENT + " TEXT)";
         sqLiteDatabase.execSQL(CREATE_USER_NOTES_TABLE);
     }
 
@@ -60,34 +58,68 @@ public class DatabaseHandler extends SQLiteOpenHelper{
                 KEY_ID + "=?",
                 new String[] { String.valueOf(id) }, null, null, null, null);
 
-        if( cursor != null) {
-            cursor.moveToFirst();
+        if( cursor != null && cursor.moveToFirst()) {
+            SingleNote note = new SingleNote(Integer.parseInt(cursor.getString(0)),
+                    cursor.getString(1), cursor.getString(2));
+            cursor.close();
+            return note;
         }
 
-        SingleNote note = new SingleNote(Integer.parseInt(cursor.getString(0)),
-                cursor.getString(1), cursor.getString(2));
-        return note;
+        return null;            // WANT TO TEST THIS
     }
 
     // Get all the notes
     public List<SingleNote> getAllNotes() {
+        List<SingleNote> noteList = new ArrayList<>();
+        String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES;
 
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor =  db.rawQuery(selectQuery, null);
+
+        if(cursor.moveToFirst()) {
+            do{
+                SingleNote note = new SingleNote();
+                note.set_id(Integer.parseInt(cursor.getString(0)));
+                note.set_title(cursor.getString(1));
+                note.set_content(cursor.getString(2));
+
+                noteList.add(note);
+            } while(cursor.moveToNext());
+        }
+
+        cursor.close();
+        return noteList;
     }
 
     // Get count of the number of notes
     public int getNotesCount() {
+        String countQuery = "SELECT * FROM " + TABLE_USER_NOTES;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+        cursor.close();
 
-
+        return cursor.getCount();
     }
 
     // Update a single note
     public int updateNote(SingleNote note) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        ContentValues values = new ContentValues();
+        values.put(KEY_TITLE, note.get_title());
+        values.put(KEY_CONTENT, note.get_content());
+
+        return db.update(TABLE_USER_NOTES, values, KEY_ID +     " = ?",
+                new String[] {String.valueOf(note.get_id())});
     }
 
     // Delete a single note
     public void deleteNote(SingleNote note) {
+        SQLiteDatabase db = this.getWritableDatabase();
 
+        db.delete(TABLE_USER_NOTES, KEY_ID +     " = ?",
+                new String[] {String.valueOf(note.get_id())});
+        db.close();
     }
 
 
