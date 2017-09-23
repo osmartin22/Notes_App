@@ -12,6 +12,8 @@ import android.widget.ListView;
 import java.util.List;
 
 // TODO: 1) Use AsyncTask for db read/write instead of Main thread
+// TODO: 2) Slide to delete
+// TODO: 3) On long press, allow multiple deletes and show delete button
 
 
 public class MainActivity extends AppCompatActivity {
@@ -81,18 +83,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-        notesList = db.getAllNotes();
-
-        if(listView.getAdapter() == null) {
-            listView.setAdapter(myAdapter);
+        if(db.getNotesCount() != notesList.size()) {
+            notesList = db.getAllNotes();
         }
 
-        else {
-            listView.setAdapter(myAdapter);
-            myAdapter.notifyDataSetChanged();
+        if(listView != null) {
             listView.invalidateViews();
-            listView.refreshDrawableState();
         }
+
+        myAdapter.notifyDataSetChanged();
+
+//        if(listView.getAdapter() == null) {
+//            listView.setAdapter(myAdapter);
+//        }
+//
+//        else {
+//            listView.setAdapter(myAdapter);
+//            myAdapter.notifyDataSetChanged();
+//            listView.invalidateViews();
+//            listView.refreshDrawableState();
+//        }
     }
 
 //    @Override

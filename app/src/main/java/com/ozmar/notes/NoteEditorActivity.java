@@ -17,6 +17,9 @@ public class NoteEditorActivity extends AppCompatActivity {
     int noteID;
 
     // TODO: Modify so that only changes in text cause a save
+    // TODO: Possibly change how saveNote is done. Right now it uses notesList to access notes.
+        // TODO: (Cont.) The key member is not used for getting notes. db is only used to add a note
+        // TODO: (Cont.) and notesList is then updated with the new note
     // Update note if it exists else create a new one
     public void saveNote(View view){
         String title = editTextTitle.getText().toString();
@@ -28,18 +31,17 @@ public class NoteEditorActivity extends AppCompatActivity {
             tempNote.set_content(content);
             db.updateNote(tempNote);
 
-            Log.d("Note", "Updated");
-            Log.d("Current Key", Integer.toString(noteID));
+//            Log.d("Note", "Updated");
         }
 
         else {
-            db.addNote(new SingleNote(title, content));
+            SingleNote temp = new SingleNote(title, content);
+            db.addNote(temp);
             notesList = db.getAllNotes();
-            noteID = notesList.size()-1;    // set key to access note in db to the last position in the list
+            noteID = notesList.size()-1;    // Set noteID to last note in the List since the newly added note
+                                                // will be in that position
 
-            Log.d("Note", "Added");
-            Log.d("New Key", Integer.toString(noteID));
-            Log.d("Size", Integer.toString(notesList.size()));
+//            Log.d("Note", "Added");
         }
 
         //MainActivity.myAdapter.notifyDataSetChanged();
