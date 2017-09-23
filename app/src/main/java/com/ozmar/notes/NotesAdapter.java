@@ -32,7 +32,6 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
         nList = objects;
     }
 
-//    // Set my onclick here
     @Override
     public void onClick(View view) {
         int position = (Integer)view.getTag();
@@ -44,7 +43,7 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
                 Log.i("Adapter ", "OnClick called");
                 break;
         }
-    }
+    } // onClick() end
 
     @Override @NonNull
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -68,6 +67,6 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
         holder.content.setText(singleNote.get_content());
 
         return convertView;
-    }
+    } // getView() end
 
-}
+} // NotesAdapter end

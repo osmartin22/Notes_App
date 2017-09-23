@@ -11,7 +11,7 @@ import android.widget.ListView;
 
 import java.util.List;
 
-// TODO: 1) Use AsyncTask for db read/write
+// TODO: 1) Use AsyncTask for db read/write instead of Main thread
 
 
 public class MainActivity extends AppCompatActivity {
@@ -21,12 +21,12 @@ public class MainActivity extends AppCompatActivity {
 
     static List<SingleNote> notesList;
 
-    // onClick method for add button
-    public void addNote(View view) {
+    // onClick method launch activity to create note
+    public void launchNoteEditor(View view) {
         Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
         intent.putExtra("noteID", -1);
         startActivity(intent);
-    }
+    } // launchNoteEditor() end
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,12 +34,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         db = new DatabaseHandler(MainActivity.this);
-
         notesList = db.getAllNotes();
 
-        listView = (ListView)findViewById(R.id.listVIew);
-
         myAdapter = new NotesAdapter(this, R.layout.note_preview, notesList);
+        listView = (ListView)findViewById(R.id.listVIew);
         listView.setAdapter(myAdapter);
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -51,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // Pop up  option to delete note
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -74,9 +73,11 @@ public class MainActivity extends AppCompatActivity {
 
                 return true;
             }
-        });
-    }
+        }); // setOnItemLongClickListener() end
 
+    } // onCreate() end
+
+    // Not doing what i wanted (Refresh listView)
     @Override
     public void onStart() {
         super.onStart();

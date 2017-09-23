@@ -47,7 +47,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
         values.put(KEY_CONTENT, note.get_content());
 
         db.insert(TABLE_USER_NOTES, null, values);
-    }
+    } // launchNoteEditor() end
 
     // Get a single note
     public SingleNote getNote(int id) {
@@ -65,7 +65,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
         }
 
         return null;            // WANT TO TEST THIS
-    }
+    } // getNote() end
 
     // Get all the notes
     public List<SingleNote> getAllNotes() {
@@ -88,7 +88,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 
         cursor.close();
         return noteList;
-    }
+    } // getAllNotes() end
 
     // Get count of the number of notes
     public int getNotesCount() {
@@ -100,7 +100,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
         cursor.close();
 
         return count;
-    }
+    } // getNotesCount() end
 
     // Update a single note
     public int updateNote(SingleNote note) {
@@ -112,7 +112,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 
         return db.update(TABLE_USER_NOTES, values, KEY_ID +     " = ?",
                 new String[] {String.valueOf(note.get_id())});
-    }
+    } // updateNode() end
 
     // Delete a single note
     public void deleteNote(SingleNote note) {
@@ -120,7 +120,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 
         db.delete(TABLE_USER_NOTES, KEY_ID +     " = ?",
                 new String[] {String.valueOf(note.get_id())});
-    }
+    } // deleteNote() end
 
 
 

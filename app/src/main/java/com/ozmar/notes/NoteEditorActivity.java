@@ -15,7 +15,8 @@ public class NoteEditorActivity extends AppCompatActivity {
 
     int noteID;
 
-    // Modify so that only changes in text cause a save
+    // TODO: Modify so that only changes in text cause a save
+    // Update not if it exists else create a new one
     public void saveNote(View view){
         // Save note to permanent storage
         String title = editTextTitle.getText().toString();
@@ -39,7 +40,7 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         //MainActivity.myAdapter.notifyDataSetChanged();
 
-    }
+    } // saveNote() end
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,29 +57,6 @@ public class NoteEditorActivity extends AppCompatActivity {
             editTextTitle.setText(notesList.get(noteID).get_title());
              editTextContent.setText(notesList.get(noteID).get_content());
         }
-//
-//        else {
-//            MainActivity.notes.add("");
-//            noteID = MainActivity.notes.size() - 1;
-//            MainActivity.myAdapter.notifyDataSetChanged();
-//        }
-//
-//        editTextTitle.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//                MainActivity.notes.set(noteID, String.valueOf(charSequence));
-//                MainActivity.myAdapter.notifyDataSetChanged();
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable editable) {
-//
-//            }
-//        });
-    }
-}
+    } // onCreate() end
+
+} // NoteEditorActiity() end
