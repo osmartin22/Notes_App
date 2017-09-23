@@ -1,7 +1,9 @@
 package com.ozmar.notes;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +16,7 @@ import java.util.List;
  * Created by ozmar on 9/22/2017.
  */
 
-public class NotesAdapter extends ArrayAdapter<SingleNote> {
+public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnClickListener{
 
     private Context context;
     private List<SingleNote> nList;
@@ -31,10 +33,18 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> {
     }
 
 //    // Set my onclick here
-//    @Override
-//    public void onClick(View view) {
+    @Override
+    public void onClick(View view) {
+        int position = (Integer)view.getTag();
+        Object object = getItem(position);
+        SingleNote note = (SingleNote)object;
 
-//    }
+        switch (view.getId()) {
+            case R.id.note:
+                Log.i("Adapter ", "OnClick called");
+                break;
+        }
+    }
 
     @Override @NonNull
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {

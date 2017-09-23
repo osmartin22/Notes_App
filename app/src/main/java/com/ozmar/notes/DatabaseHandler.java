@@ -47,7 +47,6 @@ public class DatabaseHandler extends SQLiteOpenHelper{
         values.put(KEY_CONTENT, note.get_content());
 
         db.insert(TABLE_USER_NOTES, null, values);
-        db.close();
     }
 
     // Get a single note
@@ -96,9 +95,11 @@ public class DatabaseHandler extends SQLiteOpenHelper{
         String countQuery = "SELECT * FROM " + TABLE_USER_NOTES;
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
+
+        int count = cursor.getCount();
         cursor.close();
 
-        return cursor.getCount();
+        return count;
     }
 
     // Update a single note
@@ -119,7 +120,6 @@ public class DatabaseHandler extends SQLiteOpenHelper{
 
         db.delete(TABLE_USER_NOTES, KEY_ID +     " = ?",
                 new String[] {String.valueOf(note.get_id())});
-        db.close();
     }
 
 

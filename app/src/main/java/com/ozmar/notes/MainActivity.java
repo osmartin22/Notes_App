@@ -2,92 +2,96 @@ package com.ozmar.notes;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
-import java.util.ArrayList;
 import java.util.List;
+
+// TODO: 1) Use AsyncTask for db read/write
+
 
 public class MainActivity extends AppCompatActivity {
     ListView listView;
+    NotesAdapter myAdapter;
+    static DatabaseHandler db;
 
-
-    static ArrayList<String> notes = new ArrayList<>();
-    static ArrayAdapter arrayAdapter;
+    static List<SingleNote> notesList;
 
     // onClick method for add button
     public void addNote(View view) {
         Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
+        intent.putExtra("noteID", -1);
         startActivity(intent);
     }
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        DatabaseHandler db = new DatabaseHandler(this);
+        db = new DatabaseHandler(MainActivity.this);
 
-        db.addNote(new SingleNote("Test 1 Title", "Test 1 Content"));
-        db.addNote(new SingleNote("Test 2 Title", "Test 2 Content"));
-        db.addNote(new SingleNote("Test 3 Title", "Test 3 Content"));
-        db.addNote(new SingleNote("Test 4 Title", "Test 4 Content"));
-
-        List<SingleNote> notesList = db.getAllNotes();
+        notesList = db.getAllNotes();
 
         listView = (ListView)findViewById(R.id.listVIew);
 
-        NotesAdapter myAdapter = new NotesAdapter(this, R.layout.note_preview, notesList);
-
+        myAdapter = new NotesAdapter(this, R.layout.note_preview, notesList);
         listView.setAdapter(myAdapter);
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
+                intent.putExtra("noteID", i);
+                startActivity(intent);
+            }
+        });
 
-//
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
-//                intent.putExtra("noteID", i);
-//                startActivity(intent);
-//            }
-//        });
-//
-//        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            @Override
-//            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-//
-//                final int itemToDelete = i;
-//
-//                new AlertDialog.Builder(MainActivity.this)
-//                                .setIcon(android.R.drawable.ic_dialog_alert)
-//                                .setTitle("Are You Sure?")
-//                                .setMessage("Do You Want To Delete This Item?")
-//                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-//                                    @Override
-//                                    public void onClick(DialogInterface dialogInterface, int i) {
-//                                        notes.remove(itemToDelete);
-//                                        arrayAdapter.notifyDataSetChanged();
-//                                    }
-//                                })
-//                                .setNegativeButton("No", null)
-//                                .show();
-//
-//                return true;
-//            }
-//        });
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                final int itemToDelete = i;
+
+                new AlertDialog.Builder(MainActivity.this)
+                                .setIcon(android.R.drawable.ic_dialog_alert)
+                                .setTitle("Are You Sure?")
+                                .setMessage("Do You Want To Delete This Item?")
+                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        db.deleteNote(notesList.get(itemToDelete));
+                                        notesList = db.getAllNotes();
+                                        myAdapter.notifyDataSetChanged();
+                                    }
+                                })
+                                .setNegativeButton("No", null)
+                                .show();
+
+                return true;
+            }
+        });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        notesList = db.getAllNotes();
+
+        if(listView.getAdapter() == null) {
+            listView.setAdapter(myAdapter);
+        }
+
+        else {
+            listView.setAdapter(myAdapter);
+            myAdapter.notifyDataSetChanged();
+            listView.invalidateViews();
+            listView.refreshDrawableState();
+        }
     }
 
 //    @Override
