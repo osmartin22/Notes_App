@@ -32,6 +32,12 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
         nList = objects;
     }
 
+    public void updateAdapter(List<SingleNote> newList) {
+        nList.clear();
+        nList.addAll(newList);
+        this.notifyDataSetChanged();
+    }
+
     @Override
     public void onClick(View view) {
         int position = (Integer)view.getTag();

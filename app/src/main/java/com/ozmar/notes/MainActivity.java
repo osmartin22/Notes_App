@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         listView = (ListView)findViewById(R.id.listVIew);
         listView.setAdapter(myAdapter);
 
+        myAdapter.updateAdapter(notesList);
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         db.deleteNote(notesList.get(itemToDelete));
                                         notesList = db.getAllNotes();
-                                        myAdapter.notifyDataSetChanged();
+                                        myAdapter.updateAdapter(notesList);
                                     }
                                 })
                                 .setNegativeButton("No", null)
@@ -81,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
     // Not doing what i wanted (Refresh listView)
     @Override
-    public void onStart() {
-        super.onStart();
+    public void onResume() {
+        super.onResume();
         if(db.getNotesCount() != notesList.size()) {
             notesList = db.getAllNotes();
         }
@@ -91,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
             listView.invalidateViews();
         }
 
-        myAdapter.notifyDataSetChanged();
+        //myAdapter.notifyDataSetChanged();
+        myAdapter.updateAdapter(notesList);
 
 //        if(listView.getAdapter() == null) {
 //            listView.setAdapter(myAdapter);

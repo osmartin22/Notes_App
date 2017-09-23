@@ -65,4 +65,4 @@ public class NoteEditorActivity extends AppCompatActivity {
         }
     } // onCreate() end
 
-} // NoteEditorActiity() end
+} // NoteEditorActivity() end
