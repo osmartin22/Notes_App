@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                 new AlertDialog.Builder(MainActivity.this)
                                 .setIcon(android.R.drawable.ic_dialog_alert)
                                 .setTitle("Are You Sure?")
-                                .setMessage("Do You Want To Delete This Item?")
+                                .setMessage("Do You Want To Delete This Note?")
                                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {

@@ -3,6 +3,7 @@ package com.ozmar.notes;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 
@@ -16,9 +17,8 @@ public class NoteEditorActivity extends AppCompatActivity {
     int noteID;
 
     // TODO: Modify so that only changes in text cause a save
-    // Update not if it exists else create a new one
+    // Update note if it exists else create a new one
     public void saveNote(View view){
-        // Save note to permanent storage
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
@@ -26,16 +26,20 @@ public class NoteEditorActivity extends AppCompatActivity {
             SingleNote tempNote = notesList.get(noteID);
             tempNote.set_title(title);
             tempNote.set_content(content);
-//            int key = tempNote.get_id();
             db.updateNote(tempNote);
-//            Log.d("Note", "Updated");
+
+            Log.d("Note", "Updated");
+            Log.d("Current Key", Integer.toString(noteID));
         }
 
         else {
             db.addNote(new SingleNote(title, content));
-//            Log.d("Note", "Added");
             notesList = db.getAllNotes();
-//            Log.d("Size", Integer.toString(notesList.size()));
+            noteID = notesList.size()-1;    // set key to access note in db to the last position in the list
+
+            Log.d("Note", "Added");
+            Log.d("New Key", Integer.toString(noteID));
+            Log.d("Size", Integer.toString(notesList.size()));
         }
 
         //MainActivity.myAdapter.notifyDataSetChanged();
