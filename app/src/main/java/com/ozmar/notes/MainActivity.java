@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -83,8 +84,15 @@ public class MainActivity extends AppCompatActivity {
 
     // Not doing what i wanted (Refresh listView)
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onStart() {
+        super.onStart();
+
+        Intent intent = getIntent();
+        if(intent.getIntExtra("Note Success", -1) == 0) {
+            Toast toast = Toast.makeText(getApplicationContext(), "No content to save. Note discarded", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+
         if(db.getNotesCount() != notesList.size()) {
             notesList = db.getAllNotes();
         }
@@ -93,20 +101,9 @@ public class MainActivity extends AppCompatActivity {
             listView.invalidateViews();
         }
 
-        //myAdapter.notifyDataSetChanged();
         myAdapter.updateAdapter(notesList);
 
-//        if(listView.getAdapter() == null) {
-//            listView.setAdapter(myAdapter);
-//        }
-//
-//        else {
-//            listView.setAdapter(myAdapter);
-//            myAdapter.notifyDataSetChanged();
-//            listView.invalidateViews();
-//            listView.refreshDrawableState();
-//        }
-    }
+    } // onStart() end
 
 //    @Override
 //    public boolean onCreateOptionsMenu(Menu menu) {

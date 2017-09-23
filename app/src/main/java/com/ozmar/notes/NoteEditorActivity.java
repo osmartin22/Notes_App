@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import static com.ozmar.notes.MainActivity.db;
 import static com.ozmar.notes.MainActivity.notesList;
@@ -16,7 +17,6 @@ public class NoteEditorActivity extends AppCompatActivity {
 
     int noteID;
 
-    // TODO: Modify so that only changes in text cause a save
     // TODO: Possibly change how saveNote is done. Right now it uses notesList to access notes.
         // TODO: (Cont.) The key member is not used for getting notes. db is only used to add a note
         // TODO: (Cont.) and notesList is then updated with the new note
@@ -25,26 +25,55 @@ public class NoteEditorActivity extends AppCompatActivity {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
-        if(noteID != -1) {
-            SingleNote tempNote = notesList.get(noteID);
-            tempNote.set_title(title);
-            tempNote.set_content(content);
-            db.updateNote(tempNote);
+        // Intent will go pack to MainActivity and clear the stack until MainActivity is reached
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-//            Log.d("Note", "Updated");
+        // Check if the note has anything to save
+        if(!title.isEmpty() || !content.isEmpty()) {
+            if (noteID != -1) {
+                SingleNote tempNote = notesList.get(noteID);
+
+                // Check if user is saving note without changes
+                // If statement is true if no changes were made
+                if( !(title.equals(tempNote.get_title()) && content.equals(tempNote.get_content())) ) {
+
+                    // Only save content if title not changed
+                    if(title.equals(tempNote.get_title())) {
+                        tempNote.set_content(content);
+                    }
+
+                    // Only save title if content not changed
+                    else if(content.equals(tempNote.get_content())) {
+                        tempNote.set_title(title);
+                    }
+
+                    // Title and content were changed
+                    else {
+                        tempNote.set_title(title);
+                        tempNote.set_content(content);
+                    }
+
+                    db.updateNote(tempNote);
+                }
+            }
+
+            // New note is being added
+            else {
+                SingleNote temp = new SingleNote(title, content);
+                db.addNote(temp);
+                notesList = db.getAllNotes();
+            }
+
+            intent.putExtra("Note Success", 1);
         }
 
+        // Note is empty
         else {
-            SingleNote temp = new SingleNote(title, content);
-            db.addNote(temp);
-            notesList = db.getAllNotes();
-            noteID = notesList.size()-1;    // Set noteID to last note in the List since the newly added note
-                                                // will be in that position
-
-//            Log.d("Note", "Added");
+            intent.putExtra("Note Success", 0);
         }
 
-        //MainActivity.myAdapter.notifyDataSetChanged();
+        startActivity(intent);
 
     } // saveNote() end
 
