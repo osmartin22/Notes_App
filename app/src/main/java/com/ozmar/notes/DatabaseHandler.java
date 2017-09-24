@@ -34,7 +34,6 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS" + TABLE_USER_NOTES);
-
         onCreate(sqLiteDatabase);
     }
 
@@ -49,23 +48,24 @@ public class DatabaseHandler extends SQLiteOpenHelper{
         db.insert(TABLE_USER_NOTES, null, values);
     } // launchNoteEditor() end
 
+    // NOTE: Not in use since my notes are not using unique keys
     // Get a single note
-    public SingleNote getNote(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(TABLE_USER_NOTES, new String[] { KEY_ID, KEY_TITLE, KEY_CONTENT },
-                KEY_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
-
-        if( cursor != null && cursor.moveToFirst()) {
-            SingleNote note = new SingleNote(Integer.parseInt(cursor.getString(0)),
-                    cursor.getString(1), cursor.getString(2));
-            cursor.close();
-            return note;
-        }
-
-        return null;            // WANT TO TEST THIS
-    } // getNote() end
+//    public SingleNote getNote(int id) {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//
+//        Cursor cursor = db.query(TABLE_USER_NOTES,
+//                new String[] { KEY_ID, KEY_TITLE, KEY_CONTENT }, KEY_ID + "=?",
+//                new String[] { String.valueOf(id) }, null, null, null, null);
+//
+//        if( cursor != null && cursor.moveToFirst()) {
+//            SingleNote note = new SingleNote(Integer.parseInt(cursor.getString(0)),
+//                    cursor.getString(1), cursor.getString(2));
+//            cursor.close();
+//            return note;
+//        }
+//
+//        return null;            // WANT TO TEST THIS
+//    } // getNote() end
 
     // Get all the notes
     public List<SingleNote> getAllNotes() {
@@ -110,7 +110,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
         values.put(KEY_TITLE, note.get_title());
         values.put(KEY_CONTENT, note.get_content());
 
-        return db.update(TABLE_USER_NOTES, values, KEY_ID +     " = ?",
+        return db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
                 new String[] {String.valueOf(note.get_id())});
     } // updateNode() end
 
@@ -118,13 +118,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     public void deleteNote(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.delete(TABLE_USER_NOTES, KEY_ID +     " = ?",
+        db.delete(TABLE_USER_NOTES, KEY_ID + " = ?",
                 new String[] {String.valueOf(note.get_id())});
     } // deleteNote() end
-
-
-
-
-
-
 }

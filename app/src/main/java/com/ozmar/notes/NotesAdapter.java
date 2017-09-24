@@ -1,7 +1,6 @@
 package com.ozmar.notes;
 
 import android.content.Context;
-import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,10 +39,6 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
 
     @Override
     public void onClick(View view) {
-        int position = (Integer)view.getTag();
-        Object object = getItem(position);
-        SingleNote note = (SingleNote)object;
-
         switch (view.getId()) {
             case R.id.note:
                 Log.i("Adapter ", "OnClick called");
