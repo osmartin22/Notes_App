@@ -70,7 +70,7 @@ public class DatabaseHandler extends SQLiteOpenHelper{
     // Get all the notes
     public List<SingleNote> getAllNotes() {
         List<SingleNote> noteList = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES;
+        String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " ORDER BY ROWID DESC";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor =  db.rawQuery(selectQuery, null);

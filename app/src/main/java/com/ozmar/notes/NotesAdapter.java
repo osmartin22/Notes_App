@@ -11,10 +11,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-/**
- * Created by ozmar on 9/22/2017.
- */
-
 public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnClickListener{
 
     private Context context;

@@ -5,9 +5,6 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -18,7 +15,7 @@ import java.util.List;
 // TODO: 1) Use AsyncTask for db read/write instead of Main thread
 // TODO: 2) Slide to delete
 // TODO: 3) On long press, allow multiple deletes and show delete button
-
+// TODO: 4) Make ListView more efficient, i.e, reuse views once they go offscreen
 
 public class MainActivity extends AppCompatActivity {
     ListView listView;

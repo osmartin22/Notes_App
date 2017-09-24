@@ -1,9 +1,5 @@
 package com.ozmar.notes;
 
-/**
- * Created by ozmar on 9/21/2017.
- */
-
 public class SingleNote {
 
     int _id;

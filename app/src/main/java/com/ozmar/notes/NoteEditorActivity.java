@@ -3,16 +3,18 @@ package com.ozmar.notes;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import static com.ozmar.notes.MainActivity.db;
 import static com.ozmar.notes.MainActivity.notesList;
+
+// TODO: Possibly change how saveNote is done. Right now it uses notesList to access notes.
+// TODO: (Cont.) The key member is not used for getting notes. db is only used to add a note
+// TODO: (Cont.) and notesList is then updated with the new note
+
 
 public class NoteEditorActivity extends AppCompatActivity {
 
@@ -20,9 +22,6 @@ public class NoteEditorActivity extends AppCompatActivity {
 
     int noteID;
 
-    // TODO: Possibly change how saveNote is done. Right now it uses notesList to access notes.
-        // TODO: (Cont.) The key member is not used for getting notes. db is only used to add a note
-        // TODO: (Cont.) and notesList is then updated with the new note
     // Update note if it exists else create a new one
     public void saveNote(){
         String title = editTextTitle.getText().toString();
