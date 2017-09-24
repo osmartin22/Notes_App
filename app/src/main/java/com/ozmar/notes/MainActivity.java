@@ -15,7 +15,9 @@ import java.util.List;
 // TODO: 1) Use AsyncTask for db read/write instead of Main thread
 // TODO: 2) Slide to delete
 // TODO: 3) On long press, allow multiple deletes and show delete button
-// TODO: 4) Make ListView more efficient, i.e, reuse views once they go offscreen
+
+// TODO Possibly) Add GPS so that a notification appears/or vibrate phone when at location
+// TODO Possibly) Let user choose theme (Maybe do in shared preferences)
 
 public class MainActivity extends AppCompatActivity {
     ListView listView;

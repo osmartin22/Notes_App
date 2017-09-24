@@ -60,6 +60,16 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
         }
 
         SingleNote singleNote = nList.get(position);
+
+        // Limit content display in preview
+        int limit = 80;
+        if(singleNote.get_content().length() > limit) {
+            String temp = singleNote.get_content();
+            temp = temp.substring(0, limit-3);
+            temp += "...";
+            singleNote.set_content(temp);
+        }
+
         holder.title.setText(singleNote.get_title());
         holder.content.setText(singleNote.get_content());
 
