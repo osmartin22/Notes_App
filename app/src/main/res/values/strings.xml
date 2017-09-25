@@ -5,6 +5,8 @@
     <string name="titleEditText">Enter Title</string>
 
     <string name="saveNoteMenuItem">Save Note</string>
+    <string name="deleteNoteMenuItem">Delete Note</string>
+    <string name="favoriteNoteMenuItem">Favorite Note</string>
 
     <string name="saveButton">Save</string>
 

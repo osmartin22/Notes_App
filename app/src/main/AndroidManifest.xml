@@ -18,9 +18,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".NoteEditorActivity"
-            android:windowSoftInputMode="stateVisible">
-        </activity>
+        <activity android:name=".NoteEditorActivity"></activity>
 
     </application>
 
