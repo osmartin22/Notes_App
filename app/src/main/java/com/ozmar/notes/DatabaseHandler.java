@@ -112,7 +112,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public List<SingleNote> getAllFavoriteNotes() {
         List<SingleNote> noteList = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " WHERE " + KEY_FAVORITE + " = 1";
+        String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " WHERE " + KEY_FAVORITE + " = 1" +
+                " ORDER BY ROWID DESC";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);

@@ -106,6 +106,34 @@ public class MainActivity extends AppCompatActivity {
 
         spinner.setAdapter(spinnerAdapter);
 
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                switch (adapterView.getItemAtPosition(i).toString()) {
+                    case "All Notes" :
+                        listView.invalidateViews();
+                        notesList = db.getAllNotes();
+                        myAdapter.updateAdapter(notesList);
+                        break;
+
+                    case "Favorites":
+                        listView.invalidateViews();
+                        notesList = db.getAllFavoriteNotes();
+                        myAdapter.updateAdapter(notesList);
+                        break;
+
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -121,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
             toast.show();
         }
 
+        // TODO: Instead of getting all the notes, add the new note to notesList at the front
         if (db.getNotesCount() != notesList.size()) {
             notesList = db.getAllNotes();
         }

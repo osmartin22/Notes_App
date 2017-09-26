@@ -13,8 +13,8 @@
     <string name="spinnerMain">mainSpinner</string>
 
     <string-array name="mainSpinnerArray">
-        <item>All</item>
-        <item>Favorite</item>
+        <item>All Notes</item>
+        <item>Favorites</item>
     </string-array>
 
     

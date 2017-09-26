@@ -26,11 +26,9 @@ public class NoteEditorActivity extends AppCompatActivity {
 
     private EditText editTextTitle, editTextContent;
     private SingleNote currentNote = null;
-
     private boolean favorite = false;
 
-
-    // Hides the soft keyboard
+    // Hide the soft keyboard
     private void hideSoftKeyboard() {
         this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
@@ -49,6 +47,16 @@ public class NoteEditorActivity extends AppCompatActivity {
         favorite = !favorite;
         Toast toast = Toast.makeText(getApplicationContext(), "Note is favorite: " + favorite, Toast.LENGTH_SHORT);
         toast.show();
+
+        int temp = 0;
+        if (favorite) {     // Show boolean as int to store in db
+            temp = 1;
+        }
+
+        if (currentNote != null) {  // Save favorite even if user does explicitly press save menu item
+            currentNote.set_favorite(temp);
+            db.updateNote(currentNote);
+        }
     }
 
     private void deleteNoteMenu() {
@@ -63,7 +71,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
-        // Intent will go pack to MainActivity and clear the stack until MainActivity is reached
+        // Intent will go pack to MainActivity and clear the stack
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -74,28 +82,16 @@ public class NoteEditorActivity extends AppCompatActivity {
                 boolean contentTheSame = content.equals(currentNote.get_content());
 
                 // Check if user is saving note without changes
+                // Only save changes that are required
                 if (!(titleTheSame && contentTheSame)) {
 
-                    // Only save content if title is not changed
                     if (titleTheSame) {
                         currentNote.set_content(content);
-                    }
-
-                    // Only save title if content is not changed
-                    else if (contentTheSame) {
+                    } else if (contentTheSame) {
                         currentNote.set_title(title);
-                    }
-
-                    // Title and content were changed
-                    else {
+                    } else {
                         currentNote.set_title(title);
                         currentNote.set_content(content);
-                    }
-
-                    // Mark note as favorite
-                    // Note: At note instantiation, favorite is set to false if not set to true
-                    if (favorite) {
-                        currentNote.set_favorite(0);
                     }
 
                     db.updateNote(currentNote);
@@ -118,7 +114,7 @@ public class NoteEditorActivity extends AppCompatActivity {
             intent.putExtra("Note Success", 1);
         }
 
-        // Note is empty
+        // Note is empty, do not save
         else {
             intent.putExtra("Note Success", 0);
         }
@@ -138,13 +134,15 @@ public class NoteEditorActivity extends AppCompatActivity {
         Intent intent = getIntent();
         int noteID = intent.getIntExtra("noteID", -1);
 
-        // Note exists
-        if (noteID != -1) {
+        if (noteID != -1) {     // Note exists
             currentNote = notesList.get(noteID);
-            editTextTitle.setText(currentNote.get_title());
-            editTextContent.setText(currentNote.get_content());
+            if (currentNote.get_favorite() == 1) {
+                favorite = true;
+            }
 
+            editTextTitle.setText(currentNote.get_title());
             editTextTitle.setFocusable(false);
+            editTextContent.setText(currentNote.get_content());
             editTextContent.setFocusable(false);
 
             // Keyboard does not pop up until the user clicks on the screen
