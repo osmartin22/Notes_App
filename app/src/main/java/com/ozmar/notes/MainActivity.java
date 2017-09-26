@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
                 switch (adapterView.getItemAtPosition(i).toString()) {
-                    case "All Notes" :
+                    case "All Notes":
                         listView.invalidateViews();
                         notesList = db.getAllNotes();
                         myAdapter.updateAdapter(notesList);
@@ -122,7 +122,6 @@ public class MainActivity extends AppCompatActivity {
                         notesList = db.getAllFavoriteNotes();
                         myAdapter.updateAdapter(notesList);
                         break;
-
                 }
             }
 
@@ -132,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -143,11 +141,16 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
+        Toast toast1 = Toast.makeText(getApplicationContext(), "Number of notes: " + db.getNotesCount(), Toast.LENGTH_SHORT);
+        toast1.show();
+
         Intent intent = getIntent();
         if (intent.getIntExtra("Note Success", -1) == 0) {
             Toast toast = Toast.makeText(getApplicationContext(), "No content to save. Note discarded", Toast.LENGTH_SHORT);
             toast.show();
         }
+
+        getIntent().removeExtra("Note Success");
 
         // TODO: Instead of getting all the notes, add the new note to notesList at the front
         if (db.getNotesCount() != notesList.size()) {

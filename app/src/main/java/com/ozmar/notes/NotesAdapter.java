@@ -58,20 +58,8 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
             holder = (ViewHolder) convertView.getTag();
         }
 
-        SingleNote singleNote = nList.get(position);
-
-        // Limit content display in preview
-        int limit = 80;
-        if (singleNote.get_content().length() > limit) {
-            String temp = singleNote.get_content();
-            temp = temp.substring(0, limit - 3);
-            temp += "...";
-            holder.content.setText(temp);
-        } else {
-            holder.content.setText(singleNote.get_content());
-        }
-
-        holder.title.setText(singleNote.get_title());
+        holder.content.setText(nList.get(position).get_content());
+        holder.title.setText(nList.get(position).get_title());
 
         return convertView;
     } // getView() end

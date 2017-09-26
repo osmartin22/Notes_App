@@ -1,7 +1,9 @@
 package com.ozmar.notes;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -60,10 +62,22 @@ public class NoteEditorActivity extends AppCompatActivity {
     }
 
     private void deleteNoteMenu() {
-        // Pop up warning dialog
-        // Remove note from db
-        // Update notesList
-        // Go back to MainActivity
+        new AlertDialog.Builder(NoteEditorActivity.this)
+                .setMessage("Do You Want To Delete This Note?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        if (currentNote != null) {
+                            db.deleteNote(currentNote);
+                            intent.putExtra("Note Success", 3);
+                            startActivity(intent);
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     // Update note if it exists else create a new one
