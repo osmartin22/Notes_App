@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnClickListener{
+public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnClickListener {
 
     private Context context;
     private List<SingleNote> nList;
@@ -22,7 +22,7 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
     }
 
     public NotesAdapter(Context context, int textViewResourceId, List<SingleNote> objects) {
-        super (context, textViewResourceId, objects);
+        super(context, textViewResourceId, objects);
         this.context = context;
         nList = objects;
     }
@@ -42,20 +42,19 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
         }
     } // onClick() end
 
-    @Override @NonNull
+    @Override
+    @NonNull
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
         ViewHolder holder;
-        if(convertView == null) {
-            LayoutInflater vi = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        if (convertView == null) {
+            LayoutInflater vi = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = vi.inflate(R.layout.note_preview, parent, false);
 
             holder = new ViewHolder();
             holder.title = convertView.findViewById(R.id.title);
             holder.content = convertView.findViewById(R.id.content);
             convertView.setTag(holder);
-        }
-
-        else {
+        } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
@@ -63,15 +62,16 @@ public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnCli
 
         // Limit content display in preview
         int limit = 80;
-        if(singleNote.get_content().length() > limit) {
+        if (singleNote.get_content().length() > limit) {
             String temp = singleNote.get_content();
-            temp = temp.substring(0, limit-3);
+            temp = temp.substring(0, limit - 3);
             temp += "...";
-            singleNote.set_content(temp);
+            holder.content.setText(temp);
+        } else {
+            holder.content.setText(singleNote.get_content());
         }
 
         holder.title.setText(singleNote.get_title());
-        holder.content.setText(singleNote.get_content());
 
         return convertView;
     } // getView() end

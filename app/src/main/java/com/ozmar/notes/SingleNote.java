@@ -5,22 +5,34 @@ public class SingleNote {
     int _id;
     String _title;
     String _content;
+    int _favorite;
 
     public SingleNote() {
 
     }
 
     public SingleNote(String title, String content) {
-        this._title = title;
-        this._content = content;
+        this(-1, title, content, 0);
     }
 
-    public SingleNote(int id, String title, String content) {
+    public SingleNote(String title, String content, int favorite) {
+        this(-1, title, content, favorite);
+    }
+
+    public SingleNote(int id, String title, String content, int favorite) {
         this._id = id;
         this._title = title;
         this._content = content;
+        this._favorite = favorite;
     }
 
+    public int get_favorite() {
+        return _favorite;
+    }
+
+    public void set_favorite(int _favorite) {
+        this._favorite = _favorite;
+    }
 
     public String get_title() {
         return _title;

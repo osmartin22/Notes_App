@@ -2,9 +2,9 @@ package com.ozmar.notes;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -15,13 +15,16 @@ import java.util.List;
 // TODO: 1) Use AsyncTask for db read/write instead of Main thread
 // TODO: 2) Slide to delete
 // TODO: 3) On long press, allow multiple deletes and show delete button
+// TODO: 4) Add favorites button
+// TODO: 5) If user presses back on new note and note has content, display warning that note will
+// TODO: (CONT.) not be saved. Allow user to turn this off if they desire to
 
 // TODO Possibly) Add GPS so that a notification appears/or vibrate phone when at location
 // TODO Possibly) Let user choose theme (Maybe do in shared preferences)
 
 public class MainActivity extends AppCompatActivity {
-    ListView listView;
-    NotesAdapter myAdapter;
+    private ListView listView;
+    private NotesAdapter myAdapter;
     static DatabaseHandler db;
 
     static List<SingleNote> notesList;
@@ -64,10 +67,8 @@ public class MainActivity extends AppCompatActivity {
                 final int itemToDelete = i;
 
                 new AlertDialog.Builder(MainActivity.this)
-                                .setIcon(android.R.drawable.ic_dialog_alert)
-                                .setTitle("Are You Sure?")
                                 .setMessage("Do You Want To Delete This Note?")
-                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {
                                         db.deleteNote(notesList.get(itemToDelete));
@@ -75,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
                                         myAdapter.updateAdapter(notesList);
                                     }
                                 })
-                                .setNegativeButton("No", null)
+                                .setNegativeButton("Cancel", null)
                                 .show();
 
                 return true;
@@ -104,6 +105,11 @@ public class MainActivity extends AppCompatActivity {
         }
 
         myAdapter.updateAdapter(notesList);
+
+        List<SingleNote> temp = db.getAllFavoriteNotes();
+        int size = temp.size();
+        Toast toast = Toast.makeText(getApplicationContext(), "# of favorite notes: " + size, Toast.LENGTH_SHORT);
+        toast.show();
 
     } // onStart() end
 
