@@ -3,11 +3,17 @@ package com.ozmar.notes;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.List;
@@ -41,11 +47,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         db = new DatabaseHandler(MainActivity.this);
         notesList = db.getAllNotes();
 
         myAdapter = new NotesAdapter(this, R.layout.note_preview, notesList);
-        listView = (ListView)findViewById(R.id.listVIew);
+        listView = (ListView) findViewById(R.id.listVIew);
         listView.setAdapter(myAdapter);
 
         myAdapter.updateAdapter(notesList);
@@ -67,23 +74,41 @@ public class MainActivity extends AppCompatActivity {
                 final int itemToDelete = i;
 
                 new AlertDialog.Builder(MainActivity.this)
-                                .setMessage("Do You Want To Delete This Note?")
-                                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        db.deleteNote(notesList.get(itemToDelete));
-                                        notesList = db.getAllNotes();
-                                        myAdapter.updateAdapter(notesList);
-                                    }
-                                })
-                                .setNegativeButton("Cancel", null)
-                                .show();
+                        .setMessage("Do You Want To Delete This Note?")
+                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                db.deleteNote(notesList.get(itemToDelete));
+                                notesList = db.getAllNotes();
+                                myAdapter.updateAdapter(notesList);
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .show();
 
                 return true;
             }
         }); // setOnItemLongClickListener() end
 
+
     } // onCreate() end
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.add_spinner_main, menu);
+        MenuItem item = menu.findItem(R.id.mainSpinner);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+
+        String[] spinnerItems = getResources().getStringArray(R.array.mainSpinnerArray);
+        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(MainActivity.this,
+                android.R.layout.simple_spinner_dropdown_item, spinnerItems);
+
+        spinner.setAdapter(spinnerAdapter);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
 
     // Not doing what i wanted (Refresh listView)
     @Override
@@ -91,16 +116,16 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         Intent intent = getIntent();
-        if(intent.getIntExtra("Note Success", -1) == 0) {
+        if (intent.getIntExtra("Note Success", -1) == 0) {
             Toast toast = Toast.makeText(getApplicationContext(), "No content to save. Note discarded", Toast.LENGTH_SHORT);
             toast.show();
         }
 
-        if(db.getNotesCount() != notesList.size()) {
+        if (db.getNotesCount() != notesList.size()) {
             notesList = db.getAllNotes();
         }
 
-        if(listView != null) {
+        if (listView != null) {
             listView.invalidateViews();
         }
 

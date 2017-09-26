@@ -10,5 +10,12 @@
 
     <string name="saveButton">Save</string>
 
+    <string name="spinnerMain">mainSpinner</string>
+
+    <string-array name="mainSpinnerArray">
+        <item>All</item>
+        <item>Favorite</item>
+    </string-array>
+
     
 </resources>
