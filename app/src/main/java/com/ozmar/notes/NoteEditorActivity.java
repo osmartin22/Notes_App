@@ -10,7 +10,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -29,20 +28,20 @@ public class NoteEditorActivity extends AppCompatActivity {
     private SingleNote currentNote = null;
     private boolean favorite = false;
 
-    // Hide the soft keyboard
-    private void hideSoftKeyboard() {
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-    }
-
-    // Show the soft keyboard
-    private void showSoftKeyboard() {
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-    }
-
-    private void hideMenuItem(View view) {
-        // Might not be necessary
-        view.setVisibility(View.INVISIBLE);
-    }
+//    // Hide the soft keyboard
+//    private void hideSoftKeyboard() {
+//        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+//    }
+//
+//    // Show the soft keyboard
+//    private void showSoftKeyboard() {
+//        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+//    }
+//
+//    private void hideMenuItem(View view) {
+//        // Might not be necessary
+//        view.setVisibility(View.INVISIBLE);
+//    }
 
     private void favoriteNoteMenu() {
         favorite = !favorite;
@@ -205,7 +204,6 @@ public class NoteEditorActivity extends AppCompatActivity {
                 public boolean onTouch(View view, MotionEvent motionEvent) {
                     view.setFocusableInTouchMode(true);
                     view.requestFocus();
-                    showSoftKeyboard();
                     return false;
                 }
             };
@@ -216,7 +214,6 @@ public class NoteEditorActivity extends AppCompatActivity {
         // New note is being created, show keyboard at the start
         else {
             editTextContent.requestFocus();
-            showSoftKeyboard();
         }
     } // onCreate() end
 
@@ -228,14 +225,10 @@ public class NoteEditorActivity extends AppCompatActivity {
     // Only show alert dialog if there is a difference from when the note was opened
     @Override
     public void onBackPressed() {
-//        Toast.makeText(getApplication(), "Back Pressed", Toast.LENGTH_SHORT).show();
-
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
         final int difference = checkForDifferenceFromOriginal();
-//        Toast.makeText(getApplicationContext(), "Difference: " + difference, Toast.LENGTH_SHORT).show();
-
         if ((!title.isEmpty() || !content.isEmpty()) && difference != 4) {
             new AlertDialog.Builder(NoteEditorActivity.this)
                     .setMessage("Save your changes or discard them?")
@@ -291,4 +284,28 @@ public class NoteEditorActivity extends AppCompatActivity {
         return false;
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        View view = this.getCurrentFocus();
+        if(view != null) {
+            int viewId = view.getId();
+            outState.putInt("focusID", viewId);
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        int viewId = savedInstanceState.getInt("focusID", View.NO_ID);
+        View view = findViewById(viewId);
+        if(view != null) {
+            Toast.makeText(getApplicationContext(), "Restored View " + view.toString(), Toast.LENGTH_SHORT).show();
+            view.setFocusable(true);
+            view.setFocusableInTouchMode(true);
+            view.requestFocus();
+        }
+    }
 } // NoteEditorActivity() end
