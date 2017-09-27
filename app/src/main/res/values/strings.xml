@@ -1,21 +1,23 @@
 <resources>
     <string name="app_name">Notes</string>
 
+    <!-- Hint for title and content in note editor
+    -->
     <string name="editTextNoteHint">Enter Text</string>
     <string name="titleEditText">Enter Title</string>
 
+    <!-- Menu item names
+    -->
     <string name="saveNoteMenuItem">Save Note</string>
     <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="favoriteNoteMenuItem">Favorite Note</string>
 
-    <string name="saveButton">Save</string>
-
+    <!-- Spinner for MainActivity categories
+    -->
     <string name="spinnerMain">mainSpinner</string>
-
     <string-array name="mainSpinnerArray">
         <item>All Notes</item>
         <item>Favorites</item>
     </string-array>
 
-    
 </resources>
