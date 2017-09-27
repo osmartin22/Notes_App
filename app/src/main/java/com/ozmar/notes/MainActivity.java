@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO: 1) Use AsyncTask for db read/write instead of Main thread
@@ -86,8 +87,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         db = new DatabaseHandler(MainActivity.this);
-        // Here I should get the spinner position and get the appropriate list
-        currentList = db.getAllNotes();
+        currentList = new ArrayList<>();
+        getNotesList(getSpinnerPosition());
 
         myAdapter = new NotesAdapter(this, R.layout.note_preview, currentList);
         listView = (ListView) findViewById(R.id.listVIew);
@@ -187,20 +188,4 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         storeSpinnerPosition();
     }
-
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//
-//        outState.putInt("mainSpinner", mainSpinner.getSelectedItemPosition());
-//    }
-//
-//    @Override
-//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//
-//        if (savedInstanceState != null) {
-//            spinnerPositionOnRestore = savedInstanceState.getInt("mainSpinner");
-//        }
-//    }
 }

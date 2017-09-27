@@ -4,48 +4,41 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:scrollbarAlwaysDrawVerticalTrack="true"
     tools:context="com.ozmar.notes.NoteEditorActivity">
 
     <EditText
         android:id="@+id/editTextTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:imeOptions="flagNoExtractUi"
-        android:hint="@string/titleEditText"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:ems="10"
+        android:hint="@string/titleEditText"
+        android:imeOptions="flagNoExtractUi"
+        android:inputType="textPersonName"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.constraint.Guideline
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/guideline"
-        app:layout_constraintGuide_percent=".1"
-        android:orientation="horizontal" />
 
     <EditText
         android:id="@+id/editTextContent"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:background="@android:color/transparent"
         android:ems="10"
-        android:hint="@string/editTextNoteHint"
-        android:inputType="textMultiLine"
-        android:imeOptions="flagNoExtractUi"
-        android:textAlignment="textStart"
         android:gravity="top|start"
+        android:hint="@string/editTextNoteHint"
+        android:imeOptions="flagNoExtractUi"
+        android:inputType="textMultiLine"
+        android:textAlignment="textStart"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/guideline"
+        app:layout_constraintTop_toBottomOf="@+id/editTextTitle"
         app:layout_constraintVertical_bias="0" />
 
 </android.support.constraint.ConstraintLayout>
