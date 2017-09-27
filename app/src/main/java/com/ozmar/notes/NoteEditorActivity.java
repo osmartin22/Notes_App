@@ -14,15 +14,14 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import static com.ozmar.notes.MainActivity.currentList;
 import static com.ozmar.notes.MainActivity.db;
-import static com.ozmar.notes.MainActivity.notesList;
 
 // TODO: Possibly change how saveNote is done. Right now it uses notesList to access notes.
 // TODO: (Cont.) The key member is not used for getting notes. db is only used to add a note
 // TODO: (Cont.) and notesList is then updated with the new note
 
-// TODO: Save position current action and cursor position when rotating between landscape and portrait
-
+// TODO: Rewrite how spinner is set possibly
 
 public class NoteEditorActivity extends AppCompatActivity {
 
@@ -55,7 +54,7 @@ public class NoteEditorActivity extends AppCompatActivity {
             temp = 1;
         }
 
-        if (currentNote != null) {  // Save favorite even if user does explicitly press save menu item
+        if (currentNote != null) {  // Save favorite even if user does not explicitly press save menu item
             currentNote.set_favorite(temp);
             db.updateNote(currentNote);
         }
@@ -80,6 +79,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                 .show();
     }
 
+    // Check what the user changed from the original note
     private int checkForDifferenceFromOriginal() {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
@@ -144,6 +144,11 @@ public class NoteEditorActivity extends AppCompatActivity {
                 }
 
                 db.addNote(temp);
+
+                // Update the Lists containing the notes so that db.getAllNotes() is not called
+                // Since it is a simple operation
+                // Add it to the front of the List so that the new note appears at the top
+                currentList.add(0, temp);
                 break;
         }
     }
@@ -183,7 +188,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         int noteID = intent.getIntExtra("noteID", -1);
 
         if (noteID != -1) {
-            currentNote = notesList.get(noteID);
+            currentNote = currentList.get(noteID);
             if (currentNote.get_favorite() == 1) {
                 favorite = true;
             }
@@ -220,6 +225,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         super.onResume();
     }
 
+    // Only show alert dialog if there is a difference from when the note was opened
     @Override
     public void onBackPressed() {
 //        Toast.makeText(getApplication(), "Back Pressed", Toast.LENGTH_SHORT).show();
