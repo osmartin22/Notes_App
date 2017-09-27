@@ -11,21 +11,23 @@
     <dimen name="notePreviewContentPadding">8dp</dimen>
     <dimen name="notePreviewContentTextSize">20sp</dimen>
 
+
     <!--activity_main dimensions
     -->
     <dimen name="additionButtonMargins">16dp</dimen>
     <dimen name="listViewMargin">8dp</dimen>
     <dimen name="listViewDividerHeight">5sp</dimen>
 
+
     <!--layout\activity_note_editor dimensions
     -->
     <dimen name="layoutTitleMarginSides">8dp</dimen>
     <dimen name="layoutContentMarginSides">16dp</dimen>
 
+
     <!--land\activity_note_editor dimensions
     -->
     <dimen name="landTitleMarginSides">8dp</dimen>
     <dimen name="landContentMarginSides">16dp</dimen>
-
 
 </resources>

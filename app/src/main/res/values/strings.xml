@@ -6,11 +6,13 @@
     <string name="editTextNoteHint">Enter Text</string>
     <string name="titleEditText">Enter Title</string>
 
+
     <!-- Menu item names
     -->
     <string name="saveNoteMenuItem">Save Note</string>
     <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="favoriteNoteMenuItem">Favorite Note</string>
+
 
     <!-- Spinner for MainActivity categories
     -->
