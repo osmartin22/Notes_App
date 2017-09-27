@@ -21,9 +21,6 @@ import java.util.List;
 // TODO: 1) Use AsyncTask for db read/write instead of Main thread
 // TODO: 2) Slide to delete
 // TODO: 3) On long press, allow multiple deletes and show delete button
-// TODO: 4) Add favorites button
-// TODO: 5) If user presses back on new note and note has content, display warning that note will
-// TODO: (CONT.) not be saved. Allow user to turn this off if they desire to
 
 // TODO Possibly) Add GPS so that a notification appears/or vibrate phone when at location
 // TODO Possibly) Let user choose theme (Maybe do in shared preferences)
@@ -141,13 +138,11 @@ public class MainActivity extends AppCompatActivity {
     public void onStart() {
         super.onStart();
 
-        Toast toast1 = Toast.makeText(getApplicationContext(), "Number of notes: " + db.getNotesCount(), Toast.LENGTH_SHORT);
-        toast1.show();
+        //Toast.makeText(getApplicationContext(), "Number of notes: " + db.getNotesCount(), Toast.LENGTH_SHORT).show();
 
         Intent intent = getIntent();
         if (intent.getIntExtra("Note Success", -1) == 0) {
-            Toast toast = Toast.makeText(getApplicationContext(), "No content to save. Note discarded", Toast.LENGTH_SHORT);
-            toast.show();
+            Toast.makeText(getApplicationContext(), "No content to save. Note discarded", Toast.LENGTH_SHORT).show();
         }
 
         getIntent().removeExtra("Note Success");
@@ -165,8 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
         List<SingleNote> temp = db.getAllFavoriteNotes();
         int size = temp.size();
-        Toast toast = Toast.makeText(getApplicationContext(), "# of favorite notes: " + size, Toast.LENGTH_SHORT);
-        toast.show();
+        //Toast.makeText(getApplicationContext(), "# of favorite notes: " + size, Toast.LENGTH_SHORT).show();
 
     } // onStart() end
 

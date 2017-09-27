@@ -63,7 +63,7 @@ public class NoteEditorActivity extends AppCompatActivity {
 
     private void deleteNoteMenu() {
         new AlertDialog.Builder(NoteEditorActivity.this)
-                .setMessage("Do You Want To Delete This Note?")
+                .setMessage("Do you want to delete this note?")
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -80,40 +80,62 @@ public class NoteEditorActivity extends AppCompatActivity {
                 .show();
     }
 
-    // Update note if it exists else create a new one
-    private void saveNoteMenu() {
+    private int checkForDifferenceFromOriginal() {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
-        // Intent will go pack to MainActivity and clear the stack
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (currentNote != null) {
+            boolean titleTheSame = title.equals(currentNote.get_title());
+            boolean contentTheSame = content.equals(currentNote.get_content());
 
-        // Check if the note has anything to save
-        if (!title.isEmpty() || !content.isEmpty()) {
-            if (currentNote != null) {
-                boolean titleTheSame = title.equals(currentNote.get_title());
-                boolean contentTheSame = content.equals(currentNote.get_content());
-
-                // Check if user is saving note without changes
-                // Only save changes that are required
-                if (!(titleTheSame && contentTheSame)) {
-
-                    if (titleTheSame) {
-                        currentNote.set_content(content);
-                    } else if (contentTheSame) {
-                        currentNote.set_title(title);
-                    } else {
-                        currentNote.set_title(title);
-                        currentNote.set_content(content);
-                    }
-
-                    db.updateNote(currentNote);
+            if (!(titleTheSame && contentTheSame)) {
+                if (titleTheSame) {
+                    return 1;
+                } else if (contentTheSame) {
+                    return 2;
+                } else {
+                    return 3;
                 }
             }
+            return 4;   // Note not changed
+        }
+        return 5;   // New note
+    }
 
-            // New note is being added
-            else {
+    // Save note into db
+    // This function calls checkForDifferenceFromOriginal() when 0 is passed to it
+    // If you have called that function and the user has not modified the note (changing favorite allowed)
+    // save that result and pass it instead, else pass 0
+    // This is to prevent calling the function again if it is not needed
+    private void saveInDb(int difference) {
+        String title = editTextTitle.getText().toString();
+        String content = editTextContent.getText().toString();
+
+        if (difference == 0) {
+            difference = checkForDifferenceFromOriginal();
+        }
+        // Only modify the string with differences to prevent unnecessary object creation
+        switch (difference) {
+            case 1:
+                currentNote.set_content(content);
+                db.updateNote(currentNote);
+                break;
+
+            case 2:
+                currentNote.set_title(title);
+                db.updateNote(currentNote);
+                break;
+
+            case 3:
+                currentNote.set_title(title);
+                currentNote.set_content(content);
+                db.updateNote(currentNote);
+                break;
+
+            case 4:
+                break;
+
+            case 5:
                 SingleNote temp;
                 if (favorite) {
                     temp = new SingleNote(title, content, 1);
@@ -122,9 +144,21 @@ public class NoteEditorActivity extends AppCompatActivity {
                 }
 
                 db.addNote(temp);
-                notesList = db.getAllNotes();
-            }
+                break;
+        }
+    }
 
+    // Update note if it exists else create a new one
+    private void saveNoteMenu() {
+        String title = editTextTitle.getText().toString();
+        String content = editTextContent.getText().toString();
+
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+        // Check if the note has anything to save
+        if (!title.isEmpty() || !content.isEmpty()) {
+            saveInDb(0);
             intent.putExtra("Note Success", 1);
         }
 
@@ -148,7 +182,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         Intent intent = getIntent();
         int noteID = intent.getIntExtra("noteID", -1);
 
-        if (noteID != -1) {     // Note exists
+        if (noteID != -1) {
             currentNote = notesList.get(noteID);
             if (currentNote.get_favorite() == 1) {
                 favorite = true;
@@ -184,6 +218,44 @@ public class NoteEditorActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+    }
+
+    @Override
+    public void onBackPressed() {
+//        Toast.makeText(getApplication(), "Back Pressed", Toast.LENGTH_SHORT).show();
+
+        String title = editTextTitle.getText().toString();
+        String content = editTextContent.getText().toString();
+
+        final int difference = checkForDifferenceFromOriginal();
+//        Toast.makeText(getApplicationContext(), "Difference: " + difference, Toast.LENGTH_SHORT).show();
+
+        if ((!title.isEmpty() || !content.isEmpty()) && difference != 4) {
+            new AlertDialog.Builder(NoteEditorActivity.this)
+                    .setMessage("Save your changes or discard them?")
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            saveInDb(difference);
+                            intent.putExtra("Note Success", 1);
+                            startActivity(intent);
+                        }
+                    })
+                    .setNeutralButton("Cancel", null)
+                    .setNegativeButton("Discard", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
+                        }
+                    })
+                    .show();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
