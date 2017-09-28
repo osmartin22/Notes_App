@@ -2,10 +2,10 @@ package com.ozmar.notes;
 
 public class SingleNote {
 
-    int _id;
-    String _title;
-    String _content;
-    int _favorite;
+    private int _id;
+    private String _title;
+    private String _content;
+    private int _favorite;
 
     public SingleNote() {
 

@@ -217,11 +217,6 @@ public class NoteEditorActivity extends AppCompatActivity {
         }
     } // onCreate() end
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-    }
-
     // Only show alert dialog if there is a difference from when the note was opened
     @Override
     public void onBackPressed() {

@@ -8,13 +8,14 @@ import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -30,10 +31,9 @@ import java.util.List;
 // TODO Possibly) Let user choose theme (Maybe do in shared preferences)
 
 public class MainActivity extends AppCompatActivity {
-    private ListView listView;
-    private NotesAdapter myAdapter;
+    private RecyclerView rv;
+    private NotesAdapter notesAdapter;
     private Spinner mainSpinner;
-//    private int spinnerPositionOnRestore = -1;
 
     static DatabaseHandler db;
     static List<SingleNote> currentList;
@@ -47,23 +47,17 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     } // launchNoteEditor() end
 
+    // Get notes to display on screen
+    // TODO: Optimize, right now currentList might get the same list from db
     private void getNotesList(int num) {
         switch (num) {
             case 0:
-                if(currentList.size() != db.getNotesCount()) {
-                    currentList = db.getAllNotes();
-                }
+                currentList = db.getAllNotes();
                 break;
             case 1:
                 currentList = db.getAllFavoriteNotes();
                 break;
         }
-    }
-
-    // Get spinner position from SharedPreferences
-    private int getSpinnerPosition() {
-        settings = getSharedPreferences("User Settings", Context.MODE_PRIVATE);
-        return settings.getInt("Spinner Position", 0);
     }
 
     // Store spinner position from SharedPreferences
@@ -72,13 +66,18 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("Spinner Position", mainSpinner.getSelectedItemPosition()).apply();
     }
 
+    // Get spinner position from SharedPreferences
+    private int getSpinnerPosition() {
+        settings = getSharedPreferences("User Settings", Context.MODE_PRIVATE);
+        return settings.getInt("Spinner Position", 0);
+    }
+
     // Set spinner position from SharedPreferences
-    private void setSpinnerPosition() {
-        int position = getSpinnerPosition();
+    private void setSpinnerPosition(int position) {
         if (position != -1) {
             mainSpinner.setSelection(position);
             getNotesList(position);
-            myAdapter.updateAdapter(currentList);
+            notesAdapter.notifyDataSetChanged();
         }
     }
 
@@ -94,42 +93,39 @@ public class MainActivity extends AppCompatActivity {
         currentList = new ArrayList<>();
         getNotesList(getSpinnerPosition());
 
-        myAdapter = new NotesAdapter(this, R.layout.note_preview, currentList);
-        listView = (ListView) findViewById(R.id.listVIew);
-        listView.setAdapter(myAdapter);
+        notesAdapter = new NotesAdapter(this, R.layout.note_preview, currentList);
+        rv = (RecyclerView) findViewById(R.id.listVIew);
+        rv.setHasFixedSize(true);
+        rv.setLayoutManager(new LinearLayoutManager(this));
+        rv.setAdapter(notesAdapter);
 
-        myAdapter.updateAdapter(currentList);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        rv.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(),
+                rv, new RecyclerItemListener.RecyclerTouchListener() {
+            public void onClickItem(View view, int position) {
+                Toast.makeText(getApplicationContext(), "Short Press", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
-                intent.putExtra("noteID", i);
+                intent.putExtra("noteID", position);
                 startActivity(intent);
             }
-        });
 
-        // Pop up  option to delete note
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final int itemToDelete = i;
+            public void onLongClickItem(View view, final int position) {
+                Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_SHORT).show();
                 new AlertDialog.Builder(MainActivity.this)
                         .setMessage("Do You Want To Delete This Note?")
                         .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                db.deleteNote(currentList.get(itemToDelete));
-                                currentList.remove(itemToDelete);
-                                myAdapter.updateAdapter(currentList);
+                                db.deleteNote(currentList.get(position));
+                                currentList.remove(position);
+                                rv.removeViewAt(position);
+
+                                notesAdapter.removeAt(position);
                             }
                         })
                         .setNegativeButton("Cancel", null)
                         .show();
-
-                return true;
             }
-        }); // setOnItemLongClickListener() end
-
+        }));
 
     } // onCreate() end
 
@@ -144,25 +140,28 @@ public class MainActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_dropdown_item, spinnerItems);
         mainSpinner.setAdapter(spinnerAdapter);
 
-        getSpinnerPosition();
-        setSpinnerPosition();
+        setSpinnerPosition(getSpinnerPosition());   // Restore spinner position
 
         mainSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
+                currentList.clear();
+                notesAdapter.notifyItemRangeRemoved(0, currentList.size());
                 switch (adapterView.getItemAtPosition(i).toString()) {
                     case "All Notes":
-                        currentList = db.getAllNotes();
+                        notesAdapter.getList(db.getAllNotes());
+                        currentList.addAll(db.getAllNotes());
                         break;
 
                     case "Favorites":
-                        currentList = db.getAllFavoriteNotes();
+                        notesAdapter.getList(db.getAllFavoriteNotes());
+                        currentList.addAll(db.getAllFavoriteNotes());
                         break;
                 }
 
-                listView.invalidateViews();
-                myAdapter.updateAdapter(currentList);
+//
+
             }
 
             @Override
