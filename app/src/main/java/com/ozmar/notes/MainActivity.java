@@ -10,7 +10,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     static DatabaseHandler db;
     static List<SingleNote> currentList = new ArrayList<>();
+    private int listUsed;
 
     private SharedPreferences settings;
 
@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     public void launchNoteEditor(View view) {
         Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
         intent.putExtra("noteID", -1);
+        intent.putExtra("listUsed", listUsed);
         startActivityForResult(intent, 1);
     } // launchNoteEditor() end
 
@@ -55,9 +56,11 @@ public class MainActivity extends AppCompatActivity {
         switch (num) {
             case 0:
                 currentList = db.getAllNotes();
+                listUsed = 0;
                 break;
             case 1:
                 currentList = db.getAllFavoriteNotes();
+                listUsed = 1;
                 break;
         }
     } // getNotesList() end
@@ -106,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClickItem(View view, int position) {
                 Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
                 intent.putExtra("noteID", position);
+                intent.putExtra("listUsed", listUsed);
                 startActivityForResult(intent, 1);
             }
 
@@ -150,11 +154,13 @@ public class MainActivity extends AppCompatActivity {
                     case "All Notes":
                         notesAdapter.getList(db.getAllNotes());
                         currentList.addAll(db.getAllNotes());
+                        listUsed = 0;
                         break;
 
                     case "Favorites":
                         notesAdapter.getList(db.getAllFavoriteNotes());
                         currentList.addAll(db.getAllFavoriteNotes());
+                        listUsed = 1;
                         break;
                 }
             }
@@ -172,38 +178,34 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-
         if (requestCode == 1 && data != null) {
-
             int save = data.getIntExtra("Note Success", -1);
             int position = data.getIntExtra("Note Position", -1);
 
-            Log.d("Note Success", Integer.toString(save));
-            Log.d("Note Position", Integer.toString(position));
-
             if (save == 0) {
-                Toast.makeText(getApplicationContext(), "Discard Note", Toast.LENGTH_SHORT).show();
-            } else if (save == 1) {
-                Toast.makeText(getApplicationContext(), "Content Changed", Toast.LENGTH_SHORT).show();
-                notesAdapter.updateAt(position, currentList.get(position));
-            } else if (save == 2) {
-                Toast.makeText(getApplicationContext(), "No change existing note", Toast.LENGTH_SHORT).show();
-            } else if (save == 3) {
+                Toast.makeText(getApplicationContext(), "No content to save. Note discarded.", Toast.LENGTH_SHORT).show();
 
-                // TODO: Possible optimize later
-                if (currentList.equals(db.getAllNotes())) {
+            } else if (save == 1) {
+                notesAdapter.updateAt(position, currentList.get(position));
+
+            } else if (save == 3) {
+                if (listUsed == 0) {
                     notesAdapter.addAt(position, currentList.get(position));
-                } else if (currentList.equals(db.getAllFavoriteNotes()) && currentList.get(0).get_favorite() == 1) {
+                } else if (listUsed == 1 && currentList.get(0).get_favorite() == 1) {
                     notesAdapter.addAt(position, currentList.get(position));
                 } else {
-                    currentList.remove(0);
+                    currentList.remove(0);  // No need to update RecyclerView as new note does not belong to the list
                 }
 
-                Toast.makeText(getApplicationContext(), "New note", Toast.LENGTH_SHORT).show();
             } else if (save == 4) {
-                Toast.makeText(getApplicationContext(), "Note deleted", Toast.LENGTH_SHORT).show();
                 currentList.remove(position);
                 notesAdapter.removeAt(position);
+
+            } else if (save == 5) {
+                if (listUsed == 1) {
+                    currentList.remove(position);
+                    notesAdapter.removeAt(position);
+                }
             }
 
             getIntent().removeExtra("Note Success");
