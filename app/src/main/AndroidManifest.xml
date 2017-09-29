@@ -18,7 +18,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".NoteEditorActivity"></activity>
+        <activity android:name=".NoteEditorActivity"
+            android:windowSoftInputMode="adjustResize" >
+        </activity>
 
     </application>
 

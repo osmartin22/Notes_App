@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:scrollbarAlwaysDrawVerticalTrack="true"
     tools:context="com.ozmar.notes.NoteEditorActivity">
 
     <ScrollView
@@ -24,20 +25,23 @@
                 android:id="@+id/editTextTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/layoutTitleMarginSides"
-                android:layout_marginStart="@dimen/layoutTitleMarginSides"
-                android:layout_weight="0"
+                android:layout_marginEnd="@dimen/landTitleMarginSides"
+                android:layout_marginStart="@dimen/landTitleMarginSides"
                 android:ems="10"
                 android:hint="@string/titleEditText"
                 android:imeOptions="flagNoExtractUi"
-                android:inputType="textCapSentences|textAutoCorrect|textAutoComplete" />
+                android:inputType="textCapSentences|textAutoCorrect|textAutoComplete"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
 
             <EditText
                 android:id="@+id/editTextContent"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginEnd="@dimen/layoutContentMarginSides"
-                android:layout_marginStart="@dimen/layoutContentMarginSides"
+                android:layout_marginEnd="@dimen/landContentMarginSides"
+                android:layout_marginStart="@dimen/landContentMarginSides"
                 android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:ems="10"
@@ -45,11 +49,14 @@
                 android:hint="@string/editTextNoteHint"
                 android:imeOptions="flagNoExtractUi"
                 android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
-                android:textAlignment="textStart" />
+                android:textAlignment="textStart"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/editTextTitle" />
 
         </LinearLayout>
 
     </ScrollView>
-
 
 </android.support.constraint.ConstraintLayout>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- note_preview dimensions
+    -->
+    <dimen name="notePreviewTitlePadding">4dp</dimen>
+    <dimen name="notePreviewTitleTextSize">20sp</dimen>
+
+    <dimen name="notePreviewMargin">4dp</dimen>
+
+    <dimen name="notePreviewContentPadding">4dp</dimen>
+    <dimen name="notePreviewContentTextSize">40sp</dimen>
+
+
+    <!--activity_main dimensions
+    -->
+    <dimen name="additionButtonMargins">16dp</dimen>
+    <dimen name="recyclerViewMargin">4dp</dimen>
+    <dimen name="recyclerViewDividerHeight">5sp</dimen>
+
+
+    <!--layout\activity_note_editor dimensions
+    -->
+    <dimen name="layoutTitleMarginSides">8dp</dimen>
+    <dimen name="layoutContentMarginSides">16dp</dimen>
+
+
+    <!--land\activity_note_editor dimensions
+    -->
+    <dimen name="landTitleMarginSides">8dp</dimen>
+    <dimen name="landContentMarginSides">16dp</dimen>
+
+</resources>

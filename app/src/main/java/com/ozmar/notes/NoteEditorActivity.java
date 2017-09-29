@@ -1,101 +1,261 @@
 package com.ozmar.notes;
 
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
+import static com.ozmar.notes.MainActivity.currentList;
 import static com.ozmar.notes.MainActivity.db;
-import static com.ozmar.notes.MainActivity.notesList;
 
-// TODO: Possibly change how saveNote is done. Right now it uses notesList to access notes.
-// TODO: (Cont.) The key member is not used for getting notes. db is only used to add a note
-// TODO: (Cont.) and notesList is then updated with the new note
-
-
+// If I do categories:
+// Possibly pass a number 1-3 for the currentList being used
+// 1 = all notes    2 = favorite notes  3 = category note
+// Also pass a category name
+// if 1 or 2 pass "" else pass the category name
+// Use that to get the desired list and whether to add to the currentList or not
+// i.e. if on favoriteList and new note being added and not a favorite not.
+// do not add it to the currentList, only the db.
 public class NoteEditorActivity extends AppCompatActivity {
 
-    EditText editTextTitle, editTextContent;
+    private EditText editTextTitle, editTextContent;
+    private SingleNote currentNote = null;
+    private boolean favorite = false;
+    private int notePosition;
 
-    int noteID;
+    // Hide the soft keyboard
+    private void hideSoftKeyboard() {
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+    }
 
-    // Update note if it exists else create a new one
-    public void saveNote(){
+    // Show the soft keyboard
+    private void showSoftKeyboard() {
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
+
+    private void hideMenuItem(View view) {
+        // Might not be necessary
+        view.setVisibility(View.INVISIBLE);
+    }
+
+    private void favoriteNoteMenu() {
+        favorite = !favorite;
+        Toast toast = Toast.makeText(getApplicationContext(), "Note is favorite: " + favorite, Toast.LENGTH_SHORT);
+        toast.show();
+
+        int temp = 0;
+        if (favorite) {     // Show boolean as int to store in db
+            temp = 1;
+        }
+
+        if (currentNote != null) {  // Save favorite even if user does not explicitly press save menu item
+            currentNote.set_favorite(temp);
+            db.updateNote(currentNote);
+        }
+    }
+
+    private void goBackToMainActivity(int value) {
+        Intent goToMain = new Intent(getApplicationContext(), MainActivity.class);
+        goToMain.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        goToMain.putExtra("Note Success", value);
+
+        if (notePosition == -1 && value == 3) {
+            notePosition = 0;
+        }
+        goToMain.putExtra("Note Position", notePosition);
+
+        Log.d("Value", Integer.toString(value));
+        Log.d("Index", Integer.toString(notePosition));
+
+        setResult(RESULT_OK, goToMain);
+        finish();
+    }
+
+    private void deleteNoteMenu() {
+        new AlertDialog.Builder(NoteEditorActivity.this)
+                .setMessage("Do you want to delete this note?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        if (currentNote != null) {
+                            db.deleteNote(currentNote);
+                            goBackToMainActivity(4);
+                        } else {
+                            goBackToMainActivity(-1);
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    // Check what the user changed from the original note
+    private String checkForDifferenceFromOriginal() {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
-        // Intent will go pack to MainActivity and clear the stack until MainActivity is reached
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        if (title.isEmpty() && content.isEmpty() && currentNote == null) {
+            return "discardNote";
+        } else if (currentNote != null) {
+            boolean titleTheSame = title.equals(currentNote.get_title());
+            boolean contentTheSame = content.equals(currentNote.get_content());
 
-        // Check if the note has anything to save
-        if(!title.isEmpty() || !content.isEmpty()) {
-            if (noteID != -1) {
-                SingleNote tempNote = notesList.get(noteID);
-
-                // Check if user is saving note without changes
-                // If statement is true if no changes were made
-                if( !(title.equals(tempNote.get_title()) && content.equals(tempNote.get_content())) ) {
-
-                    // Only save content if title not changed
-                    if(title.equals(tempNote.get_title())) {
-                        tempNote.set_content(content);
-                    }
-
-                    // Only save title if content not changed
-                    else if(content.equals(tempNote.get_content())) {
-                        tempNote.set_title(title);
-                    }
-
-                    // Title and content were changed
-                    else {
-                        tempNote.set_title(title);
-                        tempNote.set_content(content);
-                    }
-
-                    db.updateNote(tempNote);
+            if (!(titleTheSame && contentTheSame)) {
+                if (titleTheSame) {
+                    return "contentChanged";
+                } else if (contentTheSame) {
+                    return "titleChanged";
+                } else {
+                    return "titleAndContentChanged";
                 }
             }
+            return "notChanged";   // Note not changed
+        }
+        return "newNote";   // New note
+    }
 
-            // New note is being added
-            else {
-                SingleNote temp = new SingleNote(title, content);
+    // Save note into db and go back to MainActivity
+    private void saveNoteMenu() {
+        String title = editTextTitle.getText().toString();
+        String content = editTextContent.getText().toString();
+
+        String difference = checkForDifferenceFromOriginal();
+        // 0 = new note and empty, discard
+        // 1 = existing note modified
+        // 2 = existing note not changed
+        // 3 = new note added
+        switch (difference) {
+            case "discardNote":
+                goBackToMainActivity(0);
+                break;
+
+            case "contentChanged":
+                currentNote.set_content(content);
+                currentList.get(notePosition).set_content(content);
+                db.updateNote(currentNote);
+                goBackToMainActivity(1);
+                break;
+
+            case "titleChanged":
+                currentNote.set_title(title);
+                currentList.get(notePosition).set_title(title);
+                db.updateNote(currentNote);
+                goBackToMainActivity(1);
+                break;
+
+            case "titleAndContentChanged":
+                currentNote.set_title(title);
+                currentNote.set_content(content);
+                currentList.get(notePosition).set_title(title);
+                currentList.get(notePosition).set_content(content);
+                db.updateNote(currentNote);
+                goBackToMainActivity(1);
+                break;
+
+            case "notChanged":
+                goBackToMainActivity(2);
+                break;
+
+            case "newNote":
+                SingleNote temp;
+                if (favorite) {
+                    temp = new SingleNote(title, content, 1);
+                } else {
+                    temp = new SingleNote(title, content);
+                }
+
+                currentList.add(0, temp);
                 db.addNote(temp);
-                notesList = db.getAllNotes();
-            }
-
-            intent.putExtra("Note Success", 1);
+                goBackToMainActivity(3);
+                break;
         }
-
-        // Note is empty
-        else {
-            intent.putExtra("Note Success", 0);
-        }
-
-        startActivity(intent);
-
-    } // saveNote() end
+    } // saveNoteMenu() end
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_editor);
 
-        editTextTitle = (EditText)findViewById(R.id.editTextTitle);
-        editTextContent = (EditText)findViewById(R.id.editTextContent);
-        editTextContent.requestFocus();
+        editTextTitle = (EditText) findViewById(R.id.editTextTitle);
+        editTextContent = (EditText) findViewById(R.id.editTextContent);
 
         Intent intent = getIntent();
-        noteID = intent.getIntExtra("noteID", -1);
+        notePosition = intent.getIntExtra("noteID", -1);
+        Log.d("Note Received", Integer.toString(notePosition));
 
-         if(noteID != -1) {
-            editTextTitle.setText(notesList.get(noteID).get_title());
-             editTextContent.setText(notesList.get(noteID).get_content());
+        if (notePosition != -1) {
+            currentNote = currentList.get(notePosition);
+            if (currentNote.get_favorite() == 1) {
+                favorite = true;
+            }
+
+            editTextTitle.setText(currentNote.get_title());
+            editTextTitle.setFocusable(false);
+            editTextContent.setText(currentNote.get_content());
+            editTextContent.setFocusable(false);
+
+            // Keyboard does not pop up until the user clicks on the screen
+            // allowing the user to see the entire note at the start
+            View.OnTouchListener editTextListener = new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    view.setFocusableInTouchMode(true);
+                    view.requestFocus();
+                    return false;
+                }
+            };
+            editTextTitle.setOnTouchListener(editTextListener);
+            editTextContent.setOnTouchListener(editTextListener);
+        }
+
+        // New note is being created, show keyboard at the start
+        else {
+            editTextContent.requestFocus();
         }
     } // onCreate() end
+
+    // Only show alert dialog if there is a difference from when the note was opened
+    @Override
+    public void onBackPressed() {
+
+        final String difference = checkForDifferenceFromOriginal();
+        Toast.makeText(getApplicationContext(), difference, Toast.LENGTH_SHORT).show();
+        if (!difference.equals("discardNote") && !difference.equals("notChanged")) {
+            new AlertDialog.Builder(NoteEditorActivity.this)
+                    .setMessage("Save your changes or discard them?")
+                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            saveNoteMenu();
+                            if (currentNote != null) {
+                                goBackToMainActivity(1);
+                            } else {
+                                goBackToMainActivity(3);
+                            }
+                        }
+                    })
+                    .setNeutralButton("Cancel", null)
+                    .setNegativeButton("Discard", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            goBackToMainActivity(2);
+                        }
+                    })
+                    .show();
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -110,13 +270,42 @@ public class NoteEditorActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
 
-        if(item.getItemId() == R.id.save_note) {
-            saveNote();
-
+        if (item.getItemId() == R.id.save_note) {
+            saveNoteMenu();
+            return true;
+        } else if (item.getItemId() == R.id.delete_note) {
+            deleteNoteMenu();
+            return true;
+        } else if (item.getItemId() == R.id.favorite_note) {
+            favoriteNoteMenu();
             return true;
         }
 
         return false;
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            int viewId = view.getId();
+            outState.putInt("focusID", viewId);
+        }
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        int viewId = savedInstanceState.getInt("focusID", View.NO_ID);
+        View view = findViewById(viewId);
+        if (view != null) {
+            Toast.makeText(getApplicationContext(), "Restored View " + view.toString(), Toast.LENGTH_SHORT).show();
+            view.setFocusable(true);
+            view.setFocusableInTouchMode(true);
+            view.requestFocus();
+        }
+    }
 } // NoteEditorActivity() end

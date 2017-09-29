@@ -1,79 +1,81 @@
 package com.ozmar.notes;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.util.Log;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
 import java.util.List;
 
-public class NotesAdapter extends ArrayAdapter<SingleNote> implements View.OnClickListener{
+public class NotesAdapter extends RecyclerView.Adapter<NotesHolder> {
 
     private Context context;
-    private List<SingleNote> nList;
+    private final List<SingleNote> notes;
+    private int itemResource;
 
-    private class ViewHolder {
-        TextView title;
-        TextView content;
-    }
 
-    public NotesAdapter(Context context, int textViewResourceId, List<SingleNote> objects) {
-        super (context, textViewResourceId, objects);
+    public NotesAdapter(Context context, int itemResource, List<SingleNote> notes) {
+        this.notes = notes;
         this.context = context;
-        nList = objects;
+        this.itemResource = itemResource;
+        //Log.d("Notes Size:", Integer.toString(notes.size()));
     }
 
-    public void updateAdapter(List<SingleNote> newList) {
-        nList.clear();
-        nList.addAll(newList);
-        this.notifyDataSetChanged();
+    public void removeAt(int position) {
+        notes.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, notes.size());
+    }
+
+    public void addAt(int position, SingleNote note) {
+        notes.add(position, note);
+        notifyItemInserted(position);
+        notifyItemRangeChanged(position, notes.size());
+    }
+
+    public void updateAt(int position, SingleNote note) {
+        notes.remove(position);
+        notes.add(position, note);
+        notifyItemChanged(position);
+    }
+
+    public void clearView() {
+        int size = notes.size();
+        notes.clear();
+        notifyItemRangeRemoved(0, size);
+    }
+
+    public void getList(List<SingleNote> newList) {
+        clearView();
+        notes.addAll(newList);
+        notifyItemRangeInserted(0, notes.size());
     }
 
     @Override
-    public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.note:
-                Log.i("Adapter ", "OnClick called");
-                break;
-        }
-    } // onClick() end
+    public void onBindViewHolder(NotesHolder holder, int position) {
+        SingleNote note = this.notes.get(position);
+        holder.bindNote(note);
+    }
 
-    @Override @NonNull
-    public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-        ViewHolder holder;
-        if(convertView == null) {
-            LayoutInflater vi = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = vi.inflate(R.layout.note_preview, parent, false);
+    @Override
+    public NotesHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(itemResource, parent, false);
+        return new NotesHolder(this.context, view);
+    }
 
-            holder = new ViewHolder();
-            holder.title = convertView.findViewById(R.id.title);
-            holder.content = convertView.findViewById(R.id.content);
-            convertView.setTag(holder);
-        }
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
 
-        else {
-            holder = (ViewHolder) convertView.getTag();
-        }
+    @Override
+    public int getItemViewType(int position) {
+        return position;
+    }
 
-        SingleNote singleNote = nList.get(position);
-
-        // Limit content display in preview
-        int limit = 80;
-        if(singleNote.get_content().length() > limit) {
-            String temp = singleNote.get_content();
-            temp = temp.substring(0, limit-3);
-            temp += "...";
-            singleNote.set_content(temp);
-        }
-
-        holder.title.setText(singleNote.get_title());
-        holder.content.setText(singleNote.get_content());
-
-        return convertView;
-    } // getView() end
-
+    @Override
+    public int getItemCount() {
+        return this.notes.size();
+    }
 } // NotesAdapter end
