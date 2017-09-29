@@ -34,13 +34,7 @@ public class NotesHolder extends RecyclerView.ViewHolder implements View.OnClick
 
     @Override
     public void onClick(View view) {
-//        Intent intent = new Intent(this.context, NoteEditorActivity.class);
-//        intent.putExtra("noteID", getAdapterPosition());
-//        context.startActivity(intent);
-//
-//        if (this.note != null) {
-//            Toast.makeText(this.context, "Clicked on " + this.note.get_title(), Toast.LENGTH_SHORT).show();
-//        }
+
     }
 
 }

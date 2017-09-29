@@ -19,6 +19,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesHolder> {
         this.notes = notes;
         this.context = context;
         this.itemResource = itemResource;
+        //Log.d("Notes Size:", Integer.toString(notes.size()));
     }
 
     public void removeAt(int position) {
@@ -27,13 +28,13 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesHolder> {
         notifyItemRangeChanged(position, notes.size());
     }
 
-    public void addAt(int position) {
-        notes.remove(position);
+    public void addAt(int position, SingleNote note) {
+        notes.add(position, note);
         notifyItemInserted(position);
         notifyItemRangeChanged(position, notes.size());
     }
 
-    public void changeAt(int position) {
+    public void updaateAt(int position) {
         notes.remove(position);
         notifyItemChanged(position);
     }
@@ -58,9 +59,18 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesHolder> {
 
     @Override
     public NotesHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(itemResource, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(itemResource, parent, false);
         return new NotesHolder(this.context, view);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     @Override

@@ -10,6 +10,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,19 +37,18 @@ public class MainActivity extends AppCompatActivity {
     private Spinner mainSpinner;
 
     static DatabaseHandler db;
-    static List<SingleNote> currentList;
+    static List<SingleNote> currentList = new ArrayList<>();
 
-    SharedPreferences settings;
+    private SharedPreferences settings;
 
     // onClick method launch activity to create note
     public void launchNoteEditor(View view) {
         Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
         intent.putExtra("noteID", -1);
-        startActivity(intent);
+        startActivityForResult(intent, 1);
     } // launchNoteEditor() end
 
-    // Get notes to display on screen
-    // TODO: Optimize, right now currentList might get the same list from db
+    // Get notes to initialize currentList
     private void getNotesList(int num) {
         switch (num) {
             case 0:
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 currentList = db.getAllFavoriteNotes();
                 break;
         }
-    }
+    } // getNotesList() end
 
     // Store spinner position from SharedPreferences
     private void storeSpinnerPosition() {
@@ -66,14 +66,11 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("Spinner Position", mainSpinner.getSelectedItemPosition()).apply();
     }
 
-    // Get spinner position from SharedPreferences
-    private int getSpinnerPosition() {
+    // Restore spinner position from SharedPreferences
+    private void restoreSpinnerPosition() {
         settings = getSharedPreferences("User Settings", Context.MODE_PRIVATE);
-        return settings.getInt("Spinner Position", 0);
-    }
+        int position = settings.getInt("Spinner Position", 0);
 
-    // Set spinner position from SharedPreferences
-    private void setSpinnerPosition(int position) {
         if (position != -1) {
             mainSpinner.setSelection(position);
             getNotesList(position);
@@ -86,13 +83,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Toast.makeText(getApplicationContext(), "onCreate()", Toast.LENGTH_SHORT).show();
+
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-
         db = new DatabaseHandler(MainActivity.this);
-        currentList = new ArrayList<>();
-        getNotesList(getSpinnerPosition());
 
+        // Note: currentList will be updated with desired list in onCreateOptionsMenu()
         notesAdapter = new NotesAdapter(this, R.layout.note_preview, currentList);
         rv = (RecyclerView) findViewById(R.id.listVIew);
         rv.setHasFixedSize(true);
@@ -102,14 +98,12 @@ public class MainActivity extends AppCompatActivity {
         rv.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(),
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
-                Toast.makeText(getApplicationContext(), "Short Press", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
                 intent.putExtra("noteID", position);
-                startActivity(intent);
+                startActivityForResult(intent, 1);
             }
 
             public void onLongClickItem(View view, final int position) {
-                Toast.makeText(getApplicationContext(), "Long Press", Toast.LENGTH_SHORT).show();
                 new AlertDialog.Builder(MainActivity.this)
                         .setMessage("Do You Want To Delete This Note?")
                         .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
@@ -118,7 +112,6 @@ public class MainActivity extends AppCompatActivity {
                                 db.deleteNote(currentList.get(position));
                                 currentList.remove(position);
                                 rv.removeViewAt(position);
-
                                 notesAdapter.removeAt(position);
                             }
                         })
@@ -140,12 +133,12 @@ public class MainActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_dropdown_item, spinnerItems);
         mainSpinner.setAdapter(spinnerAdapter);
 
-        setSpinnerPosition(getSpinnerPosition());   // Restore spinner position
+        // Restore spinner position and update currentList with the desired list
+        restoreSpinnerPosition();
 
         mainSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
                 currentList.clear();
                 notesAdapter.notifyItemRangeRemoved(0, currentList.size());
                 switch (adapterView.getItemAtPosition(i).toString()) {
@@ -159,9 +152,6 @@ public class MainActivity extends AppCompatActivity {
                         currentList.addAll(db.getAllFavoriteNotes());
                         break;
                 }
-
-//
-
             }
 
             @Override
@@ -176,15 +166,68 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStart() {
         super.onStart();
-
-        Intent intent = getIntent();
-        if (intent.getIntExtra("Note Success", -1) == 0) {
-            Toast.makeText(getApplicationContext(), "No content to save. Note discarded", Toast.LENGTH_SHORT).show();
-        }
-
-        getIntent().removeExtra("Note Success");
+//        Intent intent = getIntent();
+//        long save = intent.getIntExtra("Note Success", -1);
+//        int position = intent.getIntExtra("Note Position", -1);
+//
+//        Log.d("Note Success", Long.toString(save));
+//        Log.d("Note Position", Integer.toString(position));
+//
+//        if (save == 0) {
+//            Toast.makeText(getApplicationContext(), "Discard Note", Toast.LENGTH_SHORT).show();
+//        } else if (save == 1) {
+//            Toast.makeText(getApplicationContext(), "Content Changed", Toast.LENGTH_SHORT).show();
+//            notesAdapter.notifyItemChanged(position);
+//        }  else if (save == 2) {
+//            Toast.makeText(getApplicationContext(), "No change existing note", Toast.LENGTH_SHORT).show();
+//        } else if (save == 3) {
+//            Toast.makeText(getApplicationContext(), "New note", Toast.LENGTH_SHORT).show();
+//            notesAdapter.addAt(position, currentList.get(position));
+//        } else if (save == 4) {
+//            Toast.makeText(getApplicationContext(), "Note deleted", Toast.LENGTH_SHORT).show();
+//            currentList.remove(position);
+//            notesAdapter.removeAt(position);
+//        }
+//
+//        getIntent().removeExtra("Note Success");
+//        getIntent().removeExtra("Note Position");
     } // onStart() end
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+
+        if (requestCode == 1 && data != null) {
+
+            int save = data.getIntExtra("Note Success", -1);
+            int position = data.getIntExtra("Note Position", -1);
+
+            Log.d("Note Success", Integer.toString(save));
+            Log.d("Note Position", Integer.toString(position));
+
+            if (save == 0) {
+                Toast.makeText(getApplicationContext(), "Discard Note", Toast.LENGTH_SHORT).show();
+            } else if (save == 1) {
+                Toast.makeText(getApplicationContext(), "Content Changed", Toast.LENGTH_SHORT).show();
+                notesAdapter.notifyItemChanged(position);
+            } else if (save == 2) {
+                Toast.makeText(getApplicationContext(), "No change existing note", Toast.LENGTH_SHORT).show();
+            } else if (save == 3) {
+                Toast.makeText(getApplicationContext(), "New note", Toast.LENGTH_SHORT).show();
+                notesAdapter.addAt(position, currentList.get(position));
+            } else if (save == 4) {
+                Toast.makeText(getApplicationContext(), "Note deleted", Toast.LENGTH_SHORT).show();
+                currentList.remove(position);
+                notesAdapter.removeAt(position);
+            }
+
+            getIntent().removeExtra("Note Success");
+            getIntent().removeExtra("Note Position");
+
+        }
+
+    }
 
     @Override
     protected void onStop() {
