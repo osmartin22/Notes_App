@@ -3,20 +3,20 @@
 
     <!-- note_preview dimensions
     -->
-    <dimen name="notePreviewTitlePadding">8dp</dimen>
-    <dimen name="notePreviewTitleTextSize">30sp</dimen>
+    <dimen name="notePreviewTitlePadding">4dp</dimen>
+    <dimen name="notePreviewTitleTextSize">20sp</dimen>
 
-    <dimen name="notePreviewMargin">8dp</dimen>
+    <dimen name="notePreviewMargin">4dp</dimen>
 
-    <dimen name="notePreviewContentPadding">8dp</dimen>
-    <dimen name="notePreviewContentTextSize">20sp</dimen>
+    <dimen name="notePreviewContentPadding">4dp</dimen>
+    <dimen name="notePreviewContentTextSize">40sp</dimen>
 
 
     <!--activity_main dimensions
     -->
     <dimen name="additionButtonMargins">16dp</dimen>
-    <dimen name="listViewMargin">8dp</dimen>
-    <dimen name="listViewDividerHeight">5sp</dimen>
+    <dimen name="recyclerViewMargin">4dp</dimen>
+    <dimen name="recyclerViewDividerHeight">5sp</dimen>
 
 
     <!--layout\activity_note_editor dimensions

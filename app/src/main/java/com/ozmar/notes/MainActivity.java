@@ -8,8 +8,8 @@ import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -94,7 +94,11 @@ public class MainActivity extends AppCompatActivity {
         notesAdapter = new NotesAdapter(this, R.layout.note_preview, currentList);
         rv = (RecyclerView) findViewById(R.id.listVIew);
         rv.setHasFixedSize(true);
-        rv.setLayoutManager(new LinearLayoutManager(this));
+
+        //rv.setLayoutManager(new GridLayoutManager(this, 2));
+        rv.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+//        rv.setLayoutManager(new LinearLayoutManager(this));
+
         rv.setAdapter(notesAdapter);
 
         rv.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(),
@@ -135,8 +139,7 @@ public class MainActivity extends AppCompatActivity {
                 android.R.layout.simple_spinner_dropdown_item, spinnerItems);
         mainSpinner.setAdapter(spinnerAdapter);
 
-        // Restore spinner position and update currentList with the desired list
-        restoreSpinnerPosition();
+        restoreSpinnerPosition();   // Restore spinner position and update currentList with the desired list
 
         mainSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -164,36 +167,6 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onCreateOptionsMenu(menu);
     }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-//        Intent intent = getIntent();
-//        long save = intent.getIntExtra("Note Success", -1);
-//        int position = intent.getIntExtra("Note Position", -1);
-//
-//        Log.d("Note Success", Long.toString(save));
-//        Log.d("Note Position", Integer.toString(position));
-//
-//        if (save == 0) {
-//            Toast.makeText(getApplicationContext(), "Discard Note", Toast.LENGTH_SHORT).show();
-//        } else if (save == 1) {
-//            Toast.makeText(getApplicationContext(), "Content Changed", Toast.LENGTH_SHORT).show();
-//            notesAdapter.notifyItemChanged(position);
-//        }  else if (save == 2) {
-//            Toast.makeText(getApplicationContext(), "No change existing note", Toast.LENGTH_SHORT).show();
-//        } else if (save == 3) {
-//            Toast.makeText(getApplicationContext(), "New note", Toast.LENGTH_SHORT).show();
-//            notesAdapter.addAt(position, currentList.get(position));
-//        } else if (save == 4) {
-//            Toast.makeText(getApplicationContext(), "Note deleted", Toast.LENGTH_SHORT).show();
-//            currentList.remove(position);
-//            notesAdapter.removeAt(position);
-//        }
-//
-//        getIntent().removeExtra("Note Success");
-//        getIntent().removeExtra("Note Position");
-    } // onStart() end
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -235,14 +208,12 @@ public class MainActivity extends AppCompatActivity {
 
             getIntent().removeExtra("Note Success");
             getIntent().removeExtra("Note Position");
-
         }
-
-    }
+    } // onActivityResult() end
 
     @Override
     protected void onStop() {
         super.onStop();
         storeSpinnerPosition();
     }
-}
+} // MainActivity() end
