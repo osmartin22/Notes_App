@@ -34,8 +34,9 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesHolder> {
         notifyItemRangeChanged(position, notes.size());
     }
 
-    public void updaateAt(int position) {
+    public void updateAt(int position, SingleNote note) {
         notes.remove(position);
+        notes.add(position, note);
         notifyItemChanged(position);
     }
 

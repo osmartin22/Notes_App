@@ -23,6 +23,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+// NOTE: Not using _id for notes, might take it off as unique ids do not seem necessary
+
 // TODO: 1) Use AsyncTask for db read/write instead of Main thread
 // TODO: 2) Slide to delete
 // TODO: 3) On long press, allow multiple deletes and show delete button
@@ -210,12 +212,21 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(getApplicationContext(), "Discard Note", Toast.LENGTH_SHORT).show();
             } else if (save == 1) {
                 Toast.makeText(getApplicationContext(), "Content Changed", Toast.LENGTH_SHORT).show();
-                notesAdapter.notifyItemChanged(position);
+                notesAdapter.updateAt(position, currentList.get(position));
             } else if (save == 2) {
                 Toast.makeText(getApplicationContext(), "No change existing note", Toast.LENGTH_SHORT).show();
             } else if (save == 3) {
+
+                // TODO: Possible optimize later
+                if (currentList.equals(db.getAllNotes())) {
+                    notesAdapter.addAt(position, currentList.get(position));
+                } else if (currentList.equals(db.getAllFavoriteNotes()) && currentList.get(0).get_favorite() == 1) {
+                    notesAdapter.addAt(position, currentList.get(position));
+                } else {
+                    currentList.remove(0);
+                }
+
                 Toast.makeText(getApplicationContext(), "New note", Toast.LENGTH_SHORT).show();
-                notesAdapter.addAt(position, currentList.get(position));
             } else if (save == 4) {
                 Toast.makeText(getApplicationContext(), "Note deleted", Toast.LENGTH_SHORT).show();
                 currentList.remove(position);

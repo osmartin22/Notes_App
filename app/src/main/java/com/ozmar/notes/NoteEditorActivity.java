@@ -18,6 +18,14 @@ import android.widget.Toast;
 import static com.ozmar.notes.MainActivity.currentList;
 import static com.ozmar.notes.MainActivity.db;
 
+// If I do categories:
+// Possibly pass a number 1-3 for the currentList being used
+// 1 = all notes    2 = favorite notes  3 = category note
+// Also pass a category name
+// if 1 or 2 pass "" else pass the category name
+// Use that to get the desired list and whether to add to the currentList or not
+// i.e. if on favoriteList and new note being added and not a favorite not.
+// do not add it to the currentList, only the db.
 public class NoteEditorActivity extends AppCompatActivity {
 
     private EditText editTextTitle, editTextContent;
@@ -122,10 +130,9 @@ public class NoteEditorActivity extends AppCompatActivity {
         String content = editTextContent.getText().toString();
 
         String difference = checkForDifferenceFromOriginal();
-        // Only modify the string with differences to prevent unnecessary object creation
-        // 0 = new Note and empty, discard
-        // 1 = note modified
-        // 2 = note not changed
+        // 0 = new note and empty, discard
+        // 1 = existing note modified
+        // 2 = existing note not changed
         // 3 = new note added
         switch (difference) {
             case "discardNote":
@@ -167,8 +174,8 @@ public class NoteEditorActivity extends AppCompatActivity {
                     temp = new SingleNote(title, content);
                 }
 
+                currentList.add(0, temp);
                 db.addNote(temp);
-//                currentList.add(0, temp);     // TODO: Fix
                 goBackToMainActivity(3);
                 break;
         }

@@ -83,7 +83,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             return note;
         }
 
-        return null;            // WANT TO TEST THIS
+        return null;
     } // getNote() end
 
     // Get all the notes
