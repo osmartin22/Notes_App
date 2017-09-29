@@ -3,8 +3,8 @@
 
     <!-- Hint for title and content in note editor
     -->
-    <string name="editTextNoteHint">Enter Text</string>
-    <string name="titleEditText">Enter Title</string>
+    <string name="editTextNoteHint">Note</string>
+    <string name="titleEditText">Title</string>
 
 
     <!-- Menu item names

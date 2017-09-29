@@ -11,6 +11,7 @@
 
     <item
         android:id="@+id/favorite_note"
+        android:checkable="false"
         android:icon="@android:drawable/btn_star"
         android:title="@string/favoriteNoteMenuItem"
         app:showAsAction="ifRoom">

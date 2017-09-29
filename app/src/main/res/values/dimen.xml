@@ -15,7 +15,7 @@
     <!--activity_main dimensions
     -->
     <dimen name="additionButtonMargins">16dp</dimen>
-    <dimen name="recyclerViewMargin">4dp</dimen>
+    <dimen name="recyclerViewMargin">8dp</dimen>
     <dimen name="recyclerViewDividerHeight">5sp</dimen>
 
 
@@ -24,10 +24,16 @@
     <dimen name="layoutTitleMarginSides">8dp</dimen>
     <dimen name="layoutContentMarginSides">16dp</dimen>
 
+    <dimen name="layoutTitleTextSize">20sp</dimen>
+    <dimen name="layoutContentTextSize">18sp</dimen>
+
 
     <!--land\activity_note_editor dimensions
     -->
     <dimen name="landTitleMarginSides">8dp</dimen>
     <dimen name="landContentMarginSides">16dp</dimen>
+
+    <dimen name="landTitleTextSize">20sp</dimen>
+    <dimen name="landContentTextSize">18sp</dimen>
 
 </resources>
