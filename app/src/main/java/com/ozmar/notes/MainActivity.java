@@ -3,6 +3,7 @@ package com.ozmar.notes;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -21,18 +22,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-// NOTE: Not using _id for notes, might take it off as unique ids do not seem necessary
-
-// TODO: 1) Use AsyncTask for db read/write instead of Main thread
-// TODO: 2) Slide to delete
-// TODO: 3) On long press, allow multiple deletes and show delete button
-// TODO: 4) Optimize currentList towards the end
-
-// TODO Possibly) Add GPS so that a notification appears/or vibrate phone when at location
-// TODO Possibly) Let user choose theme (Maybe do in shared preferences)
-
 public class MainActivity extends AppCompatActivity {
-    private RecyclerView rv;
     private NotesAdapter notesAdapter;
     private Spinner mainSpinner;
 
@@ -41,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private int listUsed;
 
     private boolean multiSelect;
-    private List<SingleNote> selectedNotes = new ArrayList<>();
+    private ActionMode actionMode;
+    private RecyclerViewHelper selectedNotes = new RecyclerViewHelper();
 
     private SharedPreferences settings;
 
@@ -100,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Note: currentList will be updated with desired list in onCreateOptionsMenu()
         notesAdapter = new NotesAdapter(this, R.layout.note_preview, currentList);
-        rv = (RecyclerView) findViewById(R.id.listVIew);
+        RecyclerView rv = (RecyclerView) findViewById(R.id.listVIew);
         rv.setHasFixedSize(true);
 
         //rv.setLayoutManager(new GridLayoutManager(this, 2));
@@ -113,8 +104,8 @@ public class MainActivity extends AppCompatActivity {
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
                 if (multiSelect) {
-                    selectItem(currentList.get(position));
                     Toast.makeText(getApplicationContext(), "Selected: " + position, Toast.LENGTH_SHORT).show();
+                    selectItem(view, currentList.get(position), position);
 
                 } else {
                     Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
@@ -125,22 +116,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onLongClickItem(View view, final int position) {
-
-                ((AppCompatActivity) view.getContext()).startSupportActionMode(actionModeCallback);
-
-//                new AlertDialog.Builder(MainActivity.this)
-//                        .setMessage("Do You Want To Delete This Note?")
-//                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                db.deleteNote(currentList.get(position));
-//                                currentList.remove(position);
-//                                rv.removeViewAt(position);
-//                                notesAdapter.removeAt(position);
-//                            }
-//                        })
-//                        .setNegativeButton("Cancel", null)
-//                        .show();
+                if (!multiSelect) {
+                    ((AppCompatActivity) view.getContext()).startSupportActionMode(actionModeCallback);
+                    selectItem(view, currentList.get(position), position);
+                } else {
+                    selectItem(view, currentList.get(position), position);
+                }
             }
         }));
 
@@ -155,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             multiSelect = true;
+            actionMode = mode;
             mode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
             return true;
         }
@@ -169,13 +151,10 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.contextualDelete:
 
-                    // TODO : Delete Notes
-                    // Delete notes in db               // Method, pass list, delete all
-                    // Can maybe use keys in db for equality
-
-                    //Update currentList      // call dbGetAll;
-                    // Update recycler view
-
+                    // TODO : More testing
+//                    db.deleteNoteList(selectedNotes.getNotes());
+                    getNotesList(listUsed);
+                    notesAdapter.removeSelectedViews(selectedNotes.getViews(), selectedNotes.getPositions());
                     mode.finish();
                     return true;
                 default:
@@ -186,18 +165,25 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             multiSelect = false;
-            Toast.makeText(getApplicationContext(), "Size: " + selectedNotes.size(), Toast.LENGTH_SHORT).show();
-            selectedNotes.clear();
+            actionMode = null;
+            Toast.makeText(getApplicationContext(), "Size: " + selectedNotes.getNotes().size(), Toast.LENGTH_SHORT).show();
+            selectedNotes.clearLists();
 
         }
     };
 
-    private void selectItem(SingleNote note) {
+    private void selectItem(View view, SingleNote note, int position) {
         if (multiSelect) {
-            if (selectedNotes.contains(note)) {
-                selectedNotes.remove(note);
+            if (selectedNotes.getNotes().contains(note)) {
+                selectedNotes.removeFromLists(view, note);
+                view.setBackgroundColor(Color.WHITE);
+
+                if (selectedNotes.getNotes().isEmpty()) {      // Exit CAB if no notes are selected
+                    actionMode.finish();
+                }
             } else {
-                selectedNotes.add(note);
+                view.setBackgroundColor(Color.GRAY);
+                selectedNotes.addToLists(view, note, position);
             }
         }
     }
@@ -219,17 +205,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 currentList.clear();
-                notesAdapter.notifyItemRangeRemoved(0, currentList.size());
+                notesAdapter.clearView();
                 switch (adapterView.getItemAtPosition(i).toString()) {
                     case "All Notes":
-                        notesAdapter.getList(db.getAllNotes());
                         currentList.addAll(db.getAllNotes());
+                        notesAdapter.getList(currentList);
                         listUsed = 0;
                         break;
 
                     case "Favorites":
-                        notesAdapter.getList(db.getAllFavoriteNotes());
                         currentList.addAll(db.getAllFavoriteNotes());
+                        notesAdapter.getList(currentList);
                         listUsed = 1;
                         break;
                 }

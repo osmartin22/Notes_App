@@ -159,6 +159,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(note.get_id())});
     } // updateNode() end
 
+    public void deleteNoteList(List<SingleNote> list) {
+        for(int i = 0; i < list.size(); i++) {
+            deleteNote(list.get(i));
+        }
+    }
+
     // Delete a single note
     public void deleteNote(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();

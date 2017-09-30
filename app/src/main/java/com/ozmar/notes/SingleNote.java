@@ -53,11 +53,6 @@ public class SingleNote {
         return  note._content.equals(_content) &&
                 note._title.equals(_title) &&
                 note._favorite == _favorite;
-
-//        return note._id == _id &&
-//                note._content.equals(_content) &&
-//                note._title.equals(_title) &&
-//                note._favorite == _favorite;
     }
 
     @Override
