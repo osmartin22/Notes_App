@@ -1,13 +1,12 @@
 package com.ozmar.notes;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
@@ -40,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
     static DatabaseHandler db;
     static List<SingleNote> currentList = new ArrayList<>();
     private int listUsed;
+
+    private boolean multiSelect;
+    private List<SingleNote> selectedNotes = new ArrayList<>();
 
     private SharedPreferences settings;
 
@@ -110,30 +112,95 @@ public class MainActivity extends AppCompatActivity {
         rv.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(),
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
-                Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
-                intent.putExtra("noteID", position);
-                intent.putExtra("listUsed", listUsed);
-                startActivityForResult(intent, 1);
+                if (multiSelect) {
+                    selectItem(currentList.get(position));
+                    Toast.makeText(getApplicationContext(), "Selected: " + position, Toast.LENGTH_SHORT).show();
+
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
+                    intent.putExtra("noteID", position);
+                    intent.putExtra("listUsed", listUsed);
+                    startActivityForResult(intent, 1);
+                }
             }
 
             public void onLongClickItem(View view, final int position) {
-                new AlertDialog.Builder(MainActivity.this)
-                        .setMessage("Do You Want To Delete This Note?")
-                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                db.deleteNote(currentList.get(position));
-                                currentList.remove(position);
-                                rv.removeViewAt(position);
-                                notesAdapter.removeAt(position);
-                            }
-                        })
-                        .setNegativeButton("Cancel", null)
-                        .show();
+
+                ((AppCompatActivity) view.getContext()).startSupportActionMode(actionModeCallback);
+
+//                new AlertDialog.Builder(MainActivity.this)
+//                        .setMessage("Do You Want To Delete This Note?")
+//                        .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                db.deleteNote(currentList.get(position));
+//                                currentList.remove(position);
+//                                rv.removeViewAt(position);
+//                                notesAdapter.removeAt(position);
+//                            }
+//                        })
+//                        .setNegativeButton("Cancel", null)
+//                        .show();
             }
         }));
 
     } // onCreate() end
+
+    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+        @Override
+        public int hashCode() {
+            return super.hashCode();
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            multiSelect = true;
+            mode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.contextualDelete:
+
+                    // TODO : Delete Notes
+                    // Delete notes in db               // Method, pass list, delete all
+                    // Can maybe use keys in db for equality
+
+                    //Update currentList      // call dbGetAll;
+                    // Update recycler view
+
+                    mode.finish();
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            multiSelect = false;
+            Toast.makeText(getApplicationContext(), "Size: " + selectedNotes.size(), Toast.LENGTH_SHORT).show();
+            selectedNotes.clear();
+
+        }
+    };
+
+    private void selectItem(SingleNote note) {
+        if (multiSelect) {
+            if (selectedNotes.contains(note)) {
+                selectedNotes.remove(note);
+            } else {
+                selectedNotes.add(note);
+            }
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

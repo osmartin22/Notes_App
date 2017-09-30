@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/notePreviewMargin"
-    android:background="#bababa"
+    android:background="@android:color/white"
     android:orientation="vertical">
 
     <TextView
