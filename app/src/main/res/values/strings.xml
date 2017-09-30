@@ -1,21 +1,21 @@
 <resources>
     <string name="app_name">Notes</string>
 
-    <!-- Hint for title and content in note editor
-    -->
+    <!-- Hint for title and content in note editor -->
     <string name="editTextNoteHint">Note</string>
     <string name="titleEditText">Title</string>
 
 
-    <!-- Menu item names
-    -->
+    <!-- Menu item names NoteEditorActivity-->
     <string name="saveNoteMenuItem">Save Note</string>
     <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="favoriteNoteMenuItem">Favorite Note</string>
 
+    <!-- Contextual action menu items -->
+    <string name="deleteContextualMenuItem">Delete</string>
 
-    <!-- Spinner for MainActivity categories
-    -->
+
+    <!-- Spinner for MainActivity categories -->
     <string name="spinnerMain">mainSpinner</string>
     <string-array name="mainSpinnerArray">
         <item>All Notes</item>
