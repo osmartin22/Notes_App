@@ -11,6 +11,7 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -128,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
     } // onCreate() end
 
     private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+
         @Override
         public int hashCode() {
             return super.hashCode();
@@ -150,9 +152,7 @@ public class MainActivity extends AppCompatActivity {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.contextualDelete:
-
-                    // TODO : More testing
-//                    db.deleteNoteList(selectedNotes.getNotes());
+                    db.deleteNoteList(selectedNotes.getNotes());
                     getNotesList(listUsed);
                     notesAdapter.removeSelectedViews(selectedNotes.getViews(), selectedNotes.getPositions());
                     mode.finish();
@@ -167,6 +167,7 @@ public class MainActivity extends AppCompatActivity {
             multiSelect = false;
             actionMode = null;
             Toast.makeText(getApplicationContext(), "Size: " + selectedNotes.getNotes().size(), Toast.LENGTH_SHORT).show();
+            notesAdapter.setToWhite(selectedNotes.getViews());
             selectedNotes.clearLists();
 
         }
@@ -235,6 +236,7 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 1 && data != null) {
+            boolean favorite = data.getBooleanExtra("Note Favorite", false);
             int save = data.getIntExtra("Note Success", -1);
             int position = data.getIntExtra("Note Position", -1);
 
@@ -245,10 +247,12 @@ public class MainActivity extends AppCompatActivity {
                 notesAdapter.updateAt(position, currentList.get(position));
 
             } else if (save == 3) {
+                Log.d("ListUsed", "" + listUsed);
+                getNotesList(listUsed);
                 if (listUsed == 0) {
                     notesAdapter.addAt(position, currentList.get(position));
-                } else if (listUsed == 1 && currentList.get(0).get_favorite() == 1) {
-                    notesAdapter.addAt(position, currentList.get(position));
+                } else if (listUsed == 1 && favorite) {
+                    notesAdapter.addAt(position, currentList.get(position));    // Display note if it was set to favorite
                 } else {
                     currentList.remove(0);  // No need to update RecyclerView as new note does not belong to the list
                 }
@@ -264,6 +268,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+            getIntent().removeExtra("Note Favorite");
             getIntent().removeExtra("Note Success");
             getIntent().removeExtra("Note Position");
         }

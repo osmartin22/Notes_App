@@ -44,13 +44,13 @@ public class SingleNote {
             return true;
         }
 
-        if(!(obj instanceof SingleNote)) {
-            return  false;
+        if (!(obj instanceof SingleNote)) {
+            return false;
         }
 
         SingleNote note = (SingleNote) obj;
 
-        return  note._content.equals(_content) &&
+        return note._content.equals(_content) &&
                 note._title.equals(_title) &&
                 note._favorite == _favorite;
     }

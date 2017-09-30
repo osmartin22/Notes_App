@@ -1,6 +1,7 @@
 package com.ozmar.notes;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,7 +11,7 @@ import android.view.ViewGroup;
 import java.util.Collections;
 import java.util.List;
 
-public class NotesAdapter extends RecyclerView.Adapter<NotesHolder> {
+public class NotesAdapter extends RecyclerView.Adapter<NotesViewHolder> {
 
     private Context context;
     private final List<SingleNote> notes;
@@ -56,37 +57,36 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesHolder> {
         int maxViewPositionChanged = position.get(position.size() - 1);
         int remainingViews = amountOfViews - amountOfViewsDeleted;
 
-        Log.d("Multi", "Min -> " + minViewPositionChanged);
-        Log.d("Multi", "Max -> " + maxViewPositionChanged);
-
         // Deleted entire list
         if (remainingViews == 0) {
-            Log.d("Multi", "Entire list removed");
             clearView();
 
             // Deleted notes have views no longer in use
         } else if (remainingViews <= minViewPositionChanged) {
-            Log.d("Multi", "End notes removed");
             notes.subList(minViewPositionChanged, notes.size()).clear();
             notifyItemRangeRemoved(minViewPositionChanged, amountOfViews);
 
             // Deleted notes were consecutive
         } else if (maxViewPositionChanged - minViewPositionChanged == amountOfViewsDeleted - 1) {
-            Log.d("Multi", "Consecutive notes removed");
             notes.subList(minViewPositionChanged, maxViewPositionChanged + 1).clear();
             notifyItemRangeRemoved(minViewPositionChanged, maxViewPositionChanged + 1);
             notifyItemRangeChanged(maxViewPositionChanged, amountOfViews);
 
             // Random deletes
         } else {
-            Log.d("Multi", "Random notes removed");
             for (int i = amountOfViewsDeleted - 1; i >= 0; i--) {
                 int pos = position.get(i);
-                Log.d("Multi", "Remove Position " + pos);
                 notes.remove(pos);
                 notifyItemRemoved(pos);
             }
             notifyItemRangeChanged(minViewPositionChanged, amountOfViews);
+        }
+    }
+
+    // Set views that were changed to gray back to white
+    public void setToWhite(List<View> views) {
+        for (int i = 0; i < views.size(); i++) {
+            views.get(i).setBackgroundColor(Color.WHITE);
         }
     }
 
@@ -97,15 +97,18 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesHolder> {
     }
 
     @Override
-    public void onBindViewHolder(NotesHolder holder, int position) {
+    public void onBindViewHolder(NotesViewHolder holder, int position) {
+        Log.d("Multi", "Bind at position " + position);
         SingleNote note = this.notes.get(position);
-        holder.bindNote(note);
+        holder.noteTitle.setText(note.get_title());
+        holder.noteContent.setText(note.get_content());
     }
 
     @Override
-    public NotesHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public NotesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        Log.d("Multi", "Create at position " + viewType);
         View view = LayoutInflater.from(parent.getContext()).inflate(itemResource, parent, false);
-        return new NotesHolder(this.context, view);
+        return new NotesViewHolder(view);
     }
 
     @Override

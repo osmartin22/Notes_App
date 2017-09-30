@@ -74,12 +74,16 @@ public class NoteEditorActivity extends AppCompatActivity {
     // 4 = delete note
     // 5 = favorite was changed but note text not changed
     private void goBackToMainActivity(int value) {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+
         // Set notePosition to 0 from -1 if the note being added is a new note
         if (value == 3) {
+            if(favorite) {
+                intent.putExtra("Note Favorite", true);
+            }
             notePosition = 0;
         }
 
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("Note Success", value);
         intent.putExtra("Note Position", notePosition);
@@ -180,7 +184,6 @@ public class NoteEditorActivity extends AppCompatActivity {
                     temp = new SingleNote(title, content, 0);
                 }
 
-                currentList.add(0, temp);
                 db.addNote(temp);
                 goBackToMainActivity(3);
                 break;

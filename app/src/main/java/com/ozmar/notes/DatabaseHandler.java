@@ -66,9 +66,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(TABLE_USER_NOTES, null, values);
     } // launchNoteEditor() end
 
-    // NOTE: Not in use since my notes are not using unique keys
-    // If used, update for favorite
-    // Get a single note
     public SingleNote getNote(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
