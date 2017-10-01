@@ -1,28 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/delete_note"
         android:title="@string/deleteNoteMenuItem"
-        app:showAsAction="never">
-
-    </item>
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/favorite_note"
         android:checkable="false"
-        android:icon="@android:drawable/btn_star"
+        android:icon="@drawable/ic_favorite_star_off"
         android:title="@string/favoriteNoteMenuItem"
-        app:showAsAction="ifRoom">
-
-    </item>
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/save_note"
-        android:icon="@android:drawable/ic_menu_save"
+        android:icon="@drawable/ic_save"
         android:title="@string/saveNoteMenuItem"
-        app:showAsAction="ifRoom">
-    </item>
+        app:showAsAction="ifRoom" />
 
 </menu>

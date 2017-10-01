@@ -6,7 +6,7 @@
     <string name="titleEditText">Title</string>
 
 
-    <!-- Menu item names NoteEditorActivity-->
+    <!-- MenuItem names NoteEditorActivity-->
     <string name="saveNoteMenuItem">Save Note</string>
     <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="favoriteNoteMenuItem">Favorite Note</string>
@@ -14,12 +14,22 @@
     <!-- Contextual action menu items -->
     <string name="deleteContextualMenuItem">Delete</string>
 
-
-    <!-- Spinner for MainActivity categories -->
-    <string name="spinnerMain">mainSpinner</string>
+    <!-- MenuItem names for MainActivity -->
+    <string name="layoutManager">Change Layout</string>
+    <string name="spinnerMain">Choose List</string>
     <string-array name="mainSpinnerArray">
         <item>All Notes</item>
         <item>Favorites</item>
+    </string-array>
+
+    <!-- String array for note result to notify MainActivity what to do after NoteEditor finishes -->
+    <string-array name="noteResultArray">
+        <item>discardNote</item>
+        <item>noteModified</item>
+        <item>noteNotModified</item>
+        <item>newNote</item>
+        <item>deleteNote</item>
+        <item>noteNotFavorite</item>
     </string-array>
 
 </resources>
