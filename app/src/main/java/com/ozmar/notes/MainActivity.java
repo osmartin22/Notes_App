@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
@@ -26,6 +27,9 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private NotesAdapter notesAdapter;
     private Spinner mainSpinner;
+    private RecyclerView rv;
+    private RecyclerView.LayoutManager staggeredGridLayout;
+    private RecyclerView.LayoutManager linearLayout;
 
     static DatabaseHandler db;
     static List<SingleNote> currentList = new ArrayList<>();
@@ -36,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerViewHelper selectedNotes = new RecyclerViewHelper();
 
     private SharedPreferences settings;
+    private int layoutChoice;
+    private MenuItem layoutItem;
 
     // onClick method launch activity to create note
     public void launchNoteEditor(View view) {
@@ -59,46 +65,16 @@ public class MainActivity extends AppCompatActivity {
         }
     } // getNotesList() end
 
-    // Store spinner position from SharedPreferences
-    private void storeSpinnerPosition() {
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putInt("Spinner Position", mainSpinner.getSelectedItemPosition()).apply();
-    }
-
-    // Restore spinner position from SharedPreferences
-    private void restoreSpinnerPosition() {
-        settings = getSharedPreferences("User Settings", Context.MODE_PRIVATE);
-        int position = settings.getInt("Spinner Position", 0);
-
-        if (position != -1) {
-            mainSpinner.setSelection(position);
-            getNotesList(position);
-            notesAdapter.notifyDataSetChanged();
-        }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        setTheme(R.style.AppTheme);
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
-
-        Toast.makeText(getApplicationContext(), "onCreate()", Toast.LENGTH_SHORT).show();
-
-        db = new DatabaseHandler(MainActivity.this);
-
+    private void setUpRecyclerView() {
         // Note: currentList will be updated with desired list in onCreateOptionsMenu()
         notesAdapter = new NotesAdapter(this, R.layout.note_preview, currentList);
-        RecyclerView rv = (RecyclerView) findViewById(R.id.listVIew);
+
+        restoreLayoutChoice();
+        staggeredGridLayout = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+        linearLayout = new LinearLayoutManager(this);
+        rv = (RecyclerView) findViewById(R.id.listVIew);
         rv.setHasFixedSize(true);
-
-        //rv.setLayoutManager(new GridLayoutManager(this, 2));
-        rv.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
-//        rv.setLayoutManager(new LinearLayoutManager(this));
-
+//        rv.setLayoutManager(staggeredGridLayout);
         rv.setAdapter(notesAdapter);
 
         rv.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(),
@@ -125,6 +101,22 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }));
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        setTheme(R.style.AppTheme);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
+        Toast.makeText(getApplicationContext(), "onCreate()", Toast.LENGTH_SHORT).show();
+
+        db = new DatabaseHandler(MainActivity.this);
+
+        setUpRecyclerView();
 
     } // onCreate() end
 
@@ -169,7 +161,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Size: " + selectedNotes.getNotes().size(), Toast.LENGTH_SHORT).show();
             notesAdapter.setToWhite(selectedNotes.getViews());
             selectedNotes.clearLists();
-
         }
     };
 
@@ -189,9 +180,34 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Swap RecyclerView layout
+    private void swapLayout() {
+        switch (layoutChoice) {
+            case 0:
+                layoutChoice = 1;
+                layoutItem.setIcon(R.drawable.ic_linear_layout);
+                rv.setLayoutManager(linearLayout);
+                break;
+            case 1:
+                layoutChoice = 0;
+                layoutItem.setIcon(R.drawable.ic_staggered_grid_layout);
+                rv.setLayoutManager(staggeredGridLayout);
+                break;
+        }
+    } // swapLayout() end
+
+    private void restoreLayout() {
+        if (layoutChoice == 0) {
+            rv.setLayoutManager(staggeredGridLayout);
+        } else if (layoutChoice == 1) {
+            rv.setLayoutManager(linearLayout);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.add_spinner_main, menu);
+        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
+        layoutItem = menu.findItem(R.id.layout);
         MenuItem item = menu.findItem(R.id.mainSpinner);
 
         mainSpinner = (Spinner) MenuItemCompat.getActionView(item);
@@ -201,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
         mainSpinner.setAdapter(spinnerAdapter);
 
         restoreSpinnerPosition();   // Restore spinner position and update currentList with the desired list
+        restoreLayout();     // Restore previous layout choice
 
         mainSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -229,39 +246,56 @@ public class MainActivity extends AppCompatActivity {
         });
 
         return super.onCreateOptionsMenu(menu);
-    }
+    } // onCreateOptionsMenu() end
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+
+        switch (item.getItemId()) {
+            case R.id.layout:
+                swapLayout();
+                return true;
+        }
+
+        return false;
+    } // onOptionsItemSelected() end
+
+    // Get result from NoteEditorActivity, decide how to update RecyclerView
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 1 && data != null) {
-            boolean favorite = data.getBooleanExtra("Note Favorite", false);
-            int save = data.getIntExtra("Note Success", -1);
-            int position = data.getIntExtra("Note Position", -1);
+            Bundle bundle = data.getExtras();
 
-            if (save == 0) {
+            // Array used to check NoteEditor outcome
+            String[] noteResult = getResources().getStringArray(R.array.noteResultArray);
+
+            String save = bundle.getString("Note Success", "");
+            int position = bundle.getInt("Note Position", -1);
+            boolean favorite = bundle.getBoolean("Note Favorite", false);
+
+            if (save.equals(noteResult[0])) {
                 Toast.makeText(getApplicationContext(), "No content to save. Note discarded.", Toast.LENGTH_SHORT).show();
 
-            } else if (save == 1) {
+            } else if (save.equals(noteResult[1])) {
                 notesAdapter.updateAt(position, currentList.get(position));
 
-            } else if (save == 3) {
-                Log.d("ListUsed", "" + listUsed);
+            } else if (save.equals(noteResult[3])) {
                 getNotesList(listUsed);
+
                 if (listUsed == 0) {
                     notesAdapter.addAt(position, currentList.get(position));
                 } else if (listUsed == 1 && favorite) {
-                    notesAdapter.addAt(position, currentList.get(position));    // Display note if it was set to favorite
-                } else {
-                    currentList.remove(0);  // No need to update RecyclerView as new note does not belong to the list
+                    notesAdapter.addAt(position, currentList.get(position));    // Display new note if it was set to favorite
                 }
 
-            } else if (save == 4) {
+            } else if (save.equals(noteResult[4])) {
                 currentList.remove(position);
                 notesAdapter.removeAt(position);
 
-            } else if (save == 5) {
+            } else if (save.equals(noteResult[5])) {
                 if (listUsed == 1) {
                     currentList.remove(position);
                     notesAdapter.removeAt(position);
@@ -277,6 +311,34 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        storeSpinnerPosition();
+        storeSharedPreferences();
     }
+
+    private void storeSharedPreferences() {
+        Log.d("SP", layoutChoice + "");
+
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putInt("Spinner Position", mainSpinner.getSelectedItemPosition());
+        editor.putInt("Layout Choice", layoutChoice);
+        editor.apply();
+    }
+
+    private void restoreLayoutChoice() {
+        settings = getSharedPreferences("User Settings", Context.MODE_PRIVATE);
+        layoutChoice = settings.getInt("Layout Choice", 0);
+        Log.d("SPR", layoutChoice + "");
+    }
+
+    // Restore spinner position from SharedPreferences
+    private void restoreSpinnerPosition() {
+        settings = getSharedPreferences("User Settings", Context.MODE_PRIVATE);
+        int position = settings.getInt("Spinner Position", 0);
+
+        if (position != -1) {
+            mainSpinner.setSelection(position);
+            getNotesList(position);
+            notesAdapter.notifyDataSetChanged();
+        }
+    }
+
 } // MainActivity() end

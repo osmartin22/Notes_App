@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,9 +31,13 @@ public class NoteEditorActivity extends AppCompatActivity {
 
     private EditText editTextTitle, editTextContent;
     private SingleNote currentNote = null;
+    private MenuItem menuItem;
+
     private boolean favorite = false;
     private int notePosition;
     private int listUsed;
+
+    private String[] noteResult;
 
     private void favoriteNoteMenu() {
         favorite = !favorite;
@@ -40,9 +45,13 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         int temp = 0;
         if (favorite) {
+            menuItem.setIcon(R.drawable.ic_favorite_star_on);
             temp = 1;
+        } else {
+            menuItem.setIcon(R.drawable.ic_favorite_star_off);
         }
 
+        // TODO: Put in onPause()/onStop(), have variable that checks if save was already done
         if (currentNote != null) {  // Save favorite even if user does not explicitly press save menu item
             currentNote.set_favorite(temp);
             db.updateNote(currentNote);
@@ -57,9 +66,9 @@ public class NoteEditorActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (currentNote != null) {
                             db.deleteNote(currentNote);
-                            goBackToMainActivity(4);
+                            goBackToMainActivity(noteResult[4]);
                         } else {
-                            goBackToMainActivity(0);       // New empty note, discard
+                            goBackToMainActivity(noteResult[0]);       // New empty note, discard
                         }
                     }
                 })
@@ -73,18 +82,19 @@ public class NoteEditorActivity extends AppCompatActivity {
     // 3 = new note added
     // 4 = delete note
     // 5 = favorite was changed but note text not changed
-    private void goBackToMainActivity(int value) {
+    private void goBackToMainActivity(String value) {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         // Set notePosition to 0 from -1 if the note being added is a new note
-        if (value == 3) {
+        if (value.equals(noteResult[3])) {
+            Log.d("Position", value);
             if(favorite) {
                 intent.putExtra("Note Favorite", true);
             }
             notePosition = 0;
         }
 
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.putExtra("Note Success", value);
         intent.putExtra("Note Position", notePosition);
         setResult(RESULT_OK, intent);
@@ -104,7 +114,7 @@ public class NoteEditorActivity extends AppCompatActivity {
             boolean titleTheSame = title.equals(currentNote.get_title());
             boolean contentTheSame = content.equals(currentNote.get_content());
 
-            if (!(titleTheSame && contentTheSame)) {    // Check if note text has changed
+            if (!(titleTheSame && contentTheSame)) {
 
                 if (titleTheSame) {
                     return "contentChanged";
@@ -113,13 +123,12 @@ public class NoteEditorActivity extends AppCompatActivity {
                 } else {
                     return "titleAndContentChanged";
                 }
-
             }
 
-            return "notChanged";   // Note text not changed
+            return "notChanged";
         } // else if() end
 
-        return "newNote";   // New note
+        return "newNote";
     } // checkForDifferenceFromOriginal() end
 
     // Update note if title and or content changed
@@ -139,7 +148,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         }
 
         db.updateNote(currentNote);
-        goBackToMainActivity(1);
+        goBackToMainActivity(noteResult[1]);
     }
 
     // Save note into db and go back to MainActivity
@@ -150,7 +159,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         String difference = checkForDifferenceFromOriginal();
         switch (difference) {
             case "discardNote":
-                goBackToMainActivity(0);
+                goBackToMainActivity(noteResult[0]);
                 break;
 
             case "contentChanged":
@@ -170,9 +179,9 @@ public class NoteEditorActivity extends AppCompatActivity {
                 // Used to update favorites list if it is the current list being looked at and the note
                 // is no longer a favorite note
                 if (listUsed == 1 && !favorite) {
-                    goBackToMainActivity(5);
+                    goBackToMainActivity(noteResult[5]);
                 } else {
-                    goBackToMainActivity(2);    // No updates to RecyclerView
+                    goBackToMainActivity(noteResult[2]);    // No updates to RecyclerView
                 }
                 break;
 
@@ -185,7 +194,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                 }
 
                 db.addNote(temp);
-                goBackToMainActivity(3);
+                goBackToMainActivity(noteResult[3]);
                 break;
         }
     } // saveNoteMenu() end
@@ -198,6 +207,9 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        noteResult = getResources().getStringArray(R.array.noteResultArray);
 
         editTextTitle = (EditText) findViewById(R.id.editTextTitle);
         editTextContent = (EditText) findViewById(R.id.editTextContent);
@@ -252,9 +264,9 @@ public class NoteEditorActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialogInterface, int i) {
                             saveNoteMenu();
                             if (currentNote != null) {
-                                goBackToMainActivity(1);    // Write over existing note
+                                goBackToMainActivity(noteResult[1]);    // Write over existing note
                             } else {
-                                goBackToMainActivity(3);    // New note saved
+                                goBackToMainActivity(noteResult[3]);    // New note saved
                             }
                         }
                     })
@@ -262,7 +274,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                     .setNegativeButton("Discard", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            goBackToMainActivity(2);    // No change to note
+                            goBackToMainActivity(noteResult[2]);    // No change to note
                         }
                     })
                     .show();
@@ -271,7 +283,7 @@ public class NoteEditorActivity extends AppCompatActivity {
             // Used to update favorites list if it is the current list being looked at and the note
             // is no longer a favorite note
             if (listUsed == 1 && !favorite) {
-                goBackToMainActivity(5);
+                goBackToMainActivity(noteResult[5]);
             } else {
                 super.onBackPressed();
             }
@@ -281,7 +293,11 @@ public class NoteEditorActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.add_note_menu, menu);
+        menuInflater.inflate(R.menu.note_editor_menu, menu);
+
+        if(currentNote!= null && currentNote.get_favorite() == 1) {
+            menu.findItem(R.id.favorite_note).setIcon(R.drawable.ic_favorite_star_on);
+        }
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -298,6 +314,7 @@ public class NoteEditorActivity extends AppCompatActivity {
             deleteNoteMenu();
             return true;
         } else if (item.getItemId() == R.id.favorite_note) {
+            this.menuItem = item;
             favoriteNoteMenu();
             return true;
         }
