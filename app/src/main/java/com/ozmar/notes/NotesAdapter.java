@@ -11,11 +11,13 @@ import android.view.ViewGroup;
 import java.util.Collections;
 import java.util.List;
 
-public class NotesAdapter extends RecyclerView.Adapter<NotesViewHolder> {
+public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Context context;
     private final List<SingleNote> notes;
     private int itemResource;
+
+    private final int showTitle = 0, showContent = 1, showAll = 2;
 
 
     public NotesAdapter(Context context, int itemResource, List<SingleNote> notes) {
@@ -97,18 +99,57 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(NotesViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         Log.d("Multi", "Bind at position " + position);
         SingleNote note = this.notes.get(position);
-        holder.noteTitle.setText(note.get_title());
-        holder.noteContent.setText(note.get_content());
+        switch (viewHolder.getItemViewType()) {
+            case 0:
+                NotesViewHolderTitle viewHolderTitle = (NotesViewHolderTitle) viewHolder;
+                viewHolderTitle.noteTitle.setText(note.get_title());
+                break;
+
+            case 1:
+                NotesViewHolderContent viewHolderContent =(NotesViewHolderContent) viewHolder;
+                viewHolderContent.noteContent.setText(note.get_content());
+                break;
+
+            case 2:
+            default:
+                NotesViewHolder notesViewHolder = (NotesViewHolder) viewHolder;
+                notesViewHolder.noteTitle.setText(note.get_title());
+                notesViewHolder.noteContent.setText(note.get_content());
+                break;
+        }
+
+
     }
 
     @Override
-    public NotesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         Log.d("Multi", "Create at position " + viewType);
-        View view = LayoutInflater.from(parent.getContext()).inflate(itemResource, parent, false);
-        return new NotesViewHolder(view);
+
+        RecyclerView.ViewHolder viewHolder;
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+
+        switch (viewType) {
+            case showTitle:
+                View viewShowTitle = inflater.inflate(R.layout.note_preview_title, parent, false);
+                viewHolder = new NotesViewHolderTitle(viewShowTitle);
+                break;
+
+            case showContent:
+                View viewShowContent = inflater.inflate(R.layout.note_preview_content, parent, false);
+                viewHolder = new NotesViewHolderContent(viewShowContent);
+                break;
+
+            case showAll:
+            default:
+                View viewShowAll = inflater.inflate(R.layout.note_preview, parent, false);
+                viewHolder = new NotesViewHolder(viewShowAll);
+                break;
+        }
+
+        return viewHolder;
     }
 
     @Override
@@ -118,7 +159,16 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return position;
+        boolean titleTextEmpty = notes.get(position).get_title().isEmpty();
+        boolean titleContentEmpty = notes.get(position).get_content().isEmpty();
+
+        if (titleTextEmpty && titleContentEmpty || titleContentEmpty) {
+            return showTitle;
+        } else if (titleTextEmpty) {
+            return showContent;
+        } else {
+            return showAll;
+        }
     }
 
     @Override

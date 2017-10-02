@@ -1,26 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- note_preview dimensions
-    -->
-    <dimen name="notePreviewTitlePadding">4dp</dimen>
-    <dimen name="notePreviewTitleTextSize">20sp</dimen>
-
+    <!-- Used for all of the note_preview/title/content layouts -->
     <dimen name="notePreviewMargin">4dp</dimen>
-
-    <dimen name="notePreviewContentPadding">4dp</dimen>
+    <dimen name="notePreviewTitleTextSize">20sp</dimen>
     <dimen name="notePreviewContentTextSize">40sp</dimen>
+    <dimen name="titleAndContentSidePadding">8dp</dimen>
+    <dimen name="titleTopPadding">8dp</dimen>
+    <dimen name="contentBottomPadding">8dp</dimen>
+
+    <!-- Specific to note_preview dp/sp -->
+    <dimen name="notePreviewTitleBottomPadding">4dp</dimen>
+    <dimen name="notePreviewContentTopPadding">4dp</dimen>
+
+    <!-- Specific to note_preview_title dimension -->
+    <dimen name="notePreviewTitleOnlyBottomPadding">16dp</dimen>
+
+    <!-- Specific to note_preview_content dimension -->
+    <dimen name="notePreviewContentOnlyTopPadding">8dp</dimen>
 
 
-    <!--activity_main dimensions
-    -->
+    <!-- activity_main dp/sp -->
     <dimen name="additionButtonMargins">16dp</dimen>
     <dimen name="recyclerViewMargin">8dp</dimen>
     <dimen name="recyclerViewDividerHeight">5sp</dimen>
 
 
-    <!--layout\activity_note_editor dimensions
-    -->
+    <!-- layout\activity_note_editor dp/sp -->
     <dimen name="layoutTitleMarginSides">8dp</dimen>
     <dimen name="layoutContentMarginSides">16dp</dimen>
 
@@ -28,8 +34,7 @@
     <dimen name="layoutContentTextSize">18sp</dimen>
 
 
-    <!--land\activity_note_editor dimensions
-    -->
+    <!-- land\activity_note_editor dimensions -->
     <dimen name="landTitleMarginSides">8dp</dimen>
     <dimen name="landContentMarginSides">16dp</dimen>
 
