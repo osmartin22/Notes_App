@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private void getNotesList(int num) {
         switch (num) {
             case 0:
-                currentList = db.getAllNotes();
+                currentList = db.getAllNotesFromUserList();
                 listUsed = 0;
                 break;
             case 1:
@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
                 notesAdapter.clearView();
                 switch (adapterView.getItemAtPosition(i).toString()) {
                     case "All Notes":
-                        currentList.addAll(db.getAllNotes());
+                        currentList.addAll(db.getAllNotesFromUserList());
                         notesAdapter.getList(currentList);
                         listUsed = 0;
                         break;
