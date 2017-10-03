@@ -11,6 +11,8 @@
     <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="favoriteNoteMenuItem">Favorite Note</string>
     <string name="archiveNoteMenuItem">Archive Note</string>
+    <string name="unArchiveNoteMenuItem">Unarchive Note</string>
+    <string name="restoreNoteMenuItem">Restore Note</string>
 
     <!-- Contextual action menu items -->
     <string name="deleteContextualMenuItem">Delete</string>

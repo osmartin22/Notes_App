@@ -26,4 +26,18 @@
         android:title="@string/archiveNoteMenuItem"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/unarchive_note"
+        android:icon="@drawable/ic_unarchive"
+        android:title="@string/unArchiveNoteMenuItem"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/restore_note"
+        android:icon="@drawable/ic_restore"
+        android:title="@string/restoreNoteMenuItem"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
 </menu>

@@ -90,7 +90,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         // Set notePosition to 0 from -1 if the note being added is a new note
         if (value.equals(noteResult[3])) {
             Log.d("Position", value);
-            if(favorite) {
+            if (favorite) {
                 intent.putExtra("Note Favorite", true);
             }
             notePosition = 0;
@@ -148,7 +148,11 @@ public class NoteEditorActivity extends AppCompatActivity {
             currentList.get(notePosition).set_content(content);
         }
 
-        db.updateNoteFromUserList(currentNote);
+        if (listUsed == 2) {
+            db.updateNoteFromArchive(currentNote);
+        } else {
+            db.updateNoteFromUserList(currentNote);
+        }
         goBackToMainActivity(noteResult[1]);
     }
 
@@ -208,7 +212,10 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+        assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         noteResult = getResources().getStringArray(R.array.noteResultArray);
 
@@ -235,8 +242,13 @@ public class NoteEditorActivity extends AppCompatActivity {
             View.OnTouchListener editTextListener = new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
-                    view.setFocusableInTouchMode(true);
-                    view.requestFocus();
+
+                    if (listUsed == 3) {
+                        Toast.makeText(getApplicationContext(), "No edit", Toast.LENGTH_SHORT).show();
+                    } else {
+                        view.setFocusableInTouchMode(true);
+                        view.requestFocus();
+                    }
                     return false;
                 }
             };
@@ -283,7 +295,7 @@ public class NoteEditorActivity extends AppCompatActivity {
 
             // Used to update favorites list if it is the current list being looked at and the note
             // is no longer a favorite note
-            if (listUsed == 1 && !favorite) {
+            if (listUsed == 1 && !favorite && currentNote != null) {
                 goBackToMainActivity(noteResult[5]);
             } else {
                 super.onBackPressed();
@@ -296,9 +308,25 @@ public class NoteEditorActivity extends AppCompatActivity {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.note_editor_menu, menu);
 
-        if(currentNote!= null && currentNote.get_favorite() == 1) {
-            menu.findItem(R.id.favorite_note).setIcon(R.drawable.ic_favorite_star_on);
+        if (listUsed != 3) {
+
+            if (listUsed == 2) {
+                menu.findItem(R.id.archive_note).setVisible(false);
+                menu.findItem(R.id.unarchive_note).setVisible(true);
+            }
+
+            if (currentNote != null && currentNote.get_favorite() == 1) {
+                menu.findItem(R.id.favorite_note).setIcon(R.drawable.ic_favorite_star_on);
+            }
+
+        } else {
+            menu.findItem(R.id.restore_note).setVisible(true);
+            menu.findItem(R.id.delete_note).setVisible(false);
+            menu.findItem(R.id.archive_note).setVisible(false);
+            menu.findItem(R.id.save_note).setVisible(false);
+            menu.findItem(R.id.favorite_note).setVisible(false);
         }
+
 
         return super.onCreateOptionsMenu(menu);
     }
@@ -309,6 +337,10 @@ public class NoteEditorActivity extends AppCompatActivity {
         super.onOptionsItemSelected(item);
 
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+
             case R.id.save_note:
                 saveNoteMenu();
                 return true;
@@ -323,7 +355,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                 return true;
 
             case R.id.archive_note:
-                if(currentNote !=null) {
+                if (currentNote != null) {
                     db.addNoteToArchive(currentNote);
                     db.deleteNoteFromUserList(currentNote);
                     goBackToMainActivity(noteResult[4]);
@@ -331,6 +363,18 @@ public class NoteEditorActivity extends AppCompatActivity {
                     db.addNoteToArchive(new SingleNote(editTextTitle.getText().toString(), editTextContent.getText().toString()));
                     goBackToMainActivity(noteResult[2]);
                 }
+                return true;
+
+            case R.id.unarchive_note:
+                db.deleteNoteFromArchive(currentNote);
+                db.addNoteToUserList(0, currentNote);
+                goBackToMainActivity(noteResult[4]);
+                return true;
+
+            case R.id.restore_note:
+                db.deleteNoteFromRecycleBin(currentNote);
+                db.addNoteToUserList(0, currentNote);
+                goBackToMainActivity(noteResult[4]);
                 return true;
         }
 

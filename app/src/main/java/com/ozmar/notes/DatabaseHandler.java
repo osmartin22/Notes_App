@@ -314,17 +314,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     } // getRecycleBinNotes() end
 
-    public int updateNoteFromRecycleBin(SingleNote note) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_RECYCLE_BIN_TITLE, note.get_title());
-        values.put(KEY_RECYCLE_BIN_CONTENT, note.get_content());
-
-        return db.update(TABLE_RECYCLE_BIN, values, KEY_RECYCLE_BIN_ID + " = ?",
-                new String[]{String.valueOf(note.get_id())});
-    } // updateNoteFromRecycleBin() end
-
     // Add note to RecycleBin
     public void addNoteToRecycleBin(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
