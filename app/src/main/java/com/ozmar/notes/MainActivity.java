@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int layoutChoice;
     private MenuItem layoutItem;
 
+    private MenuItem currentNavigationMenuItem;
+
     // onClick method launch activity to create note
     public void launchNoteEditor(View view) {
         Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
@@ -50,7 +52,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivityForResult(intent, 1);
     } // launchNoteEditor() end
 
-    // Get notes to initialize currentList
     private void getNotesList(int num) {
         switch (num) {
             case 0:
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClickItem(View view, int position) {
                 if (multiSelect) {
                     Toast.makeText(getApplicationContext(), "Selected: " + position, Toast.LENGTH_SHORT).show();
-                    selectItem(view, currentList.get(position), position);
+                    multiSelect(view, currentList.get(position), position);
 
                 } else {
                     Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
@@ -102,9 +103,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onLongClickItem(View view, final int position) {
                 if (!multiSelect) {
                     ((AppCompatActivity) view.getContext()).startSupportActionMode(actionModeCallback);
-                    selectItem(view, currentList.get(position), position);
+                    multiSelect(view, currentList.get(position), position);
                 } else {
-                    selectItem(view, currentList.get(position), position);
+                    multiSelect(view, currentList.get(position), position);
                 }
             }
         }));
@@ -196,7 +197,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     };
 
-    private void selectItem(View view, SingleNote note, int position) {
+    private void multiSelect(View view, SingleNote note, int position) {
         if (multiSelect) {
             if (selectedNotes.getNotes().contains(note)) {
                 selectedNotes.removeFromLists(view, note);
@@ -261,27 +262,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
 
-        currentList.clear();
-        notesAdapter.clearView();
-        if (id == R.id.all_notes_drawer) {
-            currentList.addAll(db.getAllNotesFromUserList());
-            notesAdapter.getList(currentList);
-            listUsed = 0;
+        if (currentNavigationMenuItem != item) {
 
-        } else if (id == R.id.favorite_notes_drawer) {
-            currentList.addAll(db.getAllFavoriteNotes());
-            notesAdapter.getList(currentList);
-            listUsed = 1;
+            int id = item.getItemId();
 
-        } else if (id == R.id.archive_drawer) {
+            currentList.clear();
+            switch (id) {
+                case R.id.all_notes_drawer:
+                    Log.d("Nav", "All Notes");
+                    currentList.addAll(db.getAllNotesFromUserList());
+                    break;
 
-        } else if (id == R.id.recycle_bin_drawer) {
+                case R.id.favorite_notes_drawer:
+                    Log.d("Nav", "Favorites");
+                    currentList.addAll(db.getAllFavoriteNotes());
+                    break;
 
+                case R.id.archive_drawer:
+                    Log.d("Nav", "Archive");
+                    currentList.addAll(db.getArchiveNotes());
+                    break;
+
+                case R.id.recycle_bin_drawer:
+                    Log.d("Nav", "Recycle Bin");
+                    currentList.addAll(db.getRecycleBinNotes());
+                    break;
+
+                default:
+                    currentList.addAll(db.getAllNotesFromUserList());
+            }
+            notesAdapter.notifyDataSetChanged();
         }
 
+        currentNavigationMenuItem = item;
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
@@ -302,35 +316,54 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             int position = bundle.getInt("Note Position", -1);
             boolean favorite = bundle.getBoolean("Note Favorite", false);
 
-            if (save.equals(noteResult[0])) {
-                Toast.makeText(getApplicationContext(), "No content to save. Note discarded.", Toast.LENGTH_SHORT).show();
+            // These results can only occur for lists 0 and 1
+            if (listUsed == 0 || listUsed == 1) {
 
-            } else if (save.equals(noteResult[1])) {
-                notesAdapter.updateAt(position, currentList.get(position));
+                if (save.equals(noteResult[0])) {
+                    Toast.makeText(getApplicationContext(), "No content to save. Note discarded.", Toast.LENGTH_SHORT).show();
 
-            } else if (save.equals(noteResult[3])) {
-                getNotesList(listUsed);
+                } else if (save.equals(noteResult[3])) {    // Update rv with new note
+                    getNotesList(listUsed);
 
-                if (listUsed == 0) {
-                    notesAdapter.addAt(position, currentList.get(position));
-                } else if (listUsed == 1 && favorite) {
-                    notesAdapter.addAt(position, currentList.get(position));    // Display new note if it was set to favorite
-                }
+                    if (listUsed == 0) {
+                        notesAdapter.addAt(position, currentList.get(position));
+                    } else if (listUsed == 1 && favorite) {
+                        notesAdapter.addAt(position, currentList.get(position));
+                    }
 
-            } else if (save.equals(noteResult[4])) {
-                currentList.remove(position);
-                notesAdapter.removeAt(position);
-
-            } else if (save.equals(noteResult[5])) {
-                if (listUsed == 1) {
+                } else if (save.equals(noteResult[4])) {    // Remove note from rv
                     currentList.remove(position);
                     notesAdapter.removeAt(position);
-                }
-            }
 
-            getIntent().removeExtra("Note Favorite");
-            getIntent().removeExtra("Note Success");
-            getIntent().removeExtra("Note Position");
+                } else if (save.equals(noteResult[5])) {    // If in favorites, remove note from rv if note no longer a favorite
+                    if (listUsed == 1) {
+                        currentList.remove(position);
+                        notesAdapter.removeAt(position);
+                    }
+                }
+
+                // These results can occur for all the lists
+            } else {
+
+                if (save.equals(noteResult[1])) {
+                    notesAdapter.updateAt(position, currentList.get(position));
+
+                } else if (save.equals(noteResult[4])) {
+                    currentList.remove(position);
+                    notesAdapter.removeAt(position);
+
+                } else if (save.equals(noteResult[5])) {
+                    if (listUsed == 1) {
+                        currentList.remove(position);
+                        notesAdapter.removeAt(position);
+                    }
+                }
+
+
+                getIntent().removeExtra("Note Favorite");
+                getIntent().removeExtra("Note Success");
+                getIntent().removeExtra("Note Position");
+            }
         }
     } // onActivityResult() end
 

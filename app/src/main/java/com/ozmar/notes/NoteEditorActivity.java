@@ -66,6 +66,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (currentNote != null) {
                             db.deleteNoteFromUserList(currentNote);
+                            db.addNoteToRecycleBin(currentNote);
                             goBackToMainActivity(noteResult[4]);
                         } else {
                             goBackToMainActivity(noteResult[0]);       // New empty note, discard
@@ -307,16 +308,30 @@ public class NoteEditorActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
 
-        if (item.getItemId() == R.id.save_note) {
-            saveNoteMenu();
-            return true;
-        } else if (item.getItemId() == R.id.delete_note) {
-            deleteNoteMenu();
-            return true;
-        } else if (item.getItemId() == R.id.favorite_note) {
-            this.menuItem = item;
-            favoriteNoteMenu();
-            return true;
+        switch (item.getItemId()) {
+            case R.id.save_note:
+                saveNoteMenu();
+                return true;
+
+            case R.id.delete_note:
+                deleteNoteMenu();
+                return true;
+
+            case R.id.favorite_note:
+                this.menuItem = item;
+                favoriteNoteMenu();
+                return true;
+
+            case R.id.archive_note:
+                if(currentNote !=null) {
+                    db.addNoteToArchive(currentNote);
+                    db.deleteNoteFromUserList(currentNote);
+                    goBackToMainActivity(noteResult[4]);
+                } else {
+                    db.addNoteToArchive(new SingleNote(editTextTitle.getText().toString(), editTextContent.getText().toString()));
+                    goBackToMainActivity(noteResult[2]);
+                }
+                return true;
         }
 
         return false;

@@ -10,6 +10,7 @@
     <string name="saveNoteMenuItem">Save Note</string>
     <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="favoriteNoteMenuItem">Favorite Note</string>
+    <string name="archiveNoteMenuItem">Archive Note</string>
 
     <!-- Contextual action menu items -->
     <string name="deleteContextualMenuItem">Delete</string>
@@ -26,12 +27,13 @@
 
     <!-- String array for note result to notify MainActivity what to do after NoteEditor finishes -->
     <string-array name="noteResultArray">
-        <item>discardNote</item>
+        <item>discardNote</item>        <!-- 0 -->
         <item>noteModified</item>
         <item>noteNotModified</item>
         <item>newNote</item>
         <item>deleteNote</item>
         <item>noteNotFavorite</item>
+        <item>archiveNote</item>        <!-- 6 -->
     </string-array>
 
 

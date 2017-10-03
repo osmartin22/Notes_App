@@ -40,6 +40,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public void clearView() {
+        Log.d("Nav", "Clearing");
         int size = notes.size();
         notes.clear();
         notifyItemRangeRemoved(0, size);
@@ -88,8 +89,8 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public void getList(List<SingleNote> newList) {
-        clearView();
         notes.addAll(newList);
+        Log.d("Nav", "New Size " + notes.size());
         notifyItemRangeInserted(0, notes.size());
     }
 

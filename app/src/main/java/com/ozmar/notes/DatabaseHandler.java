@@ -59,14 +59,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-        String CREATE_USER_NOTES_TABLE = "CREATE TABLE " + TABLE_USER_NOTES + "(" + KEY_ID
-                + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, " + KEY_CONTENT + " TEXT, "
-                + KEY_FAVORITE + " INTEGER)";
-        sqLiteDatabase.execSQL(CREATE_USER_NOTES_TABLE);
+//        String CREATE_USER_NOTES_TABLE = "CREATE TABLE " + TABLE_USER_NOTES + "(" + KEY_ID
+//                + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, " + KEY_CONTENT + " TEXT, "
+//                + KEY_FAVORITE + " INTEGER)";
+//        sqLiteDatabase.execSQL(CREATE_USER_NOTES_TABLE);
 
-//        sqLiteDatabase.execSQL(CREATE_TABLE_USER_NOTES);
-//        sqLiteDatabase.execSQL(CREATE_TABLE_ARCHIVE);
-//        sqLiteDatabase.execSQL(CREATE_TABLE_RECYCLE_BIN);
+        sqLiteDatabase.execSQL(CREATE_TABLE_USER_NOTES);
+        sqLiteDatabase.execSQL(CREATE_TABLE_ARCHIVE);
+        sqLiteDatabase.execSQL(CREATE_TABLE_RECYCLE_BIN);
     }
 
     @Override
@@ -84,8 +84,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onDowngrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_NOTES);
-        onCreate(sqLiteDatabase);
+//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_NOTES);
+//        onCreate(sqLiteDatabase);
 //        super.onDowngrade(db, oldVersion, newVersion);
     }
 

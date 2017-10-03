@@ -20,4 +20,10 @@
         android:title="@string/saveNoteMenuItem"
         app:showAsAction="ifRoom" />
 
+    <item
+        android:id="@+id/archive_note"
+        android:icon="@drawable/ic_archive"
+        android:title="@string/archiveNoteMenuItem"
+        app:showAsAction="ifRoom" />
+
 </menu>
