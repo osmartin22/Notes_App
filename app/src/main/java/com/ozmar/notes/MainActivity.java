@@ -5,7 +5,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -16,17 +19,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private NotesAdapter notesAdapter;
-    private Spinner mainSpinner;
     private RecyclerView rv;
     private RecyclerView.LayoutManager staggeredGridLayout;
     private RecyclerView.LayoutManager linearLayout;
@@ -62,19 +61,27 @@ public class MainActivity extends AppCompatActivity {
                 currentList = db.getAllFavoriteNotes();
                 listUsed = 1;
                 break;
+
+            case 2:
+                currentList = db.getArchiveNotes();
+                listUsed = 2;
+                break;
+
+            case 3:
+                currentList = db.getRecycleBinNotes();
+                listUsed = 3;
         }
     } // getNotesList() end
 
     private void setUpRecyclerView() {
         // Note: currentList will be updated with desired list in onCreateOptionsMenu()
-        notesAdapter = new NotesAdapter(this, R.layout.note_preview, currentList);
-
+        getNotesList(0);
+        notesAdapter = new NotesAdapter(currentList);
         restoreLayoutChoice();
         staggeredGridLayout = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
         linearLayout = new LinearLayoutManager(this);
-        rv = (RecyclerView) findViewById(R.id.listVIew);
+        rv = (RecyclerView) findViewById(R.id.recyclerView);
         rv.setHasFixedSize(true);
-//        rv.setLayoutManager(staggeredGridLayout);
         rv.setAdapter(notesAdapter);
 
         rv.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(),
@@ -101,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }));
-    }
+    } // setUpRecyclerView() end
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,13 +119,30 @@ public class MainActivity extends AppCompatActivity {
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
-        Toast.makeText(getApplicationContext(), "onCreate()", Toast.LENGTH_SHORT).show();
-
         db = new DatabaseHandler(MainActivity.this);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, myToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
 
         setUpRecyclerView();
 
     } // onCreate() end
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
 
@@ -149,6 +173,14 @@ public class MainActivity extends AppCompatActivity {
                     notesAdapter.removeSelectedViews(selectedNotes.getViews(), selectedNotes.getPositions());
                     mode.finish();
                     return true;
+
+                case R.id.contextualArchive:
+                    db.deleteNoteList(selectedNotes.getNotes());
+                    db.addListToArchive(selectedNotes.getNotes());
+                    getNotesList(listUsed);
+                    notesAdapter.removeSelectedViews(selectedNotes.getViews(), selectedNotes.getPositions());
+                    mode.finish();
+
                 default:
                     return false;
             }
@@ -185,12 +217,12 @@ public class MainActivity extends AppCompatActivity {
         switch (layoutChoice) {
             case 0:
                 layoutChoice = 1;
-                layoutItem.setIcon(R.drawable.ic_linear_layout);
+                layoutItem.setIcon(R.drawable.ic_staggered_grid_layout);
                 rv.setLayoutManager(linearLayout);
                 break;
             case 1:
                 layoutChoice = 0;
-                layoutItem.setIcon(R.drawable.ic_staggered_grid_layout);
+                layoutItem.setIcon(R.drawable.ic_linear_layout);
                 rv.setLayoutManager(staggeredGridLayout);
                 break;
         }
@@ -208,42 +240,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_menu, menu);
         layoutItem = menu.findItem(R.id.layout);
-        MenuItem item = menu.findItem(R.id.mainSpinner);
 
-        mainSpinner = (Spinner) MenuItemCompat.getActionView(item);
-        String[] spinnerItems = getResources().getStringArray(R.array.mainSpinnerArray);
-        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(MainActivity.this,
-                android.R.layout.simple_spinner_dropdown_item, spinnerItems);
-        mainSpinner.setAdapter(spinnerAdapter);
-
-        restoreSpinnerPosition();   // Restore spinner position and update currentList with the desired list
         restoreLayout();     // Restore previous layout choice
-
-        mainSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                currentList.clear();
-                notesAdapter.clearView();
-                switch (adapterView.getItemAtPosition(i).toString()) {
-                    case "All Notes":
-                        currentList.addAll(db.getAllNotesFromUserList());
-                        notesAdapter.getList(currentList);
-                        listUsed = 0;
-                        break;
-
-                    case "Favorites":
-                        currentList.addAll(db.getAllFavoriteNotes());
-                        notesAdapter.getList(currentList);
-                        listUsed = 1;
-                        break;
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
 
         return super.onCreateOptionsMenu(menu);
     } // onCreateOptionsMenu() end
@@ -260,6 +258,34 @@ public class MainActivity extends AppCompatActivity {
 
         return false;
     } // onOptionsItemSelected() end
+
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        currentList.clear();
+        notesAdapter.clearView();
+        if (id == R.id.all_notes_drawer) {
+            currentList.addAll(db.getAllNotesFromUserList());
+            notesAdapter.getList(currentList);
+            listUsed = 0;
+
+        } else if (id == R.id.favorite_notes_drawer) {
+            currentList.addAll(db.getAllFavoriteNotes());
+            notesAdapter.getList(currentList);
+            listUsed = 1;
+
+        } else if (id == R.id.archive_drawer) {
+
+        } else if (id == R.id.recycle_bin_drawer) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 
     // Get result from NoteEditorActivity, decide how to update RecyclerView
     @Override
@@ -315,10 +341,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void storeSharedPreferences() {
-        Log.d("SP", layoutChoice + "");
-
         SharedPreferences.Editor editor = settings.edit();
-        editor.putInt("Spinner Position", mainSpinner.getSelectedItemPosition());
         editor.putInt("Layout Choice", layoutChoice);
         editor.apply();
     }
@@ -329,16 +352,5 @@ public class MainActivity extends AppCompatActivity {
         Log.d("SPR", layoutChoice + "");
     }
 
-    // Restore spinner position from SharedPreferences
-    private void restoreSpinnerPosition() {
-        settings = getSharedPreferences("User Settings", Context.MODE_PRIVATE);
-        int position = settings.getInt("Spinner Position", 0);
-
-        if (position != -1) {
-            mainSpinner.setSelection(position);
-            getNotesList(position);
-            notesAdapter.notifyDataSetChanged();
-        }
-    }
 
 } // MainActivity() end

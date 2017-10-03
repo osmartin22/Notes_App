@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/all_notes_drawer"
+            android:icon="@drawable/ic_notes_drawer"
+            android:title="@string/allNotesDrawer" />
+        <item
+            android:id="@+id/favorite_notes_drawer"
+            android:icon="@drawable/ic_favorite_star_on"
+            android:title="@string/favoriteNotesDrawer" />
+        <item
+            android:id="@+id/archive_drawer"
+            android:icon="@drawable/ic_archive"
+            android:title="@string/archiveNotesDrawer" />
+        <item
+            android:id="@+id/recycle_bin_drawer"
+            android:icon="@drawable/ic_recycle_bin"
+            android:title="@string/recycleBinNotesDrawer" />
+    </group>
+
+</menu>

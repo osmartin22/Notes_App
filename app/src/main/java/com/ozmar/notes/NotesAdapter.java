@@ -1,6 +1,5 @@
 package com.ozmar.notes;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -13,17 +12,13 @@ import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private Context context;
     private final List<SingleNote> notes;
-    private int itemResource;
 
     private final int showTitle = 0, showContent = 1, showAll = 2;
 
 
-    public NotesAdapter(Context context, int itemResource, List<SingleNote> notes) {
+    public NotesAdapter(List<SingleNote> notes) {
         this.notes = notes;
-        this.context = context;
-        this.itemResource = itemResource;
     }
 
     public void removeAt(int position) {
@@ -120,8 +115,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 notesViewHolder.noteContent.setText(note.get_content());
                 break;
         }
-
-
     }
 
     @Override

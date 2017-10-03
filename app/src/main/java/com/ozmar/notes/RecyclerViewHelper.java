@@ -61,5 +61,7 @@ public class RecyclerViewHelper {
         this.positions.clear();
         this.views.clear();
     }
+
+
 }
 

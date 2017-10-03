@@ -4,8 +4,14 @@
 
     <item
         android:id="@+id/contextualDelete"
-        android:icon="@android:drawable/ic_menu_delete"
+        android:icon="@drawable/ic_recycle_bin"
         android:title="@string/deleteContextualMenuItem"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/contextualArchive"
+        android:icon="@drawable/ic_archive"
+        android:title="@string/archiveContextualMenuItem"
+        app:showAsAction="ifRoom" />
 
 </menu>

@@ -54,7 +54,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         // TODO: Put in onPause()/onStop(), have variable that checks if save was already done
         if (currentNote != null) {  // Save favorite even if user does not explicitly press save menu item
             currentNote.set_favorite(temp);
-            db.updateNote(currentNote);
+            db.updateNoteFromUserList(currentNote);
         }
     }
 
@@ -65,7 +65,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         if (currentNote != null) {
-                            db.deleteNote(currentNote);
+                            db.deleteNoteFromUserList(currentNote);
                             goBackToMainActivity(noteResult[4]);
                         } else {
                             goBackToMainActivity(noteResult[0]);       // New empty note, discard
@@ -147,7 +147,7 @@ public class NoteEditorActivity extends AppCompatActivity {
             currentList.get(notePosition).set_content(content);
         }
 
-        db.updateNote(currentNote);
+        db.updateNoteFromUserList(currentNote);
         goBackToMainActivity(noteResult[1]);
     }
 
@@ -193,7 +193,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                     temp = new SingleNote(title, content, 0);
                 }
 
-                db.addNote(temp);
+                db.addNoteToUserList(0, temp);
                 goBackToMainActivity(noteResult[3]);
                 break;
         }

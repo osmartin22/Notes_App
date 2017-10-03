@@ -13,6 +13,8 @@
 
     <!-- Contextual action menu items -->
     <string name="deleteContextualMenuItem">Delete</string>
+    <string name="archiveContextualMenuItem">Archive</string>
+    <string name="unarchiveContextualMenuItem">Unarchive</string>
 
     <!-- MenuItem names for MainActivity -->
     <string name="layoutManager">Change Layout</string>
@@ -31,5 +33,15 @@
         <item>deleteNote</item>
         <item>noteNotFavorite</item>
     </string-array>
+
+
+    <!-- Drawer names -->
+    <string name="allNotesDrawer">All Notes</string>
+    <string name="favoriteNotesDrawer">Favorite Notes</string>
+    <string name="archiveNotesDrawer">Archive</string>
+    <string name="recycleBinNotesDrawer">Trash</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
 
 </resources>
