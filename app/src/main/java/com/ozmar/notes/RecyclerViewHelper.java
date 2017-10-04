@@ -5,10 +5,6 @@ import android.view.View;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by ozmar on 9/29/2017.
- */
-
 // Class made to easily manage a view, its note, and position
 public class RecyclerViewHelper {
     private List<SingleNote> notes = new ArrayList<>();

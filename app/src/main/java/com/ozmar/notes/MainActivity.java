@@ -1,6 +1,7 @@
 package com.ozmar.notes;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -8,15 +9,18 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,6 +54,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout drawer;
     private FloatingActionButton fab;
     private Toolbar myToolbar;
+
+    Snackbar snackbar = null;
+    private boolean snackBarFlag = false;
 
     // onClick method launch activity to create note
     public void launchNoteEditor(View view) {
@@ -96,7 +103,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
                 if (multiSelect) {
-                    Toast.makeText(getApplicationContext(), "Selected: " + position, Toast.LENGTH_SHORT).show();
                     multiSelect(view, currentList.get(position), position);
 
                 } else {
@@ -156,6 +162,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
 
+        boolean menuItemPressed = false;
+
         @Override
         public int hashCode() {
             return super.hashCode();
@@ -178,17 +186,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.contextualDelete:
-                    db.deleteNoteList(selectedNotes.getNotes());
-                    getNotesList(listUsed);
+                    menuItemPressed = true;
+//                    db.deleteNoteList(selectedNotes.getNotes());
+//                    getNotesList(listUsed);
                     notesAdapter.removeSelectedViews(selectedNotes.getViews(), selectedNotes.getPositions());
+                    showSnackBar(item);
                     mode.finish();
                     return true;
 
                 case R.id.contextualArchive:
-                    db.deleteNoteList(selectedNotes.getNotes());
-                    db.addListToArchive(selectedNotes.getNotes());
-                    getNotesList(listUsed);
+                    menuItemPressed = true;
+//                    db.deleteNoteList(selectedNotes.getNotes());
+//                    db.addListToArchive(selectedNotes.getNotes());
+//                    getNotesList(listUsed);
                     notesAdapter.removeSelectedViews(selectedNotes.getViews(), selectedNotes.getPositions());
+                    showSnackBar(item);
                     mode.finish();
 
                 default:
@@ -198,27 +210,98 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
+            Toast.makeText(getApplicationContext(), "Cleared", Toast.LENGTH_SHORT).show();
             multiSelect = false;
             actionMode = null;
-            Toast.makeText(getApplicationContext(), "Size: " + selectedNotes.getNotes().size(), Toast.LENGTH_SHORT).show();
             notesAdapter.setToWhite(selectedNotes.getViews());
-            selectedNotes.clearLists();
+
+            Log.d("CAB", "In Destroy()");
+
+            // Only clear lists if a menu item in CAB was not pressed
+            if(!menuItemPressed) {
+                Log.d("CAB", "Back pressed");
+                selectedNotes.clearLists();
+            }
+
+            menuItemPressed = false;
         }
     };
 
+    private void showSnackBar(MenuItem item) {
+        int size = selectedNotes.getNotes().size();
+        String message;
+
+        switch (item.getItemId()) {
+            case R.id.contextualDelete:
+                message = (size == 1) ? getString(R.string.snackBarDeleteSingle) : getString(R.string.snackBarDeleteMultiple);
+                snackbar = Snackbar.make(findViewById(R.id.drawer_layout), message, Snackbar.LENGTH_LONG);
+                break;
+            case R.id.contextualArchive:
+                message = (size == 1) ? getString(R.string.snackBarArchiveSingle) : getString(R.string.snackBarArchiveMultiple);
+                snackbar = Snackbar.make(findViewById(R.id.drawer_layout), message, Snackbar.LENGTH_LONG);
+                break;
+        }
+
+        if (snackbar != null) {
+            snackbar.setAction(R.string.snackBarUndoAction, new UndoListener());
+            snackbar.show();
+            snackbar.addCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar snackbar, int event) {
+                    if(!snackBarFlag) {
+                        Toast.makeText(getApplicationContext(), "Removed", Toast.LENGTH_SHORT).show();
+                    }
+
+                    selectedNotes.clearLists();
+                    snackBarFlag = false;
+                }
+            });
+        }
+    }
+
+    public class UndoListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            Toast.makeText(getApplicationContext(), "Undone", Toast.LENGTH_SHORT).show();
+            notesAdapter.addSelectedViews(selectedNotes.getPositions(), selectedNotes.getNotes());
+            snackBarFlag = true;
+        }
+    }
+
+    private void contextualDelete() {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage("Do you want to delete this note?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
     private void multiSelect(View view, SingleNote note, int position) {
+        if(snackbar != null) {
+            snackbar.dismiss();
+        }
         if (multiSelect) {
             if (selectedNotes.getNotes().contains(note)) {
                 selectedNotes.removeFromLists(view, note);
                 view.setBackgroundColor(Color.WHITE);
 
-                if (selectedNotes.getNotes().isEmpty()) {      // Exit CAB if no notes are selected
-                    actionMode.finish();
-                }
             } else {
                 view.setBackgroundColor(Color.GRAY);
                 selectedNotes.addToLists(view, note, position);
             }
+
+            actionMode.setSubtitle(Integer.toString(selectedNotes.getNotes().size()));
+
+            if (selectedNotes.getNotes().isEmpty()) {      // Exit CAB if no notes are selected
+                actionMode.finish();
+            }
+
         }
     }
 

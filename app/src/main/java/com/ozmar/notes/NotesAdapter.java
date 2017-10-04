@@ -7,12 +7,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final List<SingleNote> notes;
+
+    private final List<SingleNote> tempNotes = new ArrayList<>();
 
     private final int showTitle = 0, showContent = 1, showAll = 2;
 
@@ -34,13 +37,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public void updateAt(int position, SingleNote note) {
-
-        Log.d("Note", notes.get(position).get_content());
-        Log.d("Note", note.get_content());
-
         notes.set(position, note);
-//        notes.remove(position);
-//        notes.add(position, note);
         notifyItemChanged(position);
     }
 
@@ -50,7 +47,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notifyItemRangeRemoved(0, size);
     }
 
-    // Optimize removal of views
     public void removeSelectedViews(List<View> views, List<Integer> position) {
         Collections.sort(position);
         int amountOfViews = notes.size();
@@ -58,6 +54,8 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         int minViewPositionChanged = position.get(0);
         int maxViewPositionChanged = position.get(position.size() - 1);
         int remainingViews = amountOfViews - amountOfViewsDeleted;
+
+        tempNotes.addAll(notes);
 
         // Deleted entire list
         if (remainingViews == 0) {
@@ -85,6 +83,33 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
+    public void addSelectedViews(List<Integer> position, List<SingleNote> addList) {
+        Collections.sort(position);
+        int size = notes.size();
+        int minViewPositionChanged = position.get(0);
+        int maxViewPositionChanged = position.get(position.size() - 1);
+
+
+        // Notes being added are consecutive
+        if (maxViewPositionChanged - minViewPositionChanged == size - 1) {
+            if (minViewPositionChanged != 0) {
+                notes.addAll(minViewPositionChanged - 1, addList);
+            } else {
+                notes.addAll(0, addList);
+            }
+
+            notifyItemRangeInserted(minViewPositionChanged, notes.size());
+
+            // Notes added at random
+        } else {
+
+            notes.clear();
+            notes.addAll(tempNotes);
+            tempNotes.clear();
+            notifyItemRangeChanged(0, size);
+        }
+    }
+
     // Set views that were changed to gray back to white
     public void setToWhite(List<View> views) {
         for (int i = 0; i < views.size(); i++) {
@@ -108,7 +133,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 break;
 
             case 1:
-                NotesViewHolderContent viewHolderContent =(NotesViewHolderContent) viewHolder;
+                NotesViewHolderContent viewHolderContent = (NotesViewHolderContent) viewHolder;
                 viewHolderContent.noteContent.setText(note.get_content());
                 break;
 

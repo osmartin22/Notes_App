@@ -6,18 +6,13 @@
     <string name="titleEditText">Title</string>
 
 
-    <!-- MenuItem names NoteEditorActivity-->
+    <!-- MenuItem names for NoteEditorActivity-->
     <string name="saveNoteMenuItem">Save Note</string>
     <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="favoriteNoteMenuItem">Favorite Note</string>
     <string name="archiveNoteMenuItem">Archive Note</string>
     <string name="unArchiveNoteMenuItem">Unarchive Note</string>
     <string name="restoreNoteMenuItem">Restore Note</string>
-
-    <!-- Contextual action menu items -->
-    <string name="deleteContextualMenuItem">Delete</string>
-    <string name="archiveContextualMenuItem">Archive</string>
-    <string name="unarchiveContextualMenuItem">Unarchive</string>
 
     <!-- MenuItem names for MainActivity -->
     <string name="layoutManager">Change Layout</string>
@@ -36,6 +31,22 @@
         <item>removeNoteFromRV</item>       <!-- Remove note from RecyclerView -->
         <item>noteNotFavorite</item>        <!-- [5] Update RecyclerView if in favorites list-->
     </string-array>
+
+    <!-- Contextual action menu items -->
+    <string name="deleteContextualMenuItem">Delete</string>
+    <string name="archiveContextualMenuItem">Archive</string>
+    <string name="unarchiveContextualMenuItem">Unarchive</string>
+    <string name="restoreContextualMenuItem">Restore</string>
+
+    <!-- SnackBar output -->
+    <string name="snackBarDeleteSingle">Note moved to trash.</string>
+    <string name="snackBarDeleteMultiple">Notes moved to trash.</string>
+    <string name="snackBarArchiveSingle">Note moved to archive.</string>
+    <string name="snackBarArchiveMultiple">Notes moved to archive.</string>
+    <string name="snackBarUnarchiveSingle">Note unarchived.</string>
+    <string name="snackBarUnarchiveMultiple">Notes unarchived.</string>
+
+    <string name="snackBarUndoAction">Undo</string>
 
 
     <!-- Drawer names -->

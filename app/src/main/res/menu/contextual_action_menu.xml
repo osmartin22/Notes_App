@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/contextualDelete"
@@ -12,6 +12,20 @@
         android:id="@+id/contextualArchive"
         android:icon="@drawable/ic_archive_dark_gray"
         android:title="@string/archiveContextualMenuItem"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/contextualUnarchive"
+        android:icon="@drawable/ic_unarchive_dark_gray"
+        android:title="@string/unarchiveContextualMenuItem"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/contextualRestore"
+        android:icon="@drawable/ic_restore_dark_gray"
+        android:title="@string/restoreContextualMenuItem"
+        android:visible="false"
         app:showAsAction="ifRoom" />
 
 </menu>
