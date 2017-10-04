@@ -4,13 +4,13 @@
 
     <item
         android:id="@+id/contextualDelete"
-        android:icon="@drawable/ic_recycle_bin"
+        android:icon="@drawable/ic_recycle_bin_dark_gray"
         android:title="@string/deleteContextualMenuItem"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/contextualArchive"
-        android:icon="@drawable/ic_archive"
+        android:icon="@drawable/ic_archive_dark_gray"
         android:title="@string/archiveContextualMenuItem"
         app:showAsAction="ifRoom" />
 

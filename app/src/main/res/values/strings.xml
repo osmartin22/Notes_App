@@ -27,15 +27,14 @@
         <item>Favorites</item>
     </string-array>
 
-    <!-- String array for note result to notify MainActivity what to do after NoteEditor finishes -->
+    <!-- String array for how to update RecyclerView after NoteEditorActivity finishes -->
     <string-array name="noteResultArray">
-        <item>discardNote</item>        <!-- 0 -->
-        <item>noteModified</item>
-        <item>noteNotModified</item>
-        <item>newNote</item>
-        <item>deleteNote</item>
-        <item>noteNotFavorite</item>
-        <item>archiveNote</item>        <!-- 6 -->
+        <item>discardNewEmptyNote</item>    <!-- [0] -->
+        <item>updateNoteInRV</item>         <!-- Update note in RecyclerView -->
+        <item>noChangesToRV</item>          <!-- No changes to RecyclerView -->
+        <item>addNewNoteToRV</item>         <!-- Add note to RecyclerView -->
+        <item>removeNoteFromRV</item>       <!-- Remove note from RecyclerView -->
+        <item>noteNotFavorite</item>        <!-- [5] Update RecyclerView if in favorites list-->
     </string-array>
 
 

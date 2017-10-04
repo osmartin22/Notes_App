@@ -12,11 +12,11 @@
             android:title="@string/favoriteNotesDrawer" />
         <item
             android:id="@+id/archive_drawer"
-            android:icon="@drawable/ic_archive"
+            android:icon="@drawable/ic_archive_dark_gray"
             android:title="@string/archiveNotesDrawer" />
         <item
             android:id="@+id/recycle_bin_drawer"
-            android:icon="@drawable/ic_recycle_bin"
+            android:icon="@drawable/ic_recycle_bin_dark_gray"
             android:title="@string/recycleBinNotesDrawer" />
     </group>
 
