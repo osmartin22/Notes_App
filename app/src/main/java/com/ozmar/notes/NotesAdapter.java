@@ -14,6 +14,7 @@ import java.util.List;
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final List<SingleNote> notes;
+    private final List<Integer> selectedIds = new ArrayList<>();
 
     private final List<SingleNote> tempNotes = new ArrayList<>();
 
@@ -47,13 +48,13 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notifyItemRangeRemoved(0, size);
     }
 
-    public void removeSelectedViews(List<View> views, List<Integer> position) {
+    public void removeSelectedViews(List<Integer> position) {
         Collections.sort(position);
         int amountOfViews = notes.size();
-        int amountOfViewsDeleted = views.size();
+        int amountOfViewsRemoved = position.size();
         int minViewPositionChanged = position.get(0);
         int maxViewPositionChanged = position.get(position.size() - 1);
-        int remainingViews = amountOfViews - amountOfViewsDeleted;
+        int remainingViews = amountOfViews - amountOfViewsRemoved;
 
         tempNotes.addAll(notes);
 
@@ -67,14 +68,14 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             notifyItemRangeRemoved(minViewPositionChanged, amountOfViews);
 
             // Deleted notes were consecutive
-        } else if (maxViewPositionChanged - minViewPositionChanged == amountOfViewsDeleted - 1) {
+        } else if (maxViewPositionChanged - minViewPositionChanged == amountOfViewsRemoved - 1) {
             notes.subList(minViewPositionChanged, maxViewPositionChanged + 1).clear();
             notifyItemRangeRemoved(minViewPositionChanged, maxViewPositionChanged + 1);
             notifyItemRangeChanged(maxViewPositionChanged, amountOfViews);
 
             // Random deletes
         } else {
-            for (int i = amountOfViewsDeleted - 1; i >= 0; i--) {
+            for (int i = amountOfViewsRemoved - 1; i >= 0; i--) {
                 int pos = position.get(i);
                 notes.remove(pos);
                 notifyItemRemoved(pos);
@@ -110,11 +111,16 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    // Set views that were changed to gray back to white
-    public void setToWhite(List<View> views) {
-        for (int i = 0; i < views.size(); i++) {
-            views.get(i).setBackgroundColor(Color.WHITE);
-        }
+    public void addSelectedId(int position) {
+        this.selectedIds.add(position);
+    }
+
+    public void removeSelectedId(int position) {
+        this.selectedIds.remove(Integer.valueOf(position));
+    }
+
+    public void clearSelectedIds() {
+        selectedIds.clear();
     }
 
     public void getList(List<SingleNote> newList) {
@@ -126,6 +132,13 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
         Log.d("Multi", "Bind at position " + position);
         SingleNote note = this.notes.get(position);
+
+        if (selectedIds.contains(position)) {
+            viewHolder.itemView.setBackgroundColor(Color.GRAY);
+        } else {
+            viewHolder.itemView.setBackgroundColor(Color.WHITE);
+        }
+
         switch (viewHolder.getItemViewType()) {
             case 0:
                 NotesViewHolderTitle viewHolderTitle = (NotesViewHolderTitle) viewHolder;

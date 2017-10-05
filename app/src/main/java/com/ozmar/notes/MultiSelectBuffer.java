@@ -2,13 +2,12 @@ package com.ozmar.notes;
 
 
 import android.util.Log;
-import android.view.View;
 
 import java.util.List;
 
 public class MultiSelectBuffer {
-    private MultiSelectHelper buffer1;
-    private MultiSelectHelper buffer2;
+    private final MultiSelectHelper buffer1;
+    private final MultiSelectHelper buffer2;
     private int currentBuffer;
 
     public MultiSelectBuffer() {
@@ -22,7 +21,7 @@ public class MultiSelectBuffer {
         if (currentBuffer == 0 && buffer1.getSize() != 0) {
             Log.d("Buffer", "Swap to Buffer1");
             currentBuffer = 1;
-        } else if (currentBuffer == 1 && buffer2.getSize() != 0){
+        } else if (currentBuffer == 1 && buffer2.getSize() != 0) {
             Log.d("Buffer", "Swap to Buffer0");
             currentBuffer = 0;
         }
@@ -30,7 +29,7 @@ public class MultiSelectBuffer {
 
     // Clears buffer that is not currently being used
     public void clearOtherBuffer() {
-        if(currentBuffer == 0) {
+        if (currentBuffer == 0) {
             buffer2.clearLists();
         } else {
             buffer1.clearLists();
@@ -39,40 +38,31 @@ public class MultiSelectBuffer {
 
     // Clears buffer currently in use
     public void clearCurrentBuffer() {
-        if(currentBuffer == 0) {
+        if (currentBuffer == 0) {
             buffer1.clearLists();
         } else {
             buffer2.clearLists();
         }
     }
 
-    public void addDataToBuffer(View view, SingleNote note, int position) {
+    public void addDataToBuffer(SingleNote note, int position) {
         if (currentBuffer == 0) {
-            buffer1.addToLists(view, note, position);
+            buffer1.addToLists(note, position);
         } else {
-            buffer2.addToLists(view, note, position);
+            buffer2.addToLists(note, position);
         }
     }
 
-    public void removeDataFromBuffer(View view, SingleNote note) {
+    public void removeDataFromBuffer(SingleNote note) {
         if (currentBuffer == 0) {
-            buffer1.removeFromLists(view, note);
+            buffer1.removeFromLists(note);
         } else {
-            buffer2.removeFromLists(view, note);
+            buffer2.removeFromLists(note);
         }
     }
-
-    // TODO: Remove Possibly
-//    public MultiSelectHelper getCurrentBuffer() {
-//        if(currentBuffer == 0) {
-//            return  buffer1;
-//        }
-//
-//        return buffer2;
-//    }
 
     public int currentBufferSize() {
-        if(currentBuffer == 0) {
+        if (currentBuffer == 0) {
             return buffer1.getSize();
         }
 
@@ -80,7 +70,7 @@ public class MultiSelectBuffer {
     }
 
     public List<SingleNote> currentBufferNotes() {
-        if(currentBuffer == 0) {
+        if (currentBuffer == 0) {
             return buffer1.getNotes();
         }
 
@@ -88,19 +78,11 @@ public class MultiSelectBuffer {
     }
 
     public List<Integer> currentBufferPositions() {
-        if(currentBuffer == 0) {
+        if (currentBuffer == 0) {
             return buffer1.getPositions();
         }
 
         return buffer2.getPositions();
-    }
-
-    public List<View> currentBufferViews() {
-        if(currentBuffer == 0) {
-            return buffer1.getViews();
-        }
-
-        return buffer2.getViews();
     }
 
     // TODO: Possible change
