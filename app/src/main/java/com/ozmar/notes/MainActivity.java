@@ -1,7 +1,6 @@
 package com.ozmar.notes;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -13,7 +12,6 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.LinearLayoutManager;
@@ -29,7 +27,7 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: fix icon colors for different backgrounds
+// TODO: swap selectedItems for currentBuffer().size()
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private NotesAdapter notesAdapter;
@@ -41,9 +39,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     static List<SingleNote> currentList = new ArrayList<>();    // TODO: pass/return note instead and make currentList private
     private int listUsed;
 
-    private boolean multiSelect;
+    private boolean multiSelectFlag;
+    private int selectedItems = 0;
     private ActionMode actionMode;
-    private RecyclerViewHelper selectedNotes = new RecyclerViewHelper();
+    private MultiSelectBuffer selectedNotesBuffer = new MultiSelectBuffer();
 
     private SharedPreferences settings;
     private int layoutChoice;
@@ -58,7 +57,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Snackbar snackbar = null;
     private boolean snackBarFlag = false;
 
-    // onClick method launch activity to create note
     public void launchNoteEditor(View view) {
         Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
         intent.putExtra("noteID", -1);
@@ -102,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rv.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(),
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
-                if (multiSelect) {
+                if (multiSelectFlag) {
                     multiSelect(view, currentList.get(position), position);
 
                 } else {
@@ -114,10 +112,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             public void onLongClickItem(View view, final int position) {
-                if (!multiSelect) {
+                if (!multiSelectFlag) {
+                    Log.d("Buffer", "Long Click Not Multi Select Flag");
+                    selectedNotesBuffer.swapBuffer();
+                    selectedItems = 0;
                     ((AppCompatActivity) view.getContext()).startSupportActionMode(actionModeCallback);
                     multiSelect(view, currentList.get(position), position);
                 } else {
+                    Log.d("Buffer", "Long Click Multi Select");
                     multiSelect(view, currentList.get(position), position);
                 }
             }
@@ -171,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            multiSelect = true;
+            multiSelectFlag = true;
             actionMode = mode;
             mode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
             return true;
@@ -187,19 +189,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             switch (item.getItemId()) {
                 case R.id.contextualDelete:
                     menuItemPressed = true;
-//                    db.deleteNoteList(selectedNotes.getNotes());
-//                    getNotesList(listUsed);
-                    notesAdapter.removeSelectedViews(selectedNotes.getViews(), selectedNotes.getPositions());
+                    notesAdapter.removeSelectedViews(selectedNotesBuffer.currentBufferViews(), selectedNotesBuffer.currentBufferPositions());
                     showSnackBar(item);
                     mode.finish();
                     return true;
 
                 case R.id.contextualArchive:
                     menuItemPressed = true;
-//                    db.deleteNoteList(selectedNotes.getNotes());
-//                    db.addListToArchive(selectedNotes.getNotes());
-//                    getNotesList(listUsed);
-                    notesAdapter.removeSelectedViews(selectedNotes.getViews(), selectedNotes.getPositions());
+                    notesAdapter.removeSelectedViews(selectedNotesBuffer.currentBufferViews(), selectedNotesBuffer.currentBufferPositions());
                     showSnackBar(item);
                     mode.finish();
 
@@ -211,24 +208,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             Toast.makeText(getApplicationContext(), "Cleared", Toast.LENGTH_SHORT).show();
-            multiSelect = false;
+            multiSelectFlag = false;
             actionMode = null;
-            notesAdapter.setToWhite(selectedNotes.getViews());
-
-            Log.d("CAB", "In Destroy()");
+            notesAdapter.setToWhite(selectedNotesBuffer.currentBufferViews());
 
             // Only clear lists if a menu item in CAB was not pressed
             if(!menuItemPressed) {
-                Log.d("CAB", "Back pressed");
-                selectedNotes.clearLists();
+                selectedNotesBuffer.clearCurrentBuffer();
             }
 
+            selectedItems = 0;
             menuItemPressed = false;
         }
     };
 
     private void showSnackBar(MenuItem item) {
-        int size = selectedNotes.getNotes().size();
+        int size = selectedNotesBuffer.currentBufferSize();
+        Toast.makeText(getApplicationContext(), "Buffer Size: " + selectedNotesBuffer.currentBufferSize(), Toast.LENGTH_SHORT).show();
         String message;
 
         switch (item.getItemId()) {
@@ -249,10 +245,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onDismissed(Snackbar snackbar, int event) {
                     if(!snackBarFlag) {
+                        Log.d("Buffer", "Long Click onDismissed");
+                        // TODO: Do menu button press here
+                        selectedNotesBuffer.clearOtherBuffer();
                         Toast.makeText(getApplicationContext(), "Removed", Toast.LENGTH_SHORT).show();
                     }
 
-                    selectedNotes.clearLists();
+                    selectedNotesBuffer.clearCurrentBuffer();
                     snackBarFlag = false;
                 }
             });
@@ -262,43 +261,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public class UndoListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
+            Log.d("Buffer", "Undo");
             Toast.makeText(getApplicationContext(), "Undone", Toast.LENGTH_SHORT).show();
-            notesAdapter.addSelectedViews(selectedNotes.getPositions(), selectedNotes.getNotes());
+            notesAdapter.addSelectedViews(selectedNotesBuffer.currentBufferPositions(), selectedNotesBuffer.currentBufferNotes());
             snackBarFlag = true;
         }
     }
 
-    private void contextualDelete() {
-        new AlertDialog.Builder(MainActivity.this)
-                .setMessage("Do you want to delete this note?")
-                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
+    // TODO: Set selectedItems to currentBufferSize()
     private void multiSelect(View view, SingleNote note, int position) {
         if(snackbar != null) {
             snackbar.dismiss();
         }
-        if (multiSelect) {
-            if (selectedNotes.getNotes().contains(note)) {
-                selectedNotes.removeFromLists(view, note);
+        if (multiSelectFlag) {
+
+            if(selectedNotesBuffer.currentBufferNotes().contains(note)) {
+                selectedNotesBuffer.removeDataFromBuffer(view,note);
                 view.setBackgroundColor(Color.WHITE);
+                selectedItems--;
 
             } else {
                 view.setBackgroundColor(Color.GRAY);
-                selectedNotes.addToLists(view, note, position);
+                selectedNotesBuffer.addDataToBuffer(view, note, position);
+                selectedItems++;
             }
 
-            actionMode.setSubtitle(Integer.toString(selectedNotes.getNotes().size()));
+            actionMode.setSubtitle(Integer.toString(selectedItems));
 
-            if (selectedNotes.getNotes().isEmpty()) {      // Exit CAB if no notes are selected
+            if(selectedItems == 0) {
                 actionMode.finish();
             }
 

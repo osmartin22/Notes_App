@@ -10,6 +10,8 @@ import com.ozmar.notes.SingleNote;
 
 public class NoteEditorUtils {
 
+    private NoteEditorUtils() {}
+
     @NonNull
     public static String differenceFromOriginal(String title, String content, SingleNote note) {
         if (title.isEmpty() && content.isEmpty() && note == null) {

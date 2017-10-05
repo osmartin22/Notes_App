@@ -6,13 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Class made to easily manage a view, its note, and position
-public class RecyclerViewHelper {
-    private List<SingleNote> notes = new ArrayList<>();
-    private List<Integer> positions = new ArrayList<>();
-    private List<View> views = new ArrayList<>();
+public class MultiSelectHelper {
+    private List<SingleNote> notes;
+    private List<Integer> positions;
+    private List<View> views;
 
-    public RecyclerViewHelper() {
-
+    public MultiSelectHelper() {
+        this.notes = new ArrayList<>();
+        this.positions = new ArrayList<>();
+        this.views = new ArrayList<>();
     }
 
     public List<SingleNote> getNotes() {
@@ -39,6 +41,13 @@ public class RecyclerViewHelper {
         this.views = views;
     }
 
+    public boolean checkIfEmpty() {
+        if(!notes.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
     public void addToLists(View view, SingleNote note, int position) {
         this.notes.add(note);
         this.positions.add(position);
@@ -56,6 +65,10 @@ public class RecyclerViewHelper {
         this.notes.clear();
         this.positions.clear();
         this.views.clear();
+    }
+
+    public int getSize() {
+        return notes.size();
     }
 
 

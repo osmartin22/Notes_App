@@ -5,18 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-
-
-// TODO: Decide no how to do deletes
-// Allow, addToArchive() to also delete from userList in just on call
-// Or keep them separate and require calling both functions
-// 1) to remove note from user table
-// 2) to dd note to archive list
-
-// Second method seems safer and gives more control
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
@@ -202,12 +194,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     } // deleteNoteFromUserList() end
 
     public void deleteNoteList(List<SingleNote> list) {
+        Log.d("Buffer", "Start of deleteList");
         SQLiteDatabase db = this.getWritableDatabase();
 
         for (int i = 0; i < list.size(); i++) {
             db.delete(TABLE_USER_NOTES, KEY_ID + " = ?",
                     new String[]{String.valueOf(list.get(i).get_id())});
         }
+        Log.d("Buffer", "Finished deletingList");
     } // deleteNoteList() end
 
 
@@ -266,6 +260,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     } // deleteNoteFromArchive() end
 
     public void addListToArchive(List<SingleNote> list) {
+        Log.d("Buffer", "Start of archive");
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -275,6 +270,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.insert(TABLE_ARCHIVE, null, values);
             values.clear();
         }
+        Log.d("Buffer", "Finished adding");
     } // addListToArchive() end
 
     public void deleteListFromArchive(List<SingleNote> list) {
