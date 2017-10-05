@@ -62,13 +62,14 @@ public class MultiSelectBuffer {
         }
     }
 
-    public MultiSelectHelper getCurrentBuffer() {
-        if(currentBuffer == 0) {
-            return  buffer1;
-        }
-
-        return buffer2;
-    }
+    // TODO: Remove Possibly
+//    public MultiSelectHelper getCurrentBuffer() {
+//        if(currentBuffer == 0) {
+//            return  buffer1;
+//        }
+//
+//        return buffer2;
+//    }
 
     public int currentBufferSize() {
         if(currentBuffer == 0) {
