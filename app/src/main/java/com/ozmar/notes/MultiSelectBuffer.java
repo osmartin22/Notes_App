@@ -19,10 +19,10 @@ public class MultiSelectBuffer {
     // Only swap buffers if the current buffer is not empty (i.e. has data to process)
     public void swapBuffer() {
         if (currentBuffer == 0 && buffer1.getSize() != 0) {
-            Log.d("Buffer", "Swap to Buffer1");
+            Log.d("Buffer", "Swap to Buffer2");
             currentBuffer = 1;
         } else if (currentBuffer == 1 && buffer2.getSize() != 0) {
-            Log.d("Buffer", "Swap to Buffer0");
+            Log.d("Buffer", "Swap to Buffer1");
             currentBuffer = 0;
         }
     }
@@ -61,6 +61,14 @@ public class MultiSelectBuffer {
         }
     }
 
+    public void removeDataFromPosition(int position) {
+        if (currentBuffer == 0) {
+            buffer1.removeFromPosition(position);
+        } else {
+            buffer2.removeFromPosition(position);
+        }
+    }
+
     public int currentBufferSize() {
         if (currentBuffer == 0) {
             return buffer1.getSize();
@@ -83,6 +91,14 @@ public class MultiSelectBuffer {
         }
 
         return buffer2.getPositions();
+    }
+
+    public String buff() {
+        if(currentBuffer == 0) {
+            return "buffer1";
+        }
+
+        return "buffer2";
     }
 
     // TODO: Possible change

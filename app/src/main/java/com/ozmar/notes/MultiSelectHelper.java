@@ -1,5 +1,7 @@
 package com.ozmar.notes;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,12 @@ public class MultiSelectHelper {
         int position = this.notes.indexOf(note);
         this.notes.remove(note);
         this.positions.remove(position);
+    }
+
+    public void removeFromPosition(int position) {
+        int index = this.positions.indexOf(position);
+        this.positions.remove(Integer.valueOf(position));
+        this.notes.remove(index);
     }
 
     public void clearLists() {
