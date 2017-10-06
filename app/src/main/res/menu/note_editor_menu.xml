@@ -3,12 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/delete_note"
-        android:title="@string/deleteNoteMenuItem"
-        android:icon="@drawable/ic_recycle_bin_white"
-        app:showAsAction="never" />
-
-    <item
         android:id="@+id/favorite_note"
         android:checkable="false"
         android:icon="@drawable/ic_favorite_star_off"
@@ -25,14 +19,20 @@
         android:id="@+id/archive_note"
         android:icon="@drawable/ic_archive_white"
         android:title="@string/archiveNoteMenuItem"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/unarchive_note"
         android:icon="@drawable/ic_unarchive_white"
         android:title="@string/unArchiveNoteMenuItem"
         android:visible="false"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/delete_note"
+        android:title="@string/deleteNoteMenuItem"
+        android:icon="@drawable/ic_recycle_bin_white"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/restore_note"

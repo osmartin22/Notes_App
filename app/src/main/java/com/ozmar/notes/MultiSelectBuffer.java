@@ -93,6 +93,22 @@ public class MultiSelectBuffer {
         return buffer2.getPositions();
     }
 
+    public MultiSelectHelper currentBuffer() {
+        if (currentBuffer == 0) {
+            return buffer1;
+        }
+
+        return buffer2;
+    }
+
+    public MultiSelectHelper otherBuffer() {
+        if (currentBuffer == 0) {
+            return buffer2;
+        }
+
+        return buffer1;
+    }
+
     public String buff() {
         if(currentBuffer == 0) {
             return "buffer1";
@@ -101,7 +117,7 @@ public class MultiSelectBuffer {
         return "buffer2";
     }
 
-    // TODO: Possible change
+    // TODO: Use in code, if false, throw message to wait maybe
     public boolean isBufferAvailable() {
         return (!buffer1.checkIfEmpty() && !buffer2.checkIfEmpty());
     }

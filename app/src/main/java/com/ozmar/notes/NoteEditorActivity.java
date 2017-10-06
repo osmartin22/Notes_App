@@ -143,7 +143,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                     temp = new SingleNote(title, content, 0);
                 }
 
-                db.addNoteToUserList(0, temp);
+                db.addNoteToUserList(temp);
                 goBackToMainActivity(noteResult[3]);
                 break;
         }
@@ -277,7 +277,6 @@ public class NoteEditorActivity extends AppCompatActivity {
             menu.findItem(R.id.save_note).setVisible(false);
             menu.findItem(R.id.favorite_note).setVisible(false);
         }
-
 
         return super.onCreateOptionsMenu(menu);
     } // onCreateOptionsMenu() end

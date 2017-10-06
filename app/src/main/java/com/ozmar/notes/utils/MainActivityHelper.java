@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -28,14 +29,13 @@ public class MainActivityHelper {
         this.listUsed = 0;
     }
 
-    // Used to get current list in use
-    public List<SingleNote> getNotesList() {
+    private List<SingleNote> getNotesList() {       // Used to get current list in use
         switch (listUsed) {
             case 0:
             default:
-                return db.getAllNotesFromUserList();
+                return db.getUserNotes();
             case 1:
-                return db.getAllFavoriteNotes();
+                return db.getFavoriteNotes();
             case 2:
                 return db.getArchiveNotes();
             case 3:
@@ -43,16 +43,15 @@ public class MainActivityHelper {
         }
     }
 
-    // Used to get specific list
-    public List<SingleNote> getNotesList(int list) {
+    public List<SingleNote> getNotesList(int list) {        // Used to get specific list
         switch (list) {
             case 0:
             default:
                 listUsed = 0;
-                return db.getAllNotesFromUserList();
+                return db.getUserNotes();
             case 1:
                 listUsed = 1;
-                return db.getAllFavoriteNotes();
+                return db.getFavoriteNotes();
             case 2:
                 listUsed = 2;
                 return db.getArchiveNotes();
@@ -61,7 +60,6 @@ public class MainActivityHelper {
                 return db.getRecycleBinNotes();
         }
     }
-
 
     public void restoreLayout(RecyclerView rv, MenuItem layoutItem, int layoutChoice) {
         switch (layoutChoice) {
@@ -90,7 +88,7 @@ public class MainActivityHelper {
         }
     }
 
-    public void updateAdapter(Intent data, NotesAdapter adapter, List<SingleNote> noteList) {
+    public List<SingleNote> updateAdapter(Intent data, NotesAdapter adapter, List<SingleNote> noteList) {
         // Array used to check NoteEditor outcome
         String[] noteResult = context.getResources().getStringArray(R.array.noteResultArray);
 
@@ -124,9 +122,92 @@ public class MainActivityHelper {
                 adapter.removeAt(position);
             }
         }
+
+        return noteList;
     }
 
     public int getListUsed() {
         return listUsed;
+    }
+
+    public String messageToDisplay(MenuItem item, int size) {
+        switch (item.getItemId()) {
+            case R.id.contextualArchive:
+                return (size == 1) ? context.getString(R.string.snackBarArchiveSingle) : context.getString(R.string.snackBarArchiveMultiple);
+            case R.id.contextualUnarchive:
+                return (size == 1) ? context.getString(R.string.snackBarUnarchiveSingle) : context.getString(R.string.snackBarUnarchiveMultiple);
+            case R.id.contextualDelete:
+                return (size == 1) ? context.getString(R.string.snackBarDeleteSingle) : context.getString(R.string.snackBarDeleteMultiple);
+            case R.id.contextualRestore:
+                return (size == 1) ? context.getString(R.string.snackBarRestoreSingle) : context.getString(R.string.snackBarRestoreMultiple);
+            case R.id.contextualDeleteForever:
+                return (size == 1) ? context.getString(R.string.deleteForeverSingle) : context.getString(R.string.deleteForeverMultiple);
+        }
+        return null;
+    }
+
+    public void setCABMenuItems(Menu menu) {
+        switch (listUsed) {
+            case 0:
+            case 1:
+            default:
+                break;
+            case 2:
+                menu.findItem(R.id.contextualArchive).setVisible(false);
+                menu.findItem(R.id.contextualUnarchive).setVisible(true);
+                break;
+            case 3:
+                menu.findItem(R.id.contextualArchive).setVisible(false);
+                menu.findItem(R.id.contextualDelete).setVisible(false);
+                menu.findItem(R.id.contextualRestore).setVisible(true);
+                menu.findItem(R.id.contextualDeleteForever).setVisible(true);
+        }
+    }
+
+    public void doCABAction(MenuItem choice, List<SingleNote> list) {
+        switch (choice.getItemId()) {
+            case R.id.contextualArchive:
+                doContextualArchive(list);      // Only in all notes / favorites
+                break;
+            case R.id.contextualUnarchive:
+                doContextualUnarchive(list);    // Only in Archive list
+                break;
+            case R.id.contextualDelete:
+                doContextualDelete(list);       // In all lists
+                break;
+            case R.id.contextualRestore:
+                doContextualRestore(list);      // Only in Trash List
+                break;
+        }
+    }
+
+    private void doContextualArchive(List<SingleNote> list) {
+        db.deleteListFromUserList(list);
+        db.addListToArchive(list);
+    }
+
+    private void doContextualUnarchive(List<SingleNote> list) {
+        db.deleteListFromArchive(list);
+        db.addListToUserList(list);
+    }
+
+    private void doContextualDelete(List<SingleNote> list) {
+        switch (listUsed) {
+            case 0:
+            case 1:
+                db.deleteListFromUserList(list);
+                break;
+
+            case 2:
+                db.deleteListFromArchive(list);
+                break;
+        }
+
+        db.addListToRecycleBin(list);
+    }
+
+    private void doContextualRestore(List<SingleNote> list) {
+        db.deleteListFromRecycleBin(list);
+        db.addListToUserList(list);
     }
 }

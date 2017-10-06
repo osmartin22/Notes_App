@@ -3,12 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/contextualDelete"
-        android:icon="@drawable/ic_recycle_bin_dark_gray"
-        android:title="@string/deleteContextualMenuItem"
-        app:showAsAction="always" />
-
-    <item
         android:id="@+id/contextualArchive"
         android:icon="@drawable/ic_archive_dark_gray"
         android:title="@string/archiveContextualMenuItem"
@@ -22,9 +16,22 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/contextualDelete"
+        android:icon="@drawable/ic_recycle_bin_dark_gray"
+        android:title="@string/deleteContextualMenuItem"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/contextualRestore"
         android:icon="@drawable/ic_restore_dark_gray"
         android:title="@string/restoreContextualMenuItem"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/contextualDeleteForever"
+        android:icon="@drawable/ic_delete_forever_dark_gray"
+        android:title="@string/deleteForeverContextualMenuItem"
         android:visible="false"
         app:showAsAction="ifRoom" />
 

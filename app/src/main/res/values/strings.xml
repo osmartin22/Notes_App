@@ -32,11 +32,16 @@
         <item>noteNotFavorite</item>        <!-- [5] Update RecyclerView if in favorites list-->
     </string-array>
 
-    <!-- Contextual action menu items -->
+    <!-- CAB menu items -->
     <string name="deleteContextualMenuItem">Delete</string>
     <string name="archiveContextualMenuItem">Archive</string>
     <string name="unarchiveContextualMenuItem">Unarchive</string>
     <string name="restoreContextualMenuItem">Restore</string>
+    <string name="deleteForeverContextualMenuItem">Delete Forever</string>
+
+    <!-- Delete forever dialog strings -->
+    <string name="deleteForeverSingle">Delete note forever?</string>
+    <string name="deleteForeverMultiple">Delete notes forever?</string>
 
     <!-- SnackBar output -->
     <string name="snackBarDeleteSingle">Note moved to trash.</string>
@@ -45,11 +50,13 @@
     <string name="snackBarArchiveMultiple">Notes moved to archive.</string>
     <string name="snackBarUnarchiveSingle">Note unarchived.</string>
     <string name="snackBarUnarchiveMultiple">Notes unarchived.</string>
+    <string name="snackBarRestoreSingle">Note restored</string>
+    <string name="snackBarRestoreMultiple">Notes restored</string>
 
     <string name="snackBarUndoAction">Undo</string>
 
 
-    <!-- Drawer names -->
+    <!-- Navigation Drawer names -->
     <string name="allNotesDrawer">All Notes</string>
     <string name="favoriteNotesDrawer">Favorite Notes</string>
     <string name="archiveNotesDrawer">Archive</string>

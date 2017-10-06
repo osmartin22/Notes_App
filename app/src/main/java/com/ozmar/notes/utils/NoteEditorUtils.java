@@ -67,12 +67,12 @@ public class NoteEditorUtils {
         if (favorite) {
             note.set_favorite(1);
         }
-        db.addNoteToUserList(0, note);
+        db.addNoteToUserList(note);
     }
 
     public static void restoreNote(SingleNote note, DatabaseHandler db) {
         db.deleteNoteFromRecycleBin(note);
-        db.addNoteToUserList(0, note);
+        db.addNoteToUserList(note);
     }
 
 }

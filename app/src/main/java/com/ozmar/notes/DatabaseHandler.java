@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,16 +85,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // User Notes Table Specific Methods
     //--------------------------------------------------------------------------------------------//
 
-    public void addNoteToUserList(int table, SingleNote note) {
-        SQLiteDatabase db = this.getWritableDatabase();
+    // Get count of the number of notes
+    public int getNotesCount() {
+        String countQuery = "SELECT * FROM " + TABLE_USER_NOTES;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
 
-        ContentValues values = new ContentValues();
-        values.put(KEY_TITLE, note.get_title());
-        values.put(KEY_CONTENT, note.get_content());
-        values.put(KEY_FAVORITE, note.get_favorite());
+        int count = cursor.getCount();
+        cursor.close();
 
-        db.insert(TABLE_USER_NOTES, null, values);
-    } // addNoteToUserList() end
+        return count;
+    } // getNotesCount() end
 
     public SingleNote getNote(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -114,7 +114,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return null;
     } // getNote() end
 
-    public List<SingleNote> getAllNotesFromUserList() {
+    public List<SingleNote> getUserNotes() {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " ORDER BY ROWID DESC";
 
@@ -127,7 +127,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_id(Integer.parseInt(cursor.getString(0)));
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
-                note.set_favorite(Integer.parseInt(cursor.getString(3)));
+
+                if(cursor.getString(3) == null) {
+                    note.set_favorite(0);
+                } else {
+                    note.set_favorite(Integer.parseInt(cursor.getString(3)));
+                }
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -135,9 +140,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         cursor.close();
         return noteList;
-    } // getAllNotesFromUserList() end
+    } // getUserNotes() end
 
-    public List<SingleNote> getAllFavoriteNotes() {
+    public List<SingleNote> getFavoriteNotes() {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " WHERE " + KEY_FAVORITE + " = 1" +
                 " ORDER BY ROWID DESC";
@@ -151,7 +156,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_id(Integer.parseInt(cursor.getString(0)));
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
-                note.set_favorite(Integer.parseInt(cursor.getString(3)));
+                if(cursor.getString(3) == null) {
+                    note.set_favorite(0);
+                } else {
+                    note.set_favorite(Integer.parseInt(cursor.getString(3)));
+                }
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -159,19 +168,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         cursor.close();
         return noteList;
-    } // getAllFavoriteNotes() end
-
-    // Get count of the number of notes
-    public int getNotesCount() {
-        String countQuery = "SELECT * FROM " + TABLE_USER_NOTES;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-
-        int count = cursor.getCount();
-        cursor.close();
-
-        return count;
-    } // getNotesCount() end
+    } // getFavoriteNotes() end
 
     // Update a single note
     public int updateNoteFromUserList(SingleNote note) {
@@ -186,6 +183,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(note.get_id())});
     } // updateNoteFromUserList() end
 
+    public void addNoteToUserList(SingleNote note) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_TITLE, note.get_title());
+        values.put(KEY_CONTENT, note.get_content());
+        values.put(KEY_FAVORITE, note.get_favorite());
+
+        db.insert(TABLE_USER_NOTES, null, values);
+    } // addNoteToUserList() end
+
     public void deleteNoteFromUserList(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -193,16 +201,26 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(note.get_id())});
     } // deleteNoteFromUserList() end
 
-    public void deleteNoteList(List<SingleNote> list) {
-        Log.d("Buffer", "Start of deleteList");
+    public void addListToUserList(List<SingleNote> list) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+        for (int i = 0; i < list.size(); i++) {
+            values.put(KEY_TITLE, list.get(i).get_title());
+            values.put(KEY_CONTENT, list.get(i).get_content());
+            db.insert(TABLE_USER_NOTES, null, values);
+            values.clear();
+        }
+    }
+
+    public void deleteListFromUserList(List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         for (int i = 0; i < list.size(); i++) {
             db.delete(TABLE_USER_NOTES, KEY_ID + " = ?",
                     new String[]{String.valueOf(list.get(i).get_id())});
         }
-        Log.d("Buffer", "Finished deletingList");
-    } // deleteNoteList() end
+    } // deleteListFromUserList() end
 
 
     //--------------------------------------------------------------------------------------------//
@@ -260,7 +278,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     } // deleteNoteFromArchive() end
 
     public void addListToArchive(List<SingleNote> list) {
-        Log.d("Buffer", "Start of archive");
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -270,7 +287,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.insert(TABLE_ARCHIVE, null, values);
             values.clear();
         }
-        Log.d("Buffer", "Finished adding");
     } // addListToArchive() end
 
     public void deleteListFromArchive(List<SingleNote> list) {
