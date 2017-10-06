@@ -16,7 +16,6 @@ import android.widget.Toast;
 
 import com.ozmar.notes.utils.NoteEditorUtils;
 
-import static com.ozmar.notes.MainActivity.currentList;
 import static com.ozmar.notes.MainActivity.db;
 
 public class NoteEditorActivity extends AppCompatActivity {
@@ -65,6 +64,7 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         intent.putExtra("Note Success", value);
         intent.putExtra("Note Position", notePosition);
+        intent.putExtra("Note", currentNote);
         setResult(RESULT_OK, intent);
         finish();
     } // goBackToMainActivity() end
@@ -89,12 +89,10 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         if (titleChanged) {
             currentNote.set_title(title);
-            currentList.get(notePosition).set_title(title);
         }
 
         if (contentChanged) {
             currentNote.set_content(content);
-            currentList.get(notePosition).set_content(content);
         }
 
         saveNoteInDb();
@@ -137,12 +135,7 @@ public class NoteEditorActivity extends AppCompatActivity {
 
             case "newNote":
                 SingleNote temp;
-                if (favorite) {
-                    temp = new SingleNote(title, content, 1);
-                } else {
-                    temp = new SingleNote(title, content, 0);
-                }
-
+                temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
                 db.addNoteToUserList(temp);
                 goBackToMainActivity(noteResult[3]);
                 break;
@@ -170,13 +163,14 @@ public class NoteEditorActivity extends AppCompatActivity {
         Intent intent = getIntent();
         notePosition = intent.getIntExtra("noteID", -1);
         listUsed = intent.getIntExtra("listUsed", 0);
+        currentNote = intent.getParcelableExtra("Note");
 
         setUpNoteView();
     } // onCreate() end
 
     private void setUpNoteView() {
-        if (notePosition != -1) {
-            currentNote = currentList.get(notePosition);
+        if (currentNote != null) {
+
             if (currentNote.get_favorite() == 1) {
                 favorite = true;
             }

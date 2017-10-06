@@ -96,12 +96,14 @@ public class MainActivityHelper {
         String save = bundle.getString("Note Success", "");
         int position = bundle.getInt("Note Position", -1);
         boolean favorite = bundle.getBoolean("Note Favorite", false);
+        SingleNote note = bundle.getParcelable("Note");
 
         if (save.equals(noteResult[0])) {
             Toast.makeText(context, "No content to save. Note discarded.", Toast.LENGTH_SHORT).show();
 
         } else if (save.equals(noteResult[1])) {    // Update rv with changes to the note
-            adapter.notifyItemChanged(position);
+            noteList.set(position, note);
+            adapter.updateAt(position, note);
 
         } else if (save.equals(noteResult[3])) {    // Update rv with new note
             noteList = getNotesList();

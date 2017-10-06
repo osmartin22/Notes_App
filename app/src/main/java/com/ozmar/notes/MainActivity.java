@@ -35,15 +35,16 @@ import java.util.List;
 // TODO: Move FAB along with SnackBar
 
 // TODO: Allow multi select on orientation change
+// TODO: (CONT) Check if any of the buffers are not empty, check multi select flag
 
-// TODO: pass/return note instead and make currentList private
+// TODO: Make db read/write into AsyncTask
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private NotesAdapter notesAdapter;
     private RecyclerView rv;
 
     static DatabaseHandler db;
-    static List<SingleNote> currentList = new ArrayList<>();
+    private List<SingleNote> currentList = new ArrayList<>();
 
     private ActionMode actionMode;
     private boolean multiSelectFlag;
@@ -96,9 +97,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     multiSelect(currentList.get(position), position);
 
                 } else {
+                    if (snackBar != null) {
+                        snackBar.dismiss();
+                    }
+
                     Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
                     intent.putExtra("noteID", position);
                     intent.putExtra("listUsed", mainActivityHelper.getListUsed());
+                    intent.putExtra("Note", currentList.get(position));
+
                     startActivityForResult(intent, 1);
                 }
             }
@@ -396,6 +403,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getIntent().removeExtra("Note Favorite");
         getIntent().removeExtra("Note Success");
         getIntent().removeExtra("Note Position");
+        getIntent().removeExtra("Note");
 
     } // onActivityResult() end
 

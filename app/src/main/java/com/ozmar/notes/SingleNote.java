@@ -1,6 +1,9 @@
 package com.ozmar.notes;
 
-public class SingleNote {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class SingleNote implements Parcelable {
 
     private int _id;
     private String _title;
@@ -58,14 +61,46 @@ public class SingleNote {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(this.getClass().getSimpleName()).append("[");
+        sb.append(this.getClass().getSimpleName()).append("[ ");
         sb.append("Id: ").append(_id);
-        sb.append(" Title: ").append(_title);
-        sb.append(" Content: ").append(_content);
-        sb.append(" Favorite: ").append(_favorite).append("]");
+        sb.append(", Title: ").append(_title);
+        sb.append(", Content: ").append(_content);
+        sb.append(", Favorite: ").append(_favorite).append(" ]");
 
         return sb.toString();
     }
+
+    public SingleNote(Parcel in) {
+        this._id = in.readInt();
+        this._title = in.readString();
+        this._content = in.readString();
+        this._favorite = in.readInt();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(_id);
+        dest.writeString(_title);
+        dest.writeString(_content);
+        dest.writeInt(_favorite);
+    }
+
+    public static final Parcelable.Creator<SingleNote> CREATOR = new Parcelable.Creator<SingleNote>() {
+        @Override
+        public SingleNote createFromParcel(Parcel in) {
+            return new SingleNote(in);
+        }
+
+        @Override
+        public SingleNote[] newArray(int size) {
+            return new SingleNote[size];
+        }
+    };
 
     public int get_favorite() {
         return _favorite;
