@@ -13,6 +13,10 @@ import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private DatabaseHandler db;
+    private int listUsed = 0;
+
+
     private final List<SingleNote> notes;
     private final List<Integer> selectedIds = new ArrayList<>();
 
@@ -20,8 +24,40 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private final int showTitle = 0, showContent = 1, showAll = 2;
 
-    public NotesAdapter(List<SingleNote> notes) {
-        this.notes = notes;
+    public NotesAdapter(DatabaseHandler db) {
+        this.db = db;
+        notes = db.getUserNotes();
+    }
+
+    public void updateAdapterList(int list) {
+        notes.clear();
+        switch (list) {
+            case 0:
+            default:
+                listUsed = 0;
+                notes.addAll(db.getUserNotes());
+                break;
+            case 1:
+                listUsed = 1;
+                notes.addAll(db.getFavoriteNotes());
+                break;
+            case 2:
+                listUsed = 2;
+                notes.addAll(db.getArchiveNotes());
+                break;
+            case 3:
+                listUsed = 3;
+                notes.addAll(db.getRecycleBinNotes());
+                break;
+        }
+    }
+
+    public int getListUsed() {
+        return listUsed;
+    }
+
+    public SingleNote getNoteAt(int position) {
+        return notes.get(position);
     }
 
     public void removeAt(int position) {
@@ -82,7 +118,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    // This method is only used when undoing an action from the SnackBar
     public void addSelectedViews(List<Integer> position, List<SingleNote> addList) {
         Collections.sort(position);
         int size = notes.size();
@@ -125,9 +160,30 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         selectedIds.clear();
     }
 
-    public void getList(List<SingleNote> newList) {
-        notes.addAll(newList);
-        notifyItemRangeInserted(0, notes.size());
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        RecyclerView.ViewHolder viewHolder;
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+
+        switch (viewType) {
+            case showTitle:
+                View viewShowTitle = inflater.inflate(R.layout.note_preview_title, parent, false);
+                viewHolder = new NotesViewHolderTitle(viewShowTitle);
+                break;
+
+            case showContent:
+                View viewShowContent = inflater.inflate(R.layout.note_preview_content, parent, false);
+                viewHolder = new NotesViewHolderContent(viewShowContent);
+                break;
+
+            case showAll:
+            default:
+                View viewShowAll = inflater.inflate(R.layout.note_preview, parent, false);
+                viewHolder = new NotesViewHolder(viewShowAll);
+                break;
+        }
+
+        return viewHolder;
     }
 
     @Override
@@ -158,32 +214,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 notesViewHolder.noteContent.setText(note.get_content());
                 break;
         }
-    }
-
-    @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        RecyclerView.ViewHolder viewHolder;
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
-        switch (viewType) {
-            case showTitle:
-                View viewShowTitle = inflater.inflate(R.layout.note_preview_title, parent, false);
-                viewHolder = new NotesViewHolderTitle(viewShowTitle);
-                break;
-
-            case showContent:
-                View viewShowContent = inflater.inflate(R.layout.note_preview_content, parent, false);
-                viewHolder = new NotesViewHolderContent(viewShowContent);
-                break;
-
-            case showAll:
-            default:
-                View viewShowAll = inflater.inflate(R.layout.note_preview, parent, false);
-                viewHolder = new NotesViewHolder(viewShowAll);
-                break;
-        }
-
-        return viewHolder;
     }
 
     @Override

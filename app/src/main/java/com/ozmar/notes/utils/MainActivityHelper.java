@@ -18,42 +18,22 @@ public class MainActivityHelper {
 
     private Context context;
     private DatabaseHandler db;
-    private int listUsed;
 
     public MainActivityHelper(Context context, DatabaseHandler db) {
         this.context = context;
         this.db = db;
-        this.listUsed = 0;
     }
 
-    private List<SingleNote> getNotesList() {       // Used to get current list in use
-        switch (listUsed) {
-            case 0:
-            default:
-                return db.getUserNotes();
-            case 1:
-                return db.getFavoriteNotes();
-            case 2:
-                return db.getArchiveNotes();
-            case 3:
-                return db.getRecycleBinNotes();
-        }
-    }
-
-    public List<SingleNote> getNotesList(int list) {        // Used to get specific list
+    private List<SingleNote> getNotesList(int list) {       // Used to get current list in use
         switch (list) {
             case 0:
             default:
-                listUsed = 0;
                 return db.getUserNotes();
             case 1:
-                listUsed = 1;
                 return db.getFavoriteNotes();
             case 2:
-                listUsed = 2;
                 return db.getArchiveNotes();
             case 3:
-                listUsed = 3;
                 return db.getRecycleBinNotes();
         }
     }
@@ -85,7 +65,7 @@ public class MainActivityHelper {
         }
     }
 
-    public List<SingleNote> updateAdapter(Bundle bundle, NotesAdapter adapter, List<SingleNote> noteList) {
+    public void updateAdapter(Bundle bundle, NotesAdapter adapter) {
         // Array used to check NoteEditor outcome
         String[] noteResult = context.getResources().getStringArray(R.array.noteResultArray);
 
@@ -93,13 +73,14 @@ public class MainActivityHelper {
         int position = bundle.getInt("Note Position", -1);
         boolean favorite = bundle.getBoolean("Note Favorite", false);
         SingleNote note = bundle.getParcelable("Note");
+        int listUsed = adapter.getListUsed();
 
         if (save.equals(noteResult[1])) {    // Update rv with changes to the note
-            noteList.set(position, note);
             adapter.updateAt(position, note);
 
+            // TODO: Optimize this, right now getting the entire list just for the newest note
         } else if (save.equals(noteResult[3])) {    // Update rv with new note
-            noteList = getNotesList();
+            List<SingleNote> noteList = getNotesList(listUsed);
 
             if (listUsed == 0) {
                 adapter.addAt(position, noteList.get(position));
@@ -107,21 +88,13 @@ public class MainActivityHelper {
                 adapter.addAt(position, noteList.get(position));
             }
 
-        } else if (save.equals(noteResult[4])) {    // Remove note from rv
-            noteList.remove(position);
+        } else if (save.equals(noteResult[4])) {    // Remove note from rv (Delete Forever)
             adapter.removeAt(position);
 
-        } else if (save.equals(noteResult[5])) {    // Note title/content not modified but note is no longer a favorite
+        } else if (save.equals(noteResult[5])) {    // Title/Content not modified but note is no longer a favorite
             if (listUsed == 1) {
-                noteList.remove(position);
                 adapter.removeAt(position);
             }
         }
-
-        return noteList;
-    }
-
-    public int getListUsed() {
-        return listUsed;
     }
 }

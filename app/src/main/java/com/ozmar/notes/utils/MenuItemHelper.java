@@ -10,10 +10,6 @@ import com.ozmar.notes.SingleNote;
 
 import java.util.List;
 
-/**
- * Created by ozmar on 10/6/2017.
- */
-
 public class MenuItemHelper {
 
     private Context context;

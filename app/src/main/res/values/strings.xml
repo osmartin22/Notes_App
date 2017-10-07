@@ -52,11 +52,11 @@
     <string name="deleteForeverMultiple">Delete notes forever?</string>
 
     <!-- SnackBar output -->
-    <string name="snackBarDeleteSingle">Note moved to trash</string>
-    <string name="snackBarDeleteMultiple">Notes moved to trash</string>
-    <string name="snackBarArchiveSingle">Note moved to archive</string>
-    <string name="snackBarArchiveMultiple">Notes moved to archive</string>
-    <string name="snackBarUnarchiveSingle">Note unarchived</string>
+    <string name="snackBarDeleteSingle">Note moved to Trash</string>
+    <string name="snackBarDeleteMultiple">Notes moved to Trash</string>
+    <string name="snackBarArchiveSingle">Note archive</string>
+    <string name="snackBarArchiveMultiple">Notes archived</string>
+    <string name="snackBarUnarchiveSingle">Note Unarchived</string>
     <string name="snackBarUnarchiveMultiple">Notes unarchived</string>
     <string name="snackBarRestoreSingle">Note restored</string>
     <string name="snackBarRestoreMultiple">Notes restored</string>

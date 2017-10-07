@@ -5,14 +5,14 @@ import android.util.Log;
 
 import java.util.List;
 
-public class MultiSelectBuffer {
-    private final MultiSelectHelper buffer0;
-    private final MultiSelectHelper buffer1;
+public class UndoBuffer {
+    private final BufferHelper buffer0;
+    private final BufferHelper buffer1;
     private int currentBuffer;
 
-    public MultiSelectBuffer() {
-        this.buffer0 = new MultiSelectHelper();
-        this.buffer1 = new MultiSelectHelper();
+    public UndoBuffer() {
+        this.buffer0 = new BufferHelper();
+        this.buffer1 = new BufferHelper();
         currentBuffer = 0;
     }
 
@@ -93,7 +93,7 @@ public class MultiSelectBuffer {
         return buffer1.getPositions();
     }
 
-    public MultiSelectHelper currentBuffer() {
+    public BufferHelper currentBuffer() {
         if (currentBuffer == 0) {
             return buffer0;
         }
@@ -101,7 +101,7 @@ public class MultiSelectBuffer {
         return buffer1;
     }
 
-    public MultiSelectHelper otherBuffer() {
+    public BufferHelper otherBuffer() {
         if (currentBuffer == 0) {
             return buffer1;
         }

@@ -63,9 +63,9 @@ public class SingleNote implements Parcelable {
         StringBuilder sb = new StringBuilder();
         sb.append(this.getClass().getSimpleName()).append("[ ");
         sb.append("Id: ").append(_id);
-        sb.append(", Title: ").append(_title);
-        sb.append(", Content: ").append(_content);
-        sb.append(", Favorite: ").append(_favorite).append(" ]");
+        sb.append(",    Title: ").append(_title);
+        sb.append(",    Content: ").append(_content);
+        sb.append(",    Favorite: ").append(_favorite).append(" ]");
 
         return sb.toString();
     }

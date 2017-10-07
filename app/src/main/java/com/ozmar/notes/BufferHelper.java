@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Class made to easily manage a view, its note, and position
-public class MultiSelectHelper {
+public class BufferHelper {
     private final List<SingleNote> notes;
     private final List<Integer> positions;
 
-    public MultiSelectHelper() {
+    public BufferHelper() {
         this.notes = new ArrayList<>();
         this.positions = new ArrayList<>();
     }
