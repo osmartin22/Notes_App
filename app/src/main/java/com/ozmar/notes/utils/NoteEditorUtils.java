@@ -53,8 +53,4 @@ public class NoteEditorUtils {
 
         return favorite;
     }
-
-    public static void doDeleteForever() {
-
-    }
 }

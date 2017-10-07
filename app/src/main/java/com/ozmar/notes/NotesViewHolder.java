@@ -11,9 +11,6 @@ import android.widget.TextView;
 public class NotesViewHolder extends RecyclerView.ViewHolder {
     public TextView noteTitle;
     public TextView noteContent;
-    public boolean multiSelect;
-
-    public int position = -1;
 
     public NotesViewHolder(View itemView) {
         super(itemView);

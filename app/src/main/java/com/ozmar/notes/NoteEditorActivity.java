@@ -98,8 +98,6 @@ public class NoteEditorActivity extends AppCompatActivity {
         }
     } // saveNoteInDb() end
 
-    // Update note if title and or content changed
-    // NOTE: Should only be called if the note was modified
     private void updateNote(boolean titleChanged, boolean contentChanged) {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
@@ -198,9 +196,8 @@ public class NoteEditorActivity extends AppCompatActivity {
             View.OnTouchListener editTextListener = new View.OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
-
                     if (listUsed == 3) {
-                        Toast.makeText(getApplicationContext(), "No edit", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Can't edit in Trash", Toast.LENGTH_SHORT).show();
                     } else {
                         view.setFocusableInTouchMode(true);
                         view.requestFocus();
@@ -212,11 +209,10 @@ public class NoteEditorActivity extends AppCompatActivity {
             editTextContent.setOnTouchListener(editTextListener);
         }
 
-        // New note is being created, show keyboard at the start
-        else {
+        else {      // New note is being created, show keyboard at the start
             editTextContent.requestFocus();
         }
-    }
+    } // setUpNoteView() end
 
     @Override
     public void onBackPressed() {

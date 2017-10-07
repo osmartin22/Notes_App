@@ -1,6 +1,7 @@
 package com.ozmar.notes;
 
 import android.graphics.Color;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -134,9 +135,9 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         SingleNote note = this.notes.get(position);
 
         if (selectedIds.contains(position)) {
-            viewHolder.itemView.setBackgroundColor(Color.GRAY);
+            ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.GRAY);
         } else {
-            viewHolder.itemView.setBackgroundColor(Color.WHITE);
+            ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.WHITE);
         }
 
         switch (viewHolder.getItemViewType()) {
