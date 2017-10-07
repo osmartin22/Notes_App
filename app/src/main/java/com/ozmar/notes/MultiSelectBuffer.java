@@ -6,22 +6,22 @@ import android.util.Log;
 import java.util.List;
 
 public class MultiSelectBuffer {
+    private final MultiSelectHelper buffer0;
     private final MultiSelectHelper buffer1;
-    private final MultiSelectHelper buffer2;
     private int currentBuffer;
 
     public MultiSelectBuffer() {
+        this.buffer0 = new MultiSelectHelper();
         this.buffer1 = new MultiSelectHelper();
-        this.buffer2 = new MultiSelectHelper();
         currentBuffer = 0;
     }
 
     // Only swap buffers if the current buffer is not empty (i.e. has data to process)
     public void swapBuffer() {
-        if (currentBuffer == 0 && buffer1.getSize() != 0) {
+        if (currentBuffer == 0 && buffer0.getSize() != 0) {
             Log.d("Buffer", "Swap to Buffer2");
             currentBuffer = 1;
-        } else if (currentBuffer == 1 && buffer2.getSize() != 0) {
+        } else if (currentBuffer == 1 && buffer1.getSize() != 0) {
             Log.d("Buffer", "Swap to Buffer1");
             currentBuffer = 0;
         }
@@ -30,95 +30,93 @@ public class MultiSelectBuffer {
     // Clears buffer that is not currently being used
     public void clearOtherBuffer() {
         if (currentBuffer == 0) {
-            buffer2.clearLists();
-        } else {
             buffer1.clearLists();
+        } else {
+            buffer0.clearLists();
         }
     }
 
     // Clears buffer currently in use
     public void clearCurrentBuffer() {
         if (currentBuffer == 0) {
-            buffer1.clearLists();
+            buffer0.clearLists();
         } else {
-            buffer2.clearLists();
+            buffer1.clearLists();
         }
     }
 
     public void addDataToBuffer(SingleNote note, int position) {
         if (currentBuffer == 0) {
-            buffer1.addToLists(note, position);
+            buffer0.addToLists(note, position);
         } else {
-            buffer2.addToLists(note, position);
+            buffer1.addToLists(note, position);
         }
     }
 
     public void removeDataFromBuffer(SingleNote note) {
         if (currentBuffer == 0) {
-            buffer1.removeFromLists(note);
+            buffer0.removeFromLists(note);
         } else {
-            buffer2.removeFromLists(note);
+            buffer1.removeFromLists(note);
         }
     }
 
     public void removeDataFromPosition(int position) {
         if (currentBuffer == 0) {
-            buffer1.removeFromPosition(position);
+            buffer0.removeFromPosition(position);
         } else {
-            buffer2.removeFromPosition(position);
+            buffer1.removeFromPosition(position);
         }
     }
 
     public int currentBufferSize() {
         if (currentBuffer == 0) {
-            return buffer1.getSize();
+            return buffer0.getSize();
         }
 
-        return buffer2.getSize();
+        return buffer1.getSize();
     }
 
     public List<SingleNote> currentBufferNotes() {
         if (currentBuffer == 0) {
-            return buffer1.getNotes();
+            return buffer0.getNotes();
         }
 
-        return buffer2.getNotes();
+        return buffer1.getNotes();
     }
 
     public List<Integer> currentBufferPositions() {
         if (currentBuffer == 0) {
-            return buffer1.getPositions();
+            return buffer0.getPositions();
         }
 
-        return buffer2.getPositions();
+        return buffer1.getPositions();
     }
 
     public MultiSelectHelper currentBuffer() {
         if (currentBuffer == 0) {
-            return buffer1;
-        }
-
-        return buffer2;
-    }
-
-    public MultiSelectHelper otherBuffer() {
-        if (currentBuffer == 0) {
-            return buffer2;
+            return buffer0;
         }
 
         return buffer1;
     }
 
-    public String buff() {
-        if(currentBuffer == 0) {
-            return "buffer1";
+    public MultiSelectHelper otherBuffer() {
+        if (currentBuffer == 0) {
+            return buffer1;
         }
 
-        return "buffer2";
+        return buffer0;
     }
 
     // TODO: Use in code, if false, throw message to wait maybe
     public boolean isBufferAvailable() {
-        return (!buffer1.checkIfEmpty() && !buffer2.checkIfEmpty());
+
+        Log.d("H", "Buffer0 -> " + buffer0.getSize());
+        Log.d("H", "Buffer0 Empty -> " + buffer0.checkIfEmpty());
+        Log.d("H", "Buffer1 -> " + buffer1.getSize());
+        Log.d("H", "Buffer1 Empty -> " + buffer1.checkIfEmpty());
+
+        return (buffer0.checkIfEmpty() || buffer1.checkIfEmpty());
     }
 }

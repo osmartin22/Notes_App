@@ -37,7 +37,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, " + KEY_CONTENT + " TEXT, "
             + KEY_FAVORITE + " INTEGER)";
 
-    // POSSIBLY REMOVE FAVORITE FROM ARCHIVE AND RECYCLE BIN, SET TO NOT FAVORITE IF RESTORED
     private static final String CREATE_TABLE_ARCHIVE = "CREATE TABLE " + TABLE_ARCHIVE + "(" + KEY_ARCHIVE_ID
             + " INTEGER PRIMARY KEY, " + KEY_ARCHIVE_TITLE + " TEXT, " + KEY_ARCHIVE_CONTENT + " TEXT)";
 
@@ -50,11 +49,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
-//        String CREATE_USER_NOTES_TABLE = "CREATE TABLE " + TABLE_USER_NOTES + "(" + KEY_ID
-//                + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, " + KEY_CONTENT + " TEXT, "
-//                + KEY_FAVORITE + " INTEGER)";
-//        sqLiteDatabase.execSQL(CREATE_USER_NOTES_TABLE);
-
         sqLiteDatabase.execSQL(CREATE_TABLE_USER_NOTES);
         sqLiteDatabase.execSQL(CREATE_TABLE_ARCHIVE);
         sqLiteDatabase.execSQL(CREATE_TABLE_RECYCLE_BIN);
@@ -128,7 +122,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
 
-                if(cursor.getString(3) == null) {
+                if (cursor.getString(3) == null) {
                     note.set_favorite(0);
                 } else {
                     note.set_favorite(Integer.parseInt(cursor.getString(3)));
@@ -156,11 +150,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_id(Integer.parseInt(cursor.getString(0)));
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
-                if(cursor.getString(3) == null) {
-                    note.set_favorite(0);
-                } else {
-                    note.set_favorite(Integer.parseInt(cursor.getString(3)));
-                }
+                note.set_favorite(Integer.parseInt(cursor.getString(3)));
 
                 noteList.add(note);
             } while (cursor.moveToNext());

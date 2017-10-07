@@ -2,7 +2,6 @@ package com.ozmar.notes;
 
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final List<SingleNote> tempNotes = new ArrayList<>();
 
     private final int showTitle = 0, showContent = 1, showAll = 2;
-
 
     public NotesAdapter(List<SingleNote> notes) {
         this.notes = notes;
@@ -56,8 +54,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         int maxViewPositionChanged = position.get(position.size() - 1);
         int remainingViews = amountOfViews - amountOfViewsRemoved;
 
-        tempNotes.addAll(notes);
-
         // Deleted entire list
         if (remainingViews == 0) {
             clearView();
@@ -75,6 +71,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             // Random deletes
         } else {
+            tempNotes.addAll(notes);
             for (int i = amountOfViewsRemoved - 1; i >= 0; i--) {
                 int pos = position.get(i);
                 notes.remove(pos);
@@ -84,31 +81,35 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
+    // This method is only used when undoing an action from the SnackBar
     public void addSelectedViews(List<Integer> position, List<SingleNote> addList) {
         Collections.sort(position);
         int size = notes.size();
+        int amountOfViewAdding = position.size();
         int minViewPositionChanged = position.get(0);
         int maxViewPositionChanged = position.get(position.size() - 1);
 
-
         // Notes being added are consecutive
-        if (maxViewPositionChanged - minViewPositionChanged == size - 1) {
+        if (maxViewPositionChanged - minViewPositionChanged == amountOfViewAdding - 1) {
             if (minViewPositionChanged != 0) {
                 notes.addAll(minViewPositionChanged - 1, addList);
             } else {
                 notes.addAll(0, addList);
             }
 
-            notifyItemRangeInserted(minViewPositionChanged, notes.size());
+            notifyItemRangeInserted(minViewPositionChanged, maxViewPositionChanged);
+            notifyItemRangeChanged(minViewPositionChanged, notes.size());
 
-            // Notes added at random
-        } else {
-
+        } else {        // Notes added at random
             notes.clear();
             notes.addAll(tempNotes);
-            tempNotes.clear();
             notifyItemRangeChanged(0, size);
         }
+        tempNotes.clear();
+    }
+
+    public void clearTempNotes() {
+        this.tempNotes.clear();
     }
 
     public void addSelectedId(int position) {
@@ -130,7 +131,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
-        Log.d("Multi", "Bind at position " + position);
         SingleNote note = this.notes.get(position);
 
         if (selectedIds.contains(position)) {
@@ -161,8 +161,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Log.d("Multi", "Create at position " + viewType);
-
         RecyclerView.ViewHolder viewHolder;
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 

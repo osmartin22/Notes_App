@@ -1,10 +1,9 @@
 package com.ozmar.notes.utils;
 
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.view.MenuItem;
-import android.widget.EditText;
 
-import com.ozmar.notes.DatabaseHandler;
 import com.ozmar.notes.R;
 import com.ozmar.notes.SingleNote;
 
@@ -13,9 +12,11 @@ public class NoteEditorUtils {
     private NoteEditorUtils() {}
 
     @NonNull
-    public static String differenceFromOriginal(String title, String content, SingleNote note) {
+    public static String differenceFromOriginal(Context context, String title, String content, SingleNote note) {
+        String[] noteChanges = context.getResources().getStringArray(R.array.noteChanges);
+
         if (title.isEmpty() && content.isEmpty() && note == null) {
-            return "discardNote";
+            return "";
 
         } else if (note != null) {
 
@@ -25,18 +26,20 @@ public class NoteEditorUtils {
             if (!(titleTheSame && contentTheSame)) {
 
                 if (titleTheSame) {
-                    return "contentChanged";
+                    return noteChanges[0];
+
                 } else if (contentTheSame) {
-                    return "titleChanged";
+                    return noteChanges[1];
+
                 } else {
-                    return "titleAndContentChanged";
+                    return noteChanges[2];
                 }
             }
 
-            return "notChanged";
+            return noteChanges[3];
         } // else if() end
 
-        return "newNote";
+        return noteChanges[4];
     }
 
     public static boolean favoriteNote(boolean favorite, MenuItem item) {
@@ -51,28 +54,7 @@ public class NoteEditorUtils {
         return favorite;
     }
 
-    public static int archiveNote(EditText title, EditText content, SingleNote note, DatabaseHandler db) {
-        if (note != null) {
-            db.addNoteToArchive(note);
-            db.deleteNoteFromUserList(note);
-            return 4;
-        } else {
-            db.addNoteToArchive(new SingleNote(title.getText().toString(), content.getText().toString()));
-            return 2;
-        }
-    }
+    public static void doDeleteForever() {
 
-    public static void unArchiveNote(boolean favorite, SingleNote note, DatabaseHandler db) {
-        db.deleteNoteFromArchive(note);
-        if (favorite) {
-            note.set_favorite(1);
-        }
-        db.addNoteToUserList(note);
     }
-
-    public static void restoreNote(SingleNote note, DatabaseHandler db) {
-        db.deleteNoteFromRecycleBin(note);
-        db.addNoteToUserList(note);
-    }
-
 }

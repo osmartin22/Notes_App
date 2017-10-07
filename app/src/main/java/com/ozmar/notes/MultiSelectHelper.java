@@ -1,7 +1,5 @@
 package com.ozmar.notes;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +53,6 @@ public class MultiSelectHelper {
     public int getSize() {
         return notes.size();
     }
-
 
 }
 

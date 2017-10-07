@@ -18,6 +18,9 @@ import com.ozmar.notes.utils.NoteEditorUtils;
 
 import static com.ozmar.notes.MainActivity.db;
 
+
+// 1) Removed sav button, notes save automatically now
+
 public class NoteEditorActivity extends AppCompatActivity {
 
     private EditText editTextTitle, editTextContent;
@@ -30,27 +33,41 @@ public class NoteEditorActivity extends AppCompatActivity {
 
     private String[] noteResult;
 
-    private void deleteNoteMenu() {
-        new AlertDialog.Builder(NoteEditorActivity.this)
-                .setMessage("Do you want to delete this note?")
-                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        if (currentNote != null) {
-                            db.deleteNoteFromUserList(currentNote);
-                            db.addNoteToRecycleBin(currentNote);
-                            goBackToMainActivity(noteResult[4]);
-                        } else {
-                            goBackToMainActivity(noteResult[0]);       // New empty note, discard
-                        }
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    } // deleteNoteMenu() end
+    private void contextualActionResult(MenuItem item) {
+
+        if (currentNote != null) {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            boolean title = !currentNote.get_title().equals(editTextTitle.toString());
+            boolean content = !currentNote.get_content().equals(editTextContent.toString());
+            updateNote(title, content);
+
+            switch (item.getItemId()) {
+                case R.id.archive_note:
+                    intent.putExtra("menuAction", 0);
+                    break;
+                case R.id.unarchive_note:
+                    intent.putExtra("menuAction", 1);
+                    break;
+                case R.id.delete_note:
+                    intent.putExtra("menuAction", 2);
+                    break;
+                case R.id.restore_note:
+                    intent.putExtra("menuAction", 3);
+                    break;
+            }
+
+            intent.putExtra("Note", currentNote);
+            intent.putExtra("Note Position", notePosition);
+            setResult(RESULT_OK, intent);
+        }
+
+        finish();   // Only allow undo for notes that are not new
+    }
 
     // Check strings.xml for meaning of noteResult[]
-    private void goBackToMainActivity(String value) {
+    private void noteModifiedResult(String value) {
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -67,7 +84,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         intent.putExtra("Note", currentNote);
         setResult(RESULT_OK, intent);
         finish();
-    } // goBackToMainActivity() end
+    } // noteModifiedResult() end
 
     private void saveNoteInDb() {
         switch (listUsed) {
@@ -94,53 +111,49 @@ public class NoteEditorActivity extends AppCompatActivity {
         if (contentChanged) {
             currentNote.set_content(content);
         }
-
-        saveNoteInDb();
-        goBackToMainActivity(noteResult[1]);
     } // updateNote() end
 
     // Save note into db and go back to MainActivity
-    private void saveNoteMenu() {
+    private void saveNote() {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
-        String difference = NoteEditorUtils.differenceFromOriginal(title, content, currentNote);
-        switch (difference) {
-            case "discardNote":
-                goBackToMainActivity(noteResult[0]);
-                break;
+        String difference = NoteEditorUtils.differenceFromOriginal(getApplicationContext(), title, content, currentNote);
+        String[] noteChanges = getResources().getStringArray(R.array.noteChanges);
 
-            case "contentChanged":
-                updateNote(false, true);
-                break;
+        if (difference.equals(noteChanges[0])) {
+            updateNote(false, true);
+            saveNoteInDb();
+            noteModifiedResult(noteResult[1]);
 
-            case "titleChanged":
-                updateNote(true, false);
-                break;
+        } else if (difference.equals(noteChanges[1])) {
+            updateNote(true, false);
+            saveNoteInDb();
+            noteModifiedResult(noteResult[1]);
 
-            case "titleAndContentChanged":
-                updateNote(true, true);
-                break;
+        } else if (difference.equals(noteChanges[2])) {
+            updateNote(true, true);
+            saveNoteInDb();
+            noteModifiedResult(noteResult[1]);
 
-            case "notChanged":
+        } else if (difference.equals(noteChanges[3])) {
+            if (listUsed == 1 && !favorite) {
+                noteModifiedResult(noteResult[5]);
+            } else {
+                noteModifiedResult(noteResult[2]);    // No updates to RecyclerView
+            }
 
-                // Used to update favorites list if it is the current list being looked at and the note
-                // is no longer a favorite note
-                if (listUsed == 1 && !favorite) {
-                    goBackToMainActivity(noteResult[5]);
-                } else {
-                    goBackToMainActivity(noteResult[2]);    // No updates to RecyclerView
-                }
-                break;
+        } else if (difference.equals(noteChanges[4])) {
+            SingleNote temp;
+            temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
+            db.addNoteToUserList(temp);
+            noteModifiedResult(noteResult[3]);
 
-            case "newNote":
-                SingleNote temp;
-                temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
-                db.addNoteToUserList(temp);
-                goBackToMainActivity(noteResult[3]);
-                break;
+        } else {
+            noteModifiedResult(noteResult[0]);
         }
-    } // saveNoteMenu() end
+
+    } // saveNote() end
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -205,45 +218,9 @@ public class NoteEditorActivity extends AppCompatActivity {
         }
     }
 
-    // Only show alert dialog if there is a difference from when the note was opened
     @Override
     public void onBackPressed() {
-        final String difference = NoteEditorUtils.differenceFromOriginal(
-                editTextTitle.getText().toString(), editTextContent.getText().toString(), currentNote);
-
-        // Only show AlertDialog if the note needs saving
-        if (!difference.equals("discardNote") && !difference.equals("notChanged")) {
-            new AlertDialog.Builder(NoteEditorActivity.this)
-                    .setMessage("Save your changes or discard them?")
-                    .setPositiveButton("Save", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            saveNoteMenu();
-                            if (currentNote != null) {
-                                goBackToMainActivity(noteResult[1]);    // Write over existing note
-                            } else {
-                                goBackToMainActivity(noteResult[3]);    // New note saved
-                            }
-                        }
-                    })
-                    .setNeutralButton("Cancel", null)
-                    .setNegativeButton("Discard", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            goBackToMainActivity(noteResult[2]);    // No change to note
-                        }
-                    })
-                    .show();
-        } else {
-
-            // Used to update favorites list if it is the current list being looked at and the note
-            // is no longer a favorite note
-            if (listUsed == 1 && !favorite && currentNote != null) {
-                goBackToMainActivity(noteResult[5]);
-            } else {
-                super.onBackPressed();
-            }
-        }
+        saveNote();
     } // onBackPressed() end
 
     @Override
@@ -266,9 +243,9 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         } else {
             menu.findItem(R.id.restore_note).setVisible(true);
+            menu.findItem(R.id.delete_note_forever).setVisible(true);
             menu.findItem(R.id.delete_note).setVisible(false);
             menu.findItem(R.id.archive_note).setVisible(false);
-            menu.findItem(R.id.save_note).setVisible(false);
             menu.findItem(R.id.favorite_note).setVisible(false);
         }
 
@@ -285,36 +262,39 @@ public class NoteEditorActivity extends AppCompatActivity {
                 onBackPressed();
                 return true;
 
-            case R.id.save_note:
-                saveNoteMenu();
-                return true;
-
-            case R.id.delete_note:
-                deleteNoteMenu();
-                return true;
-
             case R.id.favorite_note:
                 favorite = NoteEditorUtils.favoriteNote(favorite, menuItem);
                 return true;
 
+            case R.id.delete_note_forever:
+                deleteNoteForever();
+                return true;
+
+            case R.id.delete_note:
             case R.id.archive_note:
-                int result = NoteEditorUtils.archiveNote(editTextTitle, editTextContent, currentNote, db);
-                goBackToMainActivity(noteResult[result]);
-                return true;
-
             case R.id.unarchive_note:
-                NoteEditorUtils.unArchiveNote(favorite, currentNote, db);
-                goBackToMainActivity(noteResult[4]);
-                return true;
-
             case R.id.restore_note:
-                NoteEditorUtils.restoreNote(currentNote, db);
-                goBackToMainActivity(noteResult[4]);
+                contextualActionResult(item);
                 return true;
         }
 
         return false;
     } // onOptionsItemSelected() end
+
+    private void deleteNoteForever() {
+        new AlertDialog.Builder(NoteEditorActivity.this)
+                .setMessage("Do you want to delete this note?")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        db.deleteNoteFromRecycleBin(currentNote);
+                        noteModifiedResult(noteResult[4]);
+                        finish();
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    } // deleteNoteMenu() end
 
     @Override
     protected void onPause() {

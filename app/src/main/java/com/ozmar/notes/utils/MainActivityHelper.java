@@ -1,14 +1,12 @@
 package com.ozmar.notes.utils;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.ozmar.notes.DatabaseHandler;
 import com.ozmar.notes.NotesAdapter;
@@ -88,20 +86,16 @@ public class MainActivityHelper {
         }
     }
 
-    public List<SingleNote> updateAdapter(Intent data, NotesAdapter adapter, List<SingleNote> noteList) {
+    public List<SingleNote> updateAdapter(Bundle bundle, NotesAdapter adapter, List<SingleNote> noteList) {
         // Array used to check NoteEditor outcome
         String[] noteResult = context.getResources().getStringArray(R.array.noteResultArray);
 
-        Bundle bundle = data.getExtras();
         String save = bundle.getString("Note Success", "");
         int position = bundle.getInt("Note Position", -1);
         boolean favorite = bundle.getBoolean("Note Favorite", false);
         SingleNote note = bundle.getParcelable("Note");
 
-        if (save.equals(noteResult[0])) {
-            Toast.makeText(context, "No content to save. Note discarded.", Toast.LENGTH_SHORT).show();
-
-        } else if (save.equals(noteResult[1])) {    // Update rv with changes to the note
+        if (save.equals(noteResult[1])) {    // Update rv with changes to the note
             noteList.set(position, note);
             adapter.updateAt(position, note);
 
@@ -132,7 +126,7 @@ public class MainActivityHelper {
         return listUsed;
     }
 
-    public String messageToDisplay(MenuItem item, int size) {
+    public String multiSelectMessageToDisplay(MenuItem item, int size) {
         switch (item.getItemId()) {
             case R.id.contextualArchive:
                 return (size == 1) ? context.getString(R.string.snackBarArchiveSingle) : context.getString(R.string.snackBarArchiveMultiple);
@@ -146,6 +140,37 @@ public class MainActivityHelper {
                 return (size == 1) ? context.getString(R.string.deleteForeverSingle) : context.getString(R.string.deleteForeverMultiple);
         }
         return null;
+    }
+
+    public String noteEditorMessage(int num) {
+        switch (num) {
+            case 0:     // Archive
+                return context.getString(R.string.snackBarArchiveSingle);
+            case 1:     // Unarchive
+                return context.getString(R.string.snackBarUnarchiveSingle);
+            case 2:     // Delete
+                return context.getString(R.string.snackBarDeleteSingle);
+            case 3:     // Restore
+                return context.getString(R.string.snackBarRestoreSingle);
+        }
+        return  null;
+    }
+
+    public void doNoteEditorAction(int action, List<SingleNote> list) {
+        switch (action) {
+            case 0:         // Archive
+                doArchive(list);
+                break;
+            case 1:         // Unarchive
+                doUnarchive(list);
+                break;
+            case 2:         // Delete
+                doDelete(list);
+                break;
+            case 3:         // Restore
+                doRestore(list);
+                break;
+        }
     }
 
     public void setCABMenuItems(Menu menu) {
@@ -169,31 +194,31 @@ public class MainActivityHelper {
     public void doCABAction(MenuItem choice, List<SingleNote> list) {
         switch (choice.getItemId()) {
             case R.id.contextualArchive:
-                doContextualArchive(list);      // Only in all notes / favorites
+                doArchive(list);      // Only in all notes / favorites
                 break;
             case R.id.contextualUnarchive:
-                doContextualUnarchive(list);    // Only in Archive list
+                doUnarchive(list);    // Only in Archive list
                 break;
             case R.id.contextualDelete:
-                doContextualDelete(list);       // In all lists
+                doDelete(list);       // In all lists
                 break;
             case R.id.contextualRestore:
-                doContextualRestore(list);      // Only in Trash List
+                doRestore(list);      // Only in Trash List
                 break;
         }
     }
 
-    private void doContextualArchive(List<SingleNote> list) {
+    private void doArchive(List<SingleNote> list) {
         db.deleteListFromUserList(list);
         db.addListToArchive(list);
     }
 
-    private void doContextualUnarchive(List<SingleNote> list) {
+    private void doUnarchive(List<SingleNote> list) {
         db.deleteListFromArchive(list);
         db.addListToUserList(list);
     }
 
-    private void doContextualDelete(List<SingleNote> list) {
+    private void doDelete(List<SingleNote> list) {
         switch (listUsed) {
             case 0:
             case 1:
@@ -208,7 +233,7 @@ public class MainActivityHelper {
         db.addListToRecycleBin(list);
     }
 
-    private void doContextualRestore(List<SingleNote> list) {
+    private void doRestore(List<SingleNote> list) {
         db.deleteListFromRecycleBin(list);
         db.addListToUserList(list);
     }

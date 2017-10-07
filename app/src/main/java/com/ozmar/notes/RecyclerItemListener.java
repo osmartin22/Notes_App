@@ -36,7 +36,7 @@ public class RecyclerItemListener implements RecyclerView.OnItemTouchListener {
                     public boolean onSingleTapUp(MotionEvent e) {
                         View v = rv.findChildViewUnder(e.getX(), e.getY());
                         listener.onClickItem(v, rv.getChildAdapterPosition(v));
-                        return true;
+                        return false;
                     }
                 });
     }

@@ -7,24 +7,32 @@
 
 
     <!-- MenuItem names for NoteEditorActivity-->
-    <string name="saveNoteMenuItem">Save Note</string>
-    <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="favoriteNoteMenuItem">Favorite Note</string>
     <string name="archiveNoteMenuItem">Archive Note</string>
     <string name="unArchiveNoteMenuItem">Unarchive Note</string>
+    <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="restoreNoteMenuItem">Restore Note</string>
+    <string name="deleteForeverMenuItem">Delete Forever</string>
+
 
     <!-- MenuItem names for MainActivity -->
     <string name="layoutManager">Change Layout</string>
-    <string name="spinnerMain">Choose List</string>
-    <string-array name="mainSpinnerArray">
-        <item>All Notes</item>
-        <item>Favorites</item>
-    </string-array>
 
+
+    <!-- String array used for checking what changed in the note -->
+    <string-array name="noteChanges">
+        <item>contentChanged</item>contentChanged
+        <item>titleChanged</item>
+        <item>titleAndContentChanged</item>
+        <item>notChanged</item>
+        <item>newNote</item>
+        <item>favoriteChanged</item>
+    </string-array>
+    
+    
     <!-- String array for how to update RecyclerView after NoteEditorActivity finishes -->
     <string-array name="noteResultArray">
-        <item>discardNewEmptyNote</item>    <!-- [0] -->
+        <item>doNothing</item>              <!-- [0] -->
         <item>updateNoteInRV</item>         <!-- Update note in RecyclerView -->
         <item>noChangesToRV</item>          <!-- No changes to RecyclerView -->
         <item>addNewNoteToRV</item>         <!-- Add note to RecyclerView -->
@@ -44,12 +52,12 @@
     <string name="deleteForeverMultiple">Delete notes forever?</string>
 
     <!-- SnackBar output -->
-    <string name="snackBarDeleteSingle">Note moved to trash.</string>
-    <string name="snackBarDeleteMultiple">Notes moved to trash.</string>
-    <string name="snackBarArchiveSingle">Note moved to archive.</string>
-    <string name="snackBarArchiveMultiple">Notes moved to archive.</string>
-    <string name="snackBarUnarchiveSingle">Note unarchived.</string>
-    <string name="snackBarUnarchiveMultiple">Notes unarchived.</string>
+    <string name="snackBarDeleteSingle">Note moved to trash</string>
+    <string name="snackBarDeleteMultiple">Notes moved to trash</string>
+    <string name="snackBarArchiveSingle">Note moved to archive</string>
+    <string name="snackBarArchiveMultiple">Notes moved to archive</string>
+    <string name="snackBarUnarchiveSingle">Note unarchived</string>
+    <string name="snackBarUnarchiveMultiple">Notes unarchived</string>
     <string name="snackBarRestoreSingle">Note restored</string>
     <string name="snackBarRestoreMultiple">Notes restored</string>
 
