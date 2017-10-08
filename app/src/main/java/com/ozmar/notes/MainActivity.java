@@ -18,13 +18,17 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.ozmar.notes.async.BasicDBAsync;
+import com.ozmar.notes.async.DoMenuActionAsync;
 import com.ozmar.notes.utils.MainActivityHelper;
 import com.ozmar.notes.utils.MenuItemHelper;
+import com.ozmar.notes.utils.MultiSelectFlagHelper;
 import com.ozmar.notes.utils.UndoBuffer;
 
 import static android.support.v7.widget.DividerItemDecoration.HORIZONTAL;
@@ -52,8 +56,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     static DatabaseHandler db;
 
     private ActionMode actionMode;
-    private boolean multiSelectFlag;
-    private MenuItem menuItemSelected;
     private UndoBuffer buffer = new UndoBuffer();
 
     private int layoutChoice;
@@ -67,13 +69,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FloatingActionButton fab;
 
     private Snackbar snackBar = null;
-    private boolean undoFlag = false;
-    private boolean anotherMultiSelect = false;
 
-    private int editorAction = -1;
-    private boolean noteEditorAction = false;
+//    private int editorAction = -1;
 
     private MainActivityHelper mainActivityHelper;
+    private MultiSelectFlagHelper multiSelectHelper;
     private MenuItemHelper itemHelper;
 
     public void launchNoteEditor(View view) {
@@ -107,8 +107,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rv.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(),
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
-                if (multiSelectFlag) {
-
+                if (multiSelectHelper.isMultiSelectFlag()) {
                     multiSelect(notesAdapter.getNoteAt(position), position);
 
                 } else {
@@ -125,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             public void onLongClickItem(View view, final int position) {
-                if (!multiSelectFlag) {
+                if (!multiSelectHelper.isMultiSelectFlag()) {
 
                     // Only allow multi select if a buffer is available to hold the data
                     if (buffer.isBufferAvailable()) {
@@ -157,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
         mainActivityHelper = new MainActivityHelper(getApplicationContext(), db);
         itemHelper = new MenuItemHelper(getApplicationContext(), db);
+        multiSelectHelper = new MultiSelectFlagHelper();
 
         drawer = (DrawerLayout) findViewById(R.id.drawerLayout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -165,8 +165,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 super.onDrawerSlide(drawerView, slideOffset);
-                if (multiSelectFlag) {
-                    multiSelectFlag = false;
+                if (multiSelectHelper.isMultiSelectFlag()) {
+                    multiSelectHelper.setMultiSelectFlag(false);
+
                     actionMode.finish();
                 }
                 if (snackBar != null) {
@@ -212,7 +213,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             actionMode = mode;
-            multiSelectFlag = true;
+            multiSelectHelper.setMultiSelectFlag(true);
+
             mode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
             itemHelper.setCABMenuItems(menu, notesAdapter.getListUsed());
             return true;
@@ -231,11 +233,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 case R.id.contextualDelete:
                 case R.id.contextualRestore:
                     removeViews(mode, item);
-                    menuItemSelected = item;
+                    multiSelectHelper.setItem(item);
                     return true;
                 case R.id.contextualDeleteForever:
                     actionMode = mode;
                     deleteForever(item);
+                    menuItemPressed = true;
                     return true;
                 default:
                     return false;
@@ -244,12 +247,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            multiSelectFlag = false;
+            multiSelectHelper.setMultiSelectFlag(false);
             actionMode = null;
             notesAdapter.clearSelectedIds();
 
             // Clear buffer if a CAB item was not pressed (i.e. adding note, open drawer, back pressed)
             if (!menuItemPressed) {
+                Log.d("IN", "HERE");
                 buffer.clearCurrentBuffer();
                 notesAdapter.notifyDataSetChanged();
             }
@@ -265,7 +269,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        db.deleteListFromRecycleBin(buffer.currentBufferNotes());
+                        new BasicDBAsync(db, buffer.currentBufferNotes(), null, notesAdapter.getListUsed(), 3).execute();
                         notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
                         actionMode.finish();
                     }
@@ -276,7 +280,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void showSnackBar(final MenuItem item, int num) {
         String message;
-        if (noteEditorAction) {
+        if (multiSelectHelper.isNoteEditorAction()) {
             message = itemHelper.noteEditorMessage(num);
         } else {
             message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
@@ -292,36 +296,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             snackBar.addCallback(new Snackbar.Callback() {
                 @Override
                 public void onDismissed(Snackbar s, int event) {
-                    if (!undoFlag) {           // Undo not pressed in SnackBar
-
-                        if (anotherMultiSelect) {
-                            if (noteEditorAction) {
-                                itemHelper.doEditorAction(editorAction, buffer.otherBuffer().getNotes(),
-                                        notesAdapter.getListUsed());
-                            } else {
-                                itemHelper.doCABAction(menuItemSelected, buffer.otherBuffer().getNotes(),
-                                        notesAdapter.getListUsed());
-                            }
-                            anotherMultiSelect = false;
-                            buffer.clearOtherBuffer();
-
-                            // Any action that dismisses SnackBar that is not another multi select operation
-                        } else {
-                            if (noteEditorAction) {
-
-                                itemHelper.doEditorAction(editorAction, buffer.currentBufferNotes(),
-                                        notesAdapter.getListUsed());
-                            } else {
-                                itemHelper.doCABAction(menuItemSelected, buffer.currentBufferNotes(),
-                                        notesAdapter.getListUsed());
-                            }
-                            buffer.clearCurrentBuffer();
-                        }
-                    }
+                    new DoMenuActionAsync(multiSelectHelper, itemHelper, buffer, notesAdapter.getListUsed()).execute();
                     snackBar = null;
-                    undoFlag = false;
-                    menuItemSelected = null;
-                    noteEditorAction = false;
                     notesAdapter.clearTempNotes();
                 }
             });
@@ -331,9 +307,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private class UndoListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            undoFlag = true;
             snackBar = null;
-            if (noteEditorAction) {
+            multiSelectHelper.setUndoFlag(true);
+
+            if (multiSelectHelper.isNoteEditorAction()) {
+
                 notesAdapter.addSelectedViews(buffer.currentBufferPositions(),
                         buffer.currentBufferNotes());
 
@@ -347,7 +325,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void multiSelect(SingleNote note, int position) {
         if (snackBar != null) {
-            anotherMultiSelect = true;
+            multiSelectHelper.setAnotherMultiSelect(true);
+//            anotherMultiSelect = true;
             snackBar.dismiss();
             snackBar = null;
         }
@@ -436,15 +415,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (requestCode == 1 && data != null) {
             Bundle bundle = data.getExtras();
-            editorAction = bundle.getInt("menuAction", -1);
+            multiSelectHelper.setEditorAction(bundle.getInt("menuAction", -1));
             int position = bundle.getInt("Note Position", -1);
             SingleNote note = bundle.getParcelable("Note");
 
-            if (editorAction != -1) {
-                noteEditorAction = true;
+            if (multiSelectHelper.getEditorAction() != -1) {
+                multiSelectHelper.setNoteEditorAction(true);
                 buffer.addDataToBuffer(note, position);
                 notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
-                showSnackBar(null, editorAction);
+                showSnackBar(null, multiSelectHelper.getEditorAction());
 
             } else {
                 mainActivityHelper.updateAdapter(bundle, notesAdapter);

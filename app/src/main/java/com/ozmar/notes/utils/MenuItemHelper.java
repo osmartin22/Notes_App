@@ -131,4 +131,5 @@ public class MenuItemHelper {
         db.deleteListFromRecycleBin(list);
         db.addListToUserList(list);
     }
+
 }

@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.utils.NoteEditorUtils;
 
 import static com.ozmar.notes.MainActivity.db;
@@ -86,18 +87,6 @@ public class NoteEditorActivity extends AppCompatActivity {
         finish();
     } // noteModifiedResult() end
 
-    private void saveNoteInDb() {
-        switch (listUsed) {
-            case 0:
-            case 1:
-                db.updateNoteFromUserList(currentNote);
-                break;
-            case 2:
-                db.updateNoteFromArchive(currentNote);
-                break;
-        }
-    } // saveNoteInDb() end
-
     private void updateNote(boolean titleChanged, boolean contentChanged) {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
@@ -121,17 +110,17 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         if (difference.equals(noteChanges[0])) {
             updateNote(false, true);
-            saveNoteInDb();
+            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
             noteModifiedResult(noteResult[1]);
 
         } else if (difference.equals(noteChanges[1])) {
             updateNote(true, false);
-            saveNoteInDb();
+            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
             noteModifiedResult(noteResult[1]);
 
         } else if (difference.equals(noteChanges[2])) {
             updateNote(true, true);
-            saveNoteInDb();
+            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
             noteModifiedResult(noteResult[1]);
 
         } else if (difference.equals(noteChanges[3])) {
@@ -144,7 +133,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         } else if (difference.equals(noteChanges[4])) {
             SingleNote temp;
             temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
-            db.addNoteToUserList(temp);
+            new BasicDBAsync(db, null, temp, listUsed, 0).execute();
             noteModifiedResult(noteResult[3]);
 
         } else {
@@ -283,7 +272,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        db.deleteNoteFromRecycleBin(currentNote);
+                        new BasicDBAsync(db, null, currentNote, listUsed, 3).execute();
                         noteModifiedResult(noteResult[4]);
                         finish();
                     }
@@ -299,7 +288,7 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         if (currentNote != null && listUsed != 2) {  // Save favorite even if user does not explicitly press save menu item
             currentNote.set_favorite(temp);
-            db.updateNoteFromUserList(currentNote);
+            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
         }
     }
 } // NoteEditorActivity() end
