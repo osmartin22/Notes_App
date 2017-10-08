@@ -1,16 +1,12 @@
 package com.ozmar.notes.async;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.ozmar.notes.DatabaseHandler;
 import com.ozmar.notes.SingleNote;
 
 import java.util.List;
 
-/**
- * Created by ozmar on 10/7/2017.
- */
 
 public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
 
@@ -96,7 +92,6 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
     }
 
     private void deleteForever() {
-        Log.d("IN", "HERE MAN");
         if (list != null) {
             db.deleteListFromRecycleBin(list);
         } else {

@@ -20,25 +20,20 @@
 
 
     <!-- String array used for checking what changed in the note -->
-    <string-array name="noteChanges">
-        <item>contentChanged</item>contentChanged
-        <item>titleChanged</item>
-        <item>titleAndContentChanged</item>
-        <item>notChanged</item>
+    <string-array name="noteChangesArray">
+        <item>noteModified</item>
         <item>newNote</item>
         <item>favoriteChanged</item>
     </string-array>
-    
-    
+
     <!-- String array for how to update RecyclerView after NoteEditorActivity finishes -->
     <string-array name="noteResultArray">
-        <item>doNothing</item>              <!-- [0] -->
-        <item>updateNoteInRV</item>         <!-- Update note in RecyclerView -->
-        <item>noChangesToRV</item>          <!-- No changes to RecyclerView -->
-        <item>addNewNoteToRV</item>         <!-- Add note to RecyclerView -->
-        <item>removeNoteFromRV</item>       <!-- Remove note from RecyclerView -->
-        <item>noteNotFavorite</item>        <!-- [5] Update RecyclerView if in favorites list-->
+        <item>noteModified</item>       <!-- Update note in RecyclerView-->
+        <item>newNote</item>            <!-- Add note to RecyclerView -->
+        <item>deleteNoteForever</item>  <!-- Remove note from RecyclerView -->
+        <item>favoriteChanged</item>    <!-- Note not a favorite -->
     </string-array>
+
 
     <!-- CAB menu items -->
     <string name="deleteContextualMenuItem">Delete</string>

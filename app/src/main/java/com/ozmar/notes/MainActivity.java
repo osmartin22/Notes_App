@@ -43,8 +43,6 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 // TODO: Allow multi select on orientation change
 // TODO: (CONT) Check if any of the buffers are not empty, check multi select flag
 
-// TODO: Make db read/write into AsyncTask
-
 // TODO: Fix delay from user touch to when view changes background color
 
 // TODO: Fix toast message in Trash editor

@@ -20,8 +20,6 @@ import com.ozmar.notes.utils.NoteEditorUtils;
 import static com.ozmar.notes.MainActivity.db;
 
 
-// 1) Removed sav button, notes save automatically now
-
 public class NoteEditorActivity extends AppCompatActivity {
 
     private EditText editTextTitle, editTextContent;
@@ -40,9 +38,12 @@ public class NoteEditorActivity extends AppCompatActivity {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-            boolean title = !currentNote.get_title().equals(editTextTitle.toString());
-            boolean content = !currentNote.get_content().equals(editTextContent.toString());
-            updateNote(title, content);
+            String title = editTextTitle.getText().toString();
+            String content = editTextContent.getText().toString();
+
+            boolean titleChanged = !currentNote.get_title().equals(title);
+            boolean contentChanged = !currentNote.get_content().equals(content);
+            NoteEditorUtils.updateNoteObject(currentNote, title, content, titleChanged, contentChanged);
 
             switch (item.getItemId()) {
                 case R.id.archive_note:
@@ -73,7 +74,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         // Set notePosition to 0 from -1 if the note being added is a new note
-        if (value.equals(noteResult[3])) {
+        if (value.equals(noteResult[1])) {
             if (favorite) {
                 intent.putExtra("Note Favorite", true);
             }
@@ -84,21 +85,7 @@ public class NoteEditorActivity extends AppCompatActivity {
         intent.putExtra("Note Position", notePosition);
         intent.putExtra("Note", currentNote);
         setResult(RESULT_OK, intent);
-        finish();
     } // noteModifiedResult() end
-
-    private void updateNote(boolean titleChanged, boolean contentChanged) {
-        String title = editTextTitle.getText().toString();
-        String content = editTextContent.getText().toString();
-
-        if (titleChanged) {
-            currentNote.set_title(title);
-        }
-
-        if (contentChanged) {
-            currentNote.set_content(content);
-        }
-    } // updateNote() end
 
     // Save note into db and go back to MainActivity
     private void saveNote() {
@@ -106,40 +93,27 @@ public class NoteEditorActivity extends AppCompatActivity {
         String content = editTextContent.getText().toString();
 
         String difference = NoteEditorUtils.differenceFromOriginal(getApplicationContext(), title, content, currentNote);
-        String[] noteChanges = getResources().getStringArray(R.array.noteChanges);
+        String[] noteChanges = getResources().getStringArray(R.array.noteChangesArray);
 
-        if (difference.equals(noteChanges[0])) {
-            updateNote(false, true);
+        if (difference.equals(noteChanges[0])) {        // Note was modified
             new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
-            noteModifiedResult(noteResult[1]);
+            noteModifiedResult(noteResult[0]);
 
-        } else if (difference.equals(noteChanges[1])) {
-            updateNote(true, false);
-            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
-            noteModifiedResult(noteResult[1]);
-
-        } else if (difference.equals(noteChanges[2])) {
-            updateNote(true, true);
-            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
-            noteModifiedResult(noteResult[1]);
-
-        } else if (difference.equals(noteChanges[3])) {
-            if (listUsed == 1 && !favorite) {
-                noteModifiedResult(noteResult[5]);
-            } else {
-                noteModifiedResult(noteResult[2]);    // No updates to RecyclerView
-            }
-
-        } else if (difference.equals(noteChanges[4])) {
+        } else if (difference.equals(noteChanges[1])) {     // New note
             SingleNote temp;
             temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
-            new BasicDBAsync(db, null, temp, listUsed, 0).execute();
-            noteModifiedResult(noteResult[3]);
 
-        } else {
-            noteModifiedResult(noteResult[0]);
+            new BasicDBAsync(db, null, temp, listUsed, 0).execute();
+            noteModifiedResult(noteResult[1]);
+
+            // TODO: Place in separate function when adding Tags/Categories
+        } else if (difference.equals(noteChanges[2])) {
+            if (listUsed == 1 && !favorite) {       // Note not a favorite anymore
+                noteModifiedResult(noteResult[3]);
+            }
         }
 
+        finish();       // Note unmodified or empty new note
     } // saveNote() end
 
     @Override
@@ -196,9 +170,7 @@ public class NoteEditorActivity extends AppCompatActivity {
             };
             editTextTitle.setOnTouchListener(editTextListener);
             editTextContent.setOnTouchListener(editTextListener);
-        }
-
-        else {      // New note is being created, show keyboard at the start
+        } else {      // New note is being created, show keyboard at the start
             editTextContent.requestFocus();
         }
     } // setUpNoteView() end
@@ -212,28 +184,8 @@ public class NoteEditorActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.note_editor_menu, menu);
-
         menuItem = menu.findItem(R.id.favorite_note);
-
-        if (listUsed != 3) {
-
-            if (listUsed == 2) {
-                menu.findItem(R.id.archive_note).setVisible(false);
-                menu.findItem(R.id.unarchive_note).setVisible(true);
-            }
-
-            if (currentNote != null && currentNote.get_favorite() == 1) {
-                menu.findItem(R.id.favorite_note).setIcon(R.drawable.ic_favorite_star_on);
-            }
-
-        } else {
-            menu.findItem(R.id.restore_note).setVisible(true);
-            menu.findItem(R.id.delete_note_forever).setVisible(true);
-            menu.findItem(R.id.delete_note).setVisible(false);
-            menu.findItem(R.id.archive_note).setVisible(false);
-            menu.findItem(R.id.favorite_note).setVisible(false);
-        }
-
+        NoteEditorUtils.setUpMenu(menu, currentNote, listUsed);
         return super.onCreateOptionsMenu(menu);
     } // onCreateOptionsMenu() end
 
@@ -273,7 +225,7 @@ public class NoteEditorActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         new BasicDBAsync(db, null, currentNote, listUsed, 3).execute();
-                        noteModifiedResult(noteResult[4]);
+                        noteModifiedResult(noteResult[2]);
                         finish();
                     }
                 })

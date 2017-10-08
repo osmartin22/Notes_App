@@ -75,11 +75,11 @@ public class MainActivityHelper {
         SingleNote note = bundle.getParcelable("Note");
         int listUsed = adapter.getListUsed();
 
-        if (save.equals(noteResult[1])) {    // Update rv with changes to the note
+        if (save.equals(noteResult[0])) {    // Update rv with changes to the note
             adapter.updateAt(position, note);
 
             // TODO: Optimize this, right now getting the entire list just for the newest note
-        } else if (save.equals(noteResult[3])) {    // Update rv with new note
+        } else if (save.equals(noteResult[1])) {    // Update rv with new note
             List<SingleNote> noteList = getNotesList(listUsed);
 
             if (listUsed == 0) {
@@ -88,10 +88,10 @@ public class MainActivityHelper {
                 adapter.addAt(position, noteList.get(position));
             }
 
-        } else if (save.equals(noteResult[4])) {    // Remove note from rv (Delete Forever)
+        } else if (save.equals(noteResult[2])) {    // Remove note from rv (Delete Forever)
             adapter.removeAt(position);
 
-        } else if (save.equals(noteResult[5])) {    // Title/Content not modified but note is no longer a favorite
+        } else if (save.equals(noteResult[3])) {    // Title/Content not modified but note is no longer a favorite
             if (listUsed == 1) {
                 adapter.removeAt(position);
             }
