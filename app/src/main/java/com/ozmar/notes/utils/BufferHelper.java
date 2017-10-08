@@ -1,4 +1,6 @@
-package com.ozmar.notes;
+package com.ozmar.notes.utils;
+
+import com.ozmar.notes.SingleNote;
 
 import java.util.ArrayList;
 import java.util.List;

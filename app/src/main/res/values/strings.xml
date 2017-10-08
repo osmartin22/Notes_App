@@ -54,7 +54,7 @@
     <!-- SnackBar output -->
     <string name="snackBarDeleteSingle">Note moved to Trash</string>
     <string name="snackBarDeleteMultiple">Notes moved to Trash</string>
-    <string name="snackBarArchiveSingle">Note archive</string>
+    <string name="snackBarArchiveSingle">Note archived</string>
     <string name="snackBarArchiveMultiple">Notes archived</string>
     <string name="snackBarUnarchiveSingle">Note Unarchived</string>
     <string name="snackBarUnarchiveMultiple">Notes unarchived</string>

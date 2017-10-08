@@ -1,8 +1,10 @@
-package com.ozmar.notes;
+package com.ozmar.notes.viewHolders;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
+
+import com.ozmar.notes.R;
 
 /**
  * Created by ozmar on 9/27/2017.

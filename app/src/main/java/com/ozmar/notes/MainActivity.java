@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.ozmar.notes.utils.MainActivityHelper;
 import com.ozmar.notes.utils.MenuItemHelper;
+import com.ozmar.notes.utils.UndoBuffer;
 
 import static android.support.v7.widget.DividerItemDecoration.HORIZONTAL;
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
@@ -52,14 +53,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private ActionMode actionMode;
     private boolean multiSelectFlag;
-    private MenuItem cabItemSelected;
+    private MenuItem menuItemSelected;
     private UndoBuffer buffer = new UndoBuffer();
 
     private int layoutChoice;
     private MenuItem layoutItem;
     private SharedPreferences settings;
 
-    private MenuItem currentNavigationMenuItem;
+    private MenuItem currentNavMenuItem;
 
     private Toolbar myToolbar;
     private DrawerLayout drawer;
@@ -230,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 case R.id.contextualDelete:
                 case R.id.contextualRestore:
                     removeViews(mode, item);
-                    cabItemSelected = item;
+                    menuItemSelected = item;
                     return true;
                 case R.id.contextualDeleteForever:
                     actionMode = mode;
@@ -298,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 itemHelper.doEditorAction(editorAction, buffer.otherBuffer().getNotes(),
                                         notesAdapter.getListUsed());
                             } else {
-                                itemHelper.doCABAction(cabItemSelected, buffer.otherBuffer().getNotes(),
+                                itemHelper.doCABAction(menuItemSelected, buffer.otherBuffer().getNotes(),
                                         notesAdapter.getListUsed());
                             }
                             anotherMultiSelect = false;
@@ -311,15 +312,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 itemHelper.doEditorAction(editorAction, buffer.currentBufferNotes(),
                                         notesAdapter.getListUsed());
                             } else {
-                                itemHelper.doCABAction(cabItemSelected, buffer.currentBufferNotes(),
+                                itemHelper.doCABAction(menuItemSelected, buffer.currentBufferNotes(),
                                         notesAdapter.getListUsed());
                             }
                             buffer.clearCurrentBuffer();
                         }
                     }
-                    undoFlag = false;
-                    noteEditorAction = false;
                     snackBar = null;
+                    undoFlag = false;
+                    menuItemSelected = null;
+                    noteEditorAction = false;
                     notesAdapter.clearTempNotes();
                 }
             });
@@ -390,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (currentNavigationMenuItem != item) {
+        if (currentNavMenuItem != item) {
             int id = item.getItemId();
             notesAdapter.clearView();
 
@@ -420,11 +422,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     fab.hide();
                     break;
             }
-
-            notesAdapter.notifyDataSetChanged();
         }
 
-        currentNavigationMenuItem = item;
+        currentNavMenuItem = item;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     } // onNavigationItemSelected() end

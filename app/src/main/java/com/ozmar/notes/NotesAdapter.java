@@ -7,6 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.ozmar.notes.async.FetchDBListAsync;
+import com.ozmar.notes.viewHolders.NotesViewHolder;
+import com.ozmar.notes.viewHolders.NotesViewHolderContent;
+import com.ozmar.notes.viewHolders.NotesViewHolderTitle;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +20,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private DatabaseHandler db;
     private int listUsed = 0;
-
 
     private final List<SingleNote> notes;
     private final List<Integer> selectedIds = new ArrayList<>();
@@ -29,27 +33,14 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notes = db.getUserNotes();
     }
 
+    public void getList(List<SingleNote> i) {
+        notes.addAll(i);
+    }
+
     public void updateAdapterList(int list) {
         notes.clear();
-        switch (list) {
-            case 0:
-            default:
-                listUsed = 0;
-                notes.addAll(db.getUserNotes());
-                break;
-            case 1:
-                listUsed = 1;
-                notes.addAll(db.getFavoriteNotes());
-                break;
-            case 2:
-                listUsed = 2;
-                notes.addAll(db.getArchiveNotes());
-                break;
-            case 3:
-                listUsed = 3;
-                notes.addAll(db.getRecycleBinNotes());
-                break;
-        }
+        listUsed = list;
+        new FetchDBListAsync(db, this, listUsed).execute();
     }
 
     public int getListUsed() {
@@ -128,7 +119,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         // Notes being added are consecutive
         if (maxViewPositionChanged - minViewPositionChanged == amountOfViewAdding - 1) {
             if (minViewPositionChanged != 0) {
-                notes.addAll(minViewPositionChanged - 1, addList);
+                notes.addAll(minViewPositionChanged, addList);
             } else {
                 notes.addAll(0, addList);
             }

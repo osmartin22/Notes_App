@@ -50,23 +50,6 @@ public class MenuItemHelper {
         return  null;
     }
 
-    public void doEditorAction(int action, List<SingleNote> list, int listUsed) {
-        switch (action) {
-            case 0:         // Archive
-                doArchive(list);
-                break;
-            case 1:         // Unarchive
-                doUnarchive(list);
-                break;
-            case 2:         // Delete
-                doDelete(list, listUsed);
-                break;
-            case 3:         // Restore
-                doRestore(list);
-                break;
-        }
-    }
-
     public void setCABMenuItems(Menu menu, int listUsed) {
         switch (listUsed) {
             case 0:
@@ -98,6 +81,23 @@ public class MenuItemHelper {
                 break;
             case R.id.contextualRestore:
                 doRestore(list);      // Only in Trash List
+                break;
+        }
+    }
+
+    public void doEditorAction(int action, List<SingleNote> list, int listUsed) {
+        switch (action) {
+            case 0:         // Archive
+                doArchive(list);
+                break;
+            case 1:         // Unarchive
+                doUnarchive(list);
+                break;
+            case 2:         // Delete
+                doDelete(list, listUsed);
+                break;
+            case 3:         // Restore
+                doRestore(list);
                 break;
         }
     }

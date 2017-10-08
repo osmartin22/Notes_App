@@ -1,7 +1,9 @@
-package com.ozmar.notes;
+package com.ozmar.notes.utils;
 
 
 import android.util.Log;
+
+import com.ozmar.notes.SingleNote;
 
 import java.util.List;
 
