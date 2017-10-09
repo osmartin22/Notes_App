@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.DoMenuActionAsync;
+import com.ozmar.notes.async.NavMenuAsync;
 import com.ozmar.notes.utils.MainActivityHelper;
 import com.ozmar.notes.utils.MenuItemHelper;
 import com.ozmar.notes.utils.MultiSelectFlagHelper;
@@ -33,19 +34,6 @@ import com.ozmar.notes.utils.UndoBuffer;
 
 import static android.support.v7.widget.DividerItemDecoration.HORIZONTAL;
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
-
-// TODO: Save status of SnackBar in case app is force closed and contextualItem action was not completed
-// TODO: (CONT) complete action on startUp, or show message
-// TODO: (CONT) Or let user do the action again (annoying to do for user)
-
-// TODO: Add favorite button for multi select
-
-// TODO: Allow multi select on orientation change
-// TODO: (CONT) Check if any of the buffers are not empty, check multi select flag
-
-// TODO: Fix delay from user touch to when view changes background color
-
-// TODO: Fix toast message in Trash editor
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private NotesAdapter notesAdapter;
@@ -290,8 +278,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 public void onDismissed(Snackbar s, int event) {
                     Log.d("HI", "HI");
                     if (!multiSelectHelper.isUndoFlag()) {
-                        Log.d("HI", "INSIDE");
-                        new DoMenuActionAsync(multiSelectHelper, itemHelper, buffer, notesAdapter.getListUsed()).execute();
+                        new DoMenuActionAsync(db, multiSelectHelper, itemHelper, buffer, notesAdapter, myToolbar, fab).execute();
                     }
 
                     snackBar = null;
@@ -371,17 +358,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (snackBar != null) {
-            snackBar.dismiss();
-            multiSelectHelper.setInAsync(true);
-        }
-
         if (currentNavMenuItem != item) {
-            notesAdapter.clearView();
-            mainActivityHelper.setAdapterList(myToolbar, notesAdapter, fab, item);
+
+            if (snackBar != null) {
+                snackBar.dismiss();
+                multiSelectHelper.setInAsync(true);
+            }
+
+            if (!multiSelectHelper.isInAsync()) {
+                if (currentNavMenuItem != item) {
+                    notesAdapter.clearView();
+                    new NavMenuAsync(db, myToolbar, fab, notesAdapter, item).execute();
+                }
+            }
+
+            currentNavMenuItem = item;
+            multiSelectHelper.setCurrentNavMenu(currentNavMenuItem);
         }
 
-        currentNavMenuItem = item;
         drawer.closeDrawer(GravityCompat.START);
         return true;
     } // onNavigationItemSelected() end

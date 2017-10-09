@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.ozmar.notes.async.FetchDBListAsync;
 import com.ozmar.notes.viewHolders.NotesViewHolder;
 import com.ozmar.notes.viewHolders.NotesViewHolderContent;
 import com.ozmar.notes.viewHolders.NotesViewHolderTitle;
@@ -35,12 +34,11 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     public void getList(List<SingleNote> i) {
         notes.addAll(i);
+        notifyDataSetChanged();
     }
 
-    public void updateAdapterList(int list) {
-        notes.clear();
-        listUsed = list;
-            new FetchDBListAsync(db, this, listUsed).execute();
+    public void setListUsed(int listUsed) {
+        this.listUsed = listUsed;
     }
 
     public int getListUsed() {

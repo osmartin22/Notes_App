@@ -1,31 +1,39 @@
 package com.ozmar.notes.async;
 
 import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
+import com.ozmar.notes.DatabaseHandler;
+import com.ozmar.notes.NotesAdapter;
 import com.ozmar.notes.utils.MenuItemHelper;
 import com.ozmar.notes.utils.MultiSelectFlagHelper;
 import com.ozmar.notes.utils.UndoBuffer;
 
-/**
- * Created by ozmar on 10/7/2017.
- */
 
 public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
 
+    private DatabaseHandler db;
     private MultiSelectFlagHelper flagHelper;
     private MenuItemHelper itemHelper;
     private UndoBuffer buffer;
     private int listUsed;
+    private NotesAdapter adapter;
+    private Toolbar toolbar;
+    private FloatingActionButton fab;
 
-    private int bufferSelected; // 0 = currentBuffer    1 = otherBuffer (
-
-    public DoMenuActionAsync(MultiSelectFlagHelper flagHelper, MenuItemHelper itemHelper,
-                             UndoBuffer buffer, int listUsed) {
+    public DoMenuActionAsync(DatabaseHandler db, MultiSelectFlagHelper flagHelper, MenuItemHelper itemHelper,
+                             UndoBuffer buffer, NotesAdapter adapter, Toolbar toolbar, FloatingActionButton fab) {
+        this.db = db;
         this.flagHelper = flagHelper;
         this.itemHelper = itemHelper;
         this.buffer = buffer;
-        this.listUsed = listUsed;
+        this.adapter = adapter;
+        this.listUsed = adapter.getListUsed();
+        this.toolbar = toolbar;
+        this.fab = fab;
+
     }
 
     private void noteEditorAction() {
@@ -51,7 +59,6 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-        Log.d("Async", "start");
     }
 
     @Override
@@ -61,6 +68,7 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
         } else if(flagHelper.getItem() != null){
             cabAction();
         }
+
         return null;
     }
 
@@ -70,8 +78,6 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
         flagHelper.setNoteEditorAction(false);
         flagHelper.setEditorAction(-1);
         flagHelper.setItem(null);
-        flagHelper.setInAsync(false);
-        Log.d("Async", "Finished");
 
         if (flagHelper.isAnotherMultiSelect()) {
             flagHelper.setAnotherMultiSelect(false);
@@ -79,5 +85,12 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
         } else {
             buffer.clearCurrentBuffer();
         }
+
+        if(flagHelper.isInAsync()) {
+            adapter.clearView();
+            new NavMenuAsync(db, toolbar, fab, adapter, flagHelper.getCurrentNavMenu()).execute();
+        }
+
+        flagHelper.setInAsync(false);
     }
 }

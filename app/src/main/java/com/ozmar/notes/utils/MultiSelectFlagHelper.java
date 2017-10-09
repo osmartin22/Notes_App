@@ -16,10 +16,19 @@ public class MultiSelectFlagHelper {
     private int editorAction = -1;
     private MenuItem item = null;
 
-    private boolean inAsync = true;
+    private MenuItem currentNavMenu;
+    private boolean inAsync = false;
 
     public MultiSelectFlagHelper() {
 
+    }
+
+    public MenuItem getCurrentNavMenu() {
+        return currentNavMenu;
+    }
+
+    public void setCurrentNavMenu(MenuItem currentNavMenu) {
+        this.currentNavMenu = currentNavMenu;
     }
 
     public boolean isInAsync() {
