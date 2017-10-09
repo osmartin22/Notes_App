@@ -33,17 +33,24 @@ public class NoteEditorActivity extends AppCompatActivity {
     private String[] noteResult;
 
     private void contextualActionResult(MenuItem item) {
+        String title = editTextTitle.getText().toString();
+        String content = editTextContent.getText().toString();
 
-        if (currentNote != null) {
+        if(title.isEmpty() && content.isEmpty() && currentNote == null) {
+            // exit
+        } else {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-            String title = editTextTitle.getText().toString();
-            String content = editTextContent.getText().toString();
+            if (currentNote != null) {
+                boolean titleChanged = !currentNote.get_title().equals(title);
+                boolean contentChanged = !currentNote.get_content().equals(content);
+                NoteEditorUtils.updateNoteObject(currentNote, title, content, titleChanged, contentChanged);
 
-            boolean titleChanged = !currentNote.get_title().equals(title);
-            boolean contentChanged = !currentNote.get_content().equals(content);
-            NoteEditorUtils.updateNoteObject(currentNote, title, content, titleChanged, contentChanged);
+            } else {
+                currentNote = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
+                intent.putExtra("New Note Action", 1);
+            }
 
             switch (item.getItemId()) {
                 case R.id.archive_note:
@@ -60,9 +67,14 @@ public class NoteEditorActivity extends AppCompatActivity {
                     break;
             }
 
+            if (notePosition == -1) {
+                notePosition = 0;
+            }
+
             intent.putExtra("Note", currentNote);
             intent.putExtra("Note Position", notePosition);
             setResult(RESULT_OK, intent);
+
         }
 
         finish();   // Only allow undo for notes that are not new

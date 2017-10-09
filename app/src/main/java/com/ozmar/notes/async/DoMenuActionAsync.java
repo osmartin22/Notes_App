@@ -51,29 +51,28 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+        Log.d("Async", "start");
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-
-        if (!flagHelper.isUndoFlag()) {
-            if (flagHelper.isNoteEditorAction()) {
-                noteEditorAction();
-            } else {
-                cabAction();
-            }
+        if (flagHelper.isNoteEditorAction()) {
+            noteEditorAction();
+        } else if(flagHelper.getItem() != null){
+            cabAction();
         }
-
-        flagHelper.setUndoFlag(false);
-        flagHelper.setNoteEditorAction(false);
-        flagHelper.setEditorAction(-1);
-        flagHelper.setItem(null);
-
         return null;
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
+        flagHelper.setUndoFlag(false);
+        flagHelper.setNoteEditorAction(false);
+        flagHelper.setEditorAction(-1);
+        flagHelper.setItem(null);
+        flagHelper.setInAsync(false);
+        Log.d("Async", "Finished");
+
         if (flagHelper.isAnotherMultiSelect()) {
             flagHelper.setAnotherMultiSelect(false);
             buffer.clearOtherBuffer();

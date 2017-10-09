@@ -12,11 +12,30 @@ public class MultiSelectFlagHelper {
     private boolean noteEditorAction = false;
     private boolean anotherMultiSelect = false;
 
+    private int newNoteAction = -1;
     private int editorAction = -1;
     private MenuItem item = null;
 
+    private boolean inAsync = true;
+
     public MultiSelectFlagHelper() {
 
+    }
+
+    public boolean isInAsync() {
+        return inAsync;
+    }
+
+    public void setInAsync(boolean inAsync) {
+        this.inAsync = inAsync;
+    }
+
+    public int getNewNoteAction() {
+        return newNoteAction;
+    }
+
+    public void setNewNoteAction(int newNoteAction) {
+        this.newNoteAction = newNoteAction;
     }
 
     public int getEditorAction() {

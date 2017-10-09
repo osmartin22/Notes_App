@@ -2,9 +2,11 @@ package com.ozmar.notes.utils;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.ozmar.notes.DatabaseHandler;
@@ -95,6 +97,36 @@ public class MainActivityHelper {
             if (listUsed == 1) {
                 adapter.removeAt(position);
             }
+        }
+    }
+
+    public void setAdapterList(Toolbar toolbar, NotesAdapter adapter, FloatingActionButton fab, MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.all_notes_drawer:
+            default:
+                toolbar.setTitle("Notes");
+                adapter.updateAdapterList(0);
+                fab.show();
+                break;
+
+            case R.id.favorite_notes_drawer:
+                toolbar.setTitle("Favorite Notes");
+                adapter.updateAdapterList(1);
+                fab.show();
+                break;
+
+            case R.id.archive_drawer:
+                toolbar.setTitle("Archive");
+                adapter.updateAdapterList(2);
+                fab.hide();
+                break;
+
+            case R.id.recycle_bin_drawer:
+                toolbar.setTitle("Trash");
+                adapter.updateAdapterList(3);
+                fab.hide();
+                break;
         }
     }
 }

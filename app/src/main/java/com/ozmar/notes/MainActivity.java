@@ -68,11 +68,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Snackbar snackBar = null;
 
-//    private int editorAction = -1;
-
     private MainActivityHelper mainActivityHelper;
     private MultiSelectFlagHelper multiSelectHelper;
     private MenuItemHelper itemHelper;
+
 
     public void launchNoteEditor(View view) {
         if (actionMode != null) {
@@ -95,7 +94,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         rv = (RecyclerView) findViewById(R.id.recyclerView);
         rv.setHasFixedSize(true);
 
-        // TODO: Temporary solution
         DividerItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), VERTICAL);
         DividerItemDecoration decoration2 = new DividerItemDecoration(getApplicationContext(), HORIZONTAL);
         rv.addItemDecoration(decoration);
@@ -165,11 +163,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 super.onDrawerSlide(drawerView, slideOffset);
                 if (multiSelectHelper.isMultiSelectFlag()) {
                     multiSelectHelper.setMultiSelectFlag(false);
-
                     actionMode.finish();
-                }
-                if (snackBar != null) {
-                    snackBar.dismiss();
                 }
             }
         };
@@ -294,7 +288,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             snackBar.addCallback(new Snackbar.Callback() {
                 @Override
                 public void onDismissed(Snackbar s, int event) {
-                    new DoMenuActionAsync(multiSelectHelper, itemHelper, buffer, notesAdapter.getListUsed()).execute();
+                    Log.d("HI", "HI");
+                    if (!multiSelectHelper.isUndoFlag()) {
+                        Log.d("HI", "INSIDE");
+                        new DoMenuActionAsync(multiSelectHelper, itemHelper, buffer, notesAdapter.getListUsed()).execute();
+                    }
+
                     snackBar = null;
                     notesAdapter.clearTempNotes();
                 }
@@ -310,6 +309,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             if (multiSelectHelper.isNoteEditorAction()) {
 
+                if (multiSelectHelper.getNewNoteAction() == 1) {
+                    new BasicDBAsync(db, buffer.currentBufferNotes(), null, notesAdapter.getListUsed(), 0).execute();
+                }
+
                 notesAdapter.addSelectedViews(buffer.currentBufferPositions(),
                         buffer.currentBufferNotes());
 
@@ -324,7 +327,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void multiSelect(SingleNote note, int position) {
         if (snackBar != null) {
             multiSelectHelper.setAnotherMultiSelect(true);
-//            anotherMultiSelect = true;
             snackBar.dismiss();
             snackBar = null;
         }
@@ -369,36 +371,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        if (snackBar != null) {
+            snackBar.dismiss();
+            multiSelectHelper.setInAsync(true);
+        }
+
         if (currentNavMenuItem != item) {
-            int id = item.getItemId();
             notesAdapter.clearView();
-
-            switch (id) {
-                case R.id.all_notes_drawer:
-                default:
-                    myToolbar.setTitle("Notes");
-                    notesAdapter.updateAdapterList(0);
-                    fab.show();
-                    break;
-
-                case R.id.favorite_notes_drawer:
-                    myToolbar.setTitle("Favorite Notes");
-                    notesAdapter.updateAdapterList(1);
-                    fab.show();
-                    break;
-
-                case R.id.archive_drawer:
-                    myToolbar.setTitle("Archive");
-                    notesAdapter.updateAdapterList(2);
-                    fab.hide();
-                    break;
-
-                case R.id.recycle_bin_drawer:
-                    myToolbar.setTitle("Trash");
-                    notesAdapter.updateAdapterList(3);
-                    fab.hide();
-                    break;
-            }
+            mainActivityHelper.setAdapterList(myToolbar, notesAdapter, fab, item);
         }
 
         currentNavMenuItem = item;
@@ -414,13 +394,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (requestCode == 1 && data != null) {
             Bundle bundle = data.getExtras();
             multiSelectHelper.setEditorAction(bundle.getInt("menuAction", -1));
+            multiSelectHelper.setNewNoteAction(bundle.getInt("New Note Action", -1));
             int position = bundle.getInt("Note Position", -1);
             SingleNote note = bundle.getParcelable("Note");
 
             if (multiSelectHelper.getEditorAction() != -1) {
                 multiSelectHelper.setNoteEditorAction(true);
                 buffer.addDataToBuffer(note, position);
-                notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+
+                if (multiSelectHelper.getNewNoteAction() != 1) {
+                    notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+                }
                 showSnackBar(null, multiSelectHelper.getEditorAction());
 
             } else {

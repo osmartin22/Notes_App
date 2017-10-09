@@ -40,7 +40,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void updateAdapterList(int list) {
         notes.clear();
         listUsed = list;
-        new FetchDBListAsync(db, this, listUsed).execute();
+            new FetchDBListAsync(db, this, listUsed).execute();
     }
 
     public int getListUsed() {
