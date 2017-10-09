@@ -17,7 +17,7 @@ import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private DatabaseHandler db;
+//    private DatabaseHandler db;
     private int listUsed = 0;
 
     private final List<SingleNote> notes;
@@ -27,8 +27,9 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private final int showTitle = 0, showContent = 1, showAll = 2;
 
+    // TODO: Use AsyncTask to get notes at the start
     public NotesAdapter(DatabaseHandler db) {
-        this.db = db;
+//        this.db = db;
         notes = db.getUserNotes();
     }
 

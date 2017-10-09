@@ -1,9 +1,7 @@
 package com.ozmar.notes;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -46,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private int layoutChoice;
     private MenuItem layoutItem;
-    private SharedPreferences settings;
+    private Preferences preferences;
 
     private MenuItem currentNavMenuItem;
 
@@ -65,20 +63,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (actionMode != null) {
             actionMode.finish();
         }
+
+        launchIntent(null, -1, notesAdapter.getListUsed());
+    } // launchNoteEditor() end
+
+    private void launchIntent(SingleNote note, int position, int listUsed) {
         if (snackBar != null) {
             snackBar.dismiss();
         }
 
         Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
-        intent.putExtra("noteID", -1);
-        intent.putExtra("listUsed", notesAdapter.getListUsed());
+        intent.putExtra("Note", note);
+        intent.putExtra("noteID", position);
+        intent.putExtra("listUsed", listUsed);
         startActivityForResult(intent, 1);
-    } // launchNoteEditor() end
+    }
 
     private void setUpRecyclerView() {
         notesAdapter = new NotesAdapter(db);
 
-        restoreLayoutChoice();
+        layoutChoice = preferences.getLayoutChoice();
         rv = (RecyclerView) findViewById(R.id.recyclerView);
         rv.setHasFixedSize(true);
 
@@ -95,15 +99,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     multiSelect(notesAdapter.getNoteAt(position), position);
 
                 } else {
-                    if (snackBar != null) {
-                        snackBar.dismiss();
-                    }
-
-                    Intent intent = new Intent(getApplicationContext(), NoteEditorActivity.class);
-                    intent.putExtra("noteID", position);
-                    intent.putExtra("listUsed", notesAdapter.getListUsed());
-                    intent.putExtra("Note", notesAdapter.getNoteAt(position));
-                    startActivityForResult(intent, 1);
+                    launchIntent(notesAdapter.getNoteAt(position), position, notesAdapter.getListUsed());
                 }
             }
 
@@ -137,10 +133,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(myToolbar);
 
         db = new DatabaseHandler(MainActivity.this);
-        fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
-        mainActivityHelper = new MainActivityHelper(getApplicationContext(), db);
         itemHelper = new MenuItemHelper(getApplicationContext(), db);
+        preferences = new Preferences(getApplicationContext());
         multiSelectHelper = new MultiSelectFlagHelper();
+        mainActivityHelper = new MainActivityHelper(getApplicationContext(), db);
+
+        fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
 
         drawer = (DrawerLayout) findViewById(R.id.drawerLayout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -149,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 super.onDrawerSlide(drawerView, slideOffset);
-                if (multiSelectHelper.isMultiSelectFlag()) {
+                if (multiSelectHelper.isMultiSelectFlag()) {    // Turn off multi select if drawer is opened
                     multiSelectHelper.setMultiSelectFlag(false);
                     actionMode.finish();
                 }
@@ -276,9 +274,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             snackBar.addCallback(new Snackbar.Callback() {
                 @Override
                 public void onDismissed(Snackbar s, int event) {
-                    Log.d("HI", "HI");
                     if (!multiSelectHelper.isUndoFlag()) {
-                        new DoMenuActionAsync(db, multiSelectHelper, itemHelper, buffer, notesAdapter, myToolbar, fab).execute();
+                        new DoMenuActionAsync(db, multiSelectHelper, itemHelper, buffer,
+                                notesAdapter, myToolbar, fab).execute();
                     }
 
                     snackBar = null;
@@ -365,6 +363,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 multiSelectHelper.setInAsync(true);
             }
 
+            // Only enters if not currently processing a multi select operation in a thread
+            // If processing, that thread will set up the adapter list navigation selection
             if (!multiSelectHelper.isInAsync()) {
                 if (currentNavMenuItem != item) {
                     notesAdapter.clearView();
@@ -405,28 +405,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 mainActivityHelper.updateAdapter(bundle, notesAdapter);
             }
         }
-
-        getIntent().removeExtra("menuAction");
-        getIntent().removeExtra("Note Favorite");
-        getIntent().removeExtra("Note Success");
-        getIntent().removeExtra("Note Position");
-        getIntent().removeExtra("Note");
     } // onActivityResult() end
 
     @Override
     protected void onStop() {
         super.onStop();
-        storeSharedPreferences();
-    }
-
-    private void storeSharedPreferences() {
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putInt("Layout Choice", layoutChoice);
-        editor.apply();
-    }
-
-    private void restoreLayoutChoice() {
-        settings = getSharedPreferences("User Settings", Context.MODE_PRIVATE);
-        layoutChoice = settings.getInt("Layout Choice", 0);
+        preferences.saveLayoutChoice(layoutChoice);
     }
 } // MainActivity() end

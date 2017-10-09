@@ -12,6 +12,9 @@ public class UndoBuffer {
     private final BufferHelper buffer1;
     private int currentBuffer;
 
+    private boolean buffer0Processing = false;
+    private boolean buffer1Processing = false;
+
     public UndoBuffer() {
         this.buffer0 = new BufferHelper();
         this.buffer1 = new BufferHelper();

@@ -7,7 +7,7 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Instrumentation test, which will execute on an Android device.
@@ -23,4 +23,35 @@ public class ExampleInstrumentedTest {
 
         assertEquals("com.ozmar.notes", appContext.getPackageName());
     }
+
+//    @Test
+//    public void differenceFromOriginal_isCorrect() {
+//        Context context = getContext();
+//        String originalTitle = "Title";
+//        String originalContent = "content";
+//        String changed = "changed";
+//        SingleNote originalNote = new SingleNote(originalTitle, originalContent, 0);
+//
+//        android.content.res.Resources res = getInstrumentation().getTargetContext().getResources();
+//        String[] noteChanges = res.getStringArray(R.array.noteChangesArray);
+//
+//        // Note modified
+//        assertEquals(noteChanges[0], NoteEditorUtils.differenceFromOriginal(context, changed,
+//                originalContent, originalNote));
+//        assertEquals(noteChanges[0], NoteEditorUtils.differenceFromOriginal(context, originalTitle,
+//                changed, originalNote));
+//        assertEquals(noteChanges[0], NoteEditorUtils.differenceFromOriginal(context, changed,
+//                changed, originalNote));
+//
+//        // New note
+//        assertEquals(noteChanges[1], NoteEditorUtils.differenceFromOriginal(context, originalTitle,
+//                originalContent, null));
+//
+//        // Note not modified (does not include changes to favorite)
+//        assertEquals(noteChanges[2], NoteEditorUtils.differenceFromOriginal(context,
+//                originalTitle, originalContent, originalNote));
+//
+//        // New empty note
+//        assertEquals("", NoteEditorUtils.differenceFromOriginal(context, "", "", null));
+//    }
 }

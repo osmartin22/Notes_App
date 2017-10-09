@@ -2,10 +2,6 @@ package com.ozmar.notes.utils;
 
 import android.view.MenuItem;
 
-/**
- * Created by ozmar on 10/7/2017.
- */
-
 public class MultiSelectFlagHelper {
     private boolean undoFlag = false;
     private boolean multiSelectFlag = false;
