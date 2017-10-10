@@ -3,7 +3,6 @@ package com.ozmar.notes.async;
 import android.os.AsyncTask;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 
 import com.ozmar.notes.DatabaseHandler;
 import com.ozmar.notes.NotesAdapter;
@@ -40,28 +39,24 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-        if (flagHelper.isNoteEditorAction()) {
-            itemHelper.doEditorAction(flagHelper.getEditorAction(), buffer.getBuffer(processingBuffer).getNotes(), listUsed);
-        } else if (flagHelper.getItem() != null) {
-            itemHelper.doCABAction(flagHelper.getItem(), buffer.getBuffer(processingBuffer).getNotes(), listUsed);
-        }
+//        if (flagHelper.isEditorActionFlag()) {
+//            itemHelper.doEditorAction(flagHelper.getEditorAction(), buffer.getBuffer(processingBuffer).getNotes(), listUsed);
+//        } else if (flagHelper.getItem() != null) {
+//            itemHelper.doCABAction(flagHelper.getItem(), buffer.getBuffer(processingBuffer).getNotes(), listUsed);
+//        }
 
         return null;
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
-        flagHelper.setUndoFlag(false);
-        flagHelper.setNoteEditorAction(false);
         flagHelper.setEditorAction(-1);
         flagHelper.setItem(null);
 
-        Log.d("Process", "Buffer Chosen -> " + processingBuffer);
         buffer.clearBuffer(processingBuffer);
 
         if (flagHelper.isAnotherMultiSelect()) {

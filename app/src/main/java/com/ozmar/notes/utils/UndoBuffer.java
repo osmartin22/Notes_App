@@ -72,15 +72,6 @@ public class UndoBuffer {
         }
     }
 
-    public BufferHelper getBuffer(int num) {
-        if (num == 0) {
-            return buffer0;
-        }
-
-        return buffer1;
-    }
-
-
     // Add note and position to buffer
     public void addDataToBuffer(SingleNote note, int position) {
         if (currentBuffer == 0) {
@@ -90,14 +81,14 @@ public class UndoBuffer {
         }
     }
 
-//    // Remove note from buffer
-//    public void removeDataFromBuffer(SingleNote note) {
-//        if (currentBuffer == 0) {
-//            buffer0.removeFromLists(note);
-//        } else {
-//            buffer1.removeFromLists(note);
-//        }
-//    }
+    // Remove note from buffer
+    public void removeDataFromBuffer(SingleNote note) {
+        if (currentBuffer == 0) {
+            buffer0.removeFromLists(note);
+        } else {
+            buffer1.removeFromLists(note);
+        }
+    }
 
     // Remove position and note from buffer
     public void removeDataFromBuffer(int position) {

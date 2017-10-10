@@ -6,7 +6,7 @@ import android.view.MenuItem;
 public class MultiSelectFlagHelper {
     private boolean undoFlag = false;
     private boolean multiSelectFlag = false;
-    private boolean noteEditorAction = false;
+    private boolean editorActionFlag = false;
     private boolean anotherMultiSelect = false;
 
     private int newNoteAction = -1;
@@ -84,11 +84,11 @@ public class MultiSelectFlagHelper {
         this.multiSelectFlag = multiSelectFlag;
     }
 
-    public boolean isNoteEditorAction() {
-        return noteEditorAction;
+    public boolean isEditorActionFlag() {
+        return editorActionFlag;
     }
 
-    public void setNoteEditorAction(boolean noteEditorAction) {
-        this.noteEditorAction = noteEditorAction;
+    public void setEditorActionFlag(boolean editorActionFlag) {
+        this.editorActionFlag = editorActionFlag;
     }
 }

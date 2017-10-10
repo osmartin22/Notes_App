@@ -16,7 +16,6 @@ import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -108,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     if (snackBar != null) {
                         snackBar.dismiss();
-                        snackBar = null;
                     }
 
                     buffer.bufferToStartProcessing();
@@ -267,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void showSnackBar(final MenuItem item, int num) {
         String message;
-        if (multiSelectHelper.isNoteEditorAction()) {
+        if (multiSelectHelper.getEditorAction() != -1) {
             message = itemHelper.noteEditorMessage(num);
         } else {
             message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
@@ -285,12 +283,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 public void onDismissed(Snackbar s, int event) {
                     if (!multiSelectHelper.isUndoFlag()) {
 
-
-                        if(!multiSelectHelper.isAnotherMultiSelect()) {
+                        if (!multiSelectHelper.isAnotherMultiSelect()) {
                             buffer.bufferToStartProcessing();
                         }
-
-                        Log.d("Process", "This buffer -> " + buffer.getBufferToProcess());
 
                         new DoMenuActionAsync(db, multiSelectHelper, itemHelper, buffer,
                                 notesAdapter, myToolbar, fab).execute();
@@ -298,6 +293,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     snackBar = null;
                     notesAdapter.clearTempNotes();
+                    multiSelectHelper.setUndoFlag(false);
                 }
             });
         }
@@ -306,10 +302,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private class UndoListener implements View.OnClickListener {
         @Override
         public void onClick(View view) {
-            snackBar = null;
             multiSelectHelper.setUndoFlag(true);
 
-            if (multiSelectHelper.isNoteEditorAction()) {
+            if (multiSelectHelper.getEditorAction() != -1) {
 
                 if (multiSelectHelper.getNewNoteAction() == 1) {
                     new BasicDBAsync(db, buffer.currentBufferNotes(), null, notesAdapter.getListUsed(), 0).execute();
@@ -322,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 notesAdapter.addSelectedViews(buffer.currentBufferPositions(), buffer.currentBufferNotes());
             }
 
-            buffer.clearBuffer();
+            buffer.clearBuffer(buffer.getBufferToProcess());
         }
     } // UndoListener() end
 
@@ -398,23 +393,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (requestCode == 1 && data != null) {
             Bundle bundle = data.getExtras();
-            multiSelectHelper.setEditorAction(bundle.getInt("menuAction", -1));
-            multiSelectHelper.setNewNoteAction(bundle.getInt("New Note Action", -1));
-            int position = bundle.getInt("Note Position", -1);
-            SingleNote note = bundle.getParcelable("Note");
 
+            multiSelectHelper.setEditorAction(bundle.getInt("menuAction", -1));
             if (multiSelectHelper.getEditorAction() != -1) {
 
                 buffer.bufferToStartProcessing();
-                buffer.swapBuffer();
+                if (buffer.isBufferAvailable()) {
+                    buffer.swapBuffer();
 
-                multiSelectHelper.setNoteEditorAction(true);
-                buffer.addDataToBuffer(note, position);
+                    multiSelectHelper.setNewNoteAction(bundle.getInt("New Note Action", -1));
+                    buffer.addDataToBuffer((SingleNote)bundle.getParcelable("Note"), bundle.getInt("Note Position" , -1));
 
-                if (multiSelectHelper.getNewNoteAction() != 1) {
-                    notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+                    if (multiSelectHelper.getNewNoteAction() != 1) {
+                        notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+                    }
+
+                    showSnackBar(null, multiSelectHelper.getEditorAction());
+
+
+                } else {        // Buffer full
+                    multiSelectHelper.setEditorAction(-1);
+                    multiSelectHelper.setNewNoteAction(-1);
+                    Toast.makeText(getApplicationContext(), "Full", Toast.LENGTH_SHORT).show();
                 }
-                showSnackBar(null, multiSelectHelper.getEditorAction());
 
             } else {
                 mainActivityHelper.updateAdapter(bundle, notesAdapter);
