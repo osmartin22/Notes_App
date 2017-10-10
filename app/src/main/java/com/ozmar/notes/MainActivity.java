@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         intent.putExtra("noteID", position);
         intent.putExtra("listUsed", listUsed);
         startActivityForResult(intent, 1);
-    }
+    } // launchIntent() end
 
     private void setUpRecyclerView() {
         notesAdapter = new NotesAdapter(db);
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
-    }
+    } // deleteForever() end
 
     private void showSnackBar(final MenuItem item, int num) {
         String message;
@@ -386,7 +386,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     } // onNavigationItemSelected() end
 
-    // Get result from NoteEditorActivity, decide how to update RecyclerView
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -402,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     buffer.swapBuffer();
 
                     multiSelectHelper.setNewNoteAction(bundle.getInt("New Note Action", -1));
-                    buffer.addDataToBuffer((SingleNote)bundle.getParcelable("Note"), bundle.getInt("Note Position" , -1));
+                    buffer.addDataToBuffer((SingleNote) bundle.getParcelable("Note"), bundle.getInt("Note Position", -1));
 
                     if (multiSelectHelper.getNewNoteAction() != 1) {
                         notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
@@ -414,7 +413,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 } else {        // Buffer full
                     multiSelectHelper.setEditorAction(-1);
                     multiSelectHelper.setNewNoteAction(-1);
-                    Toast.makeText(getApplicationContext(), "Full", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(),
+                            "Please wait while previous selections are completed", Toast.LENGTH_SHORT).show();
                 }
 
             } else {

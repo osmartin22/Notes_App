@@ -13,7 +13,7 @@ public class UndoBuffer {
     private int currentBuffer;
 
     private int bufferToProcess = 0;     // This value should be stored as an int if needed as it
-                                        // will change with user interaction
+    // will change with user interaction
 
     public UndoBuffer() {
         this.buffer0 = new BufferHelper();
@@ -65,7 +65,7 @@ public class UndoBuffer {
     }
 
     public void clearBuffer(int num) {
-        if(num == 0) {
+        if (num == 0) {
             buffer0.clearLists();
         } else if (num == 1) {
             buffer1.clearLists();
