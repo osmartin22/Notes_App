@@ -22,6 +22,7 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
     private NotesAdapter adapter;
     private Toolbar toolbar;
     private FloatingActionButton fab;
+    private int processingBuffer;
 
     public DoMenuActionAsync(DatabaseHandler db, MultiSelectFlagHelper flagHelper, MenuItemHelper itemHelper,
                              UndoBuffer buffer, NotesAdapter adapter, Toolbar toolbar, FloatingActionButton fab) {
@@ -33,40 +34,21 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
         this.listUsed = adapter.getListUsed();
         this.toolbar = toolbar;
         this.fab = fab;
-
-    }
-
-    private void noteEditorAction() {
-        if (flagHelper.isAnotherMultiSelect()) {
-            Log.d("Async", "Other: Editor");
-            itemHelper.doEditorAction(flagHelper.getEditorAction(), buffer.otherBuffer().getNotes(), listUsed);
-        } else {
-            Log.d("Async", "Current: Editor");
-            itemHelper.doEditorAction(flagHelper.getEditorAction(), buffer.currentBufferNotes(), listUsed);
-        }
-    }
-
-    private void cabAction() {
-        if (flagHelper.isAnotherMultiSelect()) {
-            Log.d("Async", "Other: CAB");
-            itemHelper.doCABAction(flagHelper.getItem(), buffer.otherBuffer().getNotes(), listUsed);
-        } else {
-            Log.d("Async", "Current: CAB");
-            itemHelper.doCABAction(flagHelper.getItem(), buffer.currentBufferNotes(), listUsed);
-        }
+        this.processingBuffer = buffer.getBufferToProcess();
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
         if (flagHelper.isNoteEditorAction()) {
-            noteEditorAction();
-        } else if(flagHelper.getItem() != null){
-            cabAction();
+            itemHelper.doEditorAction(flagHelper.getEditorAction(), buffer.getBuffer(processingBuffer).getNotes(), listUsed);
+        } else if (flagHelper.getItem() != null) {
+            itemHelper.doCABAction(flagHelper.getItem(), buffer.getBuffer(processingBuffer).getNotes(), listUsed);
         }
 
         return null;
@@ -79,14 +61,14 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
         flagHelper.setEditorAction(-1);
         flagHelper.setItem(null);
 
+        Log.d("Process", "Buffer Chosen -> " + processingBuffer);
+        buffer.clearBuffer(processingBuffer);
+
         if (flagHelper.isAnotherMultiSelect()) {
             flagHelper.setAnotherMultiSelect(false);
-            buffer.clearOtherBuffer();
-        } else {
-            buffer.clearCurrentBuffer();
         }
 
-        if(flagHelper.isInAsync()) {
+        if (flagHelper.isInAsync()) {
             adapter.clearView();
             new NavMenuAsync(db, toolbar, fab, adapter, flagHelper.getCurrentNavMenu()).execute();
         }

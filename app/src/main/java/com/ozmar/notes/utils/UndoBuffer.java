@@ -12,8 +12,8 @@ public class UndoBuffer {
     private final BufferHelper buffer1;
     private int currentBuffer;
 
-    private boolean buffer0Processing = false;
-    private boolean buffer1Processing = false;
+    private int bufferToProcess = 0;     // This value should be stored as an int if needed as it
+                                        // will change with user interaction
 
     public UndoBuffer() {
         this.buffer0 = new BufferHelper();
@@ -21,28 +21,42 @@ public class UndoBuffer {
         currentBuffer = 0;
     }
 
-    // Only swap buffers if the current buffer is not empty (i.e. has data to process)
+    // TODO: Use in code, if false, throw message to wait maybe
+    public boolean isBufferAvailable() {
+
+        Log.d("Process", "Buffer0 -> " + buffer0.getSize());
+        Log.d("Process", "Buffer1 -> " + buffer1.getSize());
+
+        return (buffer0.checkIfEmpty() || buffer1.checkIfEmpty());
+    }
+
     public void swapBuffer() {
-        if (currentBuffer == 0 && buffer0.getSize() != 0) {
-            Log.d("Buffer", "Swap to Buffer2");
+        if (currentBuffer == 0 && !buffer0.checkIfEmpty()) {
             currentBuffer = 1;
-        } else if (currentBuffer == 1 && buffer1.getSize() != 0) {
-            Log.d("Buffer", "Swap to Buffer1");
+            Log.d("Process", "Swap to Buffer1");
+
+        } else if (currentBuffer == 1 && !buffer1.checkIfEmpty()) {
             currentBuffer = 0;
+            Log.d("Process", "Swap to Buffer0");
         }
     }
 
-    // Clears buffer that is not currently being used
-    public void clearOtherBuffer() {
+    // Returns int to which buffer is set to be processed
+    public int getBufferToProcess() {
+        return bufferToProcess;
+    }
+
+    // Return buffer to start processing
+    public void bufferToStartProcessing() {
         if (currentBuffer == 0) {
-            buffer1.clearLists();
+            bufferToProcess = 0;
         } else {
-            buffer0.clearLists();
+            bufferToProcess = 1;
         }
     }
 
-    // Clears buffer currently in use
-    public void clearCurrentBuffer() {
+    // Only use if you are sure that the current buffer in use is the one to be cleared
+    public void clearBuffer() {
         if (currentBuffer == 0) {
             buffer0.clearLists();
         } else {
@@ -50,6 +64,24 @@ public class UndoBuffer {
         }
     }
 
+    public void clearBuffer(int num) {
+        if(num == 0) {
+            buffer0.clearLists();
+        } else if (num == 1) {
+            buffer1.clearLists();
+        }
+    }
+
+    public BufferHelper getBuffer(int num) {
+        if (num == 0) {
+            return buffer0;
+        }
+
+        return buffer1;
+    }
+
+
+    // Add note and position to buffer
     public void addDataToBuffer(SingleNote note, int position) {
         if (currentBuffer == 0) {
             buffer0.addToLists(note, position);
@@ -58,15 +90,17 @@ public class UndoBuffer {
         }
     }
 
-    public void removeDataFromBuffer(SingleNote note) {
-        if (currentBuffer == 0) {
-            buffer0.removeFromLists(note);
-        } else {
-            buffer1.removeFromLists(note);
-        }
-    }
+//    // Remove note from buffer
+//    public void removeDataFromBuffer(SingleNote note) {
+//        if (currentBuffer == 0) {
+//            buffer0.removeFromLists(note);
+//        } else {
+//            buffer1.removeFromLists(note);
+//        }
+//    }
 
-    public void removeDataFromPosition(int position) {
+    // Remove position and note from buffer
+    public void removeDataFromBuffer(int position) {
         if (currentBuffer == 0) {
             buffer0.removeFromPosition(position);
         } else {
@@ -74,6 +108,7 @@ public class UndoBuffer {
         }
     }
 
+    // Get buffer size of the current buffer in use
     public int currentBufferSize() {
         if (currentBuffer == 0) {
             return buffer0.getSize();
@@ -82,6 +117,7 @@ public class UndoBuffer {
         return buffer1.getSize();
     }
 
+    // Get notes of the current buffer in use
     public List<SingleNote> currentBufferNotes() {
         if (currentBuffer == 0) {
             return buffer0.getNotes();
@@ -90,38 +126,12 @@ public class UndoBuffer {
         return buffer1.getNotes();
     }
 
+    // Get positions of the current buffer in use
     public List<Integer> currentBufferPositions() {
         if (currentBuffer == 0) {
             return buffer0.getPositions();
         }
 
         return buffer1.getPositions();
-    }
-
-    public BufferHelper currentBuffer() {
-        if (currentBuffer == 0) {
-            return buffer0;
-        }
-
-        return buffer1;
-    }
-
-    public BufferHelper otherBuffer() {
-        if (currentBuffer == 0) {
-            return buffer1;
-        }
-
-        return buffer0;
-    }
-
-    // TODO: Use in code, if false, throw message to wait maybe
-    public boolean isBufferAvailable() {
-
-        Log.d("H", "Buffer0 -> " + buffer0.getSize());
-        Log.d("H", "Buffer0 Empty -> " + buffer0.checkIfEmpty());
-        Log.d("H", "Buffer1 -> " + buffer1.getSize());
-        Log.d("H", "Buffer1 Empty -> " + buffer1.checkIfEmpty());
-
-        return (buffer0.checkIfEmpty() || buffer1.checkIfEmpty());
     }
 }

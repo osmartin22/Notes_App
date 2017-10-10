@@ -2,6 +2,7 @@ package com.ozmar.notes.utils;
 
 import android.view.MenuItem;
 
+
 public class MultiSelectFlagHelper {
     private boolean undoFlag = false;
     private boolean multiSelectFlag = false;
