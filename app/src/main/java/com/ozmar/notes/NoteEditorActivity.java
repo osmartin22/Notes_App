@@ -12,16 +12,13 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.utils.NoteEditorUtils;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import static com.ozmar.notes.MainActivity.db;
 
@@ -37,8 +34,6 @@ public class NoteEditorActivity extends AppCompatActivity {
     private int listUsed;
 
     private String[] noteResult;
-
-    private Calendar time = Calendar.getInstance();
 
     private void contextualActionResult(MenuItem item) {
         String title = editTextTitle.getText().toString();
@@ -115,9 +110,11 @@ public class NoteEditorActivity extends AppCompatActivity {
         String difference = NoteEditorUtils.differenceFromOriginal(getApplicationContext(), title, content, currentNote);
         String[] noteChanges = getResources().getStringArray(R.array.noteChangesArray);
 
+        long time = System.currentTimeMillis();
+
         if (difference.equals(noteChanges[0])) {        // Note was modified
 
-            currentNote.set_timeModified(time.getTimeInMillis());   // Update time
+            currentNote.set_timeModified(time);   // Update time
 
             new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
             noteModifiedResult(noteResult[0]);
@@ -126,7 +123,7 @@ public class NoteEditorActivity extends AppCompatActivity {
             SingleNote temp;
             temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
 
-            temp.set_timeModified(time.getTimeInMillis());  // Set creation time
+            temp.set_timeModified(time);  // Set creation time
 
             new BasicDBAsync(db, null, temp, listUsed, 0).execute();
             noteModifiedResult(noteResult[1]);
@@ -174,15 +171,10 @@ public class NoteEditorActivity extends AppCompatActivity {
                 favorite = true;
             }
 
-            Timestamp hey = new Timestamp(currentNote.get_timeModified());
-            Date j = new Date(currentNote.get_timeModified());
+            Date time = new Date(currentNote.get_timeModified());
 
-            Toast.makeText(getApplicationContext(), j.toString(), Toast.LENGTH_SHORT).show();
-
-
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM", Locale.getDefault());
-        Toast.makeText(getApplicationContext(), dateFormat.format(currentNote.get_timeModified()), Toast.LENGTH_SHORT).show();
-
+            TextView timeTextView = (TextView) findViewById(R.id.lastModified);
+            timeTextView.setText(time.toString());
 
             editTextTitle.setText(currentNote.get_title());
             editTextTitle.setFocusable(false);

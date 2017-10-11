@@ -359,10 +359,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        long time = System.currentTimeMillis();
+
         for (int i = 0; i < list.size(); i++) {
             values.put(KEY_RECYCLE_BIN_TITLE, list.get(i).get_title());
             values.put(KEY_RECYCLE_BIN_CONTENT, list.get(i).get_content());
-            values.put(KEY_RECYCLE_BIN_TIME_MODIFIED, list.get(i).get_timeModified());
+            values.put(KEY_RECYCLE_BIN_TIME_MODIFIED, time);
             db.insert(TABLE_RECYCLE_BIN, null, values);
             values.clear();
         }
@@ -376,5 +378,45 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     new String[]{String.valueOf(list.get(i).get_id())});
         }
     } // deleteListFromRecycleBin() end
+
+    public void deleteNotesPastDeleteDay() {
+        int DAYS = 7;       // Make this a shared preferences maybe
+
+//        long time = TimeUnit.DAYS.toMillis(DAYS);
+
+        long time = 300000;
+
+        long currentTime = System.currentTimeMillis();
+
+        List<String> notesToDelete = new ArrayList<>();
+
+        String selectQuery = "SELECT " + KEY_RECYCLE_BIN_ID + ", " + KEY_RECYCLE_BIN_TIME_MODIFIED
+                + " FROM " + TABLE_RECYCLE_BIN;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                if (cursor.getLong(1) + time < currentTime) {
+                    notesToDelete.add(cursor.getString(0));
+                }
+            } while (cursor.moveToNext());
+        }
+
+        autoDeleteNote(notesToDelete);
+
+        cursor.close();
+    }
+
+    private void autoDeleteNote(List<String> list) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+//        for(int i = 0; i < list.size(); i++) {
+        for (String id : list) {
+            db.delete(TABLE_RECYCLE_BIN, KEY_RECYCLE_BIN_ID + " = ?",
+                    new String[]{String.valueOf(id)});
+        }
+    }
 
 } // DataBaseHandler() end
