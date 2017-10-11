@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "UserNotesDB";
 
     // TABLE_USER_NOTES
@@ -20,22 +20,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_TITLE = "title";
     private static final String KEY_CONTENT = "content";
     private static final String KEY_FAVORITE = "favorite";
+    private static final String KEY_TIMESTAMP = "time";
 
     // TABLE_ARCHIVE
     private static final String TABLE_ARCHIVE = "archive";
     private static final String KEY_ARCHIVE_ID = "id";
     private static final String KEY_ARCHIVE_TITLE = "title";
     private static final String KEY_ARCHIVE_CONTENT = "content";
+    private static final String KEY_ARCHIVE_TIME_MODIFIED = "time";
 
     // TABLE_RECYCLE_BIN
     private static final String TABLE_RECYCLE_BIN = "recycleBin";
     private static final String KEY_RECYCLE_BIN_ID = "id";
     private static final String KEY_RECYCLE_BIN_TITLE = "title";
     private static final String KEY_RECYCLE_BIN_CONTENT = "content";
+    private static final String KEY_RECYCLE_BIN_TIME_MODIFIED = "time";
 
     private static final String CREATE_TABLE_USER_NOTES = "CREATE TABLE " + TABLE_USER_NOTES + "(" + KEY_ID
             + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, " + KEY_CONTENT + " TEXT, "
-            + KEY_FAVORITE + " INTEGER)";
+            + KEY_FAVORITE + " INTEGER " + KEY_TIMESTAMP + " INTEGER)";
 
     private static final String CREATE_TABLE_ARCHIVE = "CREATE TABLE " + TABLE_ARCHIVE + "(" + KEY_ARCHIVE_ID
             + " INTEGER PRIMARY KEY, " + KEY_ARCHIVE_TITLE + " TEXT, " + KEY_ARCHIVE_CONTENT + " TEXT)";
@@ -58,6 +61,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
         // Example for updating without losing data
         //sqLiteDatabase.execSQL(" ALTER TABLE " + TABLE_USER_NOTES + " ADD COLUMN " + KEY_FAVORITE + " INTEGER DEFAULT 0");
+        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_USER_NOTES + " ADD COLUMN " + KEY_TIMESTAMP + " INTEGER DEFAULT 0");
 
         // OR
         // Do separate code without break so that user gets al the new updates
@@ -91,22 +95,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return count;
     } // getNotesCount() end
 
-    public SingleNote getNote(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-
-        Cursor cursor = db.query(TABLE_USER_NOTES,
-                new String[]{KEY_ID, KEY_TITLE, KEY_CONTENT}, KEY_ID + "=?",
-                new String[]{String.valueOf(id)}, null, null, null, null);
-
-        if (cursor != null && cursor.moveToFirst()) {
-            SingleNote note = new SingleNote(Integer.parseInt(cursor.getString(0)),
-                    cursor.getString(1), cursor.getString(2), Integer.parseInt(cursor.getString(3)));
-            cursor.close();
-            return note;
-        }
-
-        return null;
-    } // getNote() end
+    // Update if used
+//    public SingleNote getNote(int id) {
+//        SQLiteDatabase db = this.getReadableDatabase();
+//
+//        Cursor cursor = db.query(TABLE_USER_NOTES,
+//                new String[]{KEY_ID, KEY_TITLE, KEY_CONTENT}, KEY_ID + "=?",
+//                new String[]{String.valueOf(id)}, null, null, null, null);
+//
+//        if (cursor != null && cursor.moveToFirst()) {
+//            SingleNote note = new SingleNote(Integer.parseInt(cursor.getString(0)),
+//                    cursor.getString(1), cursor.getString(2), Integer.parseInt(cursor.getString(3)));
+//            cursor.close();
+//            return note;
+//        }
+//
+//        return null;
+//    } // getNote() end
 
     public List<SingleNote> getUserNotes() {
         List<SingleNote> noteList = new ArrayList<>();
@@ -127,6 +132,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 } else {
                     note.set_favorite(Integer.parseInt(cursor.getString(3)));
                 }
+
+                note.set_timeModified(Long.parseLong(cursor.getString(4)));
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -152,6 +159,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_content(cursor.getString(2));
                 note.set_favorite(Integer.parseInt(cursor.getString(3)));
 
+                note.set_timeModified(cursor.getLong(4));
+
                 noteList.add(note);
             } while (cursor.moveToNext());
         }
@@ -169,6 +178,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_CONTENT, note.get_content());
         values.put(KEY_FAVORITE, note.get_favorite());
 
+        values.put(KEY_TIMESTAMP, note.get_timeModified());
+
         return db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(note.get_id())});
     } // updateNoteFromUserList() end
@@ -180,6 +191,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_TITLE, note.get_title());
         values.put(KEY_CONTENT, note.get_content());
         values.put(KEY_FAVORITE, note.get_favorite());
+
+        values.put(KEY_TIMESTAMP, note.get_timeModified());
 
         db.insert(TABLE_USER_NOTES, null, values);
     } // addNoteToUserList() end
@@ -355,5 +368,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     new String[]{String.valueOf(list.get(i).get_id())});
         }
     } // deleteListFromRecycleBin() end
+
+    public void deleteOldNote() {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+
+    }
 
 } // DataBaseHandler() end

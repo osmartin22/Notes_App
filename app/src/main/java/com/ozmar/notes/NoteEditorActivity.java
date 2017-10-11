@@ -17,6 +17,12 @@ import android.widget.Toast;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.utils.NoteEditorUtils;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 import static com.ozmar.notes.MainActivity.db;
 
 
@@ -32,11 +38,13 @@ public class NoteEditorActivity extends AppCompatActivity {
 
     private String[] noteResult;
 
+    private Calendar time = Calendar.getInstance();
+
     private void contextualActionResult(MenuItem item) {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
-        if(title.isEmpty() && content.isEmpty() && currentNote == null) {
+        if (title.isEmpty() && content.isEmpty() && currentNote == null) {
             // exit
         } else {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -108,12 +116,17 @@ public class NoteEditorActivity extends AppCompatActivity {
         String[] noteChanges = getResources().getStringArray(R.array.noteChangesArray);
 
         if (difference.equals(noteChanges[0])) {        // Note was modified
+
+            currentNote.set_timeModified(time.getTimeInMillis());   // Update time
+
             new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
             noteModifiedResult(noteResult[0]);
 
         } else if (difference.equals(noteChanges[1])) {     // New note
             SingleNote temp;
             temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
+
+            temp.set_timeModified(time.getTimeInMillis());  // Set creation time
 
             new BasicDBAsync(db, null, temp, listUsed, 0).execute();
             noteModifiedResult(noteResult[1]);
@@ -160,6 +173,16 @@ public class NoteEditorActivity extends AppCompatActivity {
             if (currentNote.get_favorite() == 1) {
                 favorite = true;
             }
+
+            Timestamp hey = new Timestamp(currentNote.get_timeModified());
+            Date j = new Date(currentNote.get_timeModified());
+
+            Toast.makeText(getApplicationContext(), j.toString(), Toast.LENGTH_SHORT).show();
+
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM", Locale.getDefault());
+        Toast.makeText(getApplicationContext(), dateFormat.format(currentNote.get_timeModified()), Toast.LENGTH_SHORT).show();
+
 
             editTextTitle.setText(currentNote.get_title());
             editTextTitle.setFocusable(false);
