@@ -41,6 +41,14 @@ public class UndoBuffer {
         }
     }
 
+    public BufferHelper bufferToProcess(int buffer) {
+        if (buffer == 0) {
+            return buffer0;
+        } else {
+            return buffer1;
+        }
+    }
+
     // Returns int to which buffer is set to be processed
     public int getBufferToProcess() {
         return bufferToProcess;
@@ -103,26 +111,26 @@ public class UndoBuffer {
     public int currentBufferSize() {
         if (currentBuffer == 0) {
             return buffer0.getSize();
+        } else {
+            return buffer1.getSize();
         }
-
-        return buffer1.getSize();
     }
 
     // Get notes of the current buffer in use
     public List<SingleNote> currentBufferNotes() {
         if (currentBuffer == 0) {
             return buffer0.getNotes();
+        } else {
+            return buffer1.getNotes();
         }
-
-        return buffer1.getNotes();
     }
 
     // Get positions of the current buffer in use
     public List<Integer> currentBufferPositions() {
         if (currentBuffer == 0) {
             return buffer0.getPositions();
+        } else {
+            return buffer1.getPositions();
         }
-
-        return buffer1.getPositions();
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "UserNotesDB";
 
     // TABLE_USER_NOTES
@@ -20,7 +20,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_TITLE = "title";
     private static final String KEY_CONTENT = "content";
     private static final String KEY_FAVORITE = "favorite";
-    private static final String KEY_TIMESTAMP = "time";
+    private static final String KEY_TIME_MODIFIED = "time";
 
     // TABLE_ARCHIVE
     private static final String TABLE_ARCHIVE = "archive";
@@ -38,13 +38,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final String CREATE_TABLE_USER_NOTES = "CREATE TABLE " + TABLE_USER_NOTES + "(" + KEY_ID
             + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, " + KEY_CONTENT + " TEXT, "
-            + KEY_FAVORITE + " INTEGER " + KEY_TIMESTAMP + " INTEGER)";
+            + KEY_FAVORITE + " INTEGER " + KEY_TIME_MODIFIED + " INTEGER)";
 
     private static final String CREATE_TABLE_ARCHIVE = "CREATE TABLE " + TABLE_ARCHIVE + "(" + KEY_ARCHIVE_ID
-            + " INTEGER PRIMARY KEY, " + KEY_ARCHIVE_TITLE + " TEXT, " + KEY_ARCHIVE_CONTENT + " TEXT)";
+            + " INTEGER PRIMARY KEY, " + KEY_ARCHIVE_TITLE + " TEXT, " + KEY_ARCHIVE_CONTENT + " TEXT " +
+            KEY_ARCHIVE_TIME_MODIFIED + " INTEGER)";
 
     private static final String CREATE_TABLE_RECYCLE_BIN = "CREATE TABLE " + TABLE_RECYCLE_BIN + "(" + KEY_RECYCLE_BIN_ID
-            + " INTEGER PRIMARY KEY, " + KEY_RECYCLE_BIN_TITLE + " TEXT, " + KEY_RECYCLE_BIN_CONTENT + " TEXT)";
+            + " INTEGER PRIMARY KEY, " + KEY_RECYCLE_BIN_TITLE + " TEXT, " + KEY_RECYCLE_BIN_CONTENT + " TEXT " +
+            KEY_RECYCLE_BIN_TIME_MODIFIED + " INTEGER)";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -59,12 +61,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        // Example for updating without losing data
-        //sqLiteDatabase.execSQL(" ALTER TABLE " + TABLE_USER_NOTES + " ADD COLUMN " + KEY_FAVORITE + " INTEGER DEFAULT 0");
-        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_USER_NOTES + " ADD COLUMN " + KEY_TIMESTAMP + " INTEGER DEFAULT 0");
+//        Example for updating without losing data
+//        sqLiteDatabase.execSQL(" ALTER TABLE " + TABLE_USER_NOTES + " ADD COLUMN " + KEY_FAVORITE + " INTEGER DEFAULT 0");
+//        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_ARCHIVE + " ADD COLUMN " + KEY_ARCHIVE_TIME_MODIFIED + " INTEGER DEFAULT 0");
+//        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_RECYCLE_BIN + " ADD COLUMN " + KEY_RECYCLE_BIN_TIME_MODIFIED + " INTEGER DEFAULT 0");
 
         // OR
-        // Do separate code without break so that user gets al the new updates
+        // Do separate code without break so that user gets all the new updates
 //        switch (oldVersion) {
 //            case 2:
 //            case 3:
@@ -158,7 +161,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
                 note.set_favorite(Integer.parseInt(cursor.getString(3)));
-
                 note.set_timeModified(cursor.getLong(4));
 
                 noteList.add(note);
@@ -177,8 +179,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_TITLE, note.get_title());
         values.put(KEY_CONTENT, note.get_content());
         values.put(KEY_FAVORITE, note.get_favorite());
-
-        values.put(KEY_TIMESTAMP, note.get_timeModified());
+        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
 
         return db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(note.get_id())});
@@ -191,8 +192,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_TITLE, note.get_title());
         values.put(KEY_CONTENT, note.get_content());
         values.put(KEY_FAVORITE, note.get_favorite());
-
-        values.put(KEY_TIMESTAMP, note.get_timeModified());
+        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
 
         db.insert(TABLE_USER_NOTES, null, values);
     } // addNoteToUserList() end
@@ -211,6 +211,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         for (int i = 0; i < list.size(); i++) {
             values.put(KEY_TITLE, list.get(i).get_title());
             values.put(KEY_CONTENT, list.get(i).get_content());
+            values.put(KEY_TIME_MODIFIED, list.get(i).get_timeModified());
             db.insert(TABLE_USER_NOTES, null, values);
             values.clear();
         }
@@ -242,6 +243,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_id(Integer.parseInt(cursor.getString(0)));
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
+                note.set_timeModified(cursor.getLong(3));
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -257,6 +259,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_ARCHIVE_TITLE, note.get_title());
         values.put(KEY_ARCHIVE_CONTENT, note.get_content());
+        values.put(KEY_ARCHIVE_TIME_MODIFIED, note.get_timeModified());
 
         return db.update(TABLE_ARCHIVE, values, KEY_ARCHIVE_ID + " = ?",
                 new String[]{String.valueOf(note.get_id())});
@@ -269,6 +272,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_ARCHIVE_TITLE, note.get_title());
         values.put(KEY_ARCHIVE_CONTENT, note.get_content());
+        values.put(KEY_ARCHIVE_TIME_MODIFIED, note.get_timeModified());
 
         db.insert(TABLE_ARCHIVE, null, values);
     } // addNoteToArchive() end
@@ -287,6 +291,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         for (int i = 0; i < list.size(); i++) {
             values.put(KEY_ARCHIVE_TITLE, list.get(i).get_title());
             values.put(KEY_ARCHIVE_CONTENT, list.get(i).get_content());
+            values.put(KEY_ARCHIVE_TIME_MODIFIED, list.get(i).get_timeModified());
             db.insert(TABLE_ARCHIVE, null, values);
             values.clear();
         }
@@ -320,6 +325,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_id(Integer.parseInt(cursor.getString(0)));
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
+                note.set_timeModified(cursor.getLong(3));
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -336,6 +342,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_RECYCLE_BIN_TITLE, note.get_title());
         values.put(KEY_RECYCLE_BIN_CONTENT, note.get_content());
+        values.put(KEY_RECYCLE_BIN_TIME_MODIFIED, note.get_timeModified());
 
         db.insert(TABLE_RECYCLE_BIN, null, values);
     } // addNoteToRecycleBin() end
@@ -355,6 +362,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         for (int i = 0; i < list.size(); i++) {
             values.put(KEY_RECYCLE_BIN_TITLE, list.get(i).get_title());
             values.put(KEY_RECYCLE_BIN_CONTENT, list.get(i).get_content());
+            values.put(KEY_RECYCLE_BIN_TIME_MODIFIED, list.get(i).get_timeModified());
             db.insert(TABLE_RECYCLE_BIN, null, values);
             values.clear();
         }
@@ -368,11 +376,5 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     new String[]{String.valueOf(list.get(i).get_id())});
         }
     } // deleteListFromRecycleBin() end
-
-    public void deleteOldNote() {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-
-    }
 
 } // DataBaseHandler() end

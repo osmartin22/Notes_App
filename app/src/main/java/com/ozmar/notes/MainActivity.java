@@ -45,8 +45,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MenuItem layoutItem;
     private Preferences preferences;
 
-    private MenuItem currentNavMenuItem;
-
     private Toolbar myToolbar;
     private DrawerLayout drawer;
     private FloatingActionButton fab;
@@ -362,7 +360,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (currentNavMenuItem != item) {
+        if (multiSelectHelper.getCurrentNavMenu() != item) {
+            multiSelectHelper.setCurrentNavMenu(item);
 
             if (snackBar != null) {
                 snackBar.dismiss();
@@ -372,14 +371,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Only enters if not currently processing a multi select operation in a thread
             // If processing, that thread will set up the adapter list navigation selection
             if (!multiSelectHelper.isInAsync()) {
-                if (currentNavMenuItem != item) {
-                    notesAdapter.clearView();
-                    new NavMenuAsync(db, myToolbar, fab, notesAdapter, item).execute();
-                }
+                notesAdapter.clearView();
+                new NavMenuAsync(db, myToolbar, fab, notesAdapter, item).execute();
             }
-
-            currentNavMenuItem = item;
-            multiSelectHelper.setCurrentNavMenu(currentNavMenuItem);
         }
 
         drawer.closeDrawer(GravityCompat.START);

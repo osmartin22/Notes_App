@@ -21,7 +21,7 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
     private NotesAdapter adapter;
     private Toolbar toolbar;
     private FloatingActionButton fab;
-    private int processingBuffer;
+    private int bufferInUse;
 
     public DoMenuActionAsync(DatabaseHandler db, MultiSelectFlagHelper flagHelper, MenuItemHelper itemHelper,
                              UndoBuffer buffer, NotesAdapter adapter, Toolbar toolbar, FloatingActionButton fab) {
@@ -33,7 +33,7 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
         this.listUsed = adapter.getListUsed();
         this.toolbar = toolbar;
         this.fab = fab;
-        this.processingBuffer = buffer.getBufferToProcess();
+        this.bufferInUse = buffer.getBufferToProcess();
     }
 
     @Override
@@ -43,11 +43,11 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-//        if (flagHelper.isEditorActionFlag()) {
-//            itemHelper.doEditorAction(flagHelper.getEditorAction(), buffer.getBuffer(processingBuffer).getNotes(), listUsed);
-//        } else if (flagHelper.getItem() != null) {
-//            itemHelper.doCABAction(flagHelper.getItem(), buffer.getBuffer(processingBuffer).getNotes(), listUsed);
-//        }
+        if (flagHelper.getEditorAction() != -1) {
+            itemHelper.doEditorAction(flagHelper.getEditorAction(), buffer.bufferToProcess(bufferInUse).getNotes(), listUsed);
+        } else if (flagHelper.getItem() != null) {
+            itemHelper.doCABAction(flagHelper.getItem(), buffer.bufferToProcess(bufferInUse).getNotes(), listUsed);
+        }
 
         return null;
     }
@@ -57,7 +57,7 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
         flagHelper.setEditorAction(-1);
         flagHelper.setItem(null);
 
-        buffer.clearBuffer(processingBuffer);
+        buffer.clearBuffer(bufferInUse);
 
         if (flagHelper.isAnotherMultiSelect()) {
             flagHelper.setAnotherMultiSelect(false);
