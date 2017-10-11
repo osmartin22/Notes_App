@@ -25,7 +25,6 @@ import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.DoMenuActionAsync;
 import com.ozmar.notes.async.NavMenuAsync;
-import com.ozmar.notes.utils.AutoDeleteHelper;
 import com.ozmar.notes.utils.MainActivityHelper;
 import com.ozmar.notes.utils.MenuItemHelper;
 import com.ozmar.notes.utils.MultiSelectFlagHelper;
@@ -57,7 +56,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MultiSelectFlagHelper multiSelectHelper;
     private MenuItemHelper itemHelper;
 
-    private AutoDeleteHelper autoDeleteHelper;
 
 
     public void launchNoteEditor(View view) {
@@ -147,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         preferences = new Preferences(getApplicationContext());
         multiSelectHelper = new MultiSelectFlagHelper();
         mainActivityHelper = new MainActivityHelper(getApplicationContext(), db);
-        autoDeleteHelper = new AutoDeleteHelper();
 
         new AutoDeleteAsync(db).execute();
 
