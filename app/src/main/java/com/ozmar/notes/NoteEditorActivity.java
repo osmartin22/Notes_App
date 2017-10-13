@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,7 +21,6 @@ import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.NoteEditorUtils;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import static com.ozmar.notes.MainActivity.db;
 
@@ -37,6 +37,8 @@ public class NoteEditorActivity extends AppCompatActivity
     private int listUsed;
 
     private String[] noteResult;
+
+    private Button reminder;
 
     private void contextualActionResult(MenuItem item) {
         String title = editTextTitle.getText().toString();
@@ -156,6 +158,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
         noteResult = getResources().getStringArray(R.array.noteResultArray);
 
+        reminder = (Button) findViewById(R.id.reminderButton);
         editTextTitle = (EditText) findViewById(R.id.editTextTitle);
         editTextContent = (EditText) findViewById(R.id.editTextContent);
 
@@ -174,10 +177,8 @@ public class NoteEditorActivity extends AppCompatActivity
                 favorite = true;
             }
 
-            Date time = new Date(currentNote.get_timeModified());
-
             TextView timeTextView = (TextView) findViewById(R.id.lastModified);
-            timeTextView.setText(time.toString());
+            timeTextView.setText(NoteEditorUtils.lastUpdated(getApplicationContext(), currentNote.get_timeModified()));
 
             editTextTitle.setText(currentNote.get_title());
             editTextTitle.setFocusable(false);
@@ -234,7 +235,7 @@ public class NoteEditorActivity extends AppCompatActivity
                 return true;
 
             case R.id.reminder:
-                addReminder();
+                addReminder(null);
                 return true;
 
             case R.id.delete_note_forever:
@@ -252,14 +253,22 @@ public class NoteEditorActivity extends AppCompatActivity
         return false;
     } // onOptionsItemSelected() end
 
-    private void addReminder() {
+    public void addReminder(View view) {
         ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance();
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
     }
 
     @Override
     public void onReminderPicked(Calendar calendar) {
+        // Add reminder to note and display reminder button
+        reminder.setText(NoteEditorUtils.getReminderText(getApplicationContext(), calendar));
+        reminder.setVisibility(View.VISIBLE);
+    }
 
+    @Override
+    public void onReminderDelete() {
+        // Remove reminder from note and hide reminder button
+        reminder.setVisibility(View.INVISIBLE);
     }
 
     private void deleteNoteForever() {

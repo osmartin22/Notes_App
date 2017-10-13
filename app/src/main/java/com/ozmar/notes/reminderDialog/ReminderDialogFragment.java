@@ -14,9 +14,6 @@ import com.ozmar.notes.R;
 
 import java.util.Calendar;
 
-/**
- * Created by ozmar on 10/11/2017.
- */
 
 public class ReminderDialogFragment extends DialogFragment
         implements DatePickerFragment.OnDatePickedListener, TimePickerFragment.OnTimePickedListener {
@@ -31,6 +28,7 @@ public class ReminderDialogFragment extends DialogFragment
 
     public interface OnReminderPickedListener {
         void onReminderPicked(Calendar calendar);
+        void onReminderDelete();
     }
 
     public ReminderDialogFragment() {
@@ -72,7 +70,6 @@ public class ReminderDialogFragment extends DialogFragment
                 if (myCallback != null) {
                     myCallback.onReminderPicked(calendar);
                 }
-
             }
         });
 
@@ -80,6 +77,15 @@ public class ReminderDialogFragment extends DialogFragment
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
 
+            }
+        });
+
+        reminderDialog.setNeutralButton("Delete", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (myCallback != null) {
+                    myCallback.onReminderDelete();
+                }
             }
         });
 

@@ -14,8 +14,8 @@ public class SingleNote implements Parcelable {
 
     private long _timeModified;
 
-    public long _reminderTime = 0;
-    public boolean hasReminder = false;
+    private long _reminderTime = 0;
+    private boolean hasReminder = false;
 
     public SingleNote() {
 

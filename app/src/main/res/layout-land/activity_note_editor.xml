@@ -40,6 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/landTitleMarginSides"
                 android:layout_marginStart="@dimen/landTitleMarginSides"
+                android:layout_weight="0"
                 android:ems="10"
                 android:fontFamily="sans-serif-condensed"
                 android:hint="@string/titleEditText"
@@ -48,14 +49,12 @@
                 android:textSize="@dimen/landTitleTextSize"
                 android:textStyle="bold" />
 
-
             <EditText
                 android:id="@+id/editTextContent"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginEnd="@dimen/landContentMarginSides"
                 android:layout_marginStart="@dimen/landContentMarginSides"
-                android:layout_weight="1"
                 android:background="@android:color/transparent"
                 android:ems="10"
                 android:fontFamily="sans-serif"
@@ -63,19 +62,21 @@
                 android:hint="@string/editTextNoteHint"
                 android:imeOptions="flagNoExtractUi"
                 android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
+                android:paddingBottom="16dp"
                 android:textAlignment="textStart"
                 android:textSize="@dimen/landContentTextSize" />
+
+            <TextView
+                android:id="@+id/lastModified"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp"
+                android:textAlignment="textEnd" />
 
         </LinearLayout>
 
     </ScrollView>
-
-    <TextView
-        android:id="@+id/lastModified"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0"
-        android:layout_gravity="bottom"
-        android:textAlignment="center" />
 
 </android.support.design.widget.CoordinatorLayout>
