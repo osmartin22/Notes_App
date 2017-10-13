@@ -16,14 +16,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ozmar.notes.async.BasicDBAsync;
+import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.NoteEditorUtils;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import static com.ozmar.notes.MainActivity.db;
 
 
-public class NoteEditorActivity extends AppCompatActivity {
+public class NoteEditorActivity extends AppCompatActivity
+        implements ReminderDialogFragment.OnReminderPickedListener {
 
     private EditText editTextTitle, editTextContent;
     private SingleNote currentNote = null;
@@ -230,6 +233,10 @@ public class NoteEditorActivity extends AppCompatActivity {
                 favorite = NoteEditorUtils.favoriteNote(favorite, menuItem);
                 return true;
 
+            case R.id.reminder:
+                addReminder();
+                return true;
+
             case R.id.delete_note_forever:
                 deleteNoteForever();
                 return true;
@@ -244,6 +251,16 @@ public class NoteEditorActivity extends AppCompatActivity {
 
         return false;
     } // onOptionsItemSelected() end
+
+    private void addReminder() {
+        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance();
+        dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
+    }
+
+    @Override
+    public void onReminderPicked(Calendar calendar) {
+
+    }
 
     private void deleteNoteForever() {
         new AlertDialog.Builder(NoteEditorActivity.this)

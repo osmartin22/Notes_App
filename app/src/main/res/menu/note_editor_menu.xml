@@ -10,6 +10,12 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/reminder"
+        android:icon="@drawable/ic_reminder_white"
+        android:title="@string/reminderNoteMenuItem"
+        app:showAsAction="ifRoom"/>
+
+    <item
         android:id="@+id/archive_note"
         android:icon="@drawable/ic_archive_white"
         android:title="@string/archiveNoteMenuItem"

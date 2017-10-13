@@ -13,6 +13,7 @@
     <string name="deleteNoteMenuItem">Delete Note</string>
     <string name="restoreNoteMenuItem">Restore Note</string>
     <string name="deleteForeverMenuItem">Delete Forever</string>
+    <string name="reminderNoteMenuItem">Add Reminder</string>
 
 
     <!-- MenuItem names for MainActivity -->
@@ -67,5 +68,31 @@
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+
+    <!-- String Arrays used for the Reminder Dialog -->
+    <string-array name="dateArray">
+        <item>Today</item>
+        <item>Tomorrow</item>
+        <item>Next Week</item>
+        <item>Pick A Date&#8230;</item>
+    </string-array>
+
+    <string-array name="timeArray">
+        <item>Morning</item>
+        <item>Afternoon</item>
+        <item>Evening</item>
+        <item>Night</item>
+        <item>Pick A Time&#8230;</item>
+    </string-array>
+
+    <string-array name="reminderArray">
+        <item>Does Not Repeat</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Yearly</item>
+        <item>Custom&#8230;</item>
+    </string-array>
 
 </resources>
