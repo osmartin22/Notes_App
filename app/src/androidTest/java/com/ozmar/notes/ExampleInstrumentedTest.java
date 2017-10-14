@@ -47,7 +47,7 @@ public class ExampleInstrumentedTest {
 //        assertEquals(noteChanges[1], NoteEditorUtils.differenceFromOriginal(context, originalTitle,
 //                originalContent, null));
 //
-//        // Note not modified (does not include changes to favorite)
+//        // Note not modified (does not include noteChanges to favorite)
 //        assertEquals(noteChanges[2], NoteEditorUtils.differenceFromOriginal(context,
 //                originalTitle, originalContent, originalNote));
 //

@@ -75,7 +75,7 @@ public class MainActivityHelper {
         SingleNote note = bundle.getParcelable("Note");
         int listUsed = adapter.getListUsed();
 
-        if (save.equals(noteResult[0])) {    // Update rv with changes to the note
+        if (save.equals(noteResult[0])) {    // Update rv with noteChanges to the note
             adapter.updateAt(position, note);
 
             // TODO: Optimize this, right now getting the entire list just for the newest note

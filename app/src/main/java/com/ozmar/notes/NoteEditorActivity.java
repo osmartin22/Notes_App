@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,7 +18,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ozmar.notes.async.BasicDBAsync;
+import com.ozmar.notes.async.UpdateNoteAsync;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
+import com.ozmar.notes.utils.NoteChanges;
 import com.ozmar.notes.utils.NoteEditorUtils;
 
 import java.util.Calendar;
@@ -112,31 +115,32 @@ public class NoteEditorActivity extends AppCompatActivity
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
-        String difference = NoteEditorUtils.differenceFromOriginal(getApplicationContext(), title, content, currentNote);
-        String[] noteChanges = getResources().getStringArray(R.array.noteChangesArray);
+        if (currentNote != null) {
+            NoteChanges noteChanges = new NoteChanges();
+            boolean noteTextChanged = NoteEditorUtils.noteChanges(title, content, currentNote, noteChanges);
+            boolean favoriteChanged = NoteEditorUtils.favoriteChanged(favorite, currentNote, noteChanges);
 
-        long time = System.currentTimeMillis();
+            if (noteTextChanged || favoriteChanged) {
+                new UpdateNoteAsync(db, null, currentNote, listUsed, noteChanges).execute();
 
-        if (difference.equals(noteChanges[0])) {        // Note was modified
+                if (listUsed == 1 && favoriteChanged) {       // Note not a favorite anymore
+                    noteModifiedResult(noteResult[3]);
+                } else {
+                    noteModifiedResult(noteResult[0]);
+                }
+            }
 
-            currentNote.set_timeModified(time);   // Update time
+        } else {
+            boolean titleEmpty = title.isEmpty();
+            boolean contentEmpty = content.isEmpty();
+            if (!(titleEmpty && contentEmpty)) {    // New note
 
-            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
-            noteModifiedResult(noteResult[0]);
+                SingleNote temp;
+                temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
+                temp.set_timeModified(System.currentTimeMillis());
 
-        } else if (difference.equals(noteChanges[1])) {     // New note
-            SingleNote temp;
-            temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
-
-            temp.set_timeModified(time);  // Set creation time
-
-            new BasicDBAsync(db, null, temp, listUsed, 0).execute();
-            noteModifiedResult(noteResult[1]);
-
-            // TODO: Place in separate function when adding Tags/Categories
-        } else if (difference.equals(noteChanges[2])) {
-            if (listUsed == 1 && !favorite) {       // Note not a favorite anymore
-                noteModifiedResult(noteResult[3]);
+                new BasicDBAsync(db, null, temp, listUsed, 0).execute();
+                noteModifiedResult(noteResult[1]);
             }
         }
 
@@ -289,11 +293,12 @@ public class NoteEditorActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        int temp = favorite ? 1 : 0;
-
-        if (currentNote != null && listUsed != 2) {  // Save favorite even if user does not explicitly press save menu item
-            currentNote.set_favorite(temp);
-            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();
-        }
+        Log.d("Favorite", "onPause()");
+//        int temp = favorite ? 1 : 0;
+//
+//        if (currentNote != null && listUsed != 2) {  // Save favorite even if user does not explicitly press save menu item
+//            currentNote.set_favorite(temp);
+//            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();     // TODO: OPTIMIZE
+//        }
     }
 } // NoteEditorActivity() end

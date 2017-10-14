@@ -21,7 +21,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.DoMenuActionAsync;
 import com.ozmar.notes.async.NavMenuAsync;
@@ -146,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         multiSelectHelper = new MultiSelectFlagHelper();
         mainActivityHelper = new MainActivityHelper(getApplicationContext(), db);
 
-        new AutoDeleteAsync(db).execute();
+//        new AutoDeleteAsync(db).execute();
 
         fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
 

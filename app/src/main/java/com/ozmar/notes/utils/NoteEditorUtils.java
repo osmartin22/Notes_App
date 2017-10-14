@@ -1,7 +1,7 @@
 package com.ozmar.notes.utils;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -20,33 +20,44 @@ public class NoteEditorUtils {
     private NoteEditorUtils() {
     }
 
-    @NonNull
-    public static String differenceFromOriginal(Context context, String title, String content, SingleNote note) {
-        String[] noteChanges = context.getResources().getStringArray(R.array.noteChangesArray);
+    public static boolean noteChanges(String title, String content, SingleNote note, NoteChanges changes) {
+        boolean titleTheSame = title.equals(note.get_title());
+        boolean contentTheSame = content.equals(note.get_content());
 
-        if (title.isEmpty() && content.isEmpty() && note == null) {
-            return "";
-
-        } else if (note != null) {
-            boolean titleTheSame = title.equals(note.get_title());
-            boolean contentTheSame = content.equals(note.get_content());
-
-            if (!(titleTheSame && contentTheSame)) {
-                if (titleTheSame) {
-                    note.set_content(content);
-                } else if (contentTheSame) {
-                    note.set_title(title);
-                } else {
-                    note.set_title(title);
-                    note.set_content(content);
-                }
-                return noteChanges[0];      // Note modified
+        if (!(titleTheSame && contentTheSame)) {
+            if (titleTheSame) {
+                changes.setNoteTextChanges(2);
+                note.set_content(content);
+            } else if (contentTheSame) {
+                changes.setNoteTextChanges(1);
+                note.set_title(title);
+            } else {
+                changes.setNoteTextChanges(3);
+                note.set_title(title);
+                note.set_content(content);
             }
 
-            return noteChanges[2];      // Check if favorite changed later
+            note.set_timeModified(System.currentTimeMillis());
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean favoriteChanged(boolean favorite, SingleNote note, NoteChanges changes) {
+        boolean noteFavorite = note.get_favorite() == 1;
+
+        if(noteFavorite && favorite) {
+            return false;
         }
 
-        return noteChanges[1];      // New note
+        if(favorite) {
+            note.set_favorite(1);
+        } else {
+            note.set_favorite(0);
+        }
+
+        changes.setFavoriteChanged(true);
+        return true;
     }
 
     public static boolean favoriteNote(boolean favorite, MenuItem item) {

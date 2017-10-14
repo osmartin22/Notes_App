@@ -5,6 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import com.ozmar.notes.utils.NoteChanges;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,39 +17,33 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "UserNotesDB";
 
-    // TABLE_USER_NOTES
+    // TABLES
     private static final String TABLE_USER_NOTES = "userNotes";
+    private static final String TABLE_ARCHIVE = "archive";
+    private static final String TABLE_RECYCLE_BIN = "recycleBin";
+
+    // KEYS
     private static final String KEY_ID = "id";
     private static final String KEY_TITLE = "title";
     private static final String KEY_CONTENT = "content";
-    private static final String KEY_FAVORITE = "favorite";
+    private static final String KEY_FAVORITE = "favorite";  // Change to pinned maybe
     private static final String KEY_TIME_MODIFIED = "time";
+    private static final String KEY_REMINDER_TIME = "reminder";
 
-    // TABLE_ARCHIVE
-    private static final String TABLE_ARCHIVE = "archive";
-    private static final String KEY_ARCHIVE_ID = "id";
-    private static final String KEY_ARCHIVE_TITLE = "title";
-    private static final String KEY_ARCHIVE_CONTENT = "content";
-    private static final String KEY_ARCHIVE_TIME_MODIFIED = "time";
 
-    // TABLE_RECYCLE_BIN
-    private static final String TABLE_RECYCLE_BIN = "recycleBin";
-    private static final String KEY_RECYCLE_BIN_ID = "id";
-    private static final String KEY_RECYCLE_BIN_TITLE = "title";
-    private static final String KEY_RECYCLE_BIN_CONTENT = "content";
-    private static final String KEY_RECYCLE_BIN_TIME_MODIFIED = "time";
+    private static final String CREATE_TABLE_USER_NOTES = "CREATE TABLE IF NOT EXISTS "
+            + TABLE_USER_NOTES + "(" + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, "
+            + KEY_CONTENT + " TEXT, " + KEY_FAVORITE + " INTEGER, " + KEY_TIME_MODIFIED + " INTEGER, "
+            + KEY_REMINDER_TIME + " INTEGER)";
 
-    private static final String CREATE_TABLE_USER_NOTES = "CREATE TABLE " + TABLE_USER_NOTES + "(" + KEY_ID
-            + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, " + KEY_CONTENT + " TEXT, "
-            + KEY_FAVORITE + " INTEGER " + KEY_TIME_MODIFIED + " INTEGER)";
+    private static final String CREATE_TABLE_ARCHIVE = "CREATE TABLE IF NOT EXISTS "
+            + TABLE_ARCHIVE + "(" + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, "
+            + KEY_CONTENT + " TEXT, " + KEY_TIME_MODIFIED + " INTEGER, "
+            + KEY_REMINDER_TIME + "INTEGER)";
 
-    private static final String CREATE_TABLE_ARCHIVE = "CREATE TABLE " + TABLE_ARCHIVE + "(" + KEY_ARCHIVE_ID
-            + " INTEGER PRIMARY KEY, " + KEY_ARCHIVE_TITLE + " TEXT, " + KEY_ARCHIVE_CONTENT + " TEXT " +
-            KEY_ARCHIVE_TIME_MODIFIED + " INTEGER)";
-
-    private static final String CREATE_TABLE_RECYCLE_BIN = "CREATE TABLE " + TABLE_RECYCLE_BIN + "(" + KEY_RECYCLE_BIN_ID
-            + " INTEGER PRIMARY KEY, " + KEY_RECYCLE_BIN_TITLE + " TEXT, " + KEY_RECYCLE_BIN_CONTENT + " TEXT " +
-            KEY_RECYCLE_BIN_TIME_MODIFIED + " INTEGER)";
+    private static final String CREATE_TABLE_RECYCLE_BIN = "CREATE TABLE IF NOT EXISTS "
+            + TABLE_RECYCLE_BIN + "(" + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, "
+            + KEY_CONTENT + " TEXT, " + KEY_TIME_MODIFIED + " INTEGER)";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -76,27 +73,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onDowngrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_NOTES);
+//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_ARCHIVE);
+//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_RECYCLE_BIN);
 //        onCreate(sqLiteDatabase);
-//        super.onDowngrade(db, oldVersion, newVersion);
+
+//        super.onDowngrade(sqLiteDatabase, oldVersion, newVersion);
     }
 
-
-    //--------------------------------------------------------------------------------------------//
-    // User Notes Table Specific Methods
-    //--------------------------------------------------------------------------------------------//
-
-    // Get count of the number of notes
-    public int getNotesCount() {
-        String countQuery = "SELECT * FROM " + TABLE_USER_NOTES;
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(countQuery, null);
-
-        int count = cursor.getCount();
-        cursor.close();
-
-        return count;
-    } // getNotesCount() end
 
     // Update if used
 //    public SingleNote getNote(int id) {
@@ -116,6 +99,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 //        return null;
 //    } // getNote() end
 
+    public int getNotesCount(int table) {
+        String countQuery;
+        if (table == 0) {
+            countQuery = "SELECT * FROM " + TABLE_USER_NOTES;
+        } else if (table == 1) {
+            countQuery = "SELECT * FROM " + TABLE_ARCHIVE;
+        } else {
+            countQuery = "SELECT * FROM " + TABLE_RECYCLE_BIN;
+        }
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+
+        int count = cursor.getCount();
+        cursor.close();
+
+        return count;
+    } // getNotesCount() end
+
+
+    //--------------------------------------------------------------------------------------------//
+    // User Notes Table Specific Methods
+    //--------------------------------------------------------------------------------------------//
+
     public List<SingleNote> getUserNotes() {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " ORDER BY ROWID DESC";
@@ -130,11 +137,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
 
-                if (cursor.getString(3) == null) {
-                    note.set_favorite(0);
-                } else {
+//                if (cursor.getString(3) == null) {
+//                    note.set_favorite(0);
+//                } else {
                     note.set_favorite(Integer.parseInt(cursor.getString(3)));
-                }
+//                }
 
                 note.set_timeModified(Long.parseLong(cursor.getString(4)));
 
@@ -148,8 +155,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public List<SingleNote> getFavoriteNotes() {
         List<SingleNote> noteList = new ArrayList<>();
-        String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " WHERE " + KEY_FAVORITE + " = 1" +
-                " ORDER BY ROWID DESC";
+        String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES
+                + " WHERE " + KEY_FAVORITE + " = 1 ORDER BY ROWID DESC";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -170,6 +177,31 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
         return noteList;
     } // getFavoriteNotes() end
+
+    public void updateNoteFromUserList(SingleNote note, NoteChanges changes) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        if (changes.getNoteTextChanges() != 0) {
+            if (changes.getNoteTextChanges() == 1) {
+                values.put(KEY_TITLE, note.get_title());
+            } else if (changes.getNoteTextChanges() == 2) {
+                values.put(KEY_CONTENT, note.get_content());
+            } else if (changes.getNoteTextChanges() == 3) {
+                values.put(KEY_TITLE, note.get_title());
+                values.put(KEY_CONTENT, note.get_content());
+            }
+            values.put(KEY_TIME_MODIFIED, note.get_timeModified());
+        }
+
+        if (changes.isFavoriteChanged()) {
+            values.put(KEY_FAVORITE, note.get_favorite());
+        }
+
+// TODO: Possibly put this in if so that it's not unnecessarily called
+        db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
+                new String[]{String.valueOf(note.get_id())});
+    }
 
     // Update a single note
     public int updateNoteFromUserList(SingleNote note) {
@@ -208,10 +240,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        for (int i = 0; i < list.size(); i++) {
-            values.put(KEY_TITLE, list.get(i).get_title());
-            values.put(KEY_CONTENT, list.get(i).get_content());
-            values.put(KEY_TIME_MODIFIED, list.get(i).get_timeModified());
+        for (SingleNote note : list) {
+            values.put(KEY_TITLE, note.get_title());
+            values.put(KEY_CONTENT, note.get_content());
+            values.put(KEY_TIME_MODIFIED, note.get_timeModified());
             db.insert(TABLE_USER_NOTES, null, values);
             values.clear();
         }
@@ -220,9 +252,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteListFromUserList(List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        for (int i = 0; i < list.size(); i++) {
+        for (SingleNote note : list) {
             db.delete(TABLE_USER_NOTES, KEY_ID + " = ?",
-                    new String[]{String.valueOf(list.get(i).get_id())});
+                    new String[]{String.valueOf(note.get_id())});
         }
     } // deleteListFromUserList() end
 
@@ -253,26 +285,46 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     } // getArchiveNotes() end
 
+    public void updateNoteFromArchive(SingleNote note, NoteChanges changes) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        if (changes.getNoteTextChanges() != 0) {
+            if (changes.getNoteTextChanges() == 1) {
+                values.put(KEY_TITLE, note.get_title());
+            } else if (changes.getNoteTextChanges() == 2) {
+                values.put(KEY_CONTENT, note.get_content());
+            } else if (changes.getNoteTextChanges() == 3) {
+                values.put(KEY_TITLE, note.get_title());
+                values.put(KEY_CONTENT, note.get_content());
+            }
+            values.put(KEY_TIME_MODIFIED, note.get_timeModified());
+        }
+
+        db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
+                new String[]{String.valueOf(note.get_id())});
+    }
+
+
     public int updateNoteFromArchive(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_ARCHIVE_TITLE, note.get_title());
-        values.put(KEY_ARCHIVE_CONTENT, note.get_content());
-        values.put(KEY_ARCHIVE_TIME_MODIFIED, note.get_timeModified());
+        values.put(KEY_TITLE, note.get_title());
+        values.put(KEY_CONTENT, note.get_content());
+        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
 
-        return db.update(TABLE_ARCHIVE, values, KEY_ARCHIVE_ID + " = ?",
+        return db.update(TABLE_ARCHIVE, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(note.get_id())});
     } // updateNoteFromArchive() end
 
-    // Add note to the archive list
     public void addNoteToArchive(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_ARCHIVE_TITLE, note.get_title());
-        values.put(KEY_ARCHIVE_CONTENT, note.get_content());
-        values.put(KEY_ARCHIVE_TIME_MODIFIED, note.get_timeModified());
+        values.put(KEY_TITLE, note.get_title());
+        values.put(KEY_CONTENT, note.get_content());
+        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
 
         db.insert(TABLE_ARCHIVE, null, values);
     } // addNoteToArchive() end
@@ -280,7 +332,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteNoteFromArchive(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.delete(TABLE_ARCHIVE, KEY_ARCHIVE_ID + " = ?",
+        db.delete(TABLE_ARCHIVE, KEY_ID + " = ?",
                 new String[]{String.valueOf(note.get_id())});
     } // deleteNoteFromArchive() end
 
@@ -288,10 +340,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        for (int i = 0; i < list.size(); i++) {
-            values.put(KEY_ARCHIVE_TITLE, list.get(i).get_title());
-            values.put(KEY_ARCHIVE_CONTENT, list.get(i).get_content());
-            values.put(KEY_ARCHIVE_TIME_MODIFIED, list.get(i).get_timeModified());
+        for (SingleNote note : list) {
+            values.put(KEY_TITLE, note.get_title());
+            values.put(KEY_CONTENT, note.get_content());
+            values.put(KEY_TIME_MODIFIED, note.get_timeModified());
             db.insert(TABLE_ARCHIVE, null, values);
             values.clear();
         }
@@ -300,9 +352,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteListFromArchive(List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        for (int i = 0; i < list.size(); i++) {
-            db.delete(TABLE_ARCHIVE, KEY_ARCHIVE_ID + " = ?",
-                    new String[]{String.valueOf(list.get(i).get_id())});
+        for (SingleNote note : list) {
+            db.delete(TABLE_ARCHIVE, KEY_ID + " = ?",
+                    new String[]{String.valueOf(note.get_id())});
         }
     } // deleteListFromArchive() end
 
@@ -335,23 +387,21 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     } // getRecycleBinNotes() end
 
-    // Add note to RecycleBin
     public void addNoteToRecycleBin(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_RECYCLE_BIN_TITLE, note.get_title());
-        values.put(KEY_RECYCLE_BIN_CONTENT, note.get_content());
-        values.put(KEY_RECYCLE_BIN_TIME_MODIFIED, note.get_timeModified());
+        values.put(KEY_TITLE, note.get_title());
+        values.put(KEY_CONTENT, note.get_content());
+        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
 
         db.insert(TABLE_RECYCLE_BIN, null, values);
     } // addNoteToRecycleBin() end
 
-
     public void deleteNoteFromRecycleBin(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        db.delete(TABLE_RECYCLE_BIN, KEY_RECYCLE_BIN_ID + " = ?",
+        db.delete(TABLE_RECYCLE_BIN, KEY_ID + " = ?",
                 new String[]{String.valueOf(note.get_id())});
     } // deleteNoteFromRecycleBin() end
 
@@ -359,12 +409,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
-        long time = System.currentTimeMillis();
-
-        for (int i = 0; i < list.size(); i++) {
-            values.put(KEY_RECYCLE_BIN_TITLE, list.get(i).get_title());
-            values.put(KEY_RECYCLE_BIN_CONTENT, list.get(i).get_content());
-            values.put(KEY_RECYCLE_BIN_TIME_MODIFIED, time);
+        for (SingleNote note : list) {
+            values.put(KEY_TITLE, note.get_title());
+            values.put(KEY_CONTENT, note.get_content());
+            values.put(KEY_TIME_MODIFIED, System.currentTimeMillis());
             db.insert(TABLE_RECYCLE_BIN, null, values);
             values.clear();
         }
@@ -373,27 +421,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteListFromRecycleBin(List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        for (int i = 0; i < list.size(); i++) {
-            db.delete(TABLE_RECYCLE_BIN, KEY_RECYCLE_BIN_ID + " = ?",
-                    new String[]{String.valueOf(list.get(i).get_id())});
+        for (SingleNote note : list) {
+            db.delete(TABLE_RECYCLE_BIN, KEY_ID + " = ?",
+                    new String[]{String.valueOf(note.get_id())});
         }
     } // deleteListFromRecycleBin() end
 
     public void deleteNotesPastDeleteDay() {
-        int DAYS = 7;       // Make this a shared preferences maybe
+        int DAYS = 7;       // Make this a shared preferences
 
 //        long time = TimeUnit.DAYS.toMillis(DAYS);
-
         long time = 300000;
-
         long currentTime = System.currentTimeMillis();
 
         List<String> notesToDelete = new ArrayList<>();
+        String selectQuery = "SELECT " + KEY_ID + ", " + KEY_TIME_MODIFIED + " FROM " + TABLE_RECYCLE_BIN;
 
-        String selectQuery = "SELECT " + KEY_RECYCLE_BIN_ID + ", " + KEY_RECYCLE_BIN_TIME_MODIFIED
-                + " FROM " + TABLE_RECYCLE_BIN;
-
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -404,19 +448,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             } while (cursor.moveToNext());
         }
 
-        autoDeleteNote(notesToDelete);
-
-        cursor.close();
-    }
-
-    private void autoDeleteNote(List<String> list) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-//        for(int i = 0; i < list.size(); i++) {
-        for (String id : list) {
-            db.delete(TABLE_RECYCLE_BIN, KEY_RECYCLE_BIN_ID + " = ?",
+        for (String id : notesToDelete) {
+            db.delete(TABLE_RECYCLE_BIN, KEY_ID + " = ?",
                     new String[]{String.valueOf(id)});
         }
+
+        cursor.close();
     }
 
 } // DataBaseHandler() end

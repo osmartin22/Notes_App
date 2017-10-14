@@ -59,25 +59,25 @@ public class ExampleUnitTest {
         String noteChanges[] = context.getResources().getStringArray(R.array.noteChangesArray);
 
         // Note modified
-        assertEquals(noteChanges[0], NoteEditorUtils.differenceFromOriginal(context, changed,
+        assertEquals(noteChanges[0], NoteEditorUtils.changesToNote(context, changed,
                 originalContent, note));
-        assertEquals(noteChanges[0], NoteEditorUtils.differenceFromOriginal(context, originalTitle,
+        assertEquals(noteChanges[0], NoteEditorUtils.changesToNote(context, originalTitle,
                 changed, note));
-        assertEquals(noteChanges[0], NoteEditorUtils.differenceFromOriginal(context, changed,
+        assertEquals(noteChanges[0], NoteEditorUtils.changesToNote(context, changed,
                 changed, note));
 
         // New note
-        assertEquals(noteChanges[1], NoteEditorUtils.differenceFromOriginal(context, originalTitle,
+        assertEquals(noteChanges[1], NoteEditorUtils.changesToNote(context, originalTitle,
                 originalContent, null));
 
-        // Note not modified (does not include changes to favorite)
+        // Note not modified (does not include noteChanges to favorite)
         note.set_title(originalTitle);
         note.set_content(originalContent);
-        assertEquals(noteChanges[2], NoteEditorUtils.differenceFromOriginal(context,
+        assertEquals(noteChanges[2], NoteEditorUtils.changesToNote(context,
                 originalTitle, originalContent, note));
 
         // New empty note
-        assertEquals("", NoteEditorUtils.differenceFromOriginal(context, "", "", null));
+        assertEquals("", NoteEditorUtils.changesToNote(context, "", "", null));
     }
 
 
