@@ -16,32 +16,21 @@ public class SingleNote implements Parcelable {
 
     // TODO: Update serializable
     private long _reminderTime = 0;
-    private boolean hasReminder = false;
 
     public SingleNote() {
 
     }
 
-    public SingleNote(String title, String content) {
-        this(title, content, 0);
-    }
-
-    public SingleNote(String title, String content, int favorite) {
+    public SingleNote(String title, String content, int favorite, long timeModified) {
         this._title = title;
         this._content = content;
         this._favorite = favorite;
-    }
-
-    public SingleNote(String title, String content, int favorite, long timeModified) {
-        this(title, content, favorite);
         this._timeModified = timeModified;
     }
 
-    public SingleNote(int id, String title, String content, int favorite) {
-        this._id = id;
-        this._title = title;
-        this._content = content;
-        this._favorite = favorite;
+    public SingleNote(String title, String content, int favorite, long timeModified, long reminderTime) {
+        this(title,content,favorite,timeModified);
+        this._reminderTime = reminderTime;
     }
 
     @Override
@@ -119,6 +108,14 @@ public class SingleNote implements Parcelable {
             return new SingleNote[size];
         }
     };
+
+    public long get_reminderTime() {
+        return _reminderTime;
+    }
+
+    public void set_reminderTime(long _reminderTime) {
+        this._reminderTime = _reminderTime;
+    }
 
     public long get_timeModified() {
         return _timeModified;

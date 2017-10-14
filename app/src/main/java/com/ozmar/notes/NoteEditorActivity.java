@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.UpdateNoteAsync;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
+import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.utils.NoteChanges;
 import com.ozmar.notes.utils.NoteEditorUtils;
 
@@ -41,6 +42,7 @@ public class NoteEditorActivity extends AppCompatActivity
     private String[] noteResult;
 
     private Button reminder;
+    private long reminderTime;
 
     private void contextualActionResult(MenuItem item) {
         String title = editTextTitle.getText().toString();
@@ -58,7 +60,12 @@ public class NoteEditorActivity extends AppCompatActivity
                 NoteEditorUtils.updateNoteObject(currentNote, title, content, titleChanged, contentChanged);
 
             } else {
-                currentNote = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
+                if (favorite) {
+                    currentNote = new SingleNote(title, content, 1, System.currentTimeMillis());
+                } else {
+                    currentNote = new SingleNote(title, content, 0, System.currentTimeMillis());
+                }
+
                 intent.putExtra("New Note Action", 1);
             }
 
@@ -135,8 +142,12 @@ public class NoteEditorActivity extends AppCompatActivity
             if (!(titleEmpty && contentEmpty)) {    // New note
 
                 SingleNote temp;
-                temp = favorite ? new SingleNote(title, content, 1) : new SingleNote(title, content, 0);
-                temp.set_timeModified(System.currentTimeMillis());
+                if (favorite) {
+                    temp = new SingleNote(title, content, 1, System.currentTimeMillis());
+                } else {
+                    temp = new SingleNote(title, content, 0, System.currentTimeMillis());
+                }
+
 
                 new BasicDBAsync(db, null, temp, listUsed, 0).execute();
                 noteModifiedResult(noteResult[1]);
@@ -181,7 +192,7 @@ public class NoteEditorActivity extends AppCompatActivity
             }
 
             TextView timeTextView = (TextView) findViewById(R.id.lastModified);
-            timeTextView.setText(NoteEditorUtils.lastUpdated(getApplicationContext(), currentNote.get_timeModified()));
+            timeTextView.setText(FormatUtils.lastUpdated(getApplicationContext(), currentNote.get_timeModified()));
 
             editTextTitle.setText(currentNote.get_title());
             editTextTitle.setFocusable(false);
@@ -265,13 +276,14 @@ public class NoteEditorActivity extends AppCompatActivity
     public void onReminderPicked(DateTime dateTime) {
         // Add reminder to note and display reminder button with reminder time
 
-        reminder.setText(NoteEditorUtils.getReminderText(getApplication(), dateTime));
+        reminder.setText(FormatUtils.getReminderText(getApplication(), dateTime));
         reminder.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onReminderDelete() {
         // Remove reminder from note and hide reminder button
+        // TODO: Handle empty notes
         reminder.setVisibility(View.INVISIBLE);
     }
 
