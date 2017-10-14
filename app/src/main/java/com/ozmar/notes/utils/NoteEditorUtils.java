@@ -1,10 +1,12 @@
 package com.ozmar.notes.utils;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.ozmar.notes.R;
 import com.ozmar.notes.SingleNote;
+
 
 public class NoteEditorUtils {
 
@@ -35,18 +37,11 @@ public class NoteEditorUtils {
     }
 
     public static boolean favoriteChanged(boolean favorite, SingleNote note, NoteChanges changes) {
-        boolean noteFavorite = note.get_favorite() == 1;
-
-        if (noteFavorite && favorite) {
+        if (note.is_favorite() == favorite) {
             return false;
         }
 
-        if (favorite) {
-            note.set_favorite(1);
-        } else {
-            note.set_favorite(0);
-        }
-
+        note.set_favorite(favorite);
         changes.setFavoriteChanged(true);
         return true;
     }
@@ -70,7 +65,7 @@ public class NoteEditorUtils {
                 menu.findItem(R.id.unarchive_note).setVisible(true);
             }
 
-            if (note != null && note.get_favorite() == 1) {
+            if (note != null && note.is_favorite()) {
                 menu.findItem(R.id.favorite_note).setIcon(R.drawable.ic_favorite_star_on);
             }
 

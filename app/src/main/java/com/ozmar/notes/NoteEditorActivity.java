@@ -60,11 +60,7 @@ public class NoteEditorActivity extends AppCompatActivity
                 NoteEditorUtils.updateNoteObject(currentNote, title, content, titleChanged, contentChanged);
 
             } else {
-                if (favorite) {
-                    currentNote = new SingleNote(title, content, 1, System.currentTimeMillis());
-                } else {
-                    currentNote = new SingleNote(title, content, 0, System.currentTimeMillis());
-                }
+                currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis());
 
                 intent.putExtra("New Note Action", 1);
             }
@@ -123,8 +119,12 @@ public class NoteEditorActivity extends AppCompatActivity
 
         if (currentNote != null) {
             NoteChanges noteChanges = new NoteChanges();
+            boolean favoriteChanged = false;
             boolean noteTextChanged = NoteEditorUtils.noteChanges(title, content, currentNote, noteChanges);
-            boolean favoriteChanged = NoteEditorUtils.favoriteChanged(favorite, currentNote, noteChanges);
+
+            if (listUsed != 2) {     // Don't allow changes to favorite if in archive list
+                favoriteChanged = NoteEditorUtils.favoriteChanged(favorite, currentNote, noteChanges);
+            }
 
             if (noteTextChanged || favoriteChanged) {
                 new UpdateNoteAsync(db, null, currentNote, listUsed, noteChanges).execute();
@@ -141,13 +141,7 @@ public class NoteEditorActivity extends AppCompatActivity
             boolean contentEmpty = content.isEmpty();
             if (!(titleEmpty && contentEmpty)) {    // New note
 
-                SingleNote temp;
-                if (favorite) {
-                    temp = new SingleNote(title, content, 1, System.currentTimeMillis());
-                } else {
-                    temp = new SingleNote(title, content, 0, System.currentTimeMillis());
-                }
-
+                SingleNote temp = new SingleNote(title, content, favorite, System.currentTimeMillis());
 
                 new BasicDBAsync(db, null, temp, listUsed, 0).execute();
                 noteModifiedResult(noteResult[1]);
@@ -187,9 +181,7 @@ public class NoteEditorActivity extends AppCompatActivity
     private void setUpNoteView() {
         if (currentNote != null) {
 
-            if (currentNote.get_favorite() == 1) {
-                favorite = true;
-            }
+            favorite = currentNote.is_favorite();
 
             TextView timeTextView = (TextView) findViewById(R.id.lastModified);
             timeTextView.setText(FormatUtils.lastUpdated(getApplicationContext(), currentNote.get_timeModified()));

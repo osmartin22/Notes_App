@@ -10,7 +10,7 @@ public class SingleNote implements Parcelable {
     private int _id;
     private String _title;
     private String _content;
-    private int _favorite;
+    private boolean _favorite;
 
     private long _timeModified;
 
@@ -21,14 +21,14 @@ public class SingleNote implements Parcelable {
 
     }
 
-    public SingleNote(String title, String content, int favorite, long timeModified) {
+    public SingleNote(String title, String content, boolean favorite, long timeModified) {
         this._title = title;
         this._content = content;
         this._favorite = favorite;
         this._timeModified = timeModified;
     }
 
-    public SingleNote(String title, String content, int favorite, long timeModified, long reminderTime) {
+    public SingleNote(String title, String content, boolean favorite, long timeModified, long reminderTime) {
         this(title,content,favorite,timeModified);
         this._reminderTime = reminderTime;
     }
@@ -39,7 +39,9 @@ public class SingleNote implements Parcelable {
         result = 31 * result + _id;
         result = 31 * result + _title.hashCode();
         result = 31 * result + _content.hashCode();
-        result = 31 * result + _favorite;
+        if(_favorite) {
+            result = 31 * result + 1;
+        }
         return result;
     }
 
@@ -79,7 +81,7 @@ public class SingleNote implements Parcelable {
         this._id = in.readInt();
         this._title = in.readString();
         this._content = in.readString();
-        this._favorite = in.readInt();
+        this._favorite = (in.readInt() == 1);
         this._timeModified = in.readLong();
     }
 
@@ -93,7 +95,12 @@ public class SingleNote implements Parcelable {
         dest.writeInt(_id);
         dest.writeString(_title);
         dest.writeString(_content);
-        dest.writeInt(_favorite);
+
+        if(_favorite) {
+            dest.writeInt(1);
+        } else {
+            dest.writeInt(0);
+        }
         dest.writeLong(_timeModified);
     }
 
@@ -125,11 +132,11 @@ public class SingleNote implements Parcelable {
         this._timeModified = _timeModified;
     }
 
-    public int get_favorite() {
+    public boolean is_favorite() {
         return _favorite;
     }
 
-    public void set_favorite(int _favorite) {
+    public void set_favorite(boolean _favorite) {
         this._favorite = _favorite;
     }
 

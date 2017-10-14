@@ -8,9 +8,6 @@ import com.ozmar.notes.utils.NoteChanges;
 
 import java.util.List;
 
-/**
- * Created by ozmar on 10/13/2017.
- */
 
 public class UpdateNoteAsync extends AsyncTask<Void, Void, Void> {
 
@@ -40,7 +37,7 @@ public class UpdateNoteAsync extends AsyncTask<Void, Void, Void> {
         // TODO: Implement being able to pass a list
         if (listUsed == 0) {
             db.updateNoteFromUserList(note, changes);
-        } else if (listUsed == 1) {
+        } else if (listUsed == 2) {
             db.updateNoteFromArchive(note, changes);
         }
         return null;

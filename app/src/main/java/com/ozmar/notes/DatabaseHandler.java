@@ -117,11 +117,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
 
-//                if (cursor.getString(3) == null) {
-//                    note.set_favorite(0);
-//                } else {
-                    note.set_favorite(Integer.parseInt(cursor.getString(3)));
-//                }
+                if (Integer.parseInt(cursor.getString(3)) == 1) {
+                    note.set_favorite(true);
+                } else {
+                    note.set_favorite(false);
+                }
 
                 note.set_timeModified(Long.parseLong(cursor.getString(4)));
 
@@ -147,7 +147,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_id(Integer.parseInt(cursor.getString(0)));
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
-                note.set_favorite(Integer.parseInt(cursor.getString(3)));
+
+                if (Integer.parseInt(cursor.getString(3)) == 1) {
+                    note.set_favorite(true);
+                } else {
+                    note.set_favorite(false);
+                }
+
                 note.set_timeModified(cursor.getLong(4));
 
                 noteList.add(note);
@@ -175,7 +181,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         if (changes.isFavoriteChanged()) {
-            values.put(KEY_FAVORITE, note.get_favorite());
+            if (note.is_favorite()) {
+                values.put(KEY_FAVORITE, 1);
+            } else {
+                values.put(KEY_FAVORITE, 0);
+            }
         }
 
 // TODO: Possibly put this in if so that it's not unnecessarily called
@@ -189,7 +199,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_TITLE, note.get_title());
         values.put(KEY_CONTENT, note.get_content());
-        values.put(KEY_FAVORITE, note.get_favorite());
+
+        if (note.is_favorite()) {
+            values.put(KEY_FAVORITE, 1);
+        } else {
+            values.put(KEY_FAVORITE, 1);
+        }
+
         values.put(KEY_TIME_MODIFIED, note.get_timeModified());
 
         db.insert(TABLE_USER_NOTES, null, values);
