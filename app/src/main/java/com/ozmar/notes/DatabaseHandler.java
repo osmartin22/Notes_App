@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.ozmar.notes.utils.NoteChanges;
 
@@ -79,25 +78,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 //        super.onDowngrade(sqLiteDatabase, oldVersion, newVersion);
     }
-
-
-    // Update if used
-//    public SingleNote getNote(int id) {
-//        SQLiteDatabase db = this.getReadableDatabase();
-//
-//        Cursor cursor = db.query(TABLE_USER_NOTES,
-//                new String[]{KEY_ID, KEY_TITLE, KEY_CONTENT}, KEY_ID + "=?",
-//                new String[]{String.valueOf(id)}, null, null, null, null);
-//
-//        if (cursor != null && cursor.moveToFirst()) {
-//            SingleNote note = new SingleNote(Integer.parseInt(cursor.getString(0)),
-//                    cursor.getString(1), cursor.getString(2), Integer.parseInt(cursor.getString(3)));
-//            cursor.close();
-//            return note;
-//        }
-//
-//        return null;
-//    } // getNote() end
 
     public int getNotesCount(int table) {
         String countQuery;
@@ -203,20 +183,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(note.get_id())});
     }
 
-    // Update a single note
-    public int updateNoteFromUserList(SingleNote note) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_TITLE, note.get_title());
-        values.put(KEY_CONTENT, note.get_content());
-        values.put(KEY_FAVORITE, note.get_favorite());
-        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
-
-        return db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
-                new String[]{String.valueOf(note.get_id())});
-    } // updateNoteFromUserList() end
-
     public void addNoteToUserList(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -304,19 +270,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(note.get_id())});
     }
-
-
-    public int updateNoteFromArchive(SingleNote note) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_TITLE, note.get_title());
-        values.put(KEY_CONTENT, note.get_content());
-        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
-
-        return db.update(TABLE_ARCHIVE, values, KEY_ID + " = ?",
-                new String[]{String.valueOf(note.get_id())});
-    } // updateNoteFromArchive() end
 
     public void addNoteToArchive(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();

@@ -1,19 +1,21 @@
 package com.ozmar.notes.utils;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.ozmar.notes.R;
 import com.ozmar.notes.SingleNote;
 
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public class NoteEditorUtils {
 
@@ -46,11 +48,11 @@ public class NoteEditorUtils {
     public static boolean favoriteChanged(boolean favorite, SingleNote note, NoteChanges changes) {
         boolean noteFavorite = note.get_favorite() == 1;
 
-        if(noteFavorite && favorite) {
+        if (noteFavorite && favorite) {
             return false;
         }
 
-        if(favorite) {
+        if (favorite) {
             note.set_favorite(1);
         } else {
             note.set_favorite(0);
@@ -107,28 +109,32 @@ public class NoteEditorUtils {
         Date current = new Date(System.currentTimeMillis());
         Date lastUpdated = new Date(timeLastUpdated);
         SimpleDateFormat sameYearFormat = new SimpleDateFormat("yyyy", Locale.getDefault());
-        SimpleDateFormat sameDayFormat = new SimpleDateFormat("MMdd", Locale.getDefault());
-
         boolean sameYear = sameYearFormat.format(current).equals(sameYearFormat.format(lastUpdated));
-        boolean sameDay = sameDayFormat.format(current).equals(sameDayFormat.format(lastUpdated));
+        boolean sameDay = false;
         boolean yesterday = false;
+        boolean tomorrow = false;
+
+        DateTime dateTime = new DateTime(timeLastUpdated);
+        if(sameYear) {              // Only get boolean if needed
+            sameDay = NoteEditorUtils.isToday(dateTime);
+            if(!sameDay) {
+                yesterday = NoteEditorUtils.isYesterday(dateTime);
+                if(!yesterday) {
+                    tomorrow = NoteEditorUtils.isTomorrow(dateTime);
+                }
+            }
+        }
 
         String timeModified = "Last Updated \n";
 
-        // TODO: Find a better method so that 2:30 am today and 2:31 am tomorrow still shows as yesterday
-        long timeDifference = current.getTime() - lastUpdated.getTime();
-        if (timeDifference <= TimeUnit.DAYS.toMillis(1)) {
-            yesterday = true;
-        }
-
         if (sameYear) {
+            DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(context);
             if (sameDay) {
-                DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(context);
                 timeModified += "Today, " + timeFormat.format(lastUpdated);
             } else if (yesterday) {
-                DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(context);
                 timeModified += "Yesterday, " + timeFormat.format(lastUpdated);
-
+            } else if (tomorrow) {
+                timeModified += "Tomorrow, " + timeFormat.format(lastUpdated);
             } else {
                 SimpleDateFormat df = new SimpleDateFormat("MMM  dd", Locale.getDefault());
                 timeModified += df.format(lastUpdated);
@@ -141,18 +147,60 @@ public class NoteEditorUtils {
         return timeModified;
     }
 
-    public static String getReminderText(Context contex, Calendar c) {
-        String reminderTime = "";
+    public static String getReminderText(Context context, DateTime dateTime) {
 
-        // Same Year
-            // Today month, date, time
-            // Yesterday month date time
-            // else
-            // month date time
+        String reminderDate = "";
+        DateTime today = DateTime.now();
+        boolean sameYear = today.getYear() == dateTime.getYear();
 
-        // different year && not yesterday
-            // month date year time
+        boolean sameDay = NoteEditorUtils.isToday(dateTime);
+        boolean tomorrow = false;
+        boolean yesterday = false;
 
-        return reminderTime;
+        if(sameYear) {      // Only get boolean if needed
+            if (!sameDay) {
+                tomorrow = NoteEditorUtils.isTomorrow(dateTime);
+                if (!tomorrow) {
+                    yesterday = NoteEditorUtils.isYesterday(dateTime);
+                }
+            }
+        }
+
+        DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(context);
+        Date chosen = dateTime.toDate();
+
+        if (sameYear) {
+            if (sameDay) {
+                reminderDate += "Today, ";
+            } else if (tomorrow) {
+                reminderDate += "Tomorrow ";
+            } else if (yesterday) {
+                reminderDate += "Yesterday ";
+            } else {
+                DateTimeFormatter dtfOut = DateTimeFormat.forPattern("MMM dd, ");
+                reminderDate += dtfOut.print(dateTime);
+            }
+            reminderDate += timeFormat.format(chosen);
+
+        } else {
+            DateTimeFormatter dtfOut = DateTimeFormat.forPattern("MMM dd, yyyy ");
+            reminderDate += dtfOut.print(dateTime);
+
+            reminderDate += timeFormat.format(chosen);
+        }
+
+        return reminderDate;
+    }
+
+    private static boolean isToday(DateTime time) {
+        return LocalDate.now().compareTo(new LocalDate(time)) == 0;
+    }
+
+    private static boolean isTomorrow(DateTime time) {
+        return LocalDate.now().plusDays(1).compareTo(new LocalDate(time)) == 0;
+    }
+
+    private static boolean isYesterday(DateTime time) {
+        return LocalDate.now().minusDays(1).compareTo(new LocalDate(time)) == 0;
     }
 }

@@ -72,10 +72,12 @@
 
                 <Button
                     android:id="@+id/reminderButton"
-                    android:onClick="addReminder"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0" />
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="0"
+                    android:onClick="addReminder"
+                    android:visibility="invisible" />
 
                 <TextView
                     android:id="@+id/lastModified"

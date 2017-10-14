@@ -66,14 +66,29 @@
                 android:textAlignment="textStart"
                 android:textSize="@dimen/landContentTextSize" />
 
-            <TextView
-                android:id="@+id/lastModified"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:paddingEnd="16dp"
-                android:paddingStart="16dp"
-                android:textAlignment="textEnd" />
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/reminderButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="0"
+                    android:onClick="addReminder"
+                    android:visibility="invisible" />
+
+                <TextView
+                    android:id="@+id/lastModified"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:paddingEnd="16dp"
+                    android:paddingStart="16dp"
+                    android:textAlignment="textEnd" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

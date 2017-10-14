@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -23,7 +22,7 @@ import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.NoteChanges;
 import com.ozmar.notes.utils.NoteEditorUtils;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 import static com.ozmar.notes.MainActivity.db;
 
@@ -263,9 +262,10 @@ public class NoteEditorActivity extends AppCompatActivity
     }
 
     @Override
-    public void onReminderPicked(Calendar calendar) {
-        // Add reminder to note and display reminder button
-        reminder.setText(NoteEditorUtils.getReminderText(getApplicationContext(), calendar));
+    public void onReminderPicked(DateTime dateTime) {
+        // Add reminder to note and display reminder button with reminder time
+
+        reminder.setText(NoteEditorUtils.getReminderText(getApplication(), dateTime));
         reminder.setVisibility(View.VISIBLE);
     }
 
@@ -293,12 +293,5 @@ public class NoteEditorActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d("Favorite", "onPause()");
-//        int temp = favorite ? 1 : 0;
-//
-//        if (currentNote != null && listUsed != 2) {  // Save favorite even if user does not explicitly press save menu item
-//            currentNote.set_favorite(temp);
-//            new BasicDBAsync(db, null, currentNote, listUsed, 1).execute();     // TODO: OPTIMIZE
-//        }
     }
 } // NoteEditorActivity() end

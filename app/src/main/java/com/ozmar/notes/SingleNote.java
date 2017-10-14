@@ -14,6 +14,7 @@ public class SingleNote implements Parcelable {
 
     private long _timeModified;
 
+    // TODO: Update serializable
     private long _reminderTime = 0;
     private boolean hasReminder = false;
 

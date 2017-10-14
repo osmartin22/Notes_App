@@ -9,7 +9,7 @@ import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
 import android.widget.TimePicker;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 
 public class TimePickerFragment extends DialogFragment
@@ -37,9 +37,9 @@ public class TimePickerFragment extends DialogFragment
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Calendar c = Calendar.getInstance();
-        int hour = c.get(Calendar.HOUR_OF_DAY);
-        int minute = c.get(Calendar.MINUTE);
+        DateTime dateTime = DateTime.now();
+        int minute = dateTime.getMinuteOfHour();
+        int hour = dateTime.getHourOfDay();
 
         return new TimePickerDialog(getActivity(), this, hour, minute, DateFormat.is24HourFormat(getActivity()));
     }

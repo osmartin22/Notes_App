@@ -51,26 +51,6 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
         }
     }
 
-    private void update() {
-        switch (listUsed) {
-            case 0:
-            case 1:
-                if (list != null) {
-                    // TODO
-                } else {
-                    db.updateNoteFromUserList(note);
-                }
-                break;
-            case 2:
-                if (list != null) {
-                    // TODO
-                } else {
-                    db.updateNoteFromArchive(note);
-                }
-                break;
-        }
-    }
-
     private void delete() {
         switch (listUsed) {
             case 0:
@@ -111,7 +91,7 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
                 add();
                 break;
             case 1:
-                update();
+//                update();
                 break;
             case 2:
                 delete();

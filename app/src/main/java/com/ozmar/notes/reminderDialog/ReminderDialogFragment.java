@@ -12,7 +12,8 @@ import android.widget.Toast;
 
 import com.ozmar.notes.R;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 
 
 public class ReminderDialogFragment extends DialogFragment
@@ -22,12 +23,19 @@ public class ReminderDialogFragment extends DialogFragment
     private NDSpinner spinnerTime;
     private NDSpinner spinnerReminder;
 
-    private Calendar calendar;
+    private DateTime dateTime = DateTime.now();
+
+    private int hour;
+    private int minute;
+    private int day;
+    private int month;
+    private int year;
 
     OnReminderPickedListener myCallback;
 
     public interface OnReminderPickedListener {
-        void onReminderPicked(Calendar calendar);
+        void onReminderPicked(DateTime dateTime);
+
         void onReminderDelete();
     }
 
@@ -51,8 +59,6 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        calendar = Calendar.getInstance();
-
         View view = View.inflate(getActivity(), R.layout.reminder_dialog_layout, null);
         spinnerDate = view.findViewById(R.id.spinnerDate);
         spinnerTime = view.findViewById(R.id.spinnerTime);
@@ -67,8 +73,12 @@ public class ReminderDialogFragment extends DialogFragment
         reminderDialog.setPositiveButton("Save", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                DateTime dateTime = new DateTime(year, month, day, hour, minute);
+
+                Toast.makeText(getActivity(), dateTime.toString(DateTimeFormat.mediumDateTime()), Toast.LENGTH_SHORT).show();
+
                 if (myCallback != null) {
-                    myCallback.onReminderPicked(calendar);
+                    myCallback.onReminderPicked(dateTime);
                 }
             }
         });
@@ -96,11 +106,35 @@ public class ReminderDialogFragment extends DialogFragment
     private void setSpinnerListener() {
 
         spinnerDate.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == 3) {
-                    DialogFragment newFragment = new DatePickerFragment();
-                    newFragment.show(getChildFragmentManager(), "datePicker");
+
+                switch (i) {
+                    case 0:                                 // Today
+                        year = dateTime.getYear();
+                        month = dateTime.getMonthOfYear();
+                        day = dateTime.getDayOfMonth();
+                        break;
+
+                    case 1:                                 // Tomorrow
+                        DateTime tomorrow = dateTime.plusDays(1);
+                        year = tomorrow.getYear();
+                        month = tomorrow.getMonthOfYear();
+                        day = tomorrow.getDayOfMonth();
+                        break;
+
+                    case 2:                                 // Nex Week (7 Days)
+                        DateTime nextWeek = dateTime.plusDays(7);
+                        year = nextWeek.getYear();
+                        month = nextWeek.getMonthOfYear();
+                        day = nextWeek.getDayOfMonth();
+                        break;
+
+                    case 3:                                 // Date chosen
+                        DialogFragment newFragment = new DatePickerFragment();
+                        newFragment.show(getChildFragmentManager(), "datePicker");
+                        break;
                 }
             }
 
@@ -113,9 +147,29 @@ public class ReminderDialogFragment extends DialogFragment
         spinnerTime.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                if (i == 4) {
-                    DialogFragment newFragment = new TimePickerFragment();
-                    newFragment.show(getChildFragmentManager(), "timePicker");
+
+                // TODO: Make these into SharedPreferences
+                switch (i) {
+                    case 0:
+                        hour = 8;
+                        minute = 0;
+                        break;
+                    case 1:
+                        hour = 13;
+                        minute = 0;
+                        break;
+                    case 2:
+                        hour = 18;
+                        minute = 0;
+                        break;
+                    case 3:
+                        hour = 20;
+                        minute = 0;
+                        break;
+                    case 4:
+                        DialogFragment newFragment = new TimePickerFragment();
+                        newFragment.show(getChildFragmentManager(), "timePicker");
+                        break;
                 }
             }
 
@@ -128,6 +182,8 @@ public class ReminderDialogFragment extends DialogFragment
         spinnerReminder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+                // TODO: Return chosen reminder repetition
                 if (i == 5) {
                     // Show custom reminder selection
                 }
@@ -142,16 +198,14 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public void onTimePicked(int hour, int minute) {
-        calendar.set(Calendar.HOUR, hour);
-        calendar.set(Calendar.MINUTE, minute);
-
-        Toast.makeText(getActivity(), hour + ":" + minute, Toast.LENGTH_SHORT).show();
+        this.hour = hour;
+        this.minute = minute;
     }
 
     @Override
     public void onDatePicked(int year, int month, int day) {
-        calendar.set(year, month, day);
-
-        Toast.makeText(getActivity(), month + 1 + "/" + day + "/" + year, Toast.LENGTH_SHORT).show();
+        this.year = year;
+        this.month = month;
+        this.day = day;
     }
 }

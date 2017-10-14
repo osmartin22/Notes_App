@@ -8,7 +8,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.widget.DatePicker;
 
-import java.util.Calendar;
+import org.joda.time.DateTime;
 
 
 public class DatePickerFragment extends DialogFragment
@@ -36,18 +36,19 @@ public class DatePickerFragment extends DialogFragment
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Calendar c = Calendar.getInstance();
-        int year = c.get(Calendar.YEAR);
-        int month = c.get(Calendar.MONTH);
-        int day = c.get(Calendar.DAY_OF_MONTH);
+        DateTime dateTime = DateTime.now();
+        int year = dateTime.getYear();
+        int month = dateTime.getMonthOfYear() - 1;  // Set correct month for DatePicker
+        int day = dateTime.getDayOfMonth();
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), this, year, month, day);
-        datePickerDialog.getDatePicker().setMinDate(c.getTimeInMillis());
+        datePickerDialog.getDatePicker().setMinDate(dateTime.getMillis());
 
         return datePickerDialog;
     }
 
     public void onDateSet(DatePicker view, int year, int month, int day) {
+        month += 1;
         if (myCallback != null) {
             myCallback.onDatePicked(year, month, day);
         }
