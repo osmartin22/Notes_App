@@ -1,5 +1,6 @@
 package com.ozmar.notes.utils;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 

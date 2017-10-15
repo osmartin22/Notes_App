@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     } // launchIntent() end
 
     private void setUpRecyclerView() {
-        notesAdapter = new NotesAdapter(db);
+        notesAdapter = new NotesAdapter(getApplicationContext(), db);
 
         layoutChoice = preferences.getLayoutChoice();
         rv = (RecyclerView) findViewById(R.id.recyclerView);

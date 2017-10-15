@@ -1,15 +1,20 @@
 package com.ozmar.notes;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.viewHolders.NotesViewHolder;
 import com.ozmar.notes.viewHolders.NotesViewHolderContent;
 import com.ozmar.notes.viewHolders.NotesViewHolderTitle;
+
+import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,7 +22,7 @@ import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-//    private DatabaseHandler db;
+    private Context context;
     private int listUsed = 0;
 
     private final List<SingleNote> notes;
@@ -28,8 +33,8 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final int showTitle = 0, showContent = 1, showAll = 2;
 
     // TODO: Use AsyncTask to get notes at the start
-    public NotesAdapter(DatabaseHandler db) {
-//        this.db = db;
+    public NotesAdapter(Context context, DatabaseHandler db) {
+        this.context = context;
         notes = db.getUserNotes();
     }
 
@@ -186,15 +191,19 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.WHITE);
         }
 
+        boolean displayReminder = note.get_reminderTime() != 0;
+
         switch (viewHolder.getItemViewType()) {
             case 0:
                 NotesViewHolderTitle viewHolderTitle = (NotesViewHolderTitle) viewHolder;
                 viewHolderTitle.noteTitle.setText(note.get_title());
+                displayReminder(note, viewHolderTitle.reminderView, viewHolderTitle.reminderText, displayReminder);
                 break;
 
             case 1:
                 NotesViewHolderContent viewHolderContent = (NotesViewHolderContent) viewHolder;
                 viewHolderContent.noteContent.setText(note.get_content());
+                displayReminder(note, viewHolderContent.reminderView, viewHolderContent.reminderText, displayReminder);
                 break;
 
             case 2:
@@ -202,7 +211,17 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 NotesViewHolder notesViewHolder = (NotesViewHolder) viewHolder;
                 notesViewHolder.noteTitle.setText(note.get_title());
                 notesViewHolder.noteContent.setText(note.get_content());
+                displayReminder(note, notesViewHolder.reminderView, notesViewHolder.reminderText, displayReminder);
                 break;
+        }
+    }
+
+    private void displayReminder(SingleNote note, View reminderView, TextView reminderText, boolean displayReminder) {
+        if (displayReminder) {
+            reminderText.setText(FormatUtils.getReminderText(context, new DateTime(note.get_reminderTime())));
+            reminderView.setVisibility(View.VISIBLE);
+        } else {
+            reminderView.setVisibility(View.GONE);
         }
     }
 

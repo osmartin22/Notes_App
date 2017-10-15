@@ -9,12 +9,19 @@
     <dimen name="titleTopPadding">8dp</dimen>
     <dimen name="contentBottomPadding">8dp</dimen>
 
+
+    <dimen name="reminderTextSize">12sp</dimen>
+    <dimen name="reminderLayoutStartPadding">0dp</dimen>
+    <dimen name="reminderLayoutEndPadding">8dp</dimen>
+    <dimen name="reminderMargin">8dp</dimen>
+
+
     <!-- Specific to note_preview dp/sp -->
     <dimen name="notePreviewTitleBottomPadding">4dp</dimen>
     <dimen name="notePreviewContentTopPadding">4dp</dimen>
 
     <!-- Specific to note_preview_title dimension -->
-    <dimen name="notePreviewTitleOnlyBottomPadding">16dp</dimen>
+    <dimen name="notePreviewTitleOnlyBottomPadding">12dp</dimen>
 
     <!-- Specific to note_preview_content dimension -->
     <dimen name="notePreviewContentOnlyTopPadding">8dp</dimen>

@@ -168,7 +168,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
         noteResult = getResources().getStringArray(R.array.noteResultArray);
 
-        reminderButton = (Button) findViewById(R.id.reminderButton);
+        reminderButton = (Button) findViewById(R.id.reminderText);
         editTextTitle = (EditText) findViewById(R.id.editTextTitle);
         editTextContent = (EditText) findViewById(R.id.editTextContent);
 
@@ -190,6 +190,7 @@ public class NoteEditorActivity extends AppCompatActivity
             }
 
             if(currentNote.get_reminderTime() != 0) {
+                reminderTime = currentNote.get_reminderTime();
                 reminderButton.setText(FormatUtils.getReminderText(getApplication(), new DateTime(currentNote.get_reminderTime())));
                 reminderButton.setVisibility(View.VISIBLE);
             }
