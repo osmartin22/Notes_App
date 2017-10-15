@@ -29,6 +29,9 @@ import com.ozmar.notes.utils.MenuItemHelper;
 import com.ozmar.notes.utils.MultiSelectFlagHelper;
 import com.ozmar.notes.utils.UndoBuffer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static android.support.v7.widget.DividerItemDecoration.HORIZONTAL;
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
@@ -255,8 +258,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        new BasicDBAsync(db, buffer.currentBufferNotes(), null, notesAdapter.getListUsed(), 3).execute();
+                        List<SingleNote> temp = new ArrayList<>(buffer.currentBufferNotes());
+                        new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
                         notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+                        buffer.clearBuffer();
                         actionMode.finish();
                     }
                 })
