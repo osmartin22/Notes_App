@@ -1,6 +1,5 @@
 package com.ozmar.notes.utils;
 
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -44,6 +43,15 @@ public class NoteEditorUtils {
         note.set_favorite(favorite);
         changes.setFavoriteChanged(true);
         return true;
+    }
+
+    public static boolean reminderChanged(long reminderTime, SingleNote note, NoteChanges changes) {
+        if(reminderTime != note.get_reminderTime()) {
+            note.set_reminderTime(reminderTime);
+            changes.setReminderTimeChanged(true);
+            return true;
+        }
+        return false;
     }
 
     public static boolean favoriteNote(boolean favorite, MenuItem item) {

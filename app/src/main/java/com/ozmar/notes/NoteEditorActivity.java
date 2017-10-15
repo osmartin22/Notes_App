@@ -41,8 +41,8 @@ public class NoteEditorActivity extends AppCompatActivity
 
     private String[] noteResult;
 
-    private Button reminder;
-    private long reminderTime;
+    private Button reminderButton;
+    private long reminderTime = 0;
 
     private void contextualActionResult(MenuItem item) {
         String title = editTextTitle.getText().toString();
@@ -57,11 +57,12 @@ public class NoteEditorActivity extends AppCompatActivity
             if (currentNote != null) {
                 boolean titleChanged = !currentNote.get_title().equals(title);
                 boolean contentChanged = !currentNote.get_content().equals(content);
+                currentNote.set_favorite(favorite);
+                currentNote.set_reminderTime(reminderTime);
                 NoteEditorUtils.updateNoteObject(currentNote, title, content, titleChanged, contentChanged);
 
             } else {
-                currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis());
-
+                currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime);
                 intent.putExtra("New Note Action", 1);
             }
 
@@ -120,13 +121,14 @@ public class NoteEditorActivity extends AppCompatActivity
         if (currentNote != null) {
             NoteChanges noteChanges = new NoteChanges();
             boolean favoriteChanged = false;
+            boolean reminderChanged = NoteEditorUtils.reminderChanged(reminderTime, currentNote, noteChanges);
             boolean noteTextChanged = NoteEditorUtils.noteChanges(title, content, currentNote, noteChanges);
 
             if (listUsed != 2) {     // Don't allow changes to favorite if in archive list
                 favoriteChanged = NoteEditorUtils.favoriteChanged(favorite, currentNote, noteChanges);
             }
 
-            if (noteTextChanged || favoriteChanged) {
+            if (noteTextChanged || favoriteChanged || reminderChanged) {
                 new UpdateNoteAsync(db, null, currentNote, listUsed, noteChanges).execute();
 
                 if (listUsed == 1 && favoriteChanged) {       // Note not a favorite anymore
@@ -141,7 +143,7 @@ public class NoteEditorActivity extends AppCompatActivity
             boolean contentEmpty = content.isEmpty();
             if (!(titleEmpty && contentEmpty)) {    // New note
 
-                SingleNote temp = new SingleNote(title, content, favorite, System.currentTimeMillis());
+                SingleNote temp = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime);
 
                 new BasicDBAsync(db, null, temp, listUsed, 0).execute();
                 noteModifiedResult(noteResult[1]);
@@ -166,7 +168,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
         noteResult = getResources().getStringArray(R.array.noteResultArray);
 
-        reminder = (Button) findViewById(R.id.reminderButton);
+        reminderButton = (Button) findViewById(R.id.reminderButton);
         editTextTitle = (EditText) findViewById(R.id.editTextTitle);
         editTextContent = (EditText) findViewById(R.id.editTextContent);
 
@@ -181,7 +183,16 @@ public class NoteEditorActivity extends AppCompatActivity
     private void setUpNoteView() {
         if (currentNote != null) {
 
-            favorite = currentNote.is_favorite();
+            if(listUsed == 2 && currentNote.is_favorite()) {
+                currentNote.set_favorite(false);
+            } else {
+                favorite = currentNote.is_favorite();
+            }
+
+            if(currentNote.get_reminderTime() != 0) {
+                reminderButton.setText(FormatUtils.getReminderText(getApplication(), new DateTime(currentNote.get_reminderTime())));
+                reminderButton.setVisibility(View.VISIBLE);
+            }
 
             TextView timeTextView = (TextView) findViewById(R.id.lastModified);
             timeTextView.setText(FormatUtils.lastUpdated(getApplicationContext(), currentNote.get_timeModified()));
@@ -260,23 +271,22 @@ public class NoteEditorActivity extends AppCompatActivity
     } // onOptionsItemSelected() end
 
     public void addReminder(View view) {
+        // TODO: Pass current reminderTime if exists, to start at that date
         ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance();
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
     }
 
     @Override
     public void onReminderPicked(DateTime dateTime) {
-        // Add reminder to note and display reminder button with reminder time
-
-        reminder.setText(FormatUtils.getReminderText(getApplication(), dateTime));
-        reminder.setVisibility(View.VISIBLE);
+        reminderTime = (dateTime.getMillis());
+        reminderButton.setText(FormatUtils.getReminderText(getApplication(), dateTime));
+        reminderButton.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onReminderDelete() {
-        // Remove reminder from note and hide reminder button
-        // TODO: Handle empty notes
-        reminder.setVisibility(View.INVISIBLE);
+        reminderTime = 0;
+        reminderButton.setVisibility(View.INVISIBLE);
     }
 
     private void deleteNoteForever() {

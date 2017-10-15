@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.ozmar.notes.utils.NoteChanges;
 
@@ -13,7 +14,7 @@ import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "UserNotesDB";
 
     // TABLES
@@ -33,16 +34,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String CREATE_TABLE_USER_NOTES = "CREATE TABLE IF NOT EXISTS "
             + TABLE_USER_NOTES + "(" + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, "
             + KEY_CONTENT + " TEXT, " + KEY_FAVORITE + " INTEGER, " + KEY_TIME_MODIFIED + " INTEGER, "
-            + KEY_REMINDER_TIME + " INTEGER)";
+            + KEY_REMINDER_TIME + " INTEGER DEFAULT 0);";
 
     private static final String CREATE_TABLE_ARCHIVE = "CREATE TABLE IF NOT EXISTS "
             + TABLE_ARCHIVE + "(" + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, "
             + KEY_CONTENT + " TEXT, " + KEY_TIME_MODIFIED + " INTEGER, "
-            + KEY_REMINDER_TIME + "INTEGER)";
+            + KEY_REMINDER_TIME + " INTEGER DEFAULT 0);";
 
     private static final String CREATE_TABLE_RECYCLE_BIN = "CREATE TABLE IF NOT EXISTS "
             + TABLE_RECYCLE_BIN + "(" + KEY_ID + " INTEGER PRIMARY KEY, " + KEY_TITLE + " TEXT, "
-            + KEY_CONTENT + " TEXT, " + KEY_TIME_MODIFIED + " INTEGER)";
+            + KEY_CONTENT + " TEXT, " + KEY_TIME_MODIFIED + " INTEGER);";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -72,9 +73,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Override
     public void onDowngrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_ARCHIVE);
-//        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_RECYCLE_BIN);
-//        onCreate(sqLiteDatabase);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_NOTES);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_ARCHIVE);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_RECYCLE_BIN);
+        onCreate(sqLiteDatabase);
 
 //        super.onDowngrade(sqLiteDatabase, oldVersion, newVersion);
     }
@@ -117,13 +119,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
 
-                if (Integer.parseInt(cursor.getString(3)) == 1) {
-                    note.set_favorite(true);
-                } else {
-                    note.set_favorite(false);
+                if (cursor.getString(3) != null) {
+                    if (Integer.parseInt(cursor.getString(3)) == 1) {
+                        note.set_favorite(true);
+                    } else {
+                        note.set_favorite(false);
+                    }
                 }
 
                 note.set_timeModified(Long.parseLong(cursor.getString(4)));
+                note.set_reminderTime(Long.parseLong(cursor.getString(5)));
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -148,13 +153,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
 
-                if (Integer.parseInt(cursor.getString(3)) == 1) {
-                    note.set_favorite(true);
-                } else {
-                    note.set_favorite(false);
+                if (cursor.getString(3) != null) {
+                    if (Integer.parseInt(cursor.getString(3)) == 1) {
+                        note.set_favorite(true);
+                    } else {
+                        note.set_favorite(false);
+                    }
                 }
 
                 note.set_timeModified(cursor.getLong(4));
+                note.set_reminderTime(Long.parseLong(cursor.getString(5)));
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -188,7 +196,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
         }
 
-// TODO: Possibly put this in if so that it's not unnecessarily called
+        if (changes.isReminderTimeChanged()) {
+            values.put(KEY_REMINDER_TIME, note.get_reminderTime());
+        }
+
         db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(note.get_id())});
     }
@@ -203,10 +214,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (note.is_favorite()) {
             values.put(KEY_FAVORITE, 1);
         } else {
-            values.put(KEY_FAVORITE, 1);
+            values.put(KEY_FAVORITE, 0);
         }
 
         values.put(KEY_TIME_MODIFIED, note.get_timeModified());
+        values.put(KEY_REMINDER_TIME, note.get_reminderTime());
 
         db.insert(TABLE_USER_NOTES, null, values);
     } // addNoteToUserList() end
@@ -225,7 +237,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         for (SingleNote note : list) {
             values.put(KEY_TITLE, note.get_title());
             values.put(KEY_CONTENT, note.get_content());
+
+            if (note.is_favorite()) {
+                values.put(KEY_FAVORITE, 1);
+            } else {
+                values.put(KEY_FAVORITE, 0);
+            }
+
             values.put(KEY_TIME_MODIFIED, note.get_timeModified());
+            values.put(KEY_REMINDER_TIME, note.get_reminderTime());
             db.insert(TABLE_USER_NOTES, null, values);
             values.clear();
         }
@@ -251,6 +271,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
+        Log.d("Archive", "Getting list");
+
         if (cursor.moveToFirst()) {
             do {
                 SingleNote note = new SingleNote();
@@ -258,10 +280,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_title(cursor.getString(1));
                 note.set_content(cursor.getString(2));
                 note.set_timeModified(cursor.getLong(3));
+                note.set_reminderTime(cursor.getLong(4));
 
                 noteList.add(note);
             } while (cursor.moveToNext());
         }
+
+        Log.d("Archive", "Size -> " + noteList.size());
 
         cursor.close();
         return noteList;
@@ -283,7 +308,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(KEY_TIME_MODIFIED, note.get_timeModified());
         }
 
-        db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
+        if (changes.isReminderTimeChanged()) {
+            values.put(KEY_REMINDER_TIME, note.get_reminderTime());
+        }
+
+        db.update(TABLE_ARCHIVE, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(note.get_id())});
     }
 
@@ -294,6 +323,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_TITLE, note.get_title());
         values.put(KEY_CONTENT, note.get_content());
         values.put(KEY_TIME_MODIFIED, note.get_timeModified());
+        values.put(KEY_REMINDER_TIME, note.get_reminderTime());
 
         db.insert(TABLE_ARCHIVE, null, values);
     } // addNoteToArchive() end
@@ -309,17 +339,26 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
+        Log.d("Archive", "Adding to list");
+
         for (SingleNote note : list) {
+            Log.d("Archive", note.get_content());
             values.put(KEY_TITLE, note.get_title());
             values.put(KEY_CONTENT, note.get_content());
             values.put(KEY_TIME_MODIFIED, note.get_timeModified());
-            db.insert(TABLE_ARCHIVE, null, values);
+            values.put(KEY_REMINDER_TIME, note.get_reminderTime());
+            long success = db.insert(TABLE_ARCHIVE, null, values);
+
+            Log.d("Archive", "Success - > " + success);
+
             values.clear();
         }
     } // addListToArchive() end
 
     public void deleteListFromArchive(List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
+
+        Log.d("Archive", "Deleting list");
 
         for (SingleNote note : list) {
             db.delete(TABLE_ARCHIVE, KEY_ID + " = ?",

@@ -35,7 +35,6 @@ public class ReminderDialogFragment extends DialogFragment
 
     public interface OnReminderPickedListener {
         void onReminderPicked(DateTime dateTime);
-
         void onReminderDelete();
     }
 
@@ -183,7 +182,7 @@ public class ReminderDialogFragment extends DialogFragment
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                // TODO: Return chosen reminder repetition
+                // TODO: Return chosen repetition for reminder
                 if (i == 5) {
                     // Show custom reminder selection
                 }

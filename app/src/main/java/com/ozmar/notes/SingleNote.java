@@ -3,7 +3,6 @@ package com.ozmar.notes;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-// TODO: Update constructors to always include time modified parameter
 
 public class SingleNote implements Parcelable {
 
@@ -13,8 +12,6 @@ public class SingleNote implements Parcelable {
     private boolean _favorite;
 
     private long _timeModified;
-
-    // TODO: Update serializable
     private long _reminderTime = 0;
 
     public SingleNote() {
@@ -42,6 +39,8 @@ public class SingleNote implements Parcelable {
         if(_favorite) {
             result = 31 * result + 1;
         }
+        result = 31 * result + Long.valueOf(_timeModified).hashCode();
+        result = 31 * result + Long.valueOf(_reminderTime).hashCode();
         return result;
     }
 
@@ -60,7 +59,8 @@ public class SingleNote implements Parcelable {
         return note._content.equals(_content) &&
                 note._title.equals(_title) &&
                 note._favorite == _favorite &&
-                note._timeModified == _timeModified;
+                note._timeModified == _timeModified &&
+                note._reminderTime == _reminderTime;
     }
 
     @Override
@@ -71,7 +71,8 @@ public class SingleNote implements Parcelable {
         sb.append(",    Title: ").append(_title);
         sb.append(",    Content: ").append(_content);
         sb.append(",    Favorite: ").append(_favorite);
-        sb.append(",   TimeModified: ").append((_timeModified));
+        sb.append(",    TimeModified: ").append(_timeModified);
+        sb.append(",    ReminderTime: ").append(_reminderTime);
         sb.append(" ]");
 
         return sb.toString();
@@ -83,6 +84,7 @@ public class SingleNote implements Parcelable {
         this._content = in.readString();
         this._favorite = (in.readInt() == 1);
         this._timeModified = in.readLong();
+        this._reminderTime = in.readLong();
     }
 
     @Override
@@ -102,6 +104,7 @@ public class SingleNote implements Parcelable {
             dest.writeInt(0);
         }
         dest.writeLong(_timeModified);
+        dest.writeLong(_reminderTime);
     }
 
     public static final Parcelable.Creator<SingleNote> CREATOR = new Parcelable.Creator<SingleNote>() {
