@@ -21,10 +21,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.DoMenuActionAsync;
 import com.ozmar.notes.async.NavMenuAsync;
-import com.ozmar.notes.utils.MainActivityHelper;
+import com.ozmar.notes.utils.MainActivityUtils;
 import com.ozmar.notes.utils.MenuItemHelper;
 import com.ozmar.notes.utils.MultiSelectFlagHelper;
 import com.ozmar.notes.utils.UndoBuffer;
@@ -54,10 +55,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Snackbar snackBar = null;
 
-    private MainActivityHelper mainActivityHelper;
     private MultiSelectFlagHelper multiSelectHelper;
     private MenuItemHelper itemHelper;
-
 
 
     public void launchNoteEditor(View view) {
@@ -146,9 +145,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemHelper = new MenuItemHelper(getApplicationContext(), db);
         preferences = new Preferences(getApplicationContext());
         multiSelectHelper = new MultiSelectFlagHelper();
-        mainActivityHelper = new MainActivityHelper(getApplicationContext(), db);
 
-//        new AutoDeleteAsync(db).execute();
+        new AutoDeleteAsync(db).execute();
 
         fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
 
@@ -298,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
 
                     snackBar = null;
-                    notesAdapter.clearTempNotes();
                     multiSelectHelper.setUndoFlag(false);
                 }
             });
@@ -349,7 +346,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_menu, menu);
         layoutItem = menu.findItem(R.id.layout);
-        mainActivityHelper.restoreLayout(rv, layoutItem, layoutChoice);
+        MainActivityUtils.restoreLayout(getApplicationContext(), rv, layoutItem, layoutChoice);
         return super.onCreateOptionsMenu(menu);
     } // onCreateOptionsMenu() end
 
@@ -359,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         switch (item.getItemId()) {
             case R.id.layout:
-                layoutChoice = mainActivityHelper.swapLayout(rv, layoutItem, layoutChoice);
+                layoutChoice = MainActivityUtils.swapLayout(getApplicationContext(), rv, layoutItem, layoutChoice);
                 return true;
         }
 
@@ -420,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
             } else {
-                mainActivityHelper.updateAdapter(bundle, notesAdapter);
+                MainActivityUtils.updateAdapter(getApplicationContext(), bundle, notesAdapter);
             }
         }
     } // onActivityResult() end

@@ -104,7 +104,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     //--------------------------------------------------------------------------------------------//
     // User Notes Table Specific Methods
     //--------------------------------------------------------------------------------------------//
-
     public List<SingleNote> getUserNotes() {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " ORDER BY ROWID DESC";
@@ -204,7 +203,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(note.get_id())});
     }
 
-    public void addNoteToUserList(SingleNote note) {
+    public int addNoteToUserList(SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -220,7 +219,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_TIME_MODIFIED, note.get_timeModified());
         values.put(KEY_REMINDER_TIME, note.get_reminderTime());
 
-        db.insert(TABLE_USER_NOTES, null, values);
+        return (int) db.insert(TABLE_USER_NOTES, null, values);
     } // addNoteToUserList() end
 
     public void deleteNoteFromUserList(SingleNote note) {
@@ -347,10 +346,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(KEY_CONTENT, note.get_content());
             values.put(KEY_TIME_MODIFIED, note.get_timeModified());
             values.put(KEY_REMINDER_TIME, note.get_reminderTime());
-            long success = db.insert(TABLE_ARCHIVE, null, values);
-
-            Log.d("Archive", "Success - > " + success);
-
+            db.insert(TABLE_ARCHIVE, null, values);
             values.clear();
         }
     } // addListToArchive() end
