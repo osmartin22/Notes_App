@@ -28,8 +28,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final List<SingleNote> notes;
     private final List<Integer> selectedIds = new ArrayList<>();
 
-    private final List<SingleNote> tempNotes = new ArrayList<>();
-
     private final int showTitle = 0, showContent = 1, showAll = 2;
 
     // TODO: Use AsyncTask to get notes at the start
@@ -103,7 +101,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
             // Random deletes
         } else {
-            tempNotes.addAll(notes);
             for (int i = amountOfViewsRemoved - 1; i >= 0; i--) {
                 int pos = position.get(i);
                 notes.remove(pos);
@@ -114,11 +111,10 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public void addSelectedViews(List<Integer> position, List<SingleNote> addList) {
-        Collections.sort(position);
         int size = notes.size();
         int amountOfViewAdding = position.size();
-        int minViewPositionChanged = position.get(0);
-        int maxViewPositionChanged = position.get(position.size() - 1);
+        int minViewPositionChanged = Collections.min(position);
+        int maxViewPositionChanged = Collections.max(position);
 
         // Notes being added are consecutive
         if (maxViewPositionChanged - minViewPositionChanged == amountOfViewAdding - 1) {
@@ -132,15 +128,11 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             notifyItemRangeChanged(minViewPositionChanged, notes.size());
 
         } else {        // Notes added at random
-            notes.clear();
-            notes.addAll(tempNotes);
-            notifyItemRangeChanged(0, size);
+            for (int i = 0; i < size; i++) {
+                notes.add(position.get(i), addList.get(i));
+            }
+            notifyItemRangeChanged(minViewPositionChanged, size);
         }
-        tempNotes.clear();
-    }
-
-    public void clearTempNotes() {
-        this.tempNotes.clear();
     }
 
     public void addSelectedId(int position) {
