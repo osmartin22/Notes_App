@@ -31,7 +31,7 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
                 if (list != null) {
                     db.addListToUserList(list);
                 } else {
-                    db.addNoteToUserList(note);
+                    note.set_id(db.addNoteToUserList(note));
                 }
                 break;
             case 2:
@@ -91,7 +91,7 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
                 add();
                 break;
             case 1:
-//                update();
+//                update();     // Done in another AsyncTask
                 break;
             case 2:
                 delete();

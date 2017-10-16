@@ -7,38 +7,17 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.MenuItem;
 
-import com.ozmar.notes.DatabaseHandler;
 import com.ozmar.notes.NotesAdapter;
 import com.ozmar.notes.R;
 import com.ozmar.notes.SingleNote;
 
-import java.util.List;
+public class MainActivityUtils {
 
-public class MainActivityHelper {
+    private MainActivityUtils() {
 
-    private Context context;
-    private DatabaseHandler db;
-
-    public MainActivityHelper(Context context, DatabaseHandler db) {
-        this.context = context;
-        this.db = db;
     }
 
-    private List<SingleNote> getNotesList(int list) {       // Used to get current list in use
-        switch (list) {
-            case 0:
-            default:
-                return db.getUserNotes();
-            case 1:
-                return db.getFavoriteNotes();
-            case 2:
-                return db.getArchiveNotes();
-            case 3:
-                return db.getRecycleBinNotes();
-        }
-    }
-
-    public void restoreLayout(RecyclerView rv, MenuItem layoutItem, int layoutChoice) {
+    public static void restoreLayout(Context context, RecyclerView rv, MenuItem layoutItem, int layoutChoice) {
         switch (layoutChoice) {
             case 0:
             default:
@@ -47,16 +26,16 @@ public class MainActivityHelper {
                 break;
             case 1:
                 layoutItem.setIcon(R.drawable.ic_staggered_grid_layout);
-                rv.setLayoutManager(new LinearLayoutManager(context.getApplicationContext()));
+                rv.setLayoutManager(new LinearLayoutManager(context));
         }
     }
 
-    public int swapLayout(RecyclerView rv, MenuItem layoutItem, int layoutChoice) {
+    public static int swapLayout(Context context, RecyclerView rv, MenuItem layoutItem, int layoutChoice) {
         switch (layoutChoice) {
             case 0:
             default:
                 layoutItem.setIcon(R.drawable.ic_staggered_grid_layout);
-                rv.setLayoutManager(new LinearLayoutManager(context.getApplicationContext()));
+                rv.setLayoutManager(new LinearLayoutManager(context));
                 return 1;
             case 1:
                 layoutItem.setIcon(R.drawable.ic_linear_layout);
@@ -65,7 +44,7 @@ public class MainActivityHelper {
         }
     }
 
-    public void updateAdapter(Bundle bundle, NotesAdapter adapter) {
+    public static void updateAdapter(Context context, Bundle bundle, NotesAdapter adapter) {
         // Array used to check NoteEditor outcome
         String[] noteResult = context.getResources().getStringArray(R.array.noteResultArray);
 
@@ -80,12 +59,10 @@ public class MainActivityHelper {
 
             // TODO: Optimize this, right now getting the entire list just for the newest note
         } else if (save.equals(noteResult[1])) {    // Update rv with new note
-            List<SingleNote> noteList = getNotesList(listUsed);
-
             if (listUsed == 0) {
-                adapter.addAt(position, noteList.get(position));
+                adapter.addAt(position, note);
             } else if (listUsed == 1 && favorite) {
-                adapter.addAt(position, noteList.get(position));
+                adapter.addAt(position, note);
             }
 
         } else if (save.equals(noteResult[2])) {    // Remove note from rv (Delete Forever)
