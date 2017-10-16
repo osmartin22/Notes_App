@@ -4,15 +4,14 @@ import android.os.AsyncTask;
 
 import com.ozmar.notes.DatabaseHandler;
 
-/**
- * Created by ozmar on 10/10/2017.
- */
 
 public class AutoDeleteAsync extends AsyncTask<Void, Void, Void> {
-    DatabaseHandler db;
+    private DatabaseHandler db;
+    private int days;
 
-    public AutoDeleteAsync(DatabaseHandler db) {
+    public AutoDeleteAsync(DatabaseHandler db, int days) {
         this.db = db;
+        this.days = days;
     }
 
     @Override
@@ -22,7 +21,7 @@ public class AutoDeleteAsync extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-        db.deleteNotesPastDeleteDay();
+        db.deleteNotesPastDeleteDay(days);
         return null;
     }
 

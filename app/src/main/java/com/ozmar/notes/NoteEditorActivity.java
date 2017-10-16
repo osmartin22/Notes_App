@@ -44,6 +44,8 @@ public class NoteEditorActivity extends AppCompatActivity
     private Button reminderButton;
     private long reminderTime = 0;
 
+    private Preferences preferences;
+
 
     // TODO: Store reminder in db and return id
     // Store id in note to later access it
@@ -147,7 +149,7 @@ public class NoteEditorActivity extends AppCompatActivity
             boolean contentEmpty = content.isEmpty();
             if (!(titleEmpty && contentEmpty)) {    // New note
 
-                currentNote =  new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime);
+                currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime);
 
                 new BasicDBAsync(db, null, currentNote, listUsed, 0).execute();
                 noteModifiedResult(noteResult[1]);
@@ -187,13 +189,13 @@ public class NoteEditorActivity extends AppCompatActivity
     private void setUpNoteView() {
         if (currentNote != null) {
 
-            if(listUsed == 2 && currentNote.is_favorite()) {
+            if (listUsed == 2 && currentNote.is_favorite()) {
                 currentNote.set_favorite(false);
             } else {
                 favorite = currentNote.is_favorite();
             }
 
-            if(currentNote.get_reminderTime() != 0) {
+            if (currentNote.get_reminderTime() != 0) {
                 reminderTime = currentNote.get_reminderTime();
                 reminderButton.setText(FormatUtils.getReminderText(getApplication(), new DateTime(currentNote.get_reminderTime())));
                 reminderButton.setVisibility(View.VISIBLE);
@@ -283,7 +285,6 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @Override
     public void onReminderPicked(DateTime dateTime) {
-        ReminderManager.start(getApplicationContext(), dateTime);
         reminderTime = (dateTime.getMillis());
         reminderButton.setText(FormatUtils.getReminderText(getApplication(), dateTime));
         reminderButton.setVisibility(View.VISIBLE);

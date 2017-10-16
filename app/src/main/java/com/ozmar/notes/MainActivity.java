@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         preferences = new Preferences(getApplicationContext());
         multiSelectHelper = new MultiSelectFlagHelper();
 
-        new AutoDeleteAsync(db).execute();
+        new AutoDeleteAsync(db, preferences.getDaysInTrash()).execute();
 
         fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
 

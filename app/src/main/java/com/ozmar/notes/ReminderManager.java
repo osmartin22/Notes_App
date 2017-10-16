@@ -12,13 +12,15 @@ import static android.content.Context.ALARM_SERVICE;
 
 public class ReminderManager {
 
-    public static void start(Context context, DateTime dateTime) {
+    public static void start(Context context, DateTime dateTime, int id) {
         PendingIntent pendingIntent;
         AlarmManager manager;
 
         manager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
         Intent myIntent = new Intent(context, ReminderReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(context, 0, myIntent, 0);
+
+//        pendingIntent = PendingIntent.getBroadcast(context, id, myIntent, 0);
 
         manager.setExact(AlarmManager.RTC_WAKEUP, dateTime.getMillis(), pendingIntent);
     }
