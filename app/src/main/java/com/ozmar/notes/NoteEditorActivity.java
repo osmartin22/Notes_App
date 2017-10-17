@@ -51,9 +51,7 @@ public class NoteEditorActivity extends AppCompatActivity
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
 
-        if (title.isEmpty() && content.isEmpty() && currentNote == null) {
-            // exit
-        } else {
+        if (!(title.isEmpty() && content.isEmpty() && currentNote == null)) {
             Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -61,8 +59,12 @@ public class NoteEditorActivity extends AppCompatActivity
                 boolean titleChanged = !currentNote.get_title().equals(title);
                 boolean contentChanged = !currentNote.get_content().equals(content);
                 currentNote.set_favorite(favorite);
-                currentNote.set_reminderTime(reminderTime);
                 NoteEditorUtils.updateNoteObject(currentNote, title, content, titleChanged, contentChanged);
+
+                NoteChanges noteChanges = new NoteChanges();
+                boolean reminderChanged = NoteEditorUtils.reminderChanged(reminderTime, currentNote, noteChanges);
+                boolean noteTextChanged = NoteEditorUtils.noteChanges(title, content, currentNote, noteChanges);
+                NoteEditorUtils.modifyReminderIntent(getApplicationContext(), preferences, currentNote, reminderChanged, noteTextChanged);
 
             } else {
                 currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime);

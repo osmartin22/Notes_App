@@ -60,6 +60,8 @@ public class NoteEditorUtils {
     public static void modifyReminderIntent(Context context, Preferences preferences, SingleNote note, boolean reminderChanged, boolean noteTextChanged) {
         // Adding a new PendingIntent ID
         if (note.get_reminderTime() != 0) {
+
+            // Add unique ID for notification/alarm if note does not already have one
             if (note.get_reminderId() == 0) {
                 note.set_reminderId(preferences.getReminderID());
             }
@@ -73,7 +75,6 @@ public class NoteEditorUtils {
         // Remove Reminder
         else if (note.get_reminderTime() == 0 && reminderChanged) {
             ReminderManager.cancel(context, note.get_reminderId());
-            note.set_reminderId(0);
         }
     }
 

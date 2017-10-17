@@ -20,7 +20,9 @@ public class ReminderManager {
         myIntent.putExtra("Title", note.get_title());
         myIntent.putExtra("Content", note.get_content());
 
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, note.get_reminderId(), myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, note.get_reminderId(),
+                myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         manager.setExact(AlarmManager.RTC_WAKEUP, note.get_reminderTime(), pendingIntent);
     }
 
@@ -33,13 +35,18 @@ public class ReminderManager {
     }
 
     public static Notification buildNotification(Context context, String title, String content) {
+        Intent intent = new Intent(context, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
         NotificationCompat.Builder mBuilder = (android.support.v7.app.NotificationCompat.Builder)
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_notes_drawer)
                         .setContentTitle(title)
                         .setContentText(content)
+                        .setDefaults(NotificationCompat.DEFAULT_ALL)
+                        .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setContentIntent(pendingIntent)
                         .setAutoCancel(true);
-
         return mBuilder.build();
     }
 }

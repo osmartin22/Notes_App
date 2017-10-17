@@ -13,7 +13,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         String title = intent.getStringExtra("Title");
         String content = intent.getStringExtra("Content");
 
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(id, ReminderManager.buildNotification(context, title, content));
+        NotificationManager nManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        nManager.notify(id, ReminderManager.buildNotification(context, title, content));
     }
 }

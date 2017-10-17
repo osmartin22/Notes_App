@@ -37,7 +37,7 @@ public class TimePickerFragment extends DialogFragment
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        DateTime dateTime = DateTime.now();
+        DateTime dateTime = DateTime.now().plusMinutes(1);
         int minute = dateTime.getMinuteOfHour();
         int hour = dateTime.getHourOfDay();
 
