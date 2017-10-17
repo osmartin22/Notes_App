@@ -19,23 +19,24 @@ public class SingleNote implements Parcelable {
 
     }
 
-    public SingleNote(String title, String content, boolean favorite, long timeModified) {
+    public SingleNote(String title, String content, boolean favorite, long timeModified, long reminderTime) {
         this._title = title;
         this._content = content;
         this._favorite = favorite;
         this._timeModified = timeModified;
-    }
-
-    public SingleNote(String title, String content, boolean favorite, long timeModified, long reminderTime) {
-        this(title, content, favorite, timeModified);
         this._reminderTime = reminderTime;
     }
 
-//    public SingleNote(String title, String content, boolean favorite, long timeModified, long reminderTime, int reminderId) {
-//        this(title,content,favorite,timeModified);
-//        this._reminderTime = reminderTime;
-//        this._reminderId = reminderId;
-//    }
+
+
+    public SingleNote(String title, String content, boolean favorite, long timeModified, long reminderTime, int reminderId) {
+        this._title = title;
+        this._content = content;
+        this._favorite = favorite;
+        this._timeModified = timeModified;
+        this._reminderTime = reminderTime;
+        this._reminderId = reminderId;
+    }
 
     @Override
     public int hashCode() {

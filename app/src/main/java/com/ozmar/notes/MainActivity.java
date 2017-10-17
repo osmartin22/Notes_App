@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             actionMode.finish();
         }
 
-        launchIntent(null, -1, notesAdapter.getListUsed());
+        launchIntent(null, 0, notesAdapter.getListUsed());
     } // launchNoteEditor() end
 
     private void launchIntent(SingleNote note, int position, int listUsed) {
@@ -400,7 +400,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     buffer.swapBuffer();
 
                     multiSelectHelper.setNewNoteAction(bundle.getInt("New Note Action", -1));
-                    buffer.addDataToBuffer((SingleNote) bundle.getParcelable("Note"), bundle.getInt("Note Position", -1));
+                    buffer.addDataToBuffer((SingleNote) bundle.getParcelable("Note"), bundle.getInt("Note Position", 0));
 
                     if (multiSelectHelper.getNewNoteAction() != 1) {
                         notesAdapter.removeSelectedViews(buffer.currentBufferPositions());

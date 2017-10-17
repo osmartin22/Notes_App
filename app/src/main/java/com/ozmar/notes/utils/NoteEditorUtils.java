@@ -1,10 +1,12 @@
 package com.ozmar.notes.utils;
 
-import android.util.Log;
+import android.content.Context;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.ozmar.notes.Preferences;
 import com.ozmar.notes.R;
+import com.ozmar.notes.ReminderManager;
 import com.ozmar.notes.SingleNote;
 
 
@@ -47,12 +49,32 @@ public class NoteEditorUtils {
     }
 
     public static boolean reminderChanged(long reminderTime, SingleNote note, NoteChanges changes) {
-        if(reminderTime != note.get_reminderTime()) {
+        if (reminderTime != note.get_reminderTime()) {
             note.set_reminderTime(reminderTime);
             changes.setReminderTimeChanged(true);
             return true;
         }
         return false;
+    }
+
+    public static void modifyReminderIntent(Context context, Preferences preferences, SingleNote note, boolean reminderChanged, boolean noteTextChanged) {
+        // Adding a new PendingIntent ID
+        if (note.get_reminderTime() != 0) {
+            if (note.get_reminderId() == 0) {
+                note.set_reminderId(preferences.getReminderID());
+            }
+
+            if (reminderChanged || noteTextChanged) {
+                ReminderManager.start(context, note);
+            }
+
+        }
+
+        // Remove Reminder
+        else if (note.get_reminderTime() == 0 && reminderChanged) {
+            ReminderManager.cancel(context, note.get_reminderId());
+            note.set_reminderId(0);
+        }
     }
 
     public static boolean favoriteNote(boolean favorite, MenuItem item) {

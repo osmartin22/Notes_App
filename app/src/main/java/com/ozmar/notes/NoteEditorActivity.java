@@ -47,9 +47,6 @@ public class NoteEditorActivity extends AppCompatActivity
     private Preferences preferences;
 
 
-    // TODO: Store reminder in db and return id
-    // Store id in note to later access it
-
     private void contextualActionResult(MenuItem item) {
         String title = editTextTitle.getText().toString();
         String content = editTextContent.getText().toString();
@@ -69,6 +66,11 @@ public class NoteEditorActivity extends AppCompatActivity
 
             } else {
                 currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime);
+                if (reminderTime != 0) {
+                    currentNote.set_reminderId(preferences.getReminderID());
+                    ReminderManager.start(getApplicationContext(), currentNote);
+                }
+
                 intent.putExtra("New Note Action", 1);
             }
 
@@ -87,10 +89,6 @@ public class NoteEditorActivity extends AppCompatActivity
                     break;
             }
 
-            if (notePosition == -1) {
-                notePosition = 0;
-            }
-
             intent.putExtra("Note", currentNote);
             intent.putExtra("Note Position", notePosition);
             setResult(RESULT_OK, intent);
@@ -105,12 +103,10 @@ public class NoteEditorActivity extends AppCompatActivity
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-        // Set notePosition to 0 from -1 if the note being added is a new note
         if (value.equals(noteResult[1])) {
             if (favorite) {
                 intent.putExtra("Note Favorite", true);
             }
-            notePosition = 0;
         }
 
         intent.putExtra("Note Success", value);
@@ -129,6 +125,8 @@ public class NoteEditorActivity extends AppCompatActivity
             boolean favoriteChanged = false;
             boolean reminderChanged = NoteEditorUtils.reminderChanged(reminderTime, currentNote, noteChanges);
             boolean noteTextChanged = NoteEditorUtils.noteChanges(title, content, currentNote, noteChanges);
+
+            NoteEditorUtils.modifyReminderIntent(getApplicationContext(), preferences, currentNote, reminderChanged, noteTextChanged);
 
             if (listUsed != 2) {     // Don't allow changes to favorite if in archive list
                 favoriteChanged = NoteEditorUtils.favoriteChanged(favorite, currentNote, noteChanges);
@@ -151,6 +149,11 @@ public class NoteEditorActivity extends AppCompatActivity
 
                 currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime);
 
+                if (reminderTime != 0) {
+                    currentNote.set_reminderId(preferences.getReminderID());
+                    ReminderManager.start(getApplicationContext(), currentNote);
+                }
+
                 new BasicDBAsync(db, null, currentNote, listUsed, 0).execute();
                 noteModifiedResult(noteResult[1]);
             }
@@ -172,6 +175,8 @@ public class NoteEditorActivity extends AppCompatActivity
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        preferences = new Preferences(getApplicationContext());
+
         noteResult = getResources().getStringArray(R.array.noteResultArray);
 
         reminderButton = (Button) findViewById(R.id.reminderText);
@@ -179,7 +184,7 @@ public class NoteEditorActivity extends AppCompatActivity
         editTextContent = (EditText) findViewById(R.id.editTextContent);
 
         Intent intent = getIntent();
-        notePosition = intent.getIntExtra("noteID", -1);
+        notePosition = intent.getIntExtra("noteID", 0);
         listUsed = intent.getIntExtra("listUsed", 0);
         currentNote = intent.getParcelableExtra("Note");
 
@@ -279,13 +284,14 @@ public class NoteEditorActivity extends AppCompatActivity
 
     public void addReminder(View view) {
         // TODO: Pass current reminderTime if exists, to start at that date
+
         ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance();
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
     }
 
     @Override
     public void onReminderPicked(DateTime dateTime) {
-        reminderTime = (dateTime.getMillis());
+        reminderTime = dateTime.getMillis();
         reminderButton.setText(FormatUtils.getReminderText(getApplication(), dateTime));
         reminderButton.setVisibility(View.VISIBLE);
     }
