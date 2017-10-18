@@ -3,7 +3,7 @@ package com.ozmar.notes;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.util.concurrent.TimeUnit;
+import org.joda.time.LocalTime;
 
 
 public class Preferences {
@@ -47,10 +47,10 @@ public class Preferences {
         editor.apply();
     }
 
-    public long getMorningTime() {
-        long time = TimeUnit.HOURS.toMillis(preferences.getLong("Morning Time Hour", 8));
-        time += TimeUnit.MINUTES.toMillis(preferences.getLong("Morning Time Minute", 0));
-        return time;
+    public LocalTime getMorningTime() {
+        int hour = preferences.getInt("Morning Time Hour", 8);
+        int minute = preferences.getInt("Morning Time Minute", 0);
+        return new LocalTime(hour, minute);
     }
 
     public void setMorningTime(int hour, int minute) {
@@ -60,10 +60,10 @@ public class Preferences {
         editor.apply();
     }
 
-    public long getAfternoonTime() {
-        long time = TimeUnit.HOURS.toMillis(preferences.getLong("Afternoon Time Hour", 13));
-        time += TimeUnit.MINUTES.toMillis(preferences.getLong("Afternoon Time Minute", 0));
-        return time;
+    public LocalTime getAfternoonTime() {
+        int hour = preferences.getInt("Afternoon Time Hour", 13);
+        int minute = preferences.getInt("Afternoon Time Minute", 0);
+        return new LocalTime(hour, minute);
     }
 
     public void setAfternoonTime(int hour, int minute) {
@@ -73,10 +73,10 @@ public class Preferences {
         editor.apply();
     }
 
-    public long getEveningTime() {
-        long time = TimeUnit.HOURS.toMillis(preferences.getLong("Evening Time Hour", 18));
-        time += TimeUnit.MINUTES.toMillis(preferences.getLong("Evening Time Minute", 0));
-        return time;
+    public LocalTime getEveningTime() {
+        int hour = preferences.getInt("Evening Time Hour", 18);
+        int minute = preferences.getInt("Evening Time Minute", 0);
+        return new LocalTime(hour, minute);
     }
 
     public void setEveningTime(int hour, int minute) {
@@ -86,10 +86,10 @@ public class Preferences {
         editor.apply();
     }
 
-    public long getNightTime() {
-        long time = TimeUnit.HOURS.toMillis(preferences.getLong("Night Time Hour", 20));
-        time += TimeUnit.MINUTES.toMillis(preferences.getLong("Night Time Minute", 0));
-        return time;
+    public LocalTime getNightTime() {
+        int hour = preferences.getInt("Night Time Hour", 20);
+        int minute = preferences.getInt("Night Time Minute", 0);
+        return new LocalTime(hour, minute);
     }
 
     public void setNightTime(int hour, int minute) {

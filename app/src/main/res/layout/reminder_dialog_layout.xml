@@ -7,26 +7,24 @@
 
     <com.ozmar.notes.reminderDialog.NDSpinner
         android:id="@+id/spinnerDate"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/dateArray"
-        style="@style/Widget.AppCompat.Spinner.Underlined"
-        android:layout_margin="8dp"/>
+        android:layout_margin="8dp" />
 
     <com.ozmar.notes.reminderDialog.NDSpinner
         android:id="@+id/spinnerTime"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/timeArray"
-        style="@style/Widget.AppCompat.Spinner.Underlined"
-        android:layout_margin="8dp"/>
+        android:layout_margin="8dp" />
 
     <com.ozmar.notes.reminderDialog.NDSpinner
         android:id="@+id/spinnerReminder"
+        style="@style/Widget.AppCompat.Spinner.Underlined"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/reminderArray"
-        style="@style/Widget.AppCompat.Spinner.Underlined"
-        android:layout_margin="8dp"/>
+        android:layout_margin="8dp"
+        android:entries="@array/reminderArray" />
 
 </LinearLayout>

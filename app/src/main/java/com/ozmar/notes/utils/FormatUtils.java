@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -104,6 +105,31 @@ public class FormatUtils {
         }
 
         return reminderDate;
+    }
+
+    // Use if you know the dates are in the same year
+    public static String getMonthDayFormat(DateTime chosen) {
+        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("MMMM dd");
+        return dtfOut.print(chosen);
+    }
+
+    // Used to check if the chosen date is within the same year
+    public static String getMonthDayFormat(DateTime dateTimeNow, DateTime chosen) {
+        String date;
+
+        if(dateTimeNow.getYear() == chosen.getYear()) {
+            date = FormatUtils.getMonthDayFormat(chosen);
+        } else {
+            DateTimeFormatter dtfOut = DateTimeFormat.forPattern("MMMM dd, yyyy");
+            date = dtfOut.print(chosen);
+        }
+        return date;
+    }
+
+    public static String getTimeFormat(Context context, LocalTime dateTime) {
+        DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(context);
+        Date date = dateTime.toDateTimeToday().toDate();
+        return timeFormat.format(date);
     }
 
     private static boolean isToday(DateTime time) {
