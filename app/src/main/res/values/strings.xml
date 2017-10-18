@@ -71,7 +71,7 @@
 
 
     <!-- String Arrays used for the Reminder Dialog -->
-    <string-array name="dateArray">
+    <string-array name="dateXMLArray">
         <item>Today</item>
         <item>Tomorrow</item>
         <item>Next Week</item>
@@ -79,7 +79,7 @@
         <item>Pick A Date&#8230;</item>
     </string-array>
 
-    <string-array name="timeArray">
+    <string-array name="timeXMLArray">
         <item>Morning</item>
         <item>Afternoon</item>
         <item>Evening</item>

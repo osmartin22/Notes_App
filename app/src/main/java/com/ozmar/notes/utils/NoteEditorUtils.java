@@ -66,10 +66,10 @@ public class NoteEditorUtils {
                 note.set_reminderId(preferences.getReminderID());
             }
 
-            if (reminderChanged || noteTextChanged) {
+            // Update alarm with new time/text and the reminder time has not already passed
+            if ((reminderChanged || noteTextChanged) && note.get_reminderTime() > System.currentTimeMillis()) {
                 ReminderManager.start(context, note);
             }
-
         }
 
         // Remove Reminder

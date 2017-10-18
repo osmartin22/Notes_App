@@ -3,6 +3,7 @@ package com.ozmar.notes;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,22 +28,45 @@ public class ReminderAdapter extends ArrayAdapter<String> implements SpinnerAdap
         listItems[4] = "";
     }
 
+    @NonNull
+    @Override
+    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+        if(position == 4) {
+            Log.d("DropDown", "Selected Custom choice");
+        }
+
+        return super.getView(position, convertView, parent);
+    }
+
     @Override
     public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 
-        if (convertView == null) {
-            convertView = inflater.inflate(R.layout.row, parent, false);
-            TextView leftText = convertView.findViewById(R.id.leftSpinnerText);
+//        Log.d("DropDown", "Position Chosen -> " + position);
 
-            if(spinnerStyle == 1) {
-                TextView rightText = convertView.findViewById(R.id.rightSpinnerText);
-                rightText.setText(listItems[position]);
-                rightText.setVisibility(View.VISIBLE);
+        ViewHolder viewHolder;
+
+        if (convertView == null) {
+            viewHolder = new ViewHolder();
+            convertView = inflater.inflate(R.layout.row, parent, false);
+            viewHolder.leftText = convertView.findViewById(R.id.leftSpinnerText);
+
+            if (spinnerStyle == 1) {
+                viewHolder.rightText = convertView.findViewById(R.id.rightSpinnerText);
+                viewHolder.rightText.setText(listItems[position]);
+                viewHolder.rightText.setVisibility(View.VISIBLE);
             }
 
-            leftText.setText(dropDownItems[position]);
+            Log.d("DropDown", "Inside " + position + ": " + dropDownItems[position]);
+            viewHolder.leftText.setText(dropDownItems[position]);
         }
 
         return convertView;
+    }
+
+
+
+    public static class ViewHolder {
+        TextView leftText   ;
+        TextView rightText;
     }
 }

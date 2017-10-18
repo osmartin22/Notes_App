@@ -6,6 +6,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
+
+import com.ozmar.notes.utils.FormatUtils;
+
+import org.joda.time.DateTime;
+import org.joda.time.LocalTime;
 
 import static android.content.Context.ALARM_SERVICE;
 
@@ -22,6 +28,10 @@ public class ReminderManager {
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, note.get_reminderId(),
                 myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        String setReminder = FormatUtils.getMonthDayFormat(new DateTime(note.get_reminderTime()))
+                + ", " +FormatUtils.getTimeFormat(context, new LocalTime(note.get_reminderTime()));
+        Log.d("Notification", setReminder);
 
         manager.setExact(AlarmManager.RTC_WAKEUP, note.get_reminderTime(), pendingIntent);
     }

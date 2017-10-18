@@ -49,6 +49,21 @@ public class ReminderDialogFragment extends DialogFragment
     private boolean timeSpinnerTouched = false;
     private boolean reminderSpinnerTouched = false;
 
+    private int previousDateSelection = 0;
+    private int previousTimeSelection = 0;
+    private int previousReminderSelection = 0;
+
+    // TODO: Set spinner for reminder/create dialog
+    // TODO: Fix reminder being set when only text changes
+    // TODO: On cancel, show previous selection
+        // If it was custom, set to custom selection with desired time
+    // TODO: Round futureTime to nearest quarter at least
+    // TODO: Pass reminderTime to fragment to set as initial values
+        // Make sure when creating spinner listener, number not overwritten
+        // Or set initial values after creating spinner and set to custom position(4)
+
+
+
     private Preferences preferences;
 
     private OnReminderPickedListener myCallback;
@@ -87,12 +102,13 @@ public class ReminderDialogFragment extends DialogFragment
         timeSpinner = view.findViewById(R.id.spinnerTime);
         reminderSpinner = view.findViewById(R.id.spinnerReminder);
 
-        String[] dropDownArray = getActivity().getResources().getStringArray(R.array.dateArray);
+        String[] dropDownArray = getActivity().getResources().getStringArray(R.array.dateXMLArray);
         dateSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
                 dateArray, dropDownArray, 0);
         dateSpinner.setAdapter(dateSpinnerAdapter);
 
-        dropDownArray = getActivity().getResources().getStringArray(R.array.timeArray);
+        dropDownArray = getActivity().getResources().getStringArray(R.array.timeXMLArray);
+
         timeSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
                 timeArray, dropDownArray, 1);
         timeSpinner.setAdapter(timeSpinnerAdapter);
@@ -101,7 +117,7 @@ public class ReminderDialogFragment extends DialogFragment
 
 
         setSpinnerListener();
-        setSpinnerPosition();
+//        setSpinnerPosition();
 
         AlertDialog.Builder reminderDialog = new AlertDialog.Builder(getActivity());
         reminderDialog.setView(view);
@@ -182,8 +198,8 @@ public class ReminderDialogFragment extends DialogFragment
         LocalTime futureTime = localTime.plusHours(3);
 
         // TODO: Round to nearest minute (maybe 10/15/30 minute marks)
-        if (localTime.isAfter(futureTime)) {
-            // Past Midnight, set to first preset
+        LocalTime firstPreset = preferences.getMorningTime();
+        if (localTime.isAfter(futureTime) || localTime.isBefore(firstPreset)) {
             timeSpinner.setSelection(0);
         } else {
             timeSpinner.setSelection(4);
@@ -193,8 +209,9 @@ public class ReminderDialogFragment extends DialogFragment
     }
 
     private void setSpinnerListener() {
-
+        //------------------------------------------------------------------------------------------
         // Date Spinner Listeners
+        //------------------------------------------------------------------------------------------
         dateSpinner.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -208,38 +225,44 @@ public class ReminderDialogFragment extends DialogFragment
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
+                DateTime futureTime = null;
                 switch (i) {
                     case 0:                                 // Today
                         year = dateTime.getYear();
                         month = dateTime.getMonthOfYear();
                         day = dateTime.getDayOfMonth();
+                        previousDateSelection = 0;
                         break;
 
                     case 1:                                 // Tomorrow
-                        DateTime tomorrow = dateTime.plusDays(1);
-                        year = tomorrow.getYear();
-                        month = tomorrow.getMonthOfYear();
-                        day = tomorrow.getDayOfMonth();
+                        futureTime = dateTime.plusDays(1);
+                        previousDateSelection = 1;
                         break;
 
                     case 2:                                 // Nex Week (7 Days)
-                        DateTime nextWeek = dateTime.plusDays(7);
-                        year = nextWeek.getYear();
-                        month = nextWeek.getMonthOfYear();
-                        day = nextWeek.getDayOfMonth();
+                        futureTime = dateTime.plusDays(7);
+                        previousDateSelection = 2;
                         break;
 
                     case 3:                                 // Next Month
-                        DateTime nextMonth = dateTime.plusMonths(1);
-                        year = nextMonth.getYear();
-                        month = nextMonth.getMonthOfYear();
-                        day = nextMonth.getDayOfMonth();
+                        futureTime = dateTime.plusMonths(1);
+                        previousDateSelection = 3;
                         break;
 
                     case 4:                                 // Date chosen
-                        DialogFragment newFragment = DatePickerFragment.newInstance(year, month, day);
-                        newFragment.show(getChildFragmentManager(), "datePicker");
+                        if (dateSpinnerTouched) {
+                            DialogFragment newFragment = DatePickerFragment.newInstance(year, month, day);
+                            newFragment.show(getChildFragmentManager(), "datePicker");
+//                            previousDateSelection = 4;
+                            dateSpinnerTouched = false;
+                        }
                         break;
+                }
+
+                if (futureTime != null) {
+                    year = futureTime.getYear();
+                    month = futureTime.getMonthOfYear();
+                    day = futureTime.getDayOfMonth();
                 }
             }
 
@@ -249,7 +272,10 @@ public class ReminderDialogFragment extends DialogFragment
             }
         });
 
+
+        //------------------------------------------------------------------------------------------
         // Time Spinner Listeners
+        //------------------------------------------------------------------------------------------
         timeSpinner.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -262,28 +288,37 @@ public class ReminderDialogFragment extends DialogFragment
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                // TODO: Make these into SharedPreferences
+                LocalTime localTime = null;
                 switch (i) {
                     case 0:
-                        hour = 8;
-                        minute = 0;
+                        localTime = preferences.getMorningTime();
+                        previousTimeSelection = 0;
                         break;
                     case 1:
-                        hour = 13;
-                        minute = 0;
+                        localTime = preferences.getAfternoonTime();
+                        previousTimeSelection = 1;
                         break;
                     case 2:
-                        hour = 18;
-                        minute = 0;
+                        localTime = preferences.getEveningTime();
+                        previousTimeSelection = 2;
                         break;
                     case 3:
-                        hour = 20;
-                        minute = 0;
+                        localTime = preferences.getNightTime();
+                        previousTimeSelection = 3;
                         break;
                     case 4:
-                        DialogFragment newFragment = TimePickerFragment.newInstance(hour, minute);
-                        newFragment.show(getChildFragmentManager(), "timePicker");
+                        if (timeSpinnerTouched) {
+                            DialogFragment newFragment = TimePickerFragment.newInstance(hour, minute);
+                            newFragment.show(getChildFragmentManager(), "timePicker");
+//                            previousTimeSelection = 4;
+                            timeSpinnerTouched = false;
+                        }
                         break;
+                }
+
+                if (localTime != null) {
+                    hour = localTime.getHourOfDay();
+                    minute = localTime.getMinuteOfHour();
                 }
             }
 
@@ -293,7 +328,10 @@ public class ReminderDialogFragment extends DialogFragment
             }
         });
 
+
+        //------------------------------------------------------------------------------------------
         // Reminder Spinner Listeners
+        //------------------------------------------------------------------------------------------
         reminderSpinner.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -351,7 +389,7 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public void onTimeCancel() {
-        timeSpinner.setSelection(0);
+//        timeSpinner.setSelection(previousTimeSelection);
     }
 
     @Override
@@ -366,6 +404,6 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public void onDateCancel() {
-        dateSpinner.setSelection(0);
+//        dateSpinner.setSelection(previousDateSelection);
     }
 }
