@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.UpdateNoteAsync;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
+import com.ozmar.notes.reminderDialog.ReminderManager;
 import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.utils.NoteChanges;
 import com.ozmar.notes.utils.NoteEditorUtils;

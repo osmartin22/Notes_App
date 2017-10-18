@@ -87,7 +87,7 @@
         <item>Pick A Time&#8230;</item>
     </string-array>
 
-    <string-array name="reminderArray">
+    <string-array name="reminderXMLArray">
         <item>Does Not Repeat</item>
         <item>Daily</item>
         <item>Weekly</item>

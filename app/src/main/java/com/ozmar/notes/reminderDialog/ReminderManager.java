@@ -1,4 +1,4 @@
-package com.ozmar.notes;
+package com.ozmar.notes.reminderDialog;
 
 import android.app.AlarmManager;
 import android.app.Notification;
@@ -8,6 +8,9 @@ import android.content.Intent;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
+import com.ozmar.notes.MainActivity;
+import com.ozmar.notes.R;
+import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.utils.FormatUtils;
 
 import org.joda.time.DateTime;

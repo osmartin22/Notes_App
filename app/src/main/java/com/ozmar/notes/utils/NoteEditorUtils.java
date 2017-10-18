@@ -6,7 +6,7 @@ import android.view.MenuItem;
 
 import com.ozmar.notes.Preferences;
 import com.ozmar.notes.R;
-import com.ozmar.notes.ReminderManager;
+import com.ozmar.notes.reminderDialog.ReminderManager;
 import com.ozmar.notes.SingleNote;
 
 

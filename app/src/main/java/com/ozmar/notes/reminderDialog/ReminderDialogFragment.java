@@ -14,7 +14,6 @@ import android.widget.Toast;
 
 import com.ozmar.notes.Preferences;
 import com.ozmar.notes.R;
-import com.ozmar.notes.ReminderAdapter;
 import com.ozmar.notes.utils.FormatUtils;
 
 import org.joda.time.DateTime;
@@ -41,27 +40,28 @@ public class ReminderDialogFragment extends DialogFragment
 
     private String[] dateArray = new String[5];
     private String[] timeArray = new String[5];
+    private String[] reminderArray = new String[6];
+
     private ReminderAdapter timeSpinnerAdapter;
     private ReminderAdapter dateSpinnerAdapter;
-    private ReminderAdapter reminderSpinnerAdapter;
+    private ReminderFrequencyAdapter reminderSpinnerAdapter;
 
     private boolean dateSpinnerTouched = false;
     private boolean timeSpinnerTouched = false;
     private boolean reminderSpinnerTouched = false;
 
-    private int previousDateSelection = 0;
-    private int previousTimeSelection = 0;
+    private int currentDateSelection = 0;
+    private int currentTimeSelection = 0;
     private int previousReminderSelection = 0;
 
     // TODO: Set spinner for reminder/create dialog
     // TODO: Fix reminder being set when only text changes
     // TODO: On cancel, show previous selection
-        // If it was custom, set to custom selection with desired time
+    // If it was custom, set to custom selection with desired time
     // TODO: Round futureTime to nearest quarter at least
     // TODO: Pass reminderTime to fragment to set as initial values
-        // Make sure when creating spinner listener, number not overwritten
-        // Or set initial values after creating spinner and set to custom position(4)
-
+    // Make sure when creating spinner listener, number not overwritten
+    // Or set initial values after creating spinner and set to custom position(4)
 
 
     private Preferences preferences;
@@ -96,7 +96,7 @@ public class ReminderDialogFragment extends DialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = View.inflate(getActivity(), R.layout.reminder_dialog_layout, null);
         preferences = new Preferences(getContext());
-        setUpSpinnerStringDisplay();
+        setUpSpinnerStrings();
 
         dateSpinner = view.findViewById(R.id.spinnerDate);
         timeSpinner = view.findViewById(R.id.spinnerTime);
@@ -108,16 +108,17 @@ public class ReminderDialogFragment extends DialogFragment
         dateSpinner.setAdapter(dateSpinnerAdapter);
 
         dropDownArray = getActivity().getResources().getStringArray(R.array.timeXMLArray);
-
         timeSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
-                timeArray, dropDownArray, 1);
+                timeArray, dropDownArray, 0);
         timeSpinner.setAdapter(timeSpinnerAdapter);
 
-        // TODO: Set spinner for reminder frequency
+        dropDownArray = getActivity().getResources().getStringArray(R.array.reminderXMLArray);
+        reminderSpinnerAdapter = new ReminderFrequencyAdapter(getContext(),
+                android.R.layout.simple_spinner_item, reminderArray);
+        reminderSpinner.setAdapter(reminderSpinnerAdapter);
 
-
+        setSpinnerPosition();
         setSpinnerListener();
-//        setSpinnerPosition();
 
         AlertDialog.Builder reminderDialog = new AlertDialog.Builder(getActivity());
         reminderDialog.setView(view);
@@ -179,7 +180,7 @@ public class ReminderDialogFragment extends DialogFragment
         }
     }
 
-    private void setUpSpinnerStringDisplay() {
+    private void setUpSpinnerStrings() {
         dateArray[0] = FormatUtils.getMonthDayFormat(dateTimeNow);
         dateArray[1] = FormatUtils.getMonthDayFormat(dateTimeNow, dateTimeNow.plusDays(1));
         dateArray[2] = FormatUtils.getMonthDayFormat(dateTimeNow, dateTimeNow.plusWeeks(1));
@@ -191,6 +192,8 @@ public class ReminderDialogFragment extends DialogFragment
         timeArray[2] = FormatUtils.getTimeFormat(getContext(), preferences.getEveningTime());
         timeArray[3] = FormatUtils.getTimeFormat(getContext(), preferences.getNightTime());
         timeArray[4] = "Pick A Time...";      // TODO: Set with reminderTime if available
+
+        reminderArray = getActivity().getResources().getStringArray(R.array.reminderXMLArray);
     }
 
     private void setSpinnerPosition() {
@@ -203,6 +206,7 @@ public class ReminderDialogFragment extends DialogFragment
             timeSpinner.setSelection(0);
         } else {
             timeSpinner.setSelection(4);
+            timeArray[4] = FormatUtils.getTimeFormat(getContext(), futureTime);
             hour = futureTime.getHourOfDay();
             minute = futureTime.getMinuteOfHour();
         }
@@ -231,29 +235,33 @@ public class ReminderDialogFragment extends DialogFragment
                         year = dateTime.getYear();
                         month = dateTime.getMonthOfYear();
                         day = dateTime.getDayOfMonth();
-                        previousDateSelection = 0;
+                        currentDateSelection = 0;
+                        dateArray[4] = "";
                         break;
 
                     case 1:                                 // Tomorrow
                         futureTime = dateTime.plusDays(1);
-                        previousDateSelection = 1;
+                        currentDateSelection = 1;
+                        dateArray[4] = "";
                         break;
 
                     case 2:                                 // Nex Week (7 Days)
                         futureTime = dateTime.plusDays(7);
-                        previousDateSelection = 2;
+                        currentDateSelection = 2;
+                        dateArray[4] = "";
                         break;
 
                     case 3:                                 // Next Month
                         futureTime = dateTime.plusMonths(1);
-                        previousDateSelection = 3;
+                        currentDateSelection = 3;
+                        dateArray[4] = "";
                         break;
 
                     case 4:                                 // Date chosen
                         if (dateSpinnerTouched) {
-                            DialogFragment newFragment = DatePickerFragment.newInstance(year, month, day);
+                            // Subtract 1 from month since CalendarPicker starts at month 0
+                            DialogFragment newFragment = DatePickerFragment.newInstance(year, month - 1, day);
                             newFragment.show(getChildFragmentManager(), "datePicker");
-//                            previousDateSelection = 4;
                             dateSpinnerTouched = false;
                         }
                         break;
@@ -292,25 +300,28 @@ public class ReminderDialogFragment extends DialogFragment
                 switch (i) {
                     case 0:
                         localTime = preferences.getMorningTime();
-                        previousTimeSelection = 0;
+                        currentTimeSelection = 0;
+                        timeArray[4] = "";
                         break;
                     case 1:
                         localTime = preferences.getAfternoonTime();
-                        previousTimeSelection = 1;
+                        currentTimeSelection = 1;
+                        timeArray[4] = "";
                         break;
                     case 2:
                         localTime = preferences.getEveningTime();
-                        previousTimeSelection = 2;
+                        currentTimeSelection = 2;
+                        timeArray[4] = "";
                         break;
                     case 3:
                         localTime = preferences.getNightTime();
-                        previousTimeSelection = 3;
+                        currentTimeSelection = 3;
+                        timeArray[4] = "";
                         break;
                     case 4:
                         if (timeSpinnerTouched) {
                             DialogFragment newFragment = TimePickerFragment.newInstance(hour, minute);
                             newFragment.show(getChildFragmentManager(), "timePicker");
-//                            previousTimeSelection = 4;
                             timeSpinnerTouched = false;
                         }
                         break;
@@ -389,7 +400,11 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public void onTimeCancel() {
-//        timeSpinner.setSelection(previousTimeSelection);
+        if (timeArray[4].isEmpty()) {
+            timeSpinner.setSelection(currentTimeSelection);
+        } else {
+            timeSpinner.setSelection(4);
+        }
     }
 
     @Override
@@ -404,6 +419,10 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public void onDateCancel() {
-//        dateSpinner.setSelection(previousDateSelection);
+        if (dateArray[4].isEmpty()) {
+            dateSpinner.setSelection(currentDateSelection);
+        } else {
+            dateSpinner.setSelection(4);
+        }
     }
 }

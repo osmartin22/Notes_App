@@ -1,15 +1,16 @@
-package com.ozmar.notes;
+package com.ozmar.notes.reminderDialog;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
+
+import com.ozmar.notes.R;
 
 
 public class ReminderAdapter extends ArrayAdapter<String> implements SpinnerAdapter {
@@ -31,42 +32,31 @@ public class ReminderAdapter extends ArrayAdapter<String> implements SpinnerAdap
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        if(position == 4) {
-            Log.d("DropDown", "Selected Custom choice");
+        View view = super.getView(position, convertView, parent);
+        if (position == 4) {
+            TextView textView = view.findViewById(android.R.id.text1);
+            textView.setText(listItems[4]);
         }
 
-        return super.getView(position, convertView, parent);
+        return view;
     }
 
     @Override
     public View getDropDownView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
 
-//        Log.d("DropDown", "Position Chosen -> " + position);
+        convertView = inflater.inflate(R.layout.row, parent, false);
+        TextView leftText = convertView.findViewById(R.id.leftSpinnerText);
 
-        ViewHolder viewHolder;
-
-        if (convertView == null) {
-            viewHolder = new ViewHolder();
-            convertView = inflater.inflate(R.layout.row, parent, false);
-            viewHolder.leftText = convertView.findViewById(R.id.leftSpinnerText);
-
-            if (spinnerStyle == 1) {
-                viewHolder.rightText = convertView.findViewById(R.id.rightSpinnerText);
-                viewHolder.rightText.setText(listItems[position]);
-                viewHolder.rightText.setVisibility(View.VISIBLE);
+        if (spinnerStyle == 0) {
+            if (position != 4) {
+                TextView rightText = convertView.findViewById(R.id.rightSpinnerText);
+                rightText.setText(listItems[position]);
+                rightText.setVisibility(View.VISIBLE);
             }
-
-            Log.d("DropDown", "Inside " + position + ": " + dropDownItems[position]);
-            viewHolder.leftText.setText(dropDownItems[position]);
         }
 
+        leftText.setText(dropDownItems[position]);
+
         return convertView;
-    }
-
-
-
-    public static class ViewHolder {
-        TextView leftText   ;
-        TextView rightText;
     }
 }
