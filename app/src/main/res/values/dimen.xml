@@ -48,4 +48,9 @@
     <dimen name="landTitleTextSize">20sp</dimen>
     <dimen name="landContentTextSize">18sp</dimen>
 
+    <!-- ReminderFrequencyPicker Layouts -->
+    <dimen name="circleSize">50dp</dimen>
+    <dimen name="circleHeightMarginSpacing">8dp</dimen>
+    <dimen name="circleMarginSpacing">16dp</dimen>
+
 </resources>

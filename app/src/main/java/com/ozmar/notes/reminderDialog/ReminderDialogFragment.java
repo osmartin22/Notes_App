@@ -115,8 +115,8 @@ public class ReminderDialogFragment extends DialogFragment
                 android.R.layout.simple_spinner_item, reminderArray);
         reminderSpinner.setAdapter(reminderSpinnerAdapter);
 
-        setSpinnerPosition();
         setSpinnerListener();
+        setSpinnerPosition();
 
         AlertDialog.Builder reminderDialog = new AlertDialog.Builder(getActivity());
         reminderDialog.setView(view);
@@ -368,13 +368,12 @@ public class ReminderDialogFragment extends DialogFragment
                         break;
 
                     case 5:     // Show Custom Reminder Picker
-
+                        if (reminderSpinnerTouched) {
+                            FrequencyPickerFragment newFragment = FrequencyPickerFragment.newInstance();
+                            newFragment.show(getChildFragmentManager(), "frequencyPicker");
+                            reminderSpinnerTouched = false;
+                        }
                         break;
-                }
-
-                // TODO: Return chosen repetition for reminder
-                if (i == 5) {
-                    // Show custom reminder selection
                 }
             }
 

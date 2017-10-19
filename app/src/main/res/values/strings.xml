@@ -96,4 +96,37 @@
         <item>Custom&#8230;</item>
     </string-array>
 
+    <!-- Arrays and Strings for custom ReminderFrequencyPicker -->
+    <string name="everyString">Every</string>
+
+    <string name="sameDayEachMonth">on the same day each month</string>
+    <string name="onEveryXDay">on every</string>
+
+    <string-array name="headerArray">
+        <item>REPEAT DAILY</item>
+        <item>REPEAT WEEKLY</item>
+        <item>REPEAT MONTHLY</item>
+        <item>REPEAT YEARLY</item>
+    </string-array>
+
+    <string-array name="bottomArrayListItem">
+        <item>Forever</item>
+        <item>Until</item>
+        <item>For</item>
+    </string-array>
+
+    <string-array name="bottomArrayDropDown">
+        <item>Forever</item>
+        <item>Until a date</item>
+        <item>For a number of events</item>
+    </string-array>
+
+    <string name="sundayShort">SUN</string>
+    <string name="mondayShort">MON</string>
+    <string name="tuesdayShort">TUE</string>
+    <string name="wednesdayShort">WED</string>
+    <string name="thursdayShort">THU</string>
+    <string name="fridayShort">FRI</string>
+    <string name="saturdayShort">SAT</string>
+
 </resources>

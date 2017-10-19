@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/toggleButtonSunday"
+        android:layout_width="@dimen/circleSize"
+        android:layout_height="@dimen/circleSize"
+        android:background="@drawable/circle_unclicked"
+        android:text="@string/sundayShort"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/toggleButtonMonday"
+        android:layout_width="@dimen/circleSize"
+        android:layout_height="@dimen/circleSize"
+        android:layout_marginStart="@dimen/circleMarginSpacing"
+        android:background="@drawable/circle_unclicked"
+        android:text="@string/mondayShort"
+        app:layout_constraintLeft_toRightOf="@id/toggleButtonSunday"
+        app:layout_constraintTop_toTopOf="@id/toggleButtonSunday" />
+
+    <Button
+        android:id="@+id/toggleButtonTuesday"
+        android:layout_width="@dimen/circleSize"
+        android:layout_height="@dimen/circleSize"
+        android:layout_marginStart="@dimen/circleMarginSpacing"
+        android:background="@drawable/circle_unclicked"
+        android:text="@string/tuesdayShort"
+        app:layout_constraintLeft_toRightOf="@id/toggleButtonMonday"
+        app:layout_constraintTop_toTopOf="@id/toggleButtonMonday" />
+
+    <Button
+        android:id="@+id/toggleButtonWednesday"
+        android:layout_width="@dimen/circleSize"
+        android:layout_height="@dimen/circleSize"
+        android:layout_marginStart="@dimen/circleMarginSpacing"
+        android:background="@drawable/circle_unclicked"
+        android:text="@string/wednesdayShort"
+        app:layout_constraintLeft_toRightOf="@id/toggleButtonTuesday"
+        app:layout_constraintTop_toTopOf="@id/toggleButtonTuesday" />
+
+    <Button
+        android:id="@+id/toggleButtonThursday"
+        android:layout_width="@dimen/circleSize"
+        android:layout_height="@dimen/circleSize"
+        android:layout_marginTop="@dimen/circleHeightMarginSpacing"
+        android:background="@drawable/circle_unclicked"
+        android:text="@string/thursdayShort"
+        app:layout_constraintLeft_toLeftOf="@id/toggleButtonSunday"
+        app:layout_constraintTop_toBottomOf="@id/toggleButtonSunday" />
+
+    <Button
+        android:id="@+id/toggleButtonFriday"
+        android:layout_width="@dimen/circleSize"
+        android:layout_height="@dimen/circleSize"
+        android:layout_marginStart="@dimen/circleMarginSpacing"
+        android:layout_marginTop="@dimen/circleHeightMarginSpacing"
+        android:background="@drawable/circle_unclicked"
+        android:text="@string/fridayShort"
+        app:layout_constraintLeft_toRightOf="@id/toggleButtonThursday"
+        app:layout_constraintTop_toBottomOf="@id/toggleButtonMonday" />
+
+    <Button
+        android:id="@+id/toggleButtonSaturday"
+        android:layout_width="@dimen/circleSize"
+        android:layout_height="@dimen/circleSize"
+        android:layout_marginStart="@dimen/circleMarginSpacing"
+        android:layout_marginTop="@dimen/circleHeightMarginSpacing"
+        android:background="@drawable/circle_unclicked"
+        android:text="@string/saturdayShort"
+        app:layout_constraintLeft_toRightOf="@id/toggleButtonFriday"
+        app:layout_constraintTop_toBottomOf="@id/toggleButtonTuesday" />
+
+
+</android.support.constraint.ConstraintLayout>
