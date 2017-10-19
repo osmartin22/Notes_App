@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
@@ -52,20 +53,14 @@ public class ReminderDialogFragment extends DialogFragment
 
     private int currentDateSelection = 0;
     private int currentTimeSelection = 0;
-    private int previousReminderSelection = 0;
+    private int currentReminderSelection = 0;
 
-    // TODO: Set spinner for reminder/create dialog
-    // TODO: Fix reminder being set when only text changes
-    // TODO: On cancel, show previous selection
-    // If it was custom, set to custom selection with desired time
     // TODO: Round futureTime to nearest quarter at least
     // TODO: Pass reminderTime to fragment to set as initial values
     // Make sure when creating spinner listener, number not overwritten
     // Or set initial values after creating spinner and set to custom position(4)
 
-
     private Preferences preferences;
-
     private OnReminderPickedListener myCallback;
 
     public interface OnReminderPickedListener {
@@ -92,6 +87,7 @@ public class ReminderDialogFragment extends DialogFragment
         }
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = View.inflate(getActivity(), R.layout.reminder_dialog_layout, null);
@@ -103,6 +99,7 @@ public class ReminderDialogFragment extends DialogFragment
         reminderSpinner = view.findViewById(R.id.spinnerReminder);
 
         String[] dropDownArray = getActivity().getResources().getStringArray(R.array.dateXMLArray);
+        dropDownArray[2] += " " + FormatUtils.getDayOfWeek(dateTimeNow, 1);
         dateSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
                 dateArray, dropDownArray, 0);
         dateSpinner.setAdapter(dateSpinnerAdapter);
@@ -112,7 +109,8 @@ public class ReminderDialogFragment extends DialogFragment
                 timeArray, dropDownArray, 0);
         timeSpinner.setAdapter(timeSpinnerAdapter);
 
-        dropDownArray = getActivity().getResources().getStringArray(R.array.reminderXMLArray);
+        // TODO: Implement reminder frequency selection
+//        dropDownArray = getActivity().getResources().getStringArray(R.array.reminderXMLArray);
         reminderSpinnerAdapter = new ReminderFrequencyAdapter(getContext(),
                 android.R.layout.simple_spinner_item, reminderArray);
         reminderSpinner.setAdapter(reminderSpinnerAdapter);
@@ -198,9 +196,8 @@ public class ReminderDialogFragment extends DialogFragment
 
     private void setSpinnerPosition() {
         LocalTime localTime = LocalTime.now();
-        LocalTime futureTime = localTime.plusHours(3);
+        LocalTime futureTime = FormatUtils.roundToTime(localTime.plusHours(3), 15);
 
-        // TODO: Round to nearest minute (maybe 10/15/30 minute marks)
         LocalTime firstPreset = preferences.getMorningTime();
         if (localTime.isAfter(futureTime) || localTime.isBefore(firstPreset)) {
             timeSpinner.setSelection(0);

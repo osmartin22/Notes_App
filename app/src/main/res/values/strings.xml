@@ -74,7 +74,7 @@
     <string-array name="dateXMLArray">
         <item>Today</item>
         <item>Tomorrow</item>
-        <item>Next Week</item>
+        <item>Next</item>
         <item>Next Month</item>
         <item>Pick A Date&#8230;</item>
     </string-array>

@@ -117,7 +117,7 @@ public class FormatUtils {
     public static String getMonthDayFormat(DateTime dateTimeNow, DateTime chosen) {
         String date;
 
-        if(dateTimeNow.getYear() == chosen.getYear()) {
+        if (dateTimeNow.getYear() == chosen.getYear()) {
             date = FormatUtils.getMonthDayFormat(chosen);
         } else {
             DateTimeFormatter dtfOut = DateTimeFormat.forPattern("MMMM dd, yyyy");
@@ -130,6 +130,22 @@ public class FormatUtils {
         DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(context);
         Date date = dateTime.toDateTimeToday().toDate();
         return timeFormat.format(date);
+    }
+
+    public static String getDayOfWeek(DateTime dateTime, int type) {
+        String day;
+        if (type == 0) {
+            day = dateTime.dayOfWeek().getAsShortText(Locale.getDefault());
+        } else {
+            day = dateTime.dayOfWeek().getAsText(Locale.getDefault());
+        }
+        return day;
+    }
+
+    public static LocalTime roundToTime(LocalTime localTime, int minute) {
+        // Remove seconds and milliseconds
+        LocalTime timeToSet = localTime.minuteOfHour().roundFloorCopy();
+        return timeToSet.withMinuteOfHour((timeToSet.getMinuteOfHour() / minute) * minute);
     }
 
     private static boolean isToday(DateTime time) {
