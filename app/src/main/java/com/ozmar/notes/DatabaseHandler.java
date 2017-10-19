@@ -38,7 +38,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + KEY_CONTENT + " TEXT, "
             + KEY_FAVORITE + " INTEGER, "
             + KEY_TIME_MODIFIED + " INTEGER, "
-            + KEY_REMINDER_TIME + " INTEGER DEFAULT 0"
+            + KEY_REMINDER_TIME + " INTEGER DEFAULT 0, "
             + KEY_REMINDER_ID + " INTEGER DEFAULT 0);";
 
     private static final String CREATE_TABLE_ARCHIVE = "CREATE TABLE IF NOT EXISTS "
@@ -47,7 +47,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + KEY_TITLE + " TEXT, "
             + KEY_CONTENT + " TEXT, "
             + KEY_TIME_MODIFIED + " INTEGER, "
-            + KEY_REMINDER_TIME + " INTEGER DEFAULT 0 "
+            + KEY_REMINDER_TIME + " INTEGER DEFAULT 0, "
             + KEY_REMINDER_ID + " INTEGER DEFAULT 0);";
 
     private static final String CREATE_TABLE_RECYCLE_BIN = "CREATE TABLE IF NOT EXISTS "

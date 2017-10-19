@@ -371,6 +371,7 @@ public class ReminderDialogFragment extends DialogFragment
                         if (reminderSpinnerTouched) {
                             FrequencyPickerFragment newFragment = FrequencyPickerFragment.newInstance();
                             newFragment.show(getChildFragmentManager(), "frequencyPicker");
+                            newFragment.setCancelable(false);
                             reminderSpinnerTouched = false;
                         }
                         break;

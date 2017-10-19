@@ -102,6 +102,8 @@
     <string name="sameDayEachMonth">on the same day each month</string>
     <string name="onEveryXDay">on every</string>
 
+    <string name="doneButton">DONE</string>
+
     <string-array name="headerArray">
         <item>REPEAT DAILY</item>
         <item>REPEAT WEEKLY</item>
