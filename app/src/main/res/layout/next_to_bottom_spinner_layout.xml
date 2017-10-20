@@ -5,13 +5,24 @@
     android:layout_height="wrap_content">
 
     <ViewSwitcher
+        android:id="@+id/nextToBottomSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/bottomSpinner"
         app:layout_constraintTop_toBottomOf="@+id/viewSwitcher">
 
+        <TextView
+            android:id="@+id/calendarButton"
+            style="?android:attr/listSeparatorTextViewStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:text="Chosen Date" />
+
         <android.support.constraint.ConstraintLayout
+            android:id="@+id/eventsView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
 
@@ -19,16 +30,16 @@
                 android:id="@+id/numberOfEventsEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:cursorVisible="false"
+                android:inputType="number"
+                android:maxLength="3"
                 android:paddingEnd="24dp"
                 android:paddingStart="24dp"
-                android:selectAllOnFocus="true"
                 android:text="1"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/eventTextView"
+                android:id="@+id/eventsTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="event"
@@ -37,16 +48,6 @@
 
         </android.support.constraint.ConstraintLayout>
 
-        <TextView
-            style="?android:attr/listSeparatorTextViewStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="Chosen Date"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
     </ViewSwitcher>
-
 
 </merge>

@@ -105,11 +105,13 @@
     <string name="weekSingular">Week</string>
     <string name="monthSingular">Month</string>
     <string name="yearSingular">Year</string>
+    <string name="numberOfEventsSingular">event</string>
 
     <string name="dayPlural">Days</string>
     <string name="weekPlural">Weeks</string>
     <string name="monthPlural">Months</string>
     <string name="yearPlural">Years</string>
+    <string name="numberOfEventsPlural">events</string>
 
 
     <string-array name="headerArray">
