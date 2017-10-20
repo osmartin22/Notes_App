@@ -50,7 +50,7 @@
 
     <!-- ReminderFrequencyPicker Layouts -->
     <dimen name="circleSize">50dp</dimen>
-    <dimen name="circleHeightMarginSpacing">8dp</dimen>
-    <dimen name="circleMarginSpacing">16dp</dimen>
+    <dimen name="circleMarginSpacing">8dp</dimen>
+    <dimen name="circleMarginSpaceBetweenCircle">16dp</dimen>
 
 </resources>

@@ -1,34 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <LinearLayout
-        android:id="@+id/frequencyPickerHeader"
+
+    <Spinner
+        android:id="@+id/topSpinner"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:entries="@array/headerArray"
         android:padding="16dp"
-        android:visibility="visible"
-        android:weightSum="3"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="3"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/reminderSwitch"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Switch
+        android:id="@+id/reminderSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintHorizontal_weight="0"
+        app:layout_constraintLeft_toRightOf="@+id/topSpinner"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <Spinner
-            android:id="@+id/topSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:entries="@array/headerArray" />
-
-        <Switch
-            android:id="@+id/reminderSwitch"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0" />
-    </LinearLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="0dp"
@@ -36,7 +35,7 @@
         android:background="#22676767"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/frequencyPickerHeader">
+        app:layout_constraintTop_toBottomOf="@+id/topSpinner">
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/reminderDialogContent"
@@ -59,6 +58,7 @@
                 android:id="@+id/everyNumberEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:cursorVisible="false"
                 android:inputType="number"
                 android:maxLength="2"
                 android:padding="8dp"
@@ -99,8 +99,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/viewSwitcher" />
+
+            <include
+                android:id="@+id/nextToBottomSpinner"
+                layout="@layout/next_to_bottom_spinner_layout" />
 
         </android.support.constraint.ConstraintLayout>
 

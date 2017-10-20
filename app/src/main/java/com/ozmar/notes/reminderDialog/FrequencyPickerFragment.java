@@ -29,6 +29,7 @@ public class FrequencyPickerFragment extends DialogFragment {
 
     private int topSpinnerPosition;
     private boolean timeUnitPlural;
+    private boolean emptyTextView;
 
     private Switch mySwitch;
     private Spinner topSpinner;
@@ -73,7 +74,7 @@ public class FrequencyPickerFragment extends DialogFragment {
 
         setUpOnClickListener();
         setUpSwitchListener();
-        setuPDoneListener();
+        setUpDoneListener();
         setUpTextWatcher();
 
         return mainView;
@@ -123,10 +124,13 @@ public class FrequencyPickerFragment extends DialogFragment {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:
+                        // No view next to spinner
                         break;
                     case 1:
+                        // View to press for calendarDialog
                         break;
                     case 2:
+                        // EditText with TextView
                         break;
                 }
             }
@@ -146,6 +150,9 @@ public class FrequencyPickerFragment extends DialogFragment {
                 if (isChecked) {
                     contentView.setAlpha(TRANSPARENCY_OFF);
                     topSpinner.setAlpha(TRANSPARENCY_OFF);
+                    if (!emptyTextView) {
+                        doneButton.setEnabled(true);
+                    }
 
                     monthlyHelper.setViewEnabled(true);
                     weeklyHelper.setViewEnabled(true);
@@ -170,7 +177,7 @@ public class FrequencyPickerFragment extends DialogFragment {
         });
     }
 
-    private void setuPDoneListener() {
+    private void setUpDoneListener() {
         doneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -184,6 +191,16 @@ public class FrequencyPickerFragment extends DialogFragment {
     }
 
     private void setUpTextWatcher() {
+        numberEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // TODO: Mess around with cursor
+                // Create general onclick to use with the other EditText that was added
+                // TODO: Generalize TextWatcher as well
+                numberEditText.selectAll();
+            }
+        });
+
         numberEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -193,8 +210,10 @@ public class FrequencyPickerFragment extends DialogFragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (count == 0) {
+                    emptyTextView = true;
                     doneButton.setEnabled(false);
                 } else {
+                    emptyTextView = false;
                     doneButton.setEnabled(true);
                 }
             }
@@ -203,7 +222,7 @@ public class FrequencyPickerFragment extends DialogFragment {
             public void afterTextChanged(Editable s) {
                 if (s.toString().equals("0")) {
                     s.replace(0, 1, "1");
-                } else if(!s.toString().isEmpty()){
+                } else if (!s.toString().isEmpty()) {
                     timeUnitPlural = Integer.parseInt(s.toString()) > 1;
                     setTimeUnitString();
                 }
