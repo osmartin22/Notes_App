@@ -62,17 +62,15 @@
                 android:inputType="number"
                 android:maxLength="2"
                 android:padding="8dp"
-                android:text="1"
+                android:text="@string/xDayEditText"
                 app:layout_constraintBaseline_toBaselineOf="@+id/everyTextView"
                 app:layout_constraintLeft_toRightOf="@+id/everyTextView" />
 
-
             <TextView
-                android:id="@+id/everyTypeTextView"
+                android:id="@+id/timeUnitTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
-                android:text="Day"
                 app:layout_constraintBaseline_toBaselineOf="@+id/everyTextView"
                 app:layout_constraintLeft_toRightOf="@+id/everyNumberEditText" />
 
@@ -95,7 +93,6 @@
                     layout="@layout/repeat_monthly_layout" />
 
             </ViewSwitcher>
-
 
             <Spinner
                 android:id="@+id/bottomSpinner"

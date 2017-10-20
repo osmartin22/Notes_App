@@ -98,11 +98,19 @@
 
     <!-- Arrays and Strings for custom ReminderFrequencyPicker -->
     <string name="everyString">Every</string>
-
-    <string name="sameDayEachMonth">on the same day each month</string>
-    <string name="onEveryXDay">on every</string>
-
+    <string name="xDayEditText">1</string>
     <string name="doneButton">DONE</string>
+
+    <string name="daySingular">Day</string>
+    <string name="weekSingular">Week</string>
+    <string name="monthSingular">Month</string>
+    <string name="yearSingular">Year</string>
+
+    <string name="dayPlural">Days</string>
+    <string name="weekPlural">Weeks</string>
+    <string name="monthPlural">Months</string>
+    <string name="yearPlural">Years</string>
+
 
     <string-array name="headerArray">
         <item>REPEAT DAILY</item>
@@ -123,6 +131,11 @@
         <item>For a number of events</item>
     </string-array>
 
+    <!-- Monthly Layout Strings -->
+    <string name="sameDayEachMonth">on the same day each month</string>
+    <string name="onEveryXDay">on every</string>
+
+    <!-- Weekly Layout Strings -->
     <string name="sundayShort">SUN</string>
     <string name="mondayShort">MON</string>
     <string name="tuesdayShort">TUE</string>
