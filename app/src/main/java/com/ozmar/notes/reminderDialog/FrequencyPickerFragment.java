@@ -17,12 +17,16 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
+import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.R;
 
-import java.util.List;
+import org.joda.time.DateTime;
+
+// TODO: Assign choices to FrequencyChoices on Done click
 
 
-public class FrequencyPickerFragment extends DialogFragment implements TextWatcher, View.OnClickListener {
+public class FrequencyPickerFragment extends DialogFragment implements TextWatcher, View.OnClickListener,
+        DatePickerFragment.OnDatePickedListener {
 
     private static final float TRANSPARENCY_ON = 0.5f;
     private static final float TRANSPARENCY_OFF = 1;
@@ -49,6 +53,11 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private MonthlyLayoutHelper monthlyHelper;
     private WeeklyLayoutHelper weeklyHelper;
+
+    private DateTime dateTime;
+    private int year;
+    private int month;
+    private int day;
 
     private boolean topEmpty = false;
     private boolean bottomEmpty = false;
@@ -92,14 +101,14 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         numberEditText.addTextChangedListener(this);
         numberOfEventsEditText.addTextChangedListener(this);
 
-        setUpOnClickListener();
+        setUpSpinnerListeners();
         setUpSwitchListener();
         setUpDoneListener();
-
+        setUpCalendarListener();
         return mainView;
     }
 
-    private void setUpOnClickListener() {
+    private void setUpSpinnerListeners() {
 
         topSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -205,10 +214,53 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
             @Override
             public void onClick(View v) {
 
-                // TODO: Implement callback, send data back here
-                int checkedButton = monthlyHelper.getCheckedButton();
-                List<Boolean> list = weeklyHelper.getCheckedButtons();
+                FrequencyChoices choices;
+                if (mySwitch.isChecked()) {
+                    choices = new FrequencyChoices();
+                    choices.setRepeatType(topSpinnerPosition);
+                    choices.setHowManyRepeatTypes(Integer.parseInt(numberEditText.getText().toString()));
+
+                    if (topSpinnerPosition == 1) {
+                        choices.setDaysChosen(weeklyHelper.getCheckedButtons());
+                    } else if (topSpinnerPosition == 2) {
+                        choices.setMonthRepeatType(monthlyHelper.getCheckedButton());
+                    }
+
+                    switch (bottomSpinnerPosition) {
+                        case 0:
+                            choices.setRepeatForever(true);
+                            break;
+                        case 1:
+                            choices.setRepeatToSpecificDate(new DateTime(year, month, day, 0, 0, 0).getMillis());
+                            break;
+                        case 2:
+                            choices.setHowManyRepeatEvents(Integer.parseInt(eventsTextView.toString()));
+                            break;
+                    }
+                }
+
+                // TODO: Callback to return _choices;
                 dismiss();
+            }
+        });
+    }
+
+    private void setUpCalendarListener() {
+        calendarButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // TODO: Pass the date in bundle from previous fragment that already has the date
+                // Instead of a creating a new DateTime
+                if (dateTime == null) {
+                    dateTime = DateTime.now();
+                    year = dateTime.getYear();
+                    month = dateTime.getMonthOfYear();
+                    day = dateTime.getDayOfMonth();
+                }
+
+                DialogFragment newFragment = DatePickerFragment.newInstance(year, month - 1, day);
+                newFragment.show(getChildFragmentManager(), "datePicker");
             }
         });
     }
@@ -287,5 +339,17 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                 }
                 break;
         }
+    }
+
+    @Override
+    public void onDatePicked(int year, int month, int day) {
+        this.year = year;
+        this.month = month;
+        this.day = day;
+    }
+
+    @Override
+    public void onDateCancel() {
+
     }
 }
