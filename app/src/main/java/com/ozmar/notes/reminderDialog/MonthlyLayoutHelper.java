@@ -6,6 +6,9 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
 import com.ozmar.notes.R;
+import com.ozmar.notes.utils.FormatUtils;
+
+import org.joda.time.DateTime;
 
 
 public class MonthlyLayoutHelper {
@@ -13,16 +16,23 @@ public class MonthlyLayoutHelper {
     private RadioButton topRadioButton;
     private RadioButton bottomRadioButton;
     private int checkedButton = 0;
+    private DateTime dateTime = DateTime.now();
 
     public MonthlyLayoutHelper(View view) {
         this.radioGroup = (RadioGroup) view;
         this.topRadioButton = radioGroup.findViewById(R.id.topRadioButton);
         this.bottomRadioButton = radioGroup.findViewById(R.id.bottomRadioButton);
+        setTextOfSecondRadioButton();
         setRadioGroupListener();
     }
 
     public View getMainView() {
         return radioGroup;
+    }
+
+    private void setTextOfSecondRadioButton() {
+        String nthDay = bottomRadioButton.getText().toString() + " " + FormatUtils.formatNthDayOfMonthItIs(dateTime);
+        bottomRadioButton.setText(nthDay);
     }
 
     public void setRadioGroupListener() {

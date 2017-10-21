@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="Chosen Date" />
+            android:text="10/11" />
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/eventsView"

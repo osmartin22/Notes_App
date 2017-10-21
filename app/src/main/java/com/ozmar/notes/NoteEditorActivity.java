@@ -293,7 +293,7 @@ public class NoteEditorActivity extends AppCompatActivity
     }
 
     @Override
-    public void onReminderPicked(DateTime dateTime) {
+    public void onReminderPicked(DateTime dateTime, int frequencyPicked, FrequencyChoices choices) {
         reminderTime = dateTime.getMillis();
         reminderButton.setText(FormatUtils.getReminderText(getApplication(), dateTime));
         reminderButton.setVisibility(View.VISIBLE);

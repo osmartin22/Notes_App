@@ -3,6 +3,7 @@ package com.ozmar.notes.reminderDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -22,8 +23,6 @@ import com.ozmar.notes.R;
 
 import org.joda.time.DateTime;
 
-// TODO: Assign choices to FrequencyChoices on Done click
-
 
 public class FrequencyPickerFragment extends DialogFragment implements TextWatcher, View.OnClickListener,
         DatePickerFragment.OnDatePickedListener {
@@ -33,7 +32,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private int topSpinnerPosition;
     private int bottomSpinnerPosition;
-    private boolean timeUnitPlural;
+    private boolean timeUnitTextViewPlural;
 
     private Switch mySwitch;
     private Spinner topSpinner;
@@ -54,7 +53,6 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private MonthlyLayoutHelper monthlyHelper;
     private WeeklyLayoutHelper weeklyHelper;
 
-    private DateTime dateTime;
     private int year;
     private int month;
     private int day;
@@ -62,9 +60,34 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private boolean topEmpty = false;
     private boolean bottomEmpty = false;
 
-    public static FrequencyPickerFragment newInstance() {
+    onFrequencyPickedListener myCallback;
+
+    public interface onFrequencyPickedListener {
+        void onFrequencyPicked(FrequencyChoices choices);
+    }
+
+    public void onAttachParentFragment(Fragment fragment) {
+        try {
+            myCallback = (onFrequencyPickedListener) fragment;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(fragment.toString() + " must implement onFrequencyPickedListener.");
+        }
+    }
+
+    public static FrequencyPickerFragment newInstance(int year, int month, int day) {
+        Bundle bundle = new Bundle();
+        bundle.putInt("Year", year);
+        bundle.putInt("Month", month);
+        bundle.putInt("Day", day);
         FrequencyPickerFragment fragment = new FrequencyPickerFragment();
+        fragment.setArguments(bundle);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        onAttachParentFragment(getParentFragment());
     }
 
     @Nullable
@@ -101,6 +124,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         numberEditText.addTextChangedListener(this);
         numberOfEventsEditText.addTextChangedListener(this);
 
+        setUpDataPassedFromBundle();
         setUpSpinnerListeners();
         setUpSwitchListener();
         setUpDoneListener();
@@ -108,8 +132,15 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         return mainView;
     }
 
-    private void setUpSpinnerListeners() {
+    private void setUpDataPassedFromBundle() {
+        DateTime dateTime = DateTime.now();
+        Bundle bundle = getArguments();
+        year = bundle.getInt("Year", dateTime.getYear());
+        month = bundle.getInt("Month", dateTime.getMonthOfYear() - 1);
+        day = bundle.getInt("Day", dateTime.getDayOfMonth());
+    }
 
+    private void setUpSpinnerListeners() {
         topSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -214,11 +245,11 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
             @Override
             public void onClick(View v) {
 
-                FrequencyChoices choices;
+                FrequencyChoices choices = null;
                 if (mySwitch.isChecked()) {
                     choices = new FrequencyChoices();
                     choices.setRepeatType(topSpinnerPosition);
-                    choices.setHowManyRepeatTypes(Integer.parseInt(numberEditText.getText().toString()));
+                    choices.setRepeatTypeHowOften(Integer.parseInt(numberEditText.getText().toString()));
 
                     if (topSpinnerPosition == 1) {
                         choices.setDaysChosen(weeklyHelper.getCheckedButtons());
@@ -234,12 +265,14 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                             choices.setRepeatToSpecificDate(new DateTime(year, month, day, 0, 0, 0).getMillis());
                             break;
                         case 2:
-                            choices.setHowManyRepeatEvents(Integer.parseInt(eventsTextView.toString()));
+                            choices.setHowManyRepeatEvents(Integer.parseInt(numberOfEventsEditText.getText().toString()));
                             break;
                     }
                 }
 
-                // TODO: Callback to return _choices;
+                if (myCallback != null) {
+                    myCallback.onFrequencyPicked(choices);
+                }
                 dismiss();
             }
         });
@@ -249,16 +282,6 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         calendarButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                // TODO: Pass the date in bundle from previous fragment that already has the date
-                // Instead of a creating a new DateTime
-                if (dateTime == null) {
-                    dateTime = DateTime.now();
-                    year = dateTime.getYear();
-                    month = dateTime.getMonthOfYear();
-                    day = dateTime.getDayOfMonth();
-                }
-
                 DialogFragment newFragment = DatePickerFragment.newInstance(year, month - 1, day);
                 newFragment.show(getChildFragmentManager(), "datePicker");
             }
@@ -280,7 +303,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         if (s == numberEditText.getText()) {
             topEmpty = numberEditText.getText().toString().isEmpty();
             if (!topEmpty) {
-                timeUnitPlural = Integer.parseInt(s.toString()) > 1;
+                timeUnitTextViewPlural = Integer.parseInt(s.toString()) > 1;
                 setTimeUnitString();
             }
 
@@ -311,28 +334,28 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private void setTimeUnitString() {
         switch (topSpinnerPosition) {
             case 0:
-                if (timeUnitPlural) {
+                if (timeUnitTextViewPlural) {
                     timeUnitTextView.setText(getResources().getString(R.string.dayPlural));
                 } else {
                     timeUnitTextView.setText(getResources().getString(R.string.daySingular));
                 }
                 break;
             case 1:
-                if (timeUnitPlural) {
+                if (timeUnitTextViewPlural) {
                     timeUnitTextView.setText(getResources().getString(R.string.weekPlural));
                 } else {
                     timeUnitTextView.setText(getResources().getString(R.string.weekSingular));
                 }
                 break;
             case 2:
-                if (timeUnitPlural) {
+                if (timeUnitTextViewPlural) {
                     timeUnitTextView.setText(getResources().getString(R.string.monthPlural));
                 } else {
                     timeUnitTextView.setText(getResources().getString(R.string.monthSingular));
                 }
                 break;
             case 3:
-                if (timeUnitPlural) {
+                if (timeUnitTextViewPlural) {
                     timeUnitTextView.setText(getResources().getString(R.string.yearPlural));
                 } else {
                     timeUnitTextView.setText(getResources().getString(R.string.yearSingular));

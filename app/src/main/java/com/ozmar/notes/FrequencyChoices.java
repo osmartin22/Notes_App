@@ -7,13 +7,13 @@ public class FrequencyChoices {
 
 
     private int repeatType = 0;       //day/week/month/year
-    private int howManyRepeatTypes = 0;     // Repeat every X (day/week/month/year)(counts as 1 reminder)
+    private int repeatTypeHowOften = 0;     // Repeat every X (day/week/month/year)(counts as 1 reminder)
 
     private boolean repeatForever = false;
     private long repeatToSpecificDate = 0;
     private int howManyRepeatEvents = 0;    // Repeat reminder X times
 
-    private int monthRepeatType;    // Set from RadioButton in monthly view
+    private int monthRepeatType = 0;    // Set from RadioButton in monthly view
     private List<Boolean> daysChosen;   // Set from weekly view
 
     public FrequencyChoices() {
@@ -28,12 +28,12 @@ public class FrequencyChoices {
         this.repeatType = repeatType;
     }
 
-    public int getHowManyRepeatTypes() {
-        return howManyRepeatTypes;
+    public int getRepeatTypeHowOften() {
+        return repeatTypeHowOften;
     }
 
-    public void setHowManyRepeatTypes(int howManyRepeatTypes) {
-        this.howManyRepeatTypes = howManyRepeatTypes;
+    public void setRepeatTypeHowOften(int repeatTypeHowOften) {
+        this.repeatTypeHowOften = repeatTypeHowOften;
     }
 
     public boolean isRepeatForever() {

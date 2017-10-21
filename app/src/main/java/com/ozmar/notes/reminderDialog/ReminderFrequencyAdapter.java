@@ -23,7 +23,7 @@ public class ReminderFrequencyAdapter extends ArrayAdapter<String> implements Sp
         super(context, resource, listItems);
         this.inflater = LayoutInflater.from(context);
         this.listItems = listItems;
-        this.dropDownItems = context.getResources().getStringArray(R.array.reminderXMLArray);
+        this.dropDownItems = context.getResources().getStringArray(R.array.frequencyXMLArrayDropDown);
     }
 
     @NonNull

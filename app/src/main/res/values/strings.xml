@@ -87,7 +87,16 @@
         <item>Pick A Time&#8230;</item>
     </string-array>
 
-    <string-array name="reminderXMLArray">
+    <string-array name="frequencyXMLArrayListItem">
+        <item>Does Not Repeat</item>
+        <item>Repeats Daily</item>
+        <item>Repeats Weekly</item>
+        <item>Repeats Monthly</item>
+        <item>Repeats Yearly</item>
+        <item>Custom&#8230;</item>
+    </string-array>
+
+    <string-array name="frequencyXMLArrayDropDown">
         <item>Does Not Repeat</item>
         <item>Daily</item>
         <item>Weekly</item>

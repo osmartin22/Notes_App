@@ -52,7 +52,7 @@ public class FormatUtils {
             } else if (tomorrow) {
                 timeModified += "Tomorrow, " + timeFormat.format(lastUpdated);
             } else {
-                SimpleDateFormat df = new SimpleDateFormat("MMM  dd", Locale.getDefault());
+                SimpleDateFormat df = new SimpleDateFormat("MMM dd", Locale.getDefault());
                 timeModified += df.format(lastUpdated);
             }
         } else {
@@ -146,6 +146,42 @@ public class FormatUtils {
         // Remove seconds and milliseconds
         LocalTime timeToSet = localTime.minuteOfHour().roundFloorCopy();
         return timeToSet.withMinuteOfHour((timeToSet.getMinuteOfHour() / minute) * minute);
+    }
+
+    public static String formatNthDayOfMonthItIs(DateTime dateTime) {
+        String nthDay = "";
+        int week = (dateTime.getDayOfMonth() / 7) + 1;
+        boolean lastWeek = false;
+
+        if (dateTime.getMonthOfYear() != dateTime.plusWeeks(1).getMonthOfYear()) {
+            lastWeek = true;
+        }
+
+        switch (week) {
+            case 1:
+                nthDay += "first ";
+                break;
+            case 2:
+                nthDay += "second ";
+                break;
+            case 3:
+                nthDay += "third ";
+                break;
+            case 4:
+                if (lastWeek) {
+                    nthDay += "last ";
+                } else {
+                    nthDay += "fourth ";
+                }
+                break;
+            case 5:
+                nthDay += "last ";
+                break;
+        }
+
+        nthDay += FormatUtils.getDayOfWeek(dateTime, 1);
+
+        return nthDay;
     }
 
     private static boolean isToday(DateTime time) {

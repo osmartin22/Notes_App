@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Toast;
 
+import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.Preferences;
 import com.ozmar.notes.R;
 import com.ozmar.notes.utils.FormatUtils;
@@ -23,13 +24,12 @@ import org.joda.time.format.DateTimeFormat;
 
 
 public class ReminderDialogFragment extends DialogFragment
-        implements DatePickerFragment.OnDatePickedListener, TimePickerFragment.OnTimePickedListener {
+        implements DatePickerFragment.OnDatePickedListener, TimePickerFragment.OnTimePickedListener,
+        FrequencyPickerFragment.onFrequencyPickedListener {
 
     private NDSpinner dateSpinner;
     private NDSpinner timeSpinner;
-    private NDSpinner reminderSpinner;
-
-    private DateTime dateTime = DateTime.now();
+    private NDSpinner frequencySpinner;
 
     private int hour;
     private int minute;
@@ -41,21 +41,22 @@ public class ReminderDialogFragment extends DialogFragment
 
     private String[] dateArray = new String[5];
     private String[] timeArray = new String[5];
-    private String[] reminderArray = new String[6];
+    private String[] frequencyArray = new String[6];
 
     private ReminderAdapter timeSpinnerAdapter;
     private ReminderAdapter dateSpinnerAdapter;
-    private ReminderFrequencyAdapter reminderSpinnerAdapter;
+    private ReminderFrequencyAdapter frequencySpinnerAdapter;
 
     private boolean dateSpinnerTouched = false;
     private boolean timeSpinnerTouched = false;
-    private boolean reminderSpinnerTouched = false;
+    private boolean frequencySpinnerTouched = false;
 
     private int currentDateSelection = 0;
     private int currentTimeSelection = 0;
-    private int currentReminderSelection = 0;
+    private int currentFrequencySelection = 0;
 
-    // TODO: Round futureTime to nearest quarter at least
+    private FrequencyChoices choices = null;
+
     // TODO: Pass reminderTime to fragment to set as initial values
     // Make sure when creating spinner listener, number not overwritten
     // Or set initial values after creating spinner and set to custom position(4)
@@ -64,7 +65,7 @@ public class ReminderDialogFragment extends DialogFragment
     private OnReminderPickedListener myCallback;
 
     public interface OnReminderPickedListener {
-        void onReminderPicked(DateTime dateTime);
+        void onReminderPicked(DateTime dateTime, int frequencyPicked, FrequencyChoices choices);
 
         void onReminderDelete();
     }
@@ -96,7 +97,7 @@ public class ReminderDialogFragment extends DialogFragment
 
         dateSpinner = view.findViewById(R.id.spinnerDate);
         timeSpinner = view.findViewById(R.id.spinnerTime);
-        reminderSpinner = view.findViewById(R.id.spinnerReminder);
+        frequencySpinner = view.findViewById(R.id.spinnerReminder);
 
         String[] dropDownArray = getActivity().getResources().getStringArray(R.array.dateXMLArray);
         dropDownArray[2] += " " + FormatUtils.getDayOfWeek(dateTimeNow, 1);
@@ -109,11 +110,9 @@ public class ReminderDialogFragment extends DialogFragment
                 timeArray, dropDownArray, 0);
         timeSpinner.setAdapter(timeSpinnerAdapter);
 
-        // TODO: Implement reminder frequency selection
-//        dropDownArray = getActivity().getResources().getStringArray(R.array.reminderXMLArray);
-        reminderSpinnerAdapter = new ReminderFrequencyAdapter(getContext(),
-                android.R.layout.simple_spinner_item, reminderArray);
-        reminderSpinner.setAdapter(reminderSpinnerAdapter);
+        frequencySpinnerAdapter = new ReminderFrequencyAdapter(getContext(),
+                android.R.layout.simple_spinner_item, frequencyArray);
+        frequencySpinner.setAdapter(frequencySpinnerAdapter);
 
         setSpinnerListener();
         setSpinnerPosition();
@@ -169,7 +168,7 @@ public class ReminderDialogFragment extends DialogFragment
                     } else {
                         Toast.makeText(getActivity(), dateTime.toString(DateTimeFormat.mediumDateTime()), Toast.LENGTH_SHORT).show();
                         if (myCallback != null) {
-                            myCallback.onReminderPicked(dateTime);
+                            myCallback.onReminderPicked(dateTime, currentFrequencySelection, choices);
                         }
                         dialog.dismiss();
                     }
@@ -191,7 +190,9 @@ public class ReminderDialogFragment extends DialogFragment
         timeArray[3] = FormatUtils.getTimeFormat(getContext(), preferences.getNightTime());
         timeArray[4] = "Pick A Time...";      // TODO: Set with reminderTime if available
 
-        reminderArray = getActivity().getResources().getStringArray(R.array.reminderXMLArray);
+        frequencyArray = getActivity().getResources().getStringArray(R.array.frequencyXMLArrayListItem);
+        frequencyArray[2] += " on " + FormatUtils.getDayOfWeek(dateTimeNow, 1);
+        // TODO: Set with reminderFrequency if available
     }
 
     private void setSpinnerPosition() {
@@ -200,6 +201,7 @@ public class ReminderDialogFragment extends DialogFragment
 
         LocalTime firstPreset = preferences.getMorningTime();
         if (localTime.isAfter(futureTime) || localTime.isBefore(firstPreset)) {
+            dateSpinner.setSelection(1);
             timeSpinner.setSelection(0);
         } else {
             timeSpinner.setSelection(4);
@@ -229,27 +231,27 @@ public class ReminderDialogFragment extends DialogFragment
                 DateTime futureTime = null;
                 switch (i) {
                     case 0:                                 // Today
-                        year = dateTime.getYear();
-                        month = dateTime.getMonthOfYear();
-                        day = dateTime.getDayOfMonth();
+                        year = dateTimeNow.getYear();
+                        month = dateTimeNow.getMonthOfYear();
+                        day = dateTimeNow.getDayOfMonth();
                         currentDateSelection = 0;
                         dateArray[4] = "";
                         break;
 
                     case 1:                                 // Tomorrow
-                        futureTime = dateTime.plusDays(1);
+                        futureTime = dateTimeNow.plusDays(1);
                         currentDateSelection = 1;
                         dateArray[4] = "";
                         break;
 
                     case 2:                                 // Nex Week (7 Days)
-                        futureTime = dateTime.plusDays(7);
+                        futureTime = dateTimeNow.plusDays(7);
                         currentDateSelection = 2;
                         dateArray[4] = "";
                         break;
 
                     case 3:                                 // Next Month
-                        futureTime = dateTime.plusMonths(1);
+                        futureTime = dateTimeNow.plusMonths(1);
                         currentDateSelection = 3;
                         dateArray[4] = "";
                         break;
@@ -340,39 +342,43 @@ public class ReminderDialogFragment extends DialogFragment
         //------------------------------------------------------------------------------------------
         // Reminder Spinner Listeners
         //------------------------------------------------------------------------------------------
-        reminderSpinner.setOnTouchListener(new View.OnTouchListener() {
+        frequencySpinner.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                reminderSpinnerTouched = true;
+                frequencySpinnerTouched = true;
                 return false;
             }
         });
 
-        reminderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        frequencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
                 switch (i) {
                     case 0:     // Does Not Repeat
-
+                        currentFrequencySelection = 0;
                         break;
                     case 1:     // Daily
+                        currentFrequencySelection = 1;
                         break;
 
                     case 2:     // Weekly
+                        currentFrequencySelection = 2;
                         break;
                     case 3:     // Monthly
-
+                        currentFrequencySelection = 3;
                         break;
                     case 4:     // Yearly
+                        currentFrequencySelection = 4;
                         break;
 
                     case 5:     // Show Custom Reminder Picker
-                        if (reminderSpinnerTouched) {
-                            FrequencyPickerFragment newFragment = FrequencyPickerFragment.newInstance();
+                        currentFrequencySelection = 5;
+                        if (frequencySpinnerTouched) {
+                            FrequencyPickerFragment newFragment = FrequencyPickerFragment.newInstance(year, month, day);
                             newFragment.show(getChildFragmentManager(), "frequencyPicker");
                             newFragment.setCancelable(false);
-                            reminderSpinnerTouched = false;
+                            frequencySpinnerTouched = false;
                         }
                         break;
                 }
@@ -421,5 +427,81 @@ public class ReminderDialogFragment extends DialogFragment
         } else {
             dateSpinner.setSelection(4);
         }
+    }
+
+    @Override
+    public void onFrequencyPicked(FrequencyChoices choices) {
+        if (choices == null) {
+            frequencySpinner.setSelection(0);
+        } else {
+            this.choices = choices;
+            handleFrequencyChoicesText();
+        }
+    }
+
+    private void handleFrequencyChoicesText() {
+
+        String frequencyText = "Repeats ";
+
+        // TODO: Fix monthly radio button for FrequencyPicker
+        // TODO: Format string if each word should start with uppercase or only the first word
+        // TODO: Create custom spinner to display long frequency choices
+        if (choices.isRepeatForever()) {
+            if (choices.getRepeatTypeHowOften() == 1) {
+                switch (choices.getRepeatType()) {
+                    case 0:
+                        // Repeats Daily
+                        frequencyText += "Daily";
+                        break;
+                    case 1:
+                        // Repeats Weekly (plus add selected days)
+                        frequencyText += "Weekly";
+                        // Check Boolean list to add days
+                        break;
+                    case 2:
+                        // Repeats Monthly (plus chosen RadioButton)
+                        frequencyText += "Monthly";
+                        if (choices.getMonthRepeatType() == 1) {
+                            frequencyText += " (on every " + FormatUtils.formatNthDayOfMonthItIs(dateTimeNow) + ")";
+                        }
+                        break;
+                    case 3:
+                        // Repeats Yearly
+                        frequencyText += "Yearly";
+                        break;
+                }
+
+            } else {
+
+            }
+        }
+        
+//        if (choices.getRepeatType() == 0) {
+//
+//            if (choices.isRepeatForever()) {
+//                frequencyText += "daily ";
+//            } else {
+//                frequencyText += "every " + choices.getRepeatTypeHowOften();
+//
+//                if (choices.getRepeatToSpecificDate() != 0) {
+//
+//                } else {
+//                    frequencyText += "; for " + choices.getHowManyRepeatEvents() + " time";
+//                    if (choices.getHowManyRepeatEvents() > 1) {
+//                        frequencyText += "s";
+//                    }
+//                }
+//            }
+//
+//        } else if (choices.getRepeatType() == 1) {
+//
+//        } else if (choices.getRepeatType() == 2) {
+//
+//        } else if (choices.getRepeatType() == 3) {
+//
+//        }
+
+        frequencyArray[5] = frequencyText;
+        frequencySpinnerAdapter.notifyDataSetChanged();
     }
 }
