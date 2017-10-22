@@ -32,7 +32,7 @@ public class ReminderManager {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, note.get_reminderId(),
                 myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        String setReminder = FormatUtils.getMonthDayFormat(new DateTime(note.get_reminderTime()))
+        String setReminder = FormatUtils.getMonthDayFormatLong(new DateTime(note.get_reminderTime()))
                 + ", " +FormatUtils.getTimeFormat(context, new LocalTime(note.get_reminderTime()));
         Log.d("Notification", setReminder);
 

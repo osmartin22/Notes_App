@@ -2,19 +2,16 @@ package com.ozmar.notes;
 
 import java.util.List;
 
-
 public class FrequencyChoices {
-
 
     private int repeatType = 0;       //day/week/month/year
     private int repeatTypeHowOften = 0;     // Repeat every X (day/week/month/year)(counts as 1 reminder)
 
-    private boolean repeatForever = false;
     private long repeatToSpecificDate = 0;
     private int howManyRepeatEvents = 0;    // Repeat reminder X times
 
     private int monthRepeatType = 0;    // Set from RadioButton in monthly view
-    private List<Boolean> daysChosen;   // Set from weekly view
+    private List<Integer> daysChosen;   // Set from weekly view
 
     public FrequencyChoices() {
 
@@ -34,14 +31,6 @@ public class FrequencyChoices {
 
     public void setRepeatTypeHowOften(int repeatTypeHowOften) {
         this.repeatTypeHowOften = repeatTypeHowOften;
-    }
-
-    public boolean isRepeatForever() {
-        return repeatForever;
-    }
-
-    public void setRepeatForever(boolean repeatForever) {
-        this.repeatForever = repeatForever;
     }
 
     public long getRepeatToSpecificDate() {
@@ -68,11 +57,11 @@ public class FrequencyChoices {
         this.monthRepeatType = monthRepeatType;
     }
 
-    public List<Boolean> getDaysChosen() {
+    public List<Integer> getDaysChosen() {
         return daysChosen;
     }
 
-    public void setDaysChosen(List<Boolean> daysChosen) {
+    public void setDaysChosen(List<Integer> daysChosen) {
         this.daysChosen = daysChosen;
     }
 }

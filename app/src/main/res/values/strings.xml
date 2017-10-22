@@ -5,7 +5,6 @@
     <string name="editTextNoteHint">Note</string>
     <string name="titleEditText">Title</string>
 
-
     <!-- MenuItem names for NoteEditorActivity-->
     <string name="favoriteNoteMenuItem">Favorite Note</string>
     <string name="archiveNoteMenuItem">Archive Note</string>
@@ -15,10 +14,8 @@
     <string name="deleteForeverMenuItem">Delete Forever</string>
     <string name="reminderNoteMenuItem">Add Reminder</string>
 
-
     <!-- MenuItem names for MainActivity -->
     <string name="layoutManager">Change Layout</string>
-
 
     <!-- String array used for checking what changed in the note -->
     <string-array name="noteChangesArray">
@@ -35,7 +32,6 @@
         <item>favoriteChanged</item>    <!-- Note not a favorite -->
     </string-array>
 
-
     <!-- CAB menu items -->
     <string name="deleteContextualMenuItem">Delete</string>
     <string name="archiveContextualMenuItem">Archive</string>
@@ -44,18 +40,31 @@
     <string name="deleteForeverContextualMenuItem">Delete Forever</string>
 
     <!-- Delete forever dialog strings -->
-    <string name="deleteForeverSingle">Delete note forever?</string>
-    <string name="deleteForeverMultiple">Delete notes forever?</string>
+    <plurals name="deleteForever">
+        <item quantity="one">Delete note forever?</item>
+        <item quantity="other">Delete notes forever?</item>
+    </plurals>
 
-    <!-- SnackBar output -->
-    <string name="snackBarDeleteSingle">Note moved to Trash</string>
-    <string name="snackBarDeleteMultiple">Notes moved to Trash</string>
-    <string name="snackBarArchiveSingle">Note archived</string>
-    <string name="snackBarArchiveMultiple">Notes archived</string>
-    <string name="snackBarUnarchiveSingle">Note Unarchived</string>
-    <string name="snackBarUnarchiveMultiple">Notes unarchived</string>
-    <string name="snackBarRestoreSingle">Note restored</string>
-    <string name="snackBarRestoreMultiple">Notes restored</string>
+    <!-- SnackBar output strings -->
+    <plurals name="snackBarDelete">
+        <item quantity="one">Note moved to Trash</item>
+        <item quantity="other">Notes moved to Trash</item>
+    </plurals>
+
+    <plurals name="snackBarArchive">
+        <item quantity="one">Note archived</item>
+        <item quantity="other">Notes archived</item>
+    </plurals>
+
+    <plurals name="snackBarUnarchive">
+        <item quantity="one">Note Unarchived</item>
+        <item quantity="other">Notes Unarchived</item>
+    </plurals>
+
+    <plurals name="snackBarRestore">
+        <item quantity="one">Note restored</item>
+        <item quantity="other">Notes restored</item>
+    </plurals>
 
     <string name="snackBarUndoAction">Undo</string>
 
@@ -88,16 +97,16 @@
     </string-array>
 
     <string-array name="frequencyXMLArrayListItem">
-        <item>Does Not Repeat</item>
-        <item>Repeats Daily</item>
-        <item>Repeats Weekly</item>
-        <item>Repeats Monthly</item>
-        <item>Repeats Yearly</item>
+        <item>Does not repeat</item>
+        <item>Repeats daily</item>
+        <item>Repeats weekly</item>
+        <item>Repeats monthly</item>
+        <item>Repeats yearly</item>
         <item>Custom&#8230;</item>
     </string-array>
 
     <string-array name="frequencyXMLArrayDropDown">
-        <item>Does Not Repeat</item>
+        <item>Does not repeat</item>
         <item>Daily</item>
         <item>Weekly</item>
         <item>Monthly</item>
@@ -105,23 +114,35 @@
         <item>Custom&#8230;</item>
     </string-array>
 
-    <!-- Arrays and Strings for custom ReminderFrequencyPicker -->
+    <!-- Arrays and Strings for custom FrequencyPicker -->
     <string name="everyString">Every</string>
     <string name="xDayEditText">1</string>
     <string name="doneButton">DONE</string>
 
-    <string name="daySingular">Day</string>
-    <string name="weekSingular">Week</string>
-    <string name="monthSingular">Month</string>
-    <string name="yearSingular">Year</string>
-    <string name="numberOfEventsSingular">event</string>
+    <plurals name="day">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
 
-    <string name="dayPlural">Days</string>
-    <string name="weekPlural">Weeks</string>
-    <string name="monthPlural">Months</string>
-    <string name="yearPlural">Years</string>
-    <string name="numberOfEventsPlural">events</string>
+    <plurals name="week">
+        <item quantity="one">week</item>
+        <item quantity="other">weeks</item>
+    </plurals>
 
+    <plurals name="month">
+        <item quantity="one">month</item>
+        <item quantity="other">months</item>
+    </plurals>
+
+    <plurals name="year">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
+
+    <plurals name="event">
+        <item quantity="one">event</item>
+        <item quantity="other">events</item>
+    </plurals>
 
     <string-array name="headerArray">
         <item>REPEAT DAILY</item>
@@ -154,5 +175,31 @@
     <string name="thursdayShort">THU</string>
     <string name="fridayShort">FRI</string>
     <string name="saturdayShort">SAT</string>
+
+    <!-- Strings for showing FrequencyPicker choice -->
+    <plurals name="repeatDay">
+        <item quantity="one">daily</item>
+        <item quantity="other">every %d days</item>
+    </plurals>
+
+    <plurals name="repeatWeek">
+        <item quantity="one">weekly</item>
+        <item quantity="other">every %d weeks</item>
+    </plurals>
+
+    <plurals name="repeatMonth">
+        <item quantity="one">monthly</item>
+        <item quantity="other">every %d months</item>
+    </plurals>
+
+    <plurals name="repeatYear">
+        <item quantity="one">yearly</item>
+        <item quantity="other">every %d years</item>
+    </plurals>
+
+    <plurals name="repeatEvents">
+        <item quantity="one">; for %d time</item>
+        <item quantity="other">; for %d times</item>
+    </plurals>
 
 </resources>

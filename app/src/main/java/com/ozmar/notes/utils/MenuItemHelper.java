@@ -23,15 +23,15 @@ public class MenuItemHelper {
     public String multiSelectMessage(MenuItem item, int size) {
         switch (item.getItemId()) {
             case R.id.contextualArchive:
-                return (size == 1) ? context.getString(R.string.snackBarArchiveSingle) : context.getString(R.string.snackBarArchiveMultiple);
+                return context.getResources().getQuantityString(R.plurals.snackBarArchive, size);
             case R.id.contextualUnarchive:
-                return (size == 1) ? context.getString(R.string.snackBarUnarchiveSingle) : context.getString(R.string.snackBarUnarchiveMultiple);
+                return context.getResources().getQuantityString(R.plurals.snackBarUnarchive, size);
             case R.id.contextualDelete:
-                return (size == 1) ? context.getString(R.string.snackBarDeleteSingle) : context.getString(R.string.snackBarDeleteMultiple);
+                return context.getResources().getQuantityString(R.plurals.snackBarDelete, size);
             case R.id.contextualRestore:
-                return (size == 1) ? context.getString(R.string.snackBarRestoreSingle) : context.getString(R.string.snackBarRestoreMultiple);
+                return context.getResources().getQuantityString(R.plurals.snackBarRestore, size);
             case R.id.contextualDeleteForever:
-                return (size == 1) ? context.getString(R.string.deleteForeverSingle) : context.getString(R.string.deleteForeverMultiple);
+                return context.getResources().getQuantityString(R.plurals.deleteForever, size);
         }
         return null;
     }
@@ -39,15 +39,15 @@ public class MenuItemHelper {
     public String noteEditorMessage(int num) {
         switch (num) {
             case 0:     // Archive
-                return context.getString(R.string.snackBarArchiveSingle);
+                return context.getResources().getQuantityString(R.plurals.snackBarArchive, 1);
             case 1:     // Unarchive
-                return context.getString(R.string.snackBarUnarchiveSingle);
+                return context.getResources().getQuantityString(R.plurals.snackBarUnarchive, 1);
             case 2:     // Delete
-                return context.getString(R.string.snackBarDeleteSingle);
+                return context.getResources().getQuantityString(R.plurals.snackBarDelete, 1);
             case 3:     // Restore
-                return context.getString(R.string.snackBarRestoreSingle);
+                return context.getResources().getQuantityString(R.plurals.snackBarRestore, 1);
         }
-        return  null;
+        return null;
     }
 
     public void setCABMenuItems(Menu menu, int listUsed) {

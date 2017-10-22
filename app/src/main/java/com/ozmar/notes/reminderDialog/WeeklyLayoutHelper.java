@@ -2,6 +2,7 @@ package com.ozmar.notes.reminderDialog;
 
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ToggleButton;
 
@@ -13,17 +14,20 @@ import java.util.List;
 
 public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListener {
 
-    private View view;
+    private final View view;
+    private final Button doneButton;
     private final ToggleButton sunday;
-    private ToggleButton monday;
-    private ToggleButton tuesday;
-    private ToggleButton wednesday;
-    private ToggleButton thursday;
-    private ToggleButton friday;
-    private ToggleButton saturday;
+    private final ToggleButton monday;
+    private final ToggleButton tuesday;
+    private final ToggleButton wednesday;
+    private final ToggleButton thursday;
+    private final ToggleButton friday;
+    private final ToggleButton saturday;
+    private int buttonsChecked = 0;
 
-    public WeeklyLayoutHelper(View view) {
+    public WeeklyLayoutHelper(View view, Button doneButton) {
         this.view = view;
+        this.doneButton = doneButton;
         this.sunday = view.findViewById(R.id.toggleButtonSunday);
         this.monday = view.findViewById(R.id.toggleButtonMonday);
         this.tuesday = view.findViewById(R.id.toggleButtonTuesday);
@@ -31,14 +35,6 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
         this.thursday = view.findViewById(R.id.toggleButtonThursday);
         this.friday = view.findViewById(R.id.toggleButtonFriday);
         this.saturday = view.findViewById(R.id.toggleButtonSaturday);
-
-        this.sunday.setOnCheckedChangeListener(this);
-        this.monday.setOnCheckedChangeListener(this);
-        this.tuesday.setOnCheckedChangeListener(this);
-        this.wednesday.setOnCheckedChangeListener(this);
-        this.thursday.setOnCheckedChangeListener(this);
-        this.friday.setOnCheckedChangeListener(this);
-        this.saturday.setOnCheckedChangeListener(this);
     }
 
     public void setViewEnabled(boolean flag) {
@@ -78,30 +74,45 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
         } else if (buttonView == saturday) {
             check(buttonView, "saturday");
         }
-
     }
 
     private void check(CompoundButton button, String checked) {
         if (button.isChecked()) {
-            // Set to checked background
+            buttonsChecked++;
             Log.d("Button", checked + " Checked");
         } else {
-            // Set to unchecked background
+            buttonsChecked--;
             Log.d("Button", checked + " UnChecked");
+            if (buttonsChecked == 0) {
+            }
         }
     }
 
-    public List<Boolean> getCheckedButtons() {
-        List<Boolean> buttonsChecked = new ArrayList<>();
+    public List<Integer> getCheckedButtons() {
+        List<Integer> chosen = new ArrayList<>();
 
-        buttonsChecked.add(monday.isChecked());
-        buttonsChecked.add(tuesday.isChecked());
-        buttonsChecked.add(wednesday.isChecked());
-        buttonsChecked.add(thursday.isChecked());
-        buttonsChecked.add(friday.isChecked());
-        buttonsChecked.add(saturday.isChecked());
-        buttonsChecked.add(sunday.isChecked());
+        if (sunday.isChecked()) {
+            chosen.add(7);
+        }
+        if (monday.isChecked()) {
+            chosen.add(1);
+        }
+        if (tuesday.isChecked()) {
+            chosen.add(2);
+        }
+        if (wednesday.isChecked()) {
+            chosen.add(3);
+        }
+        if (thursday.isChecked()) {
+            chosen.add(4);
+        }
+        if (friday.isChecked()) {
+            chosen.add(5);
+        }
+        if (saturday.isChecked()) {
+            chosen.add(6);
+        }
 
-        return buttonsChecked;
+        return chosen;
     }
 }

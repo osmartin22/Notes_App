@@ -100,7 +100,7 @@ public class ReminderDialogFragment extends DialogFragment
         frequencySpinner = view.findViewById(R.id.spinnerReminder);
 
         String[] dropDownArray = getActivity().getResources().getStringArray(R.array.dateXMLArray);
-        dropDownArray[2] += " " + FormatUtils.getDayOfWeek(dateTimeNow, 1);
+        dropDownArray[2] += " " + FormatUtils.getCurrentDayOfWeek(1);
         dateSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
                 dateArray, dropDownArray, 0);
         dateSpinner.setAdapter(dateSpinnerAdapter);
@@ -178,10 +178,10 @@ public class ReminderDialogFragment extends DialogFragment
     }
 
     private void setUpSpinnerStrings() {
-        dateArray[0] = FormatUtils.getMonthDayFormat(dateTimeNow);
-        dateArray[1] = FormatUtils.getMonthDayFormat(dateTimeNow, dateTimeNow.plusDays(1));
-        dateArray[2] = FormatUtils.getMonthDayFormat(dateTimeNow, dateTimeNow.plusWeeks(1));
-        dateArray[3] = FormatUtils.getMonthDayFormat(dateTimeNow, dateTimeNow.plusMonths(1));
+        dateArray[0] = FormatUtils.getMonthDayFormatLong(dateTimeNow);
+        dateArray[1] = FormatUtils.getMonthDayFormatLong(dateTimeNow.plusDays(1));
+        dateArray[2] = FormatUtils.getMonthDayFormatLong(dateTimeNow.plusWeeks(1));
+        dateArray[3] = FormatUtils.getMonthDayFormatLong(dateTimeNow.plusMonths(1));
         dateArray[4] = "Pick A Date...";      // TODO: Set with reminderDate if available
 
         timeArray[0] = FormatUtils.getTimeFormat(getContext(), preferences.getMorningTime());
@@ -191,7 +191,7 @@ public class ReminderDialogFragment extends DialogFragment
         timeArray[4] = "Pick A Time...";      // TODO: Set with reminderTime if available
 
         frequencyArray = getActivity().getResources().getStringArray(R.array.frequencyXMLArrayListItem);
-        frequencyArray[2] += " on " + FormatUtils.getDayOfWeek(dateTimeNow, 1);
+        frequencyArray[2] += " on " + FormatUtils.getCurrentDayOfWeek(1);
         // TODO: Set with reminderFrequency if available
     }
 
@@ -412,7 +412,7 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public void onDatePicked(int year, int month, int day) {
-        dateArray[4] = FormatUtils.getMonthDayFormat(dateTimeNow, new DateTime().withDate(year, month, day));
+        dateArray[4] = FormatUtils.getMonthDayFormatLong(new DateTime().withDate(year, month, day));
         dateSpinnerAdapter.notifyDataSetChanged();
 
         this.year = year;
@@ -435,73 +435,9 @@ public class ReminderDialogFragment extends DialogFragment
             frequencySpinner.setSelection(0);
         } else {
             this.choices = choices;
-            handleFrequencyChoicesText();
+
+            frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices);
+            frequencySpinnerAdapter.notifyDataSetChanged();
         }
-    }
-
-    private void handleFrequencyChoicesText() {
-
-        String frequencyText = "Repeats ";
-
-        // TODO: Fix monthly radio button for FrequencyPicker
-        // TODO: Format string if each word should start with uppercase or only the first word
-        // TODO: Create custom spinner to display long frequency choices
-        if (choices.isRepeatForever()) {
-            if (choices.getRepeatTypeHowOften() == 1) {
-                switch (choices.getRepeatType()) {
-                    case 0:
-                        // Repeats Daily
-                        frequencyText += "Daily";
-                        break;
-                    case 1:
-                        // Repeats Weekly (plus add selected days)
-                        frequencyText += "Weekly";
-                        // Check Boolean list to add days
-                        break;
-                    case 2:
-                        // Repeats Monthly (plus chosen RadioButton)
-                        frequencyText += "Monthly";
-                        if (choices.getMonthRepeatType() == 1) {
-                            frequencyText += " (on every " + FormatUtils.formatNthDayOfMonthItIs(dateTimeNow) + ")";
-                        }
-                        break;
-                    case 3:
-                        // Repeats Yearly
-                        frequencyText += "Yearly";
-                        break;
-                }
-
-            } else {
-
-            }
-        }
-        
-//        if (choices.getRepeatType() == 0) {
-//
-//            if (choices.isRepeatForever()) {
-//                frequencyText += "daily ";
-//            } else {
-//                frequencyText += "every " + choices.getRepeatTypeHowOften();
-//
-//                if (choices.getRepeatToSpecificDate() != 0) {
-//
-//                } else {
-//                    frequencyText += "; for " + choices.getHowManyRepeatEvents() + " time";
-//                    if (choices.getHowManyRepeatEvents() > 1) {
-//                        frequencyText += "s";
-//                    }
-//                }
-//            }
-//
-//        } else if (choices.getRepeatType() == 1) {
-//
-//        } else if (choices.getRepeatType() == 2) {
-//
-//        } else if (choices.getRepeatType() == 3) {
-//
-//        }
-
-        frequencyArray[5] = frequencyText;
-        frequencySpinnerAdapter.notifyDataSetChanged();
     }
 }

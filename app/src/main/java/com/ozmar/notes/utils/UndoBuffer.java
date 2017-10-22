@@ -1,8 +1,6 @@
 package com.ozmar.notes.utils;
 
 
-import android.util.Log;
-
 import com.ozmar.notes.SingleNote;
 
 import java.util.List;
@@ -21,23 +19,15 @@ public class UndoBuffer {
         currentBuffer = 0;
     }
 
-    // TODO: Use in code, if false, throw message to wait maybe
     public boolean isBufferAvailable() {
-
-        Log.d("Process", "Buffer0 -> " + buffer0.getSize());
-        Log.d("Process", "Buffer1 -> " + buffer1.getSize());
-
         return (buffer0.checkIfEmpty() || buffer1.checkIfEmpty());
     }
 
     public void swapBuffer() {
         if (currentBuffer == 0 && !buffer0.checkIfEmpty()) {
             currentBuffer = 1;
-            Log.d("Process", "Swap to Buffer1");
-
         } else if (currentBuffer == 1 && !buffer1.checkIfEmpty()) {
             currentBuffer = 0;
-            Log.d("Process", "Swap to Buffer0");
         }
     }
 

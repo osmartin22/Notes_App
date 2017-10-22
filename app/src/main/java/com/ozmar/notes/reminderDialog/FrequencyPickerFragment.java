@@ -20,8 +20,10 @@ import android.widget.ViewSwitcher;
 
 import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.R;
+import com.ozmar.notes.utils.FormatUtils;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 
 
 public class FrequencyPickerFragment extends DialogFragment implements TextWatcher, View.OnClickListener,
@@ -32,7 +34,8 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private int topSpinnerPosition;
     private int bottomSpinnerPosition;
-    private boolean timeUnitTextViewPlural;
+
+    private int timeUnitNumber = 1;
 
     private Switch mySwitch;
     private Spinner topSpinner;
@@ -47,7 +50,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private ViewSwitcher bottomViewSwitcher;
     private EditText numberOfEventsEditText;
     private TextView eventsTextView;
-    private View calendarButton;
+    private TextView calendarButton;
     private View eventsMainView;
 
     private MonthlyLayoutHelper monthlyHelper;
@@ -111,7 +114,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         calendarButton = bottomViewSwitcher.findViewById(R.id.calendarButton);
         eventsMainView = bottomViewSwitcher.findViewById(R.id.eventsView);
 
-        weeklyHelper = new WeeklyLayoutHelper(viewSwitcher.findViewById(R.id.repeatWeeklyLayout));
+        weeklyHelper = new WeeklyLayoutHelper(viewSwitcher.findViewById(R.id.repeatWeeklyLayout), doneButton);
         monthlyHelper = new MonthlyLayoutHelper(viewSwitcher.findViewById(R.id.repeatMonthlyLayout));
 
         SimpleAdapter adapter = new SimpleAdapter(getContext(), android.R.layout.simple_spinner_item,
@@ -133,11 +136,11 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     }
 
     private void setUpDataPassedFromBundle() {
-        DateTime dateTime = DateTime.now();
+        LocalDate localDate = LocalDate.now();
         Bundle bundle = getArguments();
-        year = bundle.getInt("Year", dateTime.getYear());
-        month = bundle.getInt("Month", dateTime.getMonthOfYear() - 1);
-        day = bundle.getInt("Day", dateTime.getDayOfMonth());
+        year = bundle.getInt("Year", localDate.getYear());
+        month = bundle.getInt("Month", localDate.getMonthOfYear() - 1);
+        day = bundle.getInt("Day", localDate.getDayOfMonth());
     }
 
     private void setUpSpinnerListeners() {
@@ -258,9 +261,6 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                     }
 
                     switch (bottomSpinnerPosition) {
-                        case 0:
-                            choices.setRepeatForever(true);
-                            break;
                         case 1:
                             choices.setRepeatToSpecificDate(new DateTime(year, month, day, 0, 0, 0).getMillis());
                             break;
@@ -300,21 +300,21 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     @Override
     public void afterTextChanged(Editable s) {
+        if (s.toString().equals("0")) {
+            s.replace(0, 1, "1");
+        }
+
         if (s == numberEditText.getText()) {
             topEmpty = numberEditText.getText().toString().isEmpty();
             if (!topEmpty) {
-                timeUnitTextViewPlural = Integer.parseInt(s.toString()) > 1;
+                timeUnitNumber = Integer.parseInt(s.toString());
                 setTimeUnitString();
             }
 
         } else if (s == numberOfEventsEditText.getText()) {
             bottomEmpty = numberOfEventsEditText.getText().toString().isEmpty();
             if (!bottomEmpty) {
-                if (Integer.parseInt(s.toString()) > 1) {
-                    eventsTextView.setText(getResources().getString(R.string.numberOfEventsSingular));
-                } else {
-                    eventsTextView.setText(getResources().getString(R.string.numberOfEventsPlural));
-                }
+                eventsTextView.setText(getResources().getQuantityString(R.plurals.event, Integer.parseInt(s.toString())));
             }
         }
 
@@ -334,32 +334,16 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private void setTimeUnitString() {
         switch (topSpinnerPosition) {
             case 0:
-                if (timeUnitTextViewPlural) {
-                    timeUnitTextView.setText(getResources().getString(R.string.dayPlural));
-                } else {
-                    timeUnitTextView.setText(getResources().getString(R.string.daySingular));
-                }
+                timeUnitTextView.setText(getResources().getQuantityString(R.plurals.day, timeUnitNumber));
                 break;
             case 1:
-                if (timeUnitTextViewPlural) {
-                    timeUnitTextView.setText(getResources().getString(R.string.weekPlural));
-                } else {
-                    timeUnitTextView.setText(getResources().getString(R.string.weekSingular));
-                }
+                timeUnitTextView.setText(getResources().getQuantityString(R.plurals.week, timeUnitNumber));
                 break;
             case 2:
-                if (timeUnitTextViewPlural) {
-                    timeUnitTextView.setText(getResources().getString(R.string.monthPlural));
-                } else {
-                    timeUnitTextView.setText(getResources().getString(R.string.monthSingular));
-                }
+                timeUnitTextView.setText(getResources().getQuantityString(R.plurals.month, timeUnitNumber));
                 break;
             case 3:
-                if (timeUnitTextViewPlural) {
-                    timeUnitTextView.setText(getResources().getString(R.string.yearPlural));
-                } else {
-                    timeUnitTextView.setText(getResources().getString(R.string.yearSingular));
-                }
+                timeUnitTextView.setText(getResources().getQuantityString(R.plurals.year, timeUnitNumber));
                 break;
         }
     }
@@ -369,6 +353,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         this.year = year;
         this.month = month;
         this.day = day;
+        calendarButton.setText(FormatUtils.getMonthDayFormatShort(new DateTime(year, month, day, 0, 0, 0)));
     }
 
     @Override

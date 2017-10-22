@@ -57,7 +57,6 @@ public class MainActivityUtils {
         if (save.equals(noteResult[0])) {    // Update rv with noteChanges to the note
             adapter.updateAt(position, note);
 
-            // TODO: Optimize this, right now getting the entire list just for the newest note
         } else if (save.equals(noteResult[1])) {    // Update rv with new note
             if (listUsed == 0) {
                 adapter.addAt(position, note);

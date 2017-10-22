@@ -2,6 +2,9 @@ package com.ozmar.notes.utils;
 
 import android.content.Context;
 
+import com.ozmar.notes.FrequencyChoices;
+import com.ozmar.notes.R;
+
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
@@ -11,6 +14,7 @@ import org.joda.time.format.DateTimeFormatter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 
@@ -31,7 +35,7 @@ public class FormatUtils {
         boolean tomorrow = false;
 
         DateTime dateTime = new DateTime(timeLastUpdated);
-        if (sameYear) {              // Only get boolean if needed
+        if (sameYear) {
             sameDay = FormatUtils.isToday(dateTime);
             if (!sameDay) {
                 yesterday = FormatUtils.isYesterday(dateTime);
@@ -63,27 +67,27 @@ public class FormatUtils {
         return timeModified;
     }
 
-    public static String getReminderText(Context context, DateTime dateTime) {
+    public static String getReminderText(Context context, DateTime chosenDateTime) {
 
         String reminderDate = "";
         DateTime today = DateTime.now();
-        boolean sameYear = today.getYear() == dateTime.getYear();
+        boolean sameYear = today.getYear() == chosenDateTime.getYear();
 
-        boolean sameDay = FormatUtils.isToday(dateTime);
+        boolean sameDay = FormatUtils.isToday(chosenDateTime);
         boolean tomorrow = false;
         boolean yesterday = false;
 
-        if (sameYear) {      // Only get boolean if needed
+        if (sameYear) {
             if (!sameDay) {
-                tomorrow = FormatUtils.isTomorrow(dateTime);
+                tomorrow = FormatUtils.isTomorrow(chosenDateTime);
                 if (!tomorrow) {
-                    yesterday = FormatUtils.isYesterday(dateTime);
+                    yesterday = FormatUtils.isYesterday(chosenDateTime);
                 }
             }
         }
 
         DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(context);
-        Date chosen = dateTime.toDate();
+        Date chosen = chosenDateTime.toDate();
 
         if (sameYear) {
             if (sameDay) {
@@ -93,8 +97,7 @@ public class FormatUtils {
             } else if (yesterday) {
                 reminderDate += "Yesterday, ";
             } else {
-                DateTimeFormatter dtfOut = DateTimeFormat.forPattern("MMM dd, ");
-                reminderDate += dtfOut.print(dateTime);
+                reminderDate += FormatUtils.getMonthDayFormatShort(chosenDateTime) + ", ";
             }
             reminderDate += timeFormat.format(chosen);
 
@@ -107,53 +110,79 @@ public class FormatUtils {
         return reminderDate;
     }
 
-    // Use if you know the dates are in the same year
-    public static String getMonthDayFormat(DateTime chosen) {
-        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("MMMM dd");
+    public static String getMonthDayFormatShort(DateTime chosen) {
+        DateTimeFormatter dtfOut;
+        LocalDate localDate = LocalDate.now();
+
+        if (localDate.getYear() == chosen.getYear()) {
+            dtfOut = DateTimeFormat.forPattern("MMM dd");
+        } else {
+            dtfOut = DateTimeFormat.forPattern("MMM dd, yyyy");
+        }
+
         return dtfOut.print(chosen);
     }
 
-    // Used to check if the chosen date is within the same year
-    public static String getMonthDayFormat(DateTime dateTimeNow, DateTime chosen) {
-        String date;
+    public static String getMonthDayFormatShort(long millis) {
+        return FormatUtils.getMonthDayFormatShort(new DateTime(millis));
+    }
 
-        if (dateTimeNow.getYear() == chosen.getYear()) {
-            date = FormatUtils.getMonthDayFormat(chosen);
+    public static String getMonthDayFormatLong(DateTime chosen) {
+        DateTimeFormatter dtfOut;
+        LocalDate localDate = LocalDate.now();
+
+        if (localDate.getYear() == chosen.getYear()) {
+            dtfOut = DateTimeFormat.forPattern("MMMM dd");
         } else {
-            DateTimeFormatter dtfOut = DateTimeFormat.forPattern("MMMM dd, yyyy");
-            date = dtfOut.print(chosen);
+            dtfOut = DateTimeFormat.forPattern("MMMM dd, yyyy");
         }
-        return date;
+
+        return dtfOut.print(chosen);
     }
 
-    public static String getTimeFormat(Context context, LocalTime dateTime) {
+    public static String getMonthDayFormatLong(long millis) {
+        return getMonthDayFormatLong(new DateTime(millis));
+    }
+
+    public static String getTimeFormat(Context context, LocalTime localTime) {
         DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(context);
-        Date date = dateTime.toDateTimeToday().toDate();
-        return timeFormat.format(date);
+        return timeFormat.format(localTime.toDateTimeToday().toDate());
     }
 
-    public static String getDayOfWeek(DateTime dateTime, int type) {
+    public static String getCurrentDayOfWeek(int length) {
         String day;
-        if (type == 0) {
-            day = dateTime.dayOfWeek().getAsShortText(Locale.getDefault());
+        LocalDate localDate = LocalDate.now();
+
+        if (length == 0) {
+            day = localDate.dayOfWeek().getAsShortText(Locale.getDefault());
         } else {
-            day = dateTime.dayOfWeek().getAsText(Locale.getDefault());
+            day = localDate.dayOfWeek().getAsText(Locale.getDefault());
+        }
+
+        return day;
+    }
+
+    public static String getChosenDayOfWeek(LocalDate localDate, int length) {
+        String day;
+        if (length == 0) {
+            day = localDate.dayOfWeek().getAsShortText(Locale.getDefault());
+        } else {
+            day = localDate.dayOfWeek().getAsText(Locale.getDefault());
         }
         return day;
     }
 
     public static LocalTime roundToTime(LocalTime localTime, int minute) {
-        // Remove seconds and milliseconds
         LocalTime timeToSet = localTime.minuteOfHour().roundFloorCopy();
         return timeToSet.withMinuteOfHour((timeToSet.getMinuteOfHour() / minute) * minute);
     }
 
-    public static String formatNthDayOfMonthItIs(DateTime dateTime) {
+    public static String formatNthDayOfMonthItIs(LocalDate localDate) {
         String nthDay = "";
-        int week = (dateTime.getDayOfMonth() / 7) + 1;
+        int week = (localDate.getDayOfMonth() / 7) + 1;
         boolean lastWeek = false;
 
-        if (dateTime.getMonthOfYear() != dateTime.plusWeeks(1).getMonthOfYear()) {
+        if (localDate.getMonthOfYear() != localDate.plusWeeks(1).getMonthOfYear()) {
             lastWeek = true;
         }
 
@@ -179,20 +208,84 @@ public class FormatUtils {
                 break;
         }
 
-        nthDay += FormatUtils.getDayOfWeek(dateTime, 1);
+        nthDay += FormatUtils.getChosenDayOfWeek(localDate, 1);
 
         return nthDay;
     }
 
-    private static boolean isToday(DateTime time) {
+    public static String formatFrequencyText(Context context, FrequencyChoices choices) {
+        String frequencyText = "Repeats ";
+        LocalDate localDate = LocalDate.now();
+
+        int repeatType = choices.getRepeatTypeHowOften();
+        // TODO: Create custom spinner to display long frequency choices
+        switch (choices.getRepeatType()) {
+            case 0:
+                // Repeats Daily
+                frequencyText += context.getResources().getQuantityString(R.plurals.repeatDay,
+                        repeatType, repeatType);
+                break;
+            case 1:
+                // Repeats Weekly (plus selected days)
+                frequencyText += context.getResources().getQuantityString(R.plurals.repeatWeek,
+                        repeatType, repeatType);
+                frequencyText += FormatUtils.getSelectedDays(choices);
+                break;
+            case 2:
+                // Repeats Monthly (plus chosen RadioButton)
+                frequencyText += context.getResources().getQuantityString(R.plurals.repeatMonth,
+                        repeatType, repeatType);
+                if (choices.getMonthRepeatType() == 1) {
+                    frequencyText += " (on every " + FormatUtils.formatNthDayOfMonthItIs(localDate) + ")";
+                }
+                break;
+            case 3:
+                // Repeats Yearly
+                frequencyText += context.getResources().getQuantityString(R.plurals.repeatYear,
+                        repeatType, repeatType);
+                break;
+        }
+
+        if (choices.getRepeatToSpecificDate() != 0) {
+            frequencyText += "; until " + FormatUtils.getMonthDayFormatShort(choices.getRepeatToSpecificDate());
+
+        } else if (choices.getHowManyRepeatEvents() != 0) {
+            frequencyText += context.getResources().getQuantityString(R.plurals.repeatEvents,
+                    choices.getHowManyRepeatEvents(), choices.getHowManyRepeatEvents());
+        }
+
+        return frequencyText;
+    }
+
+    public static String getSelectedDays(FrequencyChoices choices) {
+        // TODO: Disable done button if user deselects all days
+        List<Integer> chosen = choices.getDaysChosen();
+
+        String days = " on ";
+        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("EEE");
+        LocalDate localDate = LocalDate.now();
+
+        if (chosen.size() == 1) {
+            days += localDate.withDayOfWeek(chosen.get(0)).dayOfWeek().getAsText();
+        } else {
+            for (int i = 0; i <= chosen.size() - 2; i++) {
+                days += dtfOut.print(localDate.withDayOfWeek(chosen.get(i))) + ", ";
+            }
+            days += dtfOut.print(localDate.withDayOfWeek(chosen.get(chosen.size() - 1)));
+        }
+
+        return days;
+    }
+
+    public static boolean isToday(DateTime time) {
         return LocalDate.now().compareTo(new LocalDate(time)) == 0;
     }
 
-    private static boolean isTomorrow(DateTime time) {
+    public static boolean isTomorrow(DateTime time) {
         return LocalDate.now().plusDays(1).compareTo(new LocalDate(time)) == 0;
     }
 
-    private static boolean isYesterday(DateTime time) {
+    public static boolean isYesterday(DateTime time) {
         return LocalDate.now().minusDays(1).compareTo(new LocalDate(time)) == 0;
     }
 }
