@@ -26,7 +26,6 @@ public class ReminderAdapter extends ArrayAdapter<String> implements SpinnerAdap
         this.dropDownItems = dropDownItems;
         this.spinnerStyle = spinnerStyle;
         this.listItems = listItems;
-        listItems[4] = "";
     }
 
     @NonNull

@@ -21,6 +21,7 @@ public class MonthlyLayoutHelper {
         this.radioGroup = (RadioGroup) view;
         this.topRadioButton = radioGroup.findViewById(R.id.topRadioButton);
         this.bottomRadioButton = radioGroup.findViewById(R.id.bottomRadioButton);
+        topRadioButton.setChecked(true);
         setTextOfSecondRadioButton();
         setRadioGroupListener();
     }

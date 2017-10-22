@@ -1,6 +1,5 @@
 package com.ozmar.notes.reminderDialog;
 
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
@@ -25,6 +24,8 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
     private final ToggleButton saturday;
     private int buttonsChecked = 0;
 
+    private List<Integer> startingDaysChecked;
+
     public WeeklyLayoutHelper(View view, Button doneButton) {
         this.view = view;
         this.doneButton = doneButton;
@@ -35,6 +36,22 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
         this.thursday = view.findViewById(R.id.toggleButtonThursday);
         this.friday = view.findViewById(R.id.toggleButtonFriday);
         this.saturday = view.findViewById(R.id.toggleButtonSaturday);
+
+        sunday.setOnCheckedChangeListener(this);
+        monday.setOnCheckedChangeListener(this);
+        tuesday.setOnCheckedChangeListener(this);
+        wednesday.setOnCheckedChangeListener(this);
+        thursday.setOnCheckedChangeListener(this);
+        friday.setOnCheckedChangeListener(this);
+        saturday.setOnCheckedChangeListener(this);
+
+        if (buttonsChecked == 0) {
+            doneButton.setEnabled(false);
+        }
+    }
+
+    private void setUpStartingDaysChecked() {
+
     }
 
     public void setViewEnabled(boolean flag) {
@@ -53,39 +70,19 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
 
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if (buttonView == sunday) {
-            check(buttonView, "sunday");
-
-        } else if (buttonView == monday) {
-            check(buttonView, "monday");
-
-        } else if (buttonView == tuesday) {
-            check(buttonView, "tuesday");
-
-        } else if (buttonView == wednesday) {
-            check(buttonView, "wednesday");
-
-        } else if (buttonView == thursday) {
-            check(buttonView, "thursday");
-
-        } else if (buttonView == friday) {
-            check(buttonView, "friday");
-
-        } else if (buttonView == saturday) {
-            check(buttonView, "saturday");
+        if (isChecked) {
+            buttonsChecked++;
+            doneButton.setEnabled(true);
+        } else {
+            buttonsChecked--;
+            if (buttonsChecked == 0) {
+                doneButton.setEnabled(false);
+            }
         }
     }
 
-    private void check(CompoundButton button, String checked) {
-        if (button.isChecked()) {
-            buttonsChecked++;
-            Log.d("Button", checked + " Checked");
-        } else {
-            buttonsChecked--;
-            Log.d("Button", checked + " UnChecked");
-            if (buttonsChecked == 0) {
-            }
-        }
+    public int getCurrentDaysChecked() {
+        return buttonsChecked;
     }
 
     public List<Integer> getCheckedButtons() {

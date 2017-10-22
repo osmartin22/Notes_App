@@ -12,7 +12,7 @@ public class SingleNote implements Parcelable {
     private boolean _favorite;
 
     private long _timeModified;
-    private long _reminderTime = 0;
+    private long _reminderTime = 0; // TODO: this should only be the time until the next reminder alarm
     private int _reminderId = 0;
 
     public SingleNote() {

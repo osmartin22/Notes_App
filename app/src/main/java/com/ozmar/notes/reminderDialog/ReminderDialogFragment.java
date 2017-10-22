@@ -27,6 +27,7 @@ public class ReminderDialogFragment extends DialogFragment
         implements DatePickerFragment.OnDatePickedListener, TimePickerFragment.OnTimePickedListener,
         FrequencyPickerFragment.onFrequencyPickedListener {
 
+
     private NDSpinner dateSpinner;
     private NDSpinner timeSpinner;
     private NDSpinner frequencySpinner;
@@ -38,6 +39,7 @@ public class ReminderDialogFragment extends DialogFragment
     private int year;
 
     private DateTime dateTimeNow = DateTime.now();
+    private DateTime chosenDateTime;
 
     private String[] dateArray = new String[5];
     private String[] timeArray = new String[5];
@@ -74,8 +76,12 @@ public class ReminderDialogFragment extends DialogFragment
 
     }
 
-    public static ReminderDialogFragment newInstance() {
-        return new ReminderDialogFragment();
+    public static ReminderDialogFragment newInstance(long nextReminderTime) {
+        Bundle bundle = new Bundle();
+        bundle.putLong("Next Reminder Time", nextReminderTime);
+        ReminderDialogFragment fragment = new ReminderDialogFragment();
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
     @Override
@@ -91,6 +97,13 @@ public class ReminderDialogFragment extends DialogFragment
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+        Bundle bundle = getArguments();
+        long reminderTimeMillis = bundle.getLong("Next Reminder Time", 0);
+        if (reminderTimeMillis != 0) {
+            chosenDateTime = new DateTime(reminderTimeMillis);
+        }
+
         View view = View.inflate(getActivity(), R.layout.reminder_dialog_layout, null);
         preferences = new Preferences(getContext());
         setUpSpinnerStrings();
@@ -177,6 +190,7 @@ public class ReminderDialogFragment extends DialogFragment
         }
     }
 
+    // Set up strings that will be used for the list items view of each spinner
     private void setUpSpinnerStrings() {
         dateArray[0] = FormatUtils.getMonthDayFormatLong(dateTimeNow);
         dateArray[1] = FormatUtils.getMonthDayFormatLong(dateTimeNow.plusDays(1));
@@ -195,19 +209,35 @@ public class ReminderDialogFragment extends DialogFragment
         // TODO: Set with reminderFrequency if available
     }
 
+    // Set Spinner positions to reflect previous user reminder if available
+    // or to x hours into the future
     private void setSpinnerPosition() {
-        LocalTime localTime = LocalTime.now();
-        LocalTime futureTime = FormatUtils.roundToTime(localTime.plusHours(3), 15);
+        if (chosenDateTime != null) {
+            dateSpinner.setSelection(4);
+            year = chosenDateTime.getYear();
+            month = chosenDateTime.getMonthOfYear();
+            day = chosenDateTime.getDayOfMonth();
+            dateArray[4] = FormatUtils.getMonthDayFormatLong(chosenDateTime);
 
-        LocalTime firstPreset = preferences.getMorningTime();
-        if (localTime.isAfter(futureTime) || localTime.isBefore(firstPreset)) {
-            dateSpinner.setSelection(1);
-            timeSpinner.setSelection(0);
-        } else {
             timeSpinner.setSelection(4);
-            timeArray[4] = FormatUtils.getTimeFormat(getContext(), futureTime);
-            hour = futureTime.getHourOfDay();
-            minute = futureTime.getMinuteOfHour();
+            hour = chosenDateTime.getHourOfDay();
+            minute = chosenDateTime.getMinuteOfHour();
+            timeArray[4] = FormatUtils.getTimeFormat(getContext(), new LocalTime(chosenDateTime.getMillis()));
+        } else {
+
+            LocalTime localTime = LocalTime.now();
+            LocalTime futureTime = FormatUtils.roundToTime(localTime.plusHours(3), 15);
+
+            LocalTime firstPreset = preferences.getMorningTime();
+            if (localTime.isAfter(futureTime) || localTime.isBefore(firstPreset)) {
+                dateSpinner.setSelection(1);
+                timeSpinner.setSelection(0);
+            } else {
+                timeSpinner.setSelection(4);
+                timeArray[4] = FormatUtils.getTimeFormat(getContext(), futureTime);
+                hour = futureTime.getHourOfDay();
+                minute = futureTime.getMinuteOfHour();
+            }
         }
     }
 

@@ -288,7 +288,7 @@ public class NoteEditorActivity extends AppCompatActivity
     public void addReminder(View view) {
         // TODO: Pass current reminderTime if exists, to start at that date
 
-        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance();
+        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(reminderTime);
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
     }
 
