@@ -7,6 +7,8 @@ import android.widget.ToggleButton;
 
 import com.ozmar.notes.R;
 
+import org.joda.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,9 +26,11 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
     private final ToggleButton saturday;
     private int buttonsChecked = 0;
 
-    private List<Integer> startingDaysChecked;
-
     public WeeklyLayoutHelper(View view, Button doneButton) {
+        this(view, doneButton, null);
+    }
+
+    public WeeklyLayoutHelper(View view, Button doneButton, List<Integer> daysLastSelected) {
         this.view = view;
         this.doneButton = doneButton;
         this.sunday = view.findViewById(R.id.toggleButtonSunday);
@@ -45,13 +49,45 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
         friday.setOnCheckedChangeListener(this);
         saturday.setOnCheckedChangeListener(this);
 
-        if (buttonsChecked == 0) {
-            doneButton.setEnabled(false);
-        }
+        setUpStartingDaysChecked(daysLastSelected);
     }
 
-    private void setUpStartingDaysChecked() {
+    private void setUpStartingDaysChecked(List<Integer> daysLastSelected) {
+        if (daysLastSelected == null) {
+            setCheckedDay(LocalDate.now().getDayOfWeek());
+        } else {
+            for (Integer day : daysLastSelected) {
+                setCheckedDay(day);
+            }
+        }
 
+
+    }
+
+    private void setCheckedDay(int dayOfWeek) {
+        switch (dayOfWeek) {
+            case 1:
+                monday.setChecked(true);
+                break;
+            case 2:
+                tuesday.setChecked(true);
+                break;
+            case 3:
+                wednesday.setChecked(true);
+                break;
+            case 4:
+                thursday.setChecked(true);
+                break;
+            case 5:
+                friday.setChecked(true);
+                break;
+            case 6:
+                saturday.setChecked(true);
+                break;
+            case 7:
+                sunday.setChecked(true);
+                break;
+        }
     }
 
     public void setViewEnabled(boolean flag) {
@@ -88,6 +124,7 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
     public List<Integer> getCheckedButtons() {
         List<Integer> chosen = new ArrayList<>();
 
+        // Use ISO Standard for day numbering
         if (sunday.isChecked()) {
             chosen.add(7);
         }

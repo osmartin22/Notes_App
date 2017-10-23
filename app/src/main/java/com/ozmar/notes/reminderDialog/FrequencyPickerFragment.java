@@ -23,7 +23,6 @@ import com.ozmar.notes.R;
 import com.ozmar.notes.utils.FormatUtils;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 
 public class FrequencyPickerFragment extends DialogFragment implements TextWatcher, View.OnClickListener,
@@ -63,7 +62,11 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private boolean topEmpty = false;
     private boolean bottomEmpty = false;
 
+    private FrequencyChoices choices;
+
+
     onFrequencyPickedListener myCallback;
+
 
     public interface onFrequencyPickedListener {
         void onFrequencyPicked(FrequencyChoices choices);
@@ -77,11 +80,12 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         }
     }
 
-    public static FrequencyPickerFragment newInstance(int year, int month, int day) {
+    public static FrequencyPickerFragment newInstance(FrequencyChoices choices, int year, int month, int day) {
         Bundle bundle = new Bundle();
         bundle.putInt("Year", year);
         bundle.putInt("Month", month);
         bundle.putInt("Day", day);
+        bundle.putParcelable("Frequency Choices", choices);
         FrequencyPickerFragment fragment = new FrequencyPickerFragment();
         fragment.setArguments(bundle);
         return fragment;
@@ -96,6 +100,13 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        Bundle bundle = getArguments();
+        choices = bundle.getParcelable("Frequency Choices");
+        DateTime dateTime = DateTime.now();
+        year = bundle.getInt("Year", dateTime.getYear());
+        month = bundle.getInt("Month", dateTime.getMonthOfYear());
+        day = bundle.getInt("Day", dateTime.getDayOfMonth());
+
         View mainView = inflater.inflate(R.layout.reminder_frequency_picker, container, false);
         mySwitch = mainView.findViewById(R.id.reminderSwitch);
         topSpinner = mainView.findViewById(R.id.topSpinner);
@@ -114,8 +125,18 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         calendarButton = bottomViewSwitcher.findViewById(R.id.calendarButton);
         eventsMainView = bottomViewSwitcher.findViewById(R.id.eventsView);
 
-        weeklyHelper = new WeeklyLayoutHelper(viewSwitcher.findViewById(R.id.repeatWeeklyLayout), doneButton);
-        monthlyHelper = new MonthlyLayoutHelper(viewSwitcher.findViewById(R.id.repeatMonthlyLayout));
+        calendarButton.setText(FormatUtils.getMonthDayFormatShort(dateTime));
+
+        if (choices != null) {
+            if (choices.getRepeatToSpecificDate() != 0) {
+                calendarButton.setText(FormatUtils.getMonthDayFormatShort(choices.getRepeatToSpecificDate()));
+            }
+            weeklyHelper = new WeeklyLayoutHelper(viewSwitcher.findViewById(R.id.repeatWeeklyLayout), doneButton, choices.getDaysChosen());
+            monthlyHelper = new MonthlyLayoutHelper(viewSwitcher.findViewById(R.id.repeatMonthlyLayout), choices.getMonthRepeatType());
+        } else {
+            weeklyHelper = new WeeklyLayoutHelper(viewSwitcher.findViewById(R.id.repeatWeeklyLayout), doneButton);
+            monthlyHelper = new MonthlyLayoutHelper(viewSwitcher.findViewById(R.id.repeatMonthlyLayout));
+        }
 
         SimpleAdapter adapter = new SimpleAdapter(getContext(), android.R.layout.simple_spinner_item,
                 getResources().getStringArray(R.array.bottomArrayListItem));
@@ -127,20 +148,11 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         numberEditText.addTextChangedListener(this);
         numberOfEventsEditText.addTextChangedListener(this);
 
-        setUpDataPassedFromBundle();
         setUpSpinnerListeners();
         setUpSwitchListener();
         setUpDoneListener();
         setUpCalendarListener();
         return mainView;
-    }
-
-    private void setUpDataPassedFromBundle() {
-        LocalDate localDate = LocalDate.now();
-        Bundle bundle = getArguments();
-        year = bundle.getInt("Year", localDate.getYear());
-        month = bundle.getInt("Month", localDate.getMonthOfYear() - 1);
-        day = bundle.getInt("Day", localDate.getDayOfMonth());
     }
 
     private void setUpSpinnerListeners() {
@@ -149,10 +161,17 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 switch (position) {
                     case 0:     // Daily View
+                    case 3:     // Yearly View
                         viewSwitcher.setVisibility(View.GONE);
+                        if (!doneButton.isEnabled()) {
+                            doneButton.setEnabled(true);
+                        }
                         break;
 
                     case 1:     // Weekly View
+                        if (weeklyHelper.getCurrentDaysChecked() == 0) {
+                            doneButton.setEnabled(false);
+                        }
                         viewSwitcher.setVisibility(View.VISIBLE);
                         if (viewSwitcher.getNextView() == weeklyHelper.getMainView()) {
                             viewSwitcher.showNext();
@@ -163,11 +182,10 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                         viewSwitcher.setVisibility(View.VISIBLE);
                         if (viewSwitcher.getNextView() == monthlyHelper.getMainView()) {
                             viewSwitcher.showNext();
+                            if (!doneButton.isEnabled()) {
+                                doneButton.setEnabled(true);
+                            }
                         }
-                        break;
-
-                    case 3:     // Yearly View
-                        viewSwitcher.setVisibility(View.GONE);
                         break;
                 }
                 topSpinnerPosition = position;
@@ -248,7 +266,6 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
             @Override
             public void onClick(View v) {
 
-                FrequencyChoices choices = null;
                 if (mySwitch.isChecked()) {
                     choices = new FrequencyChoices();
                     choices.setRepeatType(topSpinnerPosition);
@@ -268,6 +285,8 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                             choices.setHowManyRepeatEvents(Integer.parseInt(numberOfEventsEditText.getText().toString()));
                             break;
                     }
+                } else {
+                    choices = null;
                 }
 
                 if (myCallback != null) {
@@ -298,6 +317,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     }
 
+    // TODO: Fix DoneButton being enabled/disabled from EditTexts and weeklyView days selected
     @Override
     public void afterTextChanged(Editable s) {
         if (s.toString().equals("0")) {

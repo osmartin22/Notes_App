@@ -70,13 +70,23 @@ public class FrequencyChoices implements Parcelable {
     }
 
     @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
 
-    @Override
-    public String toString() {
-        return super.toString();
+        if (!(obj instanceof FrequencyChoices)) {
+            return false;
+        }
+
+        FrequencyChoices choices = (FrequencyChoices) obj;
+
+        return choices.repeatType == repeatType &&
+                choices.repeatTypeHowOften == repeatTypeHowOften &&
+                choices.repeatToSpecificDate == repeatToSpecificDate &&
+                choices.howManyRepeatEvents == howManyRepeatEvents &&
+                choices.monthRepeatType == monthRepeatType &&
+                choices.daysChosen.containsAll(daysChosen);
     }
 
     public FrequencyChoices(Parcel in) {

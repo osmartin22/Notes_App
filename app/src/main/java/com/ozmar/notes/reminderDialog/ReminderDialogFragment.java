@@ -27,19 +27,17 @@ public class ReminderDialogFragment extends DialogFragment
         implements DatePickerFragment.OnDatePickedListener, TimePickerFragment.OnTimePickedListener,
         FrequencyPickerFragment.onFrequencyPickedListener {
 
+    private DateTime dateTimeNow = DateTime.now();
+    private DateTime chosenDateTime;
+    private int year;
+    private int month;
+    private int day;
+    private int hour;
+    private int minute;
 
     private NDSpinner dateSpinner;
     private NDSpinner timeSpinner;
     private NDSpinner frequencySpinner;
-
-    private int hour;
-    private int minute;
-    private int day;
-    private int month;
-    private int year;
-
-    private DateTime dateTimeNow = DateTime.now();
-    private DateTime chosenDateTime;
 
     private String[] dateArray = new String[5];
     private String[] timeArray = new String[5];
@@ -59,10 +57,6 @@ public class ReminderDialogFragment extends DialogFragment
 
     private FrequencyChoices choices = null;
 
-    // TODO: Pass reminderTime to fragment to set as initial values
-    // Make sure when creating spinner listener, number not overwritten
-    // Or set initial values after creating spinner and set to custom position(4)
-
     private Preferences preferences;
     private OnReminderPickedListener myCallback;
 
@@ -76,8 +70,9 @@ public class ReminderDialogFragment extends DialogFragment
 
     }
 
-    public static ReminderDialogFragment newInstance(long nextReminderTime) {
+    public static ReminderDialogFragment newInstance(FrequencyChoices choices, long nextReminderTime) {
         Bundle bundle = new Bundle();
+        bundle.putParcelable("Frequency Choices", choices);
         bundle.putLong("Next Reminder Time", nextReminderTime);
         ReminderDialogFragment fragment = new ReminderDialogFragment();
         fragment.setArguments(bundle);
@@ -97,8 +92,8 @@ public class ReminderDialogFragment extends DialogFragment
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-
         Bundle bundle = getArguments();
+        choices = bundle.getParcelable("Frequency Choices");
         long reminderTimeMillis = bundle.getLong("Next Reminder Time", 0);
         if (reminderTimeMillis != 0) {
             chosenDateTime = new DateTime(reminderTimeMillis);
@@ -384,6 +379,7 @@ public class ReminderDialogFragment extends DialogFragment
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
+                // TODO: Have selections for other positions that are not the FrequencyPicker
                 switch (i) {
                     case 0:     // Does Not Repeat
                         currentFrequencySelection = 0;
@@ -405,7 +401,8 @@ public class ReminderDialogFragment extends DialogFragment
                     case 5:     // Show Custom Reminder Picker
                         currentFrequencySelection = 5;
                         if (frequencySpinnerTouched) {
-                            FrequencyPickerFragment newFragment = FrequencyPickerFragment.newInstance(year, month, day);
+                            FrequencyPickerFragment newFragment =
+                                    FrequencyPickerFragment.newInstance(choices, year, month, day);
                             newFragment.show(getChildFragmentManager(), "frequencyPicker");
                             newFragment.setCancelable(false);
                             frequencySpinnerTouched = false;
@@ -461,11 +458,11 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public void onFrequencyPicked(FrequencyChoices choices) {
-        if (choices == null) {
-            frequencySpinner.setSelection(0);
-        } else {
-            this.choices = choices;
+        this.choices = choices;
 
+        if (choices == null) {
+            this.choices = null;
+        } else {
             frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices);
             frequencySpinnerAdapter.notifyDataSetChanged();
         }

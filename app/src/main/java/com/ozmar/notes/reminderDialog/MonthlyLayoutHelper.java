@@ -12,16 +12,27 @@ import org.joda.time.LocalDate;
 
 
 public class MonthlyLayoutHelper {
-    private RadioGroup radioGroup;
+    private final RadioGroup radioGroup;
     private RadioButton topRadioButton;
     private RadioButton bottomRadioButton;
-    private int checkedButton = 0;
+    private int checkedButton;
 
     public MonthlyLayoutHelper(View view) {
+        this(view, 0);
+    }
+
+    public MonthlyLayoutHelper(View view, int checkedButton) {
         this.radioGroup = (RadioGroup) view;
         this.topRadioButton = radioGroup.findViewById(R.id.topRadioButton);
         this.bottomRadioButton = radioGroup.findViewById(R.id.bottomRadioButton);
-        topRadioButton.setChecked(true);
+
+        if (checkedButton == 0) {
+            topRadioButton.setChecked(true);
+        } else {
+            bottomRadioButton.setChecked(true);
+        }
+
+        this.checkedButton = checkedButton;
         setTextOfSecondRadioButton();
         setRadioGroupListener();
     }

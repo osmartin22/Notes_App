@@ -258,7 +258,6 @@ public class FormatUtils {
     }
 
     public static String getSelectedDays(FrequencyChoices choices) {
-        // TODO: Disable done button if user deselects all days
         List<Integer> chosen = choices.getDaysChosen();
 
         String days = " on ";

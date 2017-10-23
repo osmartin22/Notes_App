@@ -28,6 +28,11 @@ import org.joda.time.DateTime;
 
 import static com.ozmar.notes.MainActivity.db;
 
+// TODO: Add Clock Symbol and repeat symbol to reminder display
+
+// TODO: Possibly pass a copy of FrequencyChoices to ReminderDialogFragment instead
+    // To do == comparison at the end to check whether the alarm needs updating
+// Currently, FrequencyChoices will always change so the alarm always needs updating
 
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener {
@@ -46,6 +51,8 @@ public class NoteEditorActivity extends AppCompatActivity
     private long reminderTime = 0;
 
     private Preferences preferences;
+
+    private FrequencyChoices choices = null;
 
 
     private void contextualActionResult(MenuItem item) {
@@ -129,7 +136,8 @@ public class NoteEditorActivity extends AppCompatActivity
             boolean reminderChanged = NoteEditorUtils.reminderChanged(reminderTime, currentNote, noteChanges);
             boolean noteTextChanged = NoteEditorUtils.noteChanges(title, content, currentNote, noteChanges);
 
-            NoteEditorUtils.modifyReminderIntent(getApplicationContext(), preferences, currentNote, reminderChanged, noteTextChanged);
+            NoteEditorUtils.modifyReminderIntent(getApplicationContext(), preferences, currentNote,
+                    reminderChanged, noteTextChanged);
 
             if (listUsed != 2) {     // Don't allow changes to favorite if in archive list
                 favoriteChanged = NoteEditorUtils.favoriteChanged(favorite, currentNote, noteChanges);
@@ -286,14 +294,13 @@ public class NoteEditorActivity extends AppCompatActivity
     } // onOptionsItemSelected() end
 
     public void addReminder(View view) {
-        // TODO: Pass current reminderTime if exists, to start at that date
-
-        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(reminderTime);
+        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(choices, reminderTime);
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
     }
 
     @Override
     public void onReminderPicked(DateTime dateTime, int frequencyPicked, FrequencyChoices choices) {
+        this.choices = choices;
         reminderTime = dateTime.getMillis();
         reminderButton.setText(FormatUtils.getReminderText(getApplication(), dateTime));
         reminderButton.setVisibility(View.VISIBLE);
