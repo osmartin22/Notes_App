@@ -128,7 +128,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             notifyItemRangeChanged(minViewPositionChanged, notes.size());
 
         } else {        // Notes added at random
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < amountOfViewAdding - 1; i++) {
                 notes.add(position.get(i), addList.get(i));
             }
             notifyItemRangeChanged(minViewPositionChanged, size);
