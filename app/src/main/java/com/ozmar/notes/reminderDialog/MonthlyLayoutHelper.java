@@ -13,8 +13,8 @@ import org.joda.time.LocalDate;
 
 public class MonthlyLayoutHelper {
     private final RadioGroup radioGroup;
-    private RadioButton topRadioButton;
-    private RadioButton bottomRadioButton;
+    private final RadioButton topRadioButton;
+    private final RadioButton bottomRadioButton;
     private int checkedButton;
 
     public MonthlyLayoutHelper(View view) {

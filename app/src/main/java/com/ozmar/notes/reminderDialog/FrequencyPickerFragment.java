@@ -64,7 +64,6 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private FrequencyChoices choices;
 
-
     onFrequencyPickedListener myCallback;
 
 
@@ -163,15 +162,9 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                     case 0:     // Daily View
                     case 3:     // Yearly View
                         viewSwitcher.setVisibility(View.GONE);
-                        if (!doneButton.isEnabled()) {
-                            doneButton.setEnabled(true);
-                        }
                         break;
 
                     case 1:     // Weekly View
-                        if (weeklyHelper.getCurrentDaysChecked() == 0) {
-                            doneButton.setEnabled(false);
-                        }
                         viewSwitcher.setVisibility(View.VISIBLE);
                         if (viewSwitcher.getNextView() == weeklyHelper.getMainView()) {
                             viewSwitcher.showNext();
@@ -182,13 +175,12 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                         viewSwitcher.setVisibility(View.VISIBLE);
                         if (viewSwitcher.getNextView() == monthlyHelper.getMainView()) {
                             viewSwitcher.showNext();
-                            if (!doneButton.isEnabled()) {
-                                doneButton.setEnabled(true);
-                            }
                         }
                         break;
                 }
+
                 topSpinnerPosition = position;
+                setDoneButtonEnabled();
                 setTimeUnitString();
             }
 
@@ -218,7 +210,9 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                         }
                         break;
                 }
+
                 bottomSpinnerPosition = position;
+                setDoneButtonEnabled();
             }
 
             @Override
@@ -234,11 +228,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    if (topEmpty || bottomEmpty) {
-                        doneButton.setEnabled(false);
-                    } else {
-                        doneButton.setEnabled(true);
-                    }
+                    setDoneButtonEnabled();
                     setViewEnabled(true, TRANSPARENCY_OFF);
 
                 } else {
@@ -317,7 +307,6 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     }
 
-    // TODO: Fix DoneButton being enabled/disabled from EditTexts and weeklyView days selected
     @Override
     public void afterTextChanged(Editable s) {
         if (s.toString().equals("0")) {
@@ -337,8 +326,28 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                 eventsTextView.setText(getResources().getQuantityString(R.plurals.event, Integer.parseInt(s.toString())));
             }
         }
+        setDoneButtonEnabled();
+    }
 
-        doneButton.setEnabled(!topEmpty && !bottomEmpty);
+    private void setDoneButtonEnabled() {
+        // Case for weekly view
+        if (topSpinnerPosition == 1) {
+            if (weeklyHelper.getCurrentDaysChecked() != 0) {
+                if (bottomSpinnerPosition == 2) {
+                    doneButton.setEnabled(!topEmpty && !bottomEmpty);
+                } else {
+                    doneButton.setEnabled(!topEmpty);
+                }
+            } else {
+                doneButton.setEnabled(false);
+            }
+
+            // Case for the other views
+        } else if (bottomSpinnerPosition == 2) {
+            doneButton.setEnabled(!topEmpty && !bottomEmpty);
+        } else {
+            doneButton.setEnabled(!topEmpty);
+        }
     }
 
     @Override
