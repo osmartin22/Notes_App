@@ -75,10 +75,15 @@ public class NoteEditorActivity extends AppCompatActivity
                 NoteEditorUtils.modifyReminderIntent(getApplicationContext(), preferences, currentNote, reminderChanged, noteTextChanged);
 
             } else {
-                currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime);
+
                 if (reminderTime != 0) {
-                    currentNote.set_reminderId(preferences.getReminderID());
+                    int reminderId = db.addReminder(choices, reminderTime);
+                    currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime, reminderId);
+                    // TODO: Rewrite ReminderManager
                     ReminderManager.start(getApplicationContext(), currentNote);
+
+                } else {
+                    currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis());
                 }
 
                 intent.putExtra("New Note Action", 1);
@@ -158,11 +163,13 @@ public class NoteEditorActivity extends AppCompatActivity
             boolean contentEmpty = content.isEmpty();
             if (!(titleEmpty && contentEmpty)) {    // New note
 
-                currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime);
-
                 if (reminderTime != 0) {
-                    currentNote.set_reminderId(preferences.getReminderID());
+                    int reminderId = db.addReminder(choices, reminderTime);
+                    currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis(), reminderTime, reminderId);
                     ReminderManager.start(getApplicationContext(), currentNote);
+
+                } else {
+                    currentNote = new SingleNote(title, content, favorite, System.currentTimeMillis());
                 }
 
                 new BasicDBAsync(db, null, currentNote, listUsed, 0).execute();
@@ -215,7 +222,7 @@ public class NoteEditorActivity extends AppCompatActivity
                 reminderTime = currentNote.get_nextReminderTime();
                 String reminderText = FormatUtils.getReminderText(getApplication(),
                         new DateTime(currentNote.get_nextReminderTime()));
-                if (currentNote.isRepeating()) {
+                if (currentNote.get_reminderId() != -1) {
                     choices = db.getFrequencyChoices(currentNote.get_reminderId());
                     reminderText += " " + FormatUtils.formatFrequencyText(getApplicationContext(), choices);
                 }

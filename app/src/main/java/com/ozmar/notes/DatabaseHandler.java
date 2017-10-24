@@ -166,11 +166,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_timeModified(cursor.getLong(5));
                 note.set_reminderId(cursor.getInt(6));
 
-                // TODO: Test This (Possibly pass db if internalized)
+                // TODO: Test This
                 if (note.get_reminderId() != -1) {
                     NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
                     note.set_nextReminderTime(temp.nextReminderTime);
-                    note.setRepeating(temp.hasFrequencyChoices);
                 }
 
                 noteList.add(note);
@@ -206,11 +205,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_timeModified(cursor.getLong(5));
                 note.set_reminderId(cursor.getInt(6));
 
-                // TODO: Test This (Possibly pass db if internalized)
+                // TODO: Test This
                 if (note.get_reminderId() != -1) {
                     NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
                     note.set_nextReminderTime(temp.nextReminderTime);
-                    note.setRepeating(temp.hasFrequencyChoices);
                 }
 
                 noteList.add(note);
@@ -338,11 +336,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_timeModified(cursor.getLong(4));
                 note.set_reminderId(cursor.getInt(5));
 
-                // TODO: Test This (Possibly pass db if internalized)
+                // TODO: Test This
                 if (note.get_reminderId() != -1) {
                     NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
                     note.set_nextReminderTime(temp.nextReminderTime);
-                    note.setRepeating(temp.hasFrequencyChoices);
                 }
 
                 noteList.add(note);
@@ -616,10 +613,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     public void updateReminder() {
         // TODO: Possibly call in noteUpdate instead
-            // Should update UpdateNoteAsync if taking this route
+        // Should update UpdateNoteAsync if taking this route
     }
 
-    private void deleteReminder(SQLiteDatabase db, int id){
+    private void deleteReminder(SQLiteDatabase db, int id) {
         db.delete(TABLE_RECYCLE_BIN, KEY_ID + " = ?",
                 new String[]{String.valueOf(id)});
     }

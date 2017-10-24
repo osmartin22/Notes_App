@@ -13,31 +13,26 @@ public class SingleNote implements Parcelable {
 
     private long _timeCreated;
     private long _timeModified;
-    private long _nextReminderTime = 0; // TODO: this should only be the time until the next reminder alarm
-    private int _reminderId = 0;
-
-    private boolean isRepeating = false;
+    private long _nextReminderTime;
+    private int _reminderId;
 
     public SingleNote() {
 
     }
 
-    public SingleNote(String title, String content, boolean favorite, long timeModified, long reminderTime) {
-        this._title = title;
-        this._content = content;
-        this._favorite = favorite;
-        this._timeModified = timeModified;
-        this._nextReminderTime = reminderTime;
+    // New note does not have a reminder
+    public SingleNote(String title, String content, boolean favorite, long timeCreated) {
+        this(title, content, favorite, timeCreated, 0, -1);
     }
 
-
-
-    public SingleNote(String title, String content, boolean favorite, long timeModified, long reminderTime, int reminderId) {
+    // New note has a reminder
+    public SingleNote(String title, String content, boolean favorite, long timeCreated, long _nextReminderTime, int reminderId) {
         this._title = title;
         this._content = content;
         this._favorite = favorite;
-        this._timeModified = timeModified;
-        this._nextReminderTime = reminderTime;
+        this._timeCreated = timeCreated;
+        this._timeModified = timeCreated;
+        this._nextReminderTime = _nextReminderTime;
         this._reminderId = reminderId;
     }
 
@@ -50,6 +45,7 @@ public class SingleNote implements Parcelable {
         if (_favorite) {
             result = 31 * result + 1;
         }
+        result = 31 * result + Long.valueOf(_timeCreated).hashCode();
         result = 31 * result + Long.valueOf(_timeModified).hashCode();
         result = 31 * result + Long.valueOf(_nextReminderTime).hashCode();
         result = 31 * result + _reminderId;
@@ -71,6 +67,7 @@ public class SingleNote implements Parcelable {
         return note._content.equals(_content) &&
                 note._title.equals(_title) &&
                 note._favorite == _favorite &&
+                note._timeCreated == _timeCreated &&
                 note._timeModified == _timeModified &&
                 note._nextReminderTime == _nextReminderTime &&
                 note._reminderId == _reminderId;
@@ -84,6 +81,7 @@ public class SingleNote implements Parcelable {
         sb.append(",    Title: ").append(_title);
         sb.append(",    Content: ").append(_content);
         sb.append(",    Favorite: ").append(_favorite);
+        sb.append(",    TimeCreated: ").append(_timeCreated);
         sb.append(",    TimeModified: ").append(_timeModified);
         sb.append(",    ReminderTime: ").append(_nextReminderTime);
         sb.append(",    ReminderId: ").append(_reminderId);
@@ -97,6 +95,7 @@ public class SingleNote implements Parcelable {
         this._title = in.readString();
         this._content = in.readString();
         this._favorite = (in.readInt() == 1);
+        this._timeCreated = in.readLong();
         this._timeModified = in.readLong();
         this._nextReminderTime = in.readLong();
         this._reminderId = in.readInt();
@@ -118,6 +117,8 @@ public class SingleNote implements Parcelable {
         } else {
             dest.writeInt(0);
         }
+
+        dest.writeLong(_timeCreated);
         dest.writeLong(_timeModified);
         dest.writeLong(_nextReminderTime);
         dest.writeInt(_reminderId);
@@ -135,36 +136,12 @@ public class SingleNote implements Parcelable {
         }
     };
 
-    public int get_reminderId() {
-        return _reminderId;
+    public int get_id() {
+        return _id;
     }
 
-    public void set_reminderId(int _reminderId) {
-        this._reminderId = _reminderId;
-    }
-
-    public long get_nextReminderTime() {
-        return _nextReminderTime;
-    }
-
-    public void set_nextReminderTime(long _nextReminderTime) {
-        this._nextReminderTime = _nextReminderTime;
-    }
-
-    public long get_timeModified() {
-        return _timeModified;
-    }
-
-    public void set_timeModified(long _timeModified) {
-        this._timeModified = _timeModified;
-    }
-
-    public boolean is_favorite() {
-        return _favorite;
-    }
-
-    public void set_favorite(boolean _favorite) {
-        this._favorite = _favorite;
+    public void set_id(int _id) {
+        this._id = _id;
     }
 
     public String get_title() {
@@ -175,20 +152,20 @@ public class SingleNote implements Parcelable {
         this._title = _title;
     }
 
-    public int get_id() {
-        return _id;
-    }
-
-    public void set_id(int _id) {
-        this._id = _id;
-    }
-
     public String get_content() {
         return _content;
     }
 
     public void set_content(String _content) {
         this._content = _content;
+    }
+
+    public boolean is_favorite() {
+        return _favorite;
+    }
+
+    public void set_favorite(boolean _favorite) {
+        this._favorite = _favorite;
     }
 
     public long get_timeCreated() {
@@ -199,11 +176,27 @@ public class SingleNote implements Parcelable {
         this._timeCreated = _timeCreated;
     }
 
-    public boolean isRepeating() {
-        return isRepeating;
+    public long get_timeModified() {
+        return _timeModified;
     }
 
-    public void setRepeating(boolean repeating) {
-        isRepeating = repeating;
+    public void set_timeModified(long _timeModified) {
+        this._timeModified = _timeModified;
+    }
+
+    public long get_nextReminderTime() {
+        return _nextReminderTime;
+    }
+
+    public void set_nextReminderTime(long _nextReminderTime) {
+        this._nextReminderTime = _nextReminderTime;
+    }
+
+    public int get_reminderId() {
+        return _reminderId;
+    }
+
+    public void set_reminderId(int _reminderId) {
+        this._reminderId = _reminderId;
     }
 }
