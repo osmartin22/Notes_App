@@ -1,12 +1,12 @@
 package com.ozmar.notes.reminderDialog;
 
 import android.app.NotificationManager;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v4.content.WakefulBroadcastReceiver;
 
 
-public class ReminderReceiver extends BroadcastReceiver {
+public class ReminderReceiver extends WakefulBroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         int id = intent.getIntExtra("Id", 0);

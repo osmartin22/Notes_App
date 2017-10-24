@@ -26,9 +26,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_ID = "id";
     private static final String KEY_TITLE = "title";
     private static final String KEY_CONTENT = "content";
-    private static final String KEY_FAVORITE = "favorite";  // Change to pinned maybe
-    private static final String KEY_TIME_MODIFIED = "time";
-    private static final String KEY_REMINDER_TIME = "reminder";
+    private static final String KEY_FAVORITE = "favorite";
+    private static final String KEY_TIME_CREATED = "timeCreated";
+    private static final String KEY_TIME_MODIFIED = "timeModified";
+    private static final String KEY_REMINDER_TIME = "reminder";     // TODO: Rename to more appropriate NAME
     private static final String KEY_REMINDER_ID = "reminderId";
 
     private static final String CREATE_TABLE_USER_NOTES = "CREATE TABLE IF NOT EXISTS "
@@ -37,25 +38,48 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + KEY_TITLE + " TEXT, "
             + KEY_CONTENT + " TEXT, "
             + KEY_FAVORITE + " INTEGER, "
+            + KEY_TIME_CREATED + " INTEGER, "
             + KEY_TIME_MODIFIED + " INTEGER, "
-            + KEY_REMINDER_TIME + " INTEGER DEFAULT 0, "
-            + KEY_REMINDER_ID + " INTEGER DEFAULT 0);";
+            + KEY_REMINDER_TIME + " INTEGER DEFAULT -1, "
+            + KEY_REMINDER_ID + " INTEGER DEFAULT -1);";
 
     private static final String CREATE_TABLE_ARCHIVE = "CREATE TABLE IF NOT EXISTS "
             + TABLE_ARCHIVE + "("
             + KEY_ID + " INTEGER PRIMARY KEY, "
             + KEY_TITLE + " TEXT, "
             + KEY_CONTENT + " TEXT, "
+            + KEY_TIME_CREATED + " INTEGER, "
             + KEY_TIME_MODIFIED + " INTEGER, "
-            + KEY_REMINDER_TIME + " INTEGER DEFAULT 0, "
-            + KEY_REMINDER_ID + " INTEGER DEFAULT 0);";
+            + KEY_REMINDER_TIME + " INTEGER DEFAULT -1, "
+            + KEY_REMINDER_ID + " INTEGER DEFAULT -1);";
 
     private static final String CREATE_TABLE_RECYCLE_BIN = "CREATE TABLE IF NOT EXISTS "
             + TABLE_RECYCLE_BIN + "("
             + KEY_ID + " INTEGER PRIMARY KEY, "
             + KEY_TITLE + " TEXT, "
             + KEY_CONTENT + " TEXT, "
+            + KEY_TIME_CREATED + " INTEGER, "
             + KEY_TIME_MODIFIED + " INTEGER);";
+
+    private static final String TABLE_REMINDERS = "frequencyChoices";
+    private static final String KEY_NEXT_REMINDER_TIME = "reminder";     // TODO: Rename to more appropriate NAME
+    private static final String KEY_REPEAT_TYPE = "repeatType";
+    private static final String KEY_REPEAT_TYPE_HOW_OFTEN = "repeatTypeHowOften";
+    private static final String KEY_REPEAT_TO_DATE = "repeatToDate";
+    private static final String KEY_REPEAT_EVENTS = "repeatEvents";
+    private static final String KEY_MONTH_REPEAT_TYPE = "monthRepeatType";
+    private static final String KEY_DAYS_CHOSEN = "daysChosen";
+
+    private static final String CREATE_TABLE_REMINDERS = "CREATE TABLE IF NOT EXIST "
+            + TABLE_REMINDERS + "("
+            + KEY_ID + " INTEGER PRIMARY KEY, "
+            + KEY_NEXT_REMINDER_TIME + " INTEGER DEFAULT -1, "
+            + KEY_REPEAT_TYPE + " INTEGER DEFAULT -1, "
+            + KEY_REPEAT_TYPE_HOW_OFTEN + " INTEGER DEFAULT 0, "
+            + KEY_REPEAT_TO_DATE + " INTEGER DEFAULT 0, "
+            + KEY_REPEAT_EVENTS + " INTEGER DEFAULT 0, "
+            + KEY_MONTH_REPEAT_TYPE + " INTEGER DEFAULT 0, "
+            + KEY_DAYS_CHOSEN + " TEXT);";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -66,6 +90,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL(CREATE_TABLE_USER_NOTES);
         sqLiteDatabase.execSQL(CREATE_TABLE_ARCHIVE);
         sqLiteDatabase.execSQL(CREATE_TABLE_RECYCLE_BIN);
+        sqLiteDatabase.execSQL(CREATE_TABLE_REMINDERS);
     }
 
     @Override
@@ -88,6 +113,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_USER_NOTES);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_ARCHIVE);
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_RECYCLE_BIN);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_REMINDERS);
         onCreate(sqLiteDatabase);
     }
 
@@ -118,7 +144,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " ORDER BY ROWID DESC";
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -134,9 +160,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     note.set_favorite(true);
                 }
 
-                note.set_timeModified(cursor.getLong(4));
-                note.set_reminderTime(cursor.getLong(5));
-                note.set_reminderId(cursor.getInt(6));
+                note.set_timeCreated(cursor.getLong(4));
+                note.set_timeModified(cursor.getLong(5));
+                note.set_reminderTime(cursor.getLong(6));
+                note.set_reminderId(cursor.getInt(7));
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -151,7 +178,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES
                 + " WHERE " + KEY_FAVORITE + " = 1 ORDER BY ROWID DESC";
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -167,9 +194,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                     note.set_favorite(true);
                 }
 
-                note.set_timeModified(cursor.getLong(4));
-                note.set_reminderTime(cursor.getLong(5));
-                note.set_reminderId(cursor.getInt(6));
+                note.set_timeCreated(cursor.getLong(4));
+                note.set_timeModified(cursor.getLong(5));
+                note.set_reminderTime(cursor.getLong(6));
+                note.set_reminderId(cursor.getInt(7));
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -225,6 +253,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(KEY_FAVORITE, 0);
         }
 
+        values.put(KEY_TIME_CREATED, note.get_timeCreated());
         values.put(KEY_TIME_MODIFIED, note.get_timeModified());
         values.put(KEY_REMINDER_TIME, note.get_reminderTime());
         values.put(KEY_REMINDER_ID, note.get_reminderId());
@@ -253,6 +282,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 values.put(KEY_FAVORITE, 0);
             }
 
+            values.put(KEY_TIME_CREATED, note.get_timeCreated());
             values.put(KEY_TIME_MODIFIED, note.get_timeModified());
             values.put(KEY_REMINDER_TIME, note.get_reminderTime());
             values.put(KEY_REMINDER_ID, note.get_reminderId());
@@ -279,7 +309,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_ARCHIVE + " ORDER BY ROWID DESC";
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -331,6 +361,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_TITLE, note.get_title());
         values.put(KEY_CONTENT, note.get_content());
+        values.put(KEY_TIME_CREATED, note.get_timeCreated());
         values.put(KEY_TIME_MODIFIED, note.get_timeModified());
         values.put(KEY_REMINDER_TIME, note.get_reminderTime());
         values.put(KEY_REMINDER_ID, note.get_reminderId());
@@ -352,6 +383,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         for (SingleNote note : list) {
             values.put(KEY_TITLE, note.get_title());
             values.put(KEY_CONTENT, note.get_content());
+            values.put(KEY_TIME_CREATED, note.get_timeCreated());
             values.put(KEY_TIME_MODIFIED, note.get_timeModified());
             values.put(KEY_REMINDER_TIME, note.get_reminderTime());
             values.put(KEY_REMINDER_ID, note.get_reminderId());
@@ -380,7 +412,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_RECYCLE_BIN + " ORDER BY ROWID DESC";
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         if (cursor.moveToFirst()) {
@@ -405,6 +437,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(KEY_TITLE, note.get_title());
         values.put(KEY_CONTENT, note.get_content());
+        values.put(KEY_TIME_CREATED, note.get_timeCreated());
         values.put(KEY_TIME_MODIFIED, note.get_timeModified());
 
         db.insert(TABLE_RECYCLE_BIN, null, values);
@@ -424,6 +457,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         for (SingleNote note : list) {
             values.put(KEY_TITLE, note.get_title());
             values.put(KEY_CONTENT, note.get_content());
+            values.put(KEY_TIME_CREATED, note.get_timeCreated());
             values.put(KEY_TIME_MODIFIED, System.currentTimeMillis());
 
             db.insert(TABLE_RECYCLE_BIN, null, values);
@@ -465,6 +499,62 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         cursor.close();
+    }
+
+
+    //--------------------------------------------------------------------------------------------//
+    // Reminders Table Specific Methods
+    //--------------------------------------------------------------------------------------------//
+
+    public NextReminderTime getNextReminderTime(int id) {
+        int nextReminderTime = 0;
+        boolean isRepeating = false;
+
+        String selectQuery = "SELECT " + KEY_NEXT_REMINDER_TIME + ", " + KEY_REPEAT_TYPE +
+                " FROM " + TABLE_REMINDERS + " WHERE ROWID = " + id;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                nextReminderTime = cursor.getInt(0);
+                isRepeating = cursor.getInt(1) != -1;
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return new NextReminderTime(nextReminderTime, isRepeating);
+    }
+
+    // NOTE: Assuming that I already got cursor(0) in notesAdapter
+    public FrequencyChoices getFrequencyChoices(int id) {
+        String selectQuery = "SELECT * FROM " + TABLE_REMINDERS + " WHERE ROWID = " + id;
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        FrequencyChoices choices = null;
+        if (cursor.moveToFirst()) {
+            do {
+                choices = new FrequencyChoices();
+                choices.setRepeatType(cursor.getInt(1));
+                choices.setRepeatTypeHowOften(cursor.getInt(2));
+                choices.setRepeatToSpecificDate(cursor.getLong(3));
+                choices.setHowManyRepeatEvents(cursor.getInt(4));
+                choices.setMonthRepeatType(cursor.getInt(5));
+
+                String days = cursor.getString(6);
+
+                // TODO: Get convert days to List<>
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return choices;
+    }
+
+    public void addFrequencyChoice() {
+
     }
 
 } // DataBaseHandler() end

@@ -11,9 +11,12 @@ public class SingleNote implements Parcelable {
     private String _content;
     private boolean _favorite;
 
+    private long _timeCreated;
     private long _timeModified;
     private long _reminderTime = 0; // TODO: this should only be the time until the next reminder alarm
     private int _reminderId = 0;
+
+    private boolean isRepeating = false;
 
     public SingleNote() {
 
@@ -186,5 +189,21 @@ public class SingleNote implements Parcelable {
 
     public void set_content(String _content) {
         this._content = _content;
+    }
+
+    public long get_timeCreated() {
+        return _timeCreated;
+    }
+
+    public void set_timeCreated(long _timeCreated) {
+        this._timeCreated = _timeCreated;
+    }
+
+    public boolean isRepeating() {
+        return isRepeating;
+    }
+
+    public void setRepeating(boolean repeating) {
+        isRepeating = repeating;
     }
 }

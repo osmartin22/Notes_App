@@ -460,11 +460,11 @@ public class ReminderDialogFragment extends DialogFragment
     public void onFrequencyPicked(FrequencyChoices choices) {
         this.choices = choices;
 
-        if (choices == null) {
-            this.choices = null;
-        } else {
+        if(choices != null) {
             frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices);
             frequencySpinnerAdapter.notifyDataSetChanged();
+        } else{
+            frequencySpinner.setSelection(0);
         }
     }
 }
