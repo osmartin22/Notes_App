@@ -49,8 +49,8 @@ public class NoteEditorUtils {
     }
 
     public static boolean reminderChanged(long reminderTime, SingleNote note, NoteChanges changes) {
-        if (reminderTime != note.get_reminderTime()) {
-            note.set_reminderTime(reminderTime);
+        if (reminderTime != note.get_nextReminderTime()) {
+            note.set_nextReminderTime(reminderTime);
             changes.setReminderTimeChanged(true);
             return true;
         }
@@ -59,7 +59,7 @@ public class NoteEditorUtils {
 
     public static void modifyReminderIntent(Context context, Preferences preferences, SingleNote note, boolean reminderChanged, boolean noteTextChanged) {
         // Adding a new PendingIntent ID
-        if (note.get_reminderTime() != 0) {
+        if (note.get_nextReminderTime() != 0) {
 
             // Add unique ID for notification/alarm if note does not already have one
             if (note.get_reminderId() == 0) {
@@ -67,13 +67,13 @@ public class NoteEditorUtils {
             }
 
             // Update alarm with new time/text and the reminder time has not already passed
-            if ((reminderChanged || noteTextChanged) && note.get_reminderTime() > System.currentTimeMillis()) {
+            if ((reminderChanged || noteTextChanged) && note.get_nextReminderTime() > System.currentTimeMillis()) {
                 ReminderManager.start(context, note);
             }
         }
 
         // Remove Reminder
-        else if (note.get_reminderTime() == 0 && reminderChanged) {
+        else if (note.get_nextReminderTime() == 0 && reminderChanged) {
             ReminderManager.cancel(context, note.get_reminderId());
         }
     }

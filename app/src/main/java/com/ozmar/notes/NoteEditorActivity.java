@@ -31,14 +31,14 @@ import static com.ozmar.notes.MainActivity.db;
 // TODO: Add Clock Symbol and repeat symbol to reminder display
 
 // TODO: Possibly pass a copy of FrequencyChoices to ReminderDialogFragment instead
-    // To do == comparison at the end to check whether the alarm needs updating
+// To do == comparison at the end to check whether the alarm needs updating
 // Currently, FrequencyChoices will always change so the alarm always needs updating
 
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener {
 
     private EditText editTextTitle, editTextContent;
-    private SingleNote currentNote = null;
+    private SingleNote currentNote;
     private MenuItem menuItem;
 
     private boolean favorite = false;
@@ -52,8 +52,8 @@ public class NoteEditorActivity extends AppCompatActivity
 
     private Preferences preferences;
 
-    private FrequencyChoices choices = null;
-
+    private FrequencyChoices choices;
+    private boolean choicesChanged = false;
 
     private void contextualActionResult(MenuItem item) {
         String title = editTextTitle.getText().toString();
@@ -211,9 +211,15 @@ public class NoteEditorActivity extends AppCompatActivity
                 favorite = currentNote.is_favorite();
             }
 
-            if (currentNote.get_reminderTime() != 0) {
-                reminderTime = currentNote.get_reminderTime();
-                reminderButton.setText(FormatUtils.getReminderText(getApplication(), new DateTime(currentNote.get_reminderTime())));
+            if (currentNote.get_nextReminderTime() != 0) {
+                reminderTime = currentNote.get_nextReminderTime();
+                String reminderText = FormatUtils.getReminderText(getApplication(),
+                        new DateTime(currentNote.get_nextReminderTime()));
+                if (currentNote.isRepeating()) {
+                    choices = db.getFrequencyChoices(currentNote.get_reminderId());
+                    reminderText += " " + FormatUtils.formatFrequencyText(getApplicationContext(), choices);
+                }
+                reminderButton.setText(reminderText);
                 reminderButton.setVisibility(View.VISIBLE);
             }
 
@@ -300,7 +306,11 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @Override
     public void onReminderPicked(DateTime dateTime, int frequencyPicked, FrequencyChoices choices) {
-        this.choices = choices;
+        if (this.choices != choices) {
+            this.choices = choices;
+            choicesChanged = true;
+        }
+
         reminderTime = dateTime.getMillis();
         reminderButton.setText(FormatUtils.getReminderText(getApplication(), dateTime));
         reminderButton.setVisibility(View.VISIBLE);
@@ -308,6 +318,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @Override
     public void onReminderDelete() {
+        choices = null;
         reminderTime = 0;
         reminderButton.setVisibility(View.INVISIBLE);
     }

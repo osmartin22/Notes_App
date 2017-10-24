@@ -1,8 +1,5 @@
 package com.ozmar.notes;
 
-/**
- * Created by ozmar on 10/23/2017.
- */
 
 public class NextReminderTime {
     public final long nextReminderTime;

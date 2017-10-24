@@ -183,7 +183,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.WHITE);
         }
 
-        boolean displayReminder = note.get_reminderTime() != 0;
+        boolean displayReminder = note.get_nextReminderTime() != 0;
 
         switch (viewHolder.getItemViewType()) {
             case 0:
@@ -210,7 +210,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private void displayReminder(SingleNote note, View reminderView, TextView reminderText, boolean displayReminder) {
         if (displayReminder) {
-            reminderText.setText(FormatUtils.getReminderText(context, new DateTime(note.get_reminderTime())));
+            reminderText.setText(FormatUtils.getReminderText(context, new DateTime(note.get_nextReminderTime())));
             reminderView.setVisibility(View.VISIBLE);
         } else {
             reminderView.setVisibility(View.GONE);

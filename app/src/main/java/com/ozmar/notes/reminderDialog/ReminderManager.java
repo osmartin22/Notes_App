@@ -32,11 +32,11 @@ public class ReminderManager {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, note.get_reminderId(),
                 myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        String setReminder = FormatUtils.getMonthDayFormatLong(new DateTime(note.get_reminderTime()))
-                + ", " +FormatUtils.getTimeFormat(context, new LocalTime(note.get_reminderTime()));
+        String setReminder = FormatUtils.getMonthDayFormatLong(new DateTime(note.get_nextReminderTime()))
+                + ", " +FormatUtils.getTimeFormat(context, new LocalTime(note.get_nextReminderTime()));
         Log.d("Notification", setReminder);
 
-        manager.setExact(AlarmManager.RTC_WAKEUP, note.get_reminderTime(), pendingIntent);
+        manager.setExact(AlarmManager.RTC_WAKEUP, note.get_nextReminderTime(), pendingIntent);
     }
 
     public static void cancel(Context context, int id) {
