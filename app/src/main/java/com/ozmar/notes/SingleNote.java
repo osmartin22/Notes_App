@@ -15,6 +15,7 @@ public class SingleNote implements Parcelable {
     private long _timeModified;
     private long _nextReminderTime;
     private int _reminderId;
+    private boolean _hasFrequencyChoices = false;
 
     public SingleNote() {
 
@@ -49,6 +50,9 @@ public class SingleNote implements Parcelable {
         result = 31 * result + Long.valueOf(_timeModified).hashCode();
         result = 31 * result + Long.valueOf(_nextReminderTime).hashCode();
         result = 31 * result + _reminderId;
+        if (_hasFrequencyChoices) {
+            result = 31 * result + 1;
+        }
         return result;
     }
 
@@ -70,7 +74,8 @@ public class SingleNote implements Parcelable {
                 note._timeCreated == _timeCreated &&
                 note._timeModified == _timeModified &&
                 note._nextReminderTime == _nextReminderTime &&
-                note._reminderId == _reminderId;
+                note._reminderId == _reminderId &&
+                note._hasFrequencyChoices == _hasFrequencyChoices;
     }
 
     @Override
@@ -85,6 +90,7 @@ public class SingleNote implements Parcelable {
         sb.append(",    TimeModified: ").append(_timeModified);
         sb.append(",    ReminderTime: ").append(_nextReminderTime);
         sb.append(",    ReminderId: ").append(_reminderId);
+        sb.append(",    HasFrequencyChoice: ").append(_hasFrequencyChoices);
         sb.append(" ]");
 
         return sb.toString();
@@ -99,6 +105,7 @@ public class SingleNote implements Parcelable {
         this._timeModified = in.readLong();
         this._nextReminderTime = in.readLong();
         this._reminderId = in.readInt();
+        this._hasFrequencyChoices = (in.readInt() == 1);
     }
 
     @Override
@@ -122,6 +129,12 @@ public class SingleNote implements Parcelable {
         dest.writeLong(_timeModified);
         dest.writeLong(_nextReminderTime);
         dest.writeInt(_reminderId);
+
+        if (_hasFrequencyChoices) {
+            dest.writeInt(1);
+        } else {
+            dest.writeInt(0);
+        }
     }
 
     public static final Parcelable.Creator<SingleNote> CREATOR = new Parcelable.Creator<SingleNote>() {
@@ -198,5 +211,13 @@ public class SingleNote implements Parcelable {
 
     public void set_reminderId(int _reminderId) {
         this._reminderId = _reminderId;
+    }
+
+    public boolean hasFrequencyChoices() {
+        return _hasFrequencyChoices;
+    }
+
+    public void set_hasFrequencyChoices(boolean _hasFrequencyChoices) {
+        this._hasFrequencyChoices = _hasFrequencyChoices;
     }
 }

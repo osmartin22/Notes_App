@@ -207,6 +207,11 @@ public class ReminderDialogFragment extends DialogFragment
     // Set Spinner positions to reflect previous user reminder if available
     // or to x hours into the future
     private void setSpinnerPosition() {
+        if (choices != null) {
+            frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices);
+            frequencySpinner.setSelection(5);
+        }
+
         if (chosenDateTime != null) {
             dateSpinner.setSelection(4);
             year = chosenDateTime.getYear();
@@ -460,10 +465,10 @@ public class ReminderDialogFragment extends DialogFragment
     public void onFrequencyPicked(FrequencyChoices choices) {
         this.choices = choices;
 
-        if(choices != null) {
+        if (choices != null) {
             frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices);
             frequencySpinnerAdapter.notifyDataSetChanged();
-        } else{
+        } else {
             frequencySpinner.setSelection(0);
         }
     }
