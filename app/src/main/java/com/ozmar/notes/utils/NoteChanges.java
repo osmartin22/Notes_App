@@ -4,9 +4,10 @@ package com.ozmar.notes.utils;
 public class NoteChanges {
     private int noteTextChanges = 0;
     private boolean favoriteChanged = false;
+    private boolean reminderIdChanged = false;
+
     private boolean reminderTimeChanged = false;
 
-    private boolean reminderFrequencyChanged = false;
 
     public NoteChanges() {
 
@@ -28,19 +29,19 @@ public class NoteChanges {
         this.favoriteChanged = favoriteChanged;
     }
 
+    public boolean isReminderIdChanged() {
+        return reminderIdChanged;
+    }
+
+    public void setReminderIdChanged(boolean reminderIdChanged) {
+        this.reminderIdChanged = reminderIdChanged;
+    }
+
     public boolean isReminderTimeChanged() {
         return reminderTimeChanged;
     }
 
     public void setReminderTimeChanged(boolean reminderTimeChanged) {
         this.reminderTimeChanged = reminderTimeChanged;
-    }
-
-    public boolean isReminderFrequencyChanged() {
-        return reminderFrequencyChanged;
-    }
-
-    public void setReminderFrequencyChanged(boolean reminderFrequencyChanged) {
-        this.reminderFrequencyChanged = reminderFrequencyChanged;
     }
 }

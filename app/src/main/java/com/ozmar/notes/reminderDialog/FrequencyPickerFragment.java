@@ -126,6 +126,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
         calendarButton.setText(FormatUtils.getMonthDayFormatShort(dateTime));
 
+        // TODO: Combine this if() with same if() statement a couple lines down below
         if (choices != null) {
             if (choices.getRepeatToSpecificDate() != 0) {
                 calendarButton.setText(FormatUtils.getMonthDayFormatShort(choices.getRepeatToSpecificDate()));
@@ -147,10 +148,30 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         numberEditText.addTextChangedListener(this);
         numberOfEventsEditText.addTextChangedListener(this);
 
+//        if (choices != null) {
+//            topSpinner.setSelection(choices.getRepeatType());
+//            if(choices.getRepeatToSpecificDate() != 0) {
+//                bottomSpinner.setSelection(1);
+//            } else if(choices.getHowManyRepeatEvents() != 0) {
+//                bottomSpinner.setSelection(2);
+//            }
+//        }
+//
         setUpSpinnerListeners();
         setUpSwitchListener();
         setUpDoneListener();
         setUpCalendarListener();
+
+        if (choices != null) {
+            topSpinner.setSelection(choices.getRepeatType());
+            if(choices.getRepeatToSpecificDate() != 0) {
+                bottomSpinner.setSelection(1);
+            } else if(choices.getHowManyRepeatEvents() != 0) {
+                bottomSpinner.setSelection(2);
+            }
+        }
+
+
         return mainView;
     }
 

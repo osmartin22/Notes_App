@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import com.ozmar.notes.utils.NoteChanges;
 
@@ -225,7 +224,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     } // getFavoriteNotes() end
 
     public void updateNoteFromUserList(SingleNote note, NoteChanges changes) {
-        SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         if (changes.getNoteTextChanges() != 0) {
@@ -248,20 +246,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
         }
 
-        // TODO: Rewrite -> Temporary Solution
-//        if(choices != null) {
-
-//        }
-        // Check for changes to nextReminderTime or FrequencyChoices
-        // Update the changed value
-
-
-        if (changes.isReminderTimeChanged()) {
+        if (changes.isReminderIdChanged()) {
             values.put(KEY_REMINDER_ID, note.get_reminderId());
         }
 
-        db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
-                new String[]{String.valueOf(note.get_id())});
+        if (values.size() != 0) {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
+                    new String[]{String.valueOf(note.get_id())});
+        }
     }
 
     public int addNoteToUserList(SingleNote note) {
@@ -360,7 +353,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     } // getArchiveNotes() end
 
     public void updateNoteFromArchive(SingleNote note, NoteChanges changes) {
-        SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         if (changes.getNoteTextChanges() != 0) {
@@ -375,13 +367,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(KEY_TIME_MODIFIED, note.get_timeModified());
         }
 
-        // TODO: Rewrite
-        if (changes.isReminderTimeChanged()) {
+        if (changes.isReminderIdChanged()) {
             values.put(KEY_REMINDER_ID, note.get_reminderId());
         }
 
-        db.update(TABLE_ARCHIVE, values, KEY_ID + " = ?",
-                new String[]{String.valueOf(note.get_id())});
+        if (values.size() != 0) {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.update(TABLE_ARCHIVE, values, KEY_ID + " = ?",
+                    new String[]{String.valueOf(note.get_id())});
+        }
     }
 
     public void addNoteToArchive(SingleNote note) {
@@ -604,7 +598,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         values.put(KEY_NEXT_REMINDER_TIME, nextReminderTime);
         if (choices != null) {
-            Log.d("Reminder", "Inserting FrequencyChoices -> " + choices.getRepeatType());
             values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
             values.put(KEY_REPEAT_TYPE_HOW_OFTEN, choices.getRepeatTypeHowOften());
             values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToSpecificDate());

@@ -25,18 +25,6 @@ public class Preferences {
         editor.apply();
     }
 
-    public int getReminderID() {
-        int id = preferences.getInt("reminderID", 1) + 1;
-        setReminderID(id);
-        return id;
-    }
-
-    public void setReminderID(int reminderId) {
-        editor = preferences.edit();
-        editor.putInt("reminderID", reminderId);
-        editor.apply();
-    }
-
     public int getDaysInTrash() {
         return preferences.getInt("Day In Trash", 1);
     }

@@ -40,6 +40,7 @@ public class UpdateNoteAsync extends AsyncTask<Void, Void, Void> {
         } else if (listUsed == 2) {
             db.updateNoteFromArchive(note, changes);
         }
+
         return null;
     }
 
