@@ -606,20 +606,20 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(KEY_REPEAT_EVENTS, choices.getHowManyRepeatEvents());
             values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());
 
-            String daysString = "";
-            for (Integer day : choices.getDaysChosen()) {
-                daysString += day + " ";
+            List<Integer> chosenDays = choices.getDaysChosen();
+            if (chosenDays != null) {
+                StringBuilder daysString = new StringBuilder();
+                for (Integer day : choices.getDaysChosen()) {
+                    daysString.append(day).append(" ");
+                }
+                values.put(KEY_DAYS_CHOSEN, daysString.toString());
             }
-            values.put(KEY_DAYS_CHOSEN, daysString);
         }
 
         return (int) db.insert(TABLE_REMINDERS, null, values);
     }
 
     public void updateReminder(int id, FrequencyChoices choices, long nextReminderTime) {
-        // TODO: Possibly call in noteUpdate instead
-        // Should update UpdateNoteAsync if taking this route
-
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -633,11 +633,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
             List<Integer> chosenDays = choices.getDaysChosen();
             if (chosenDays != null) {
-                String daysString = "";
-                for (Integer day : chosenDays) {
-                    daysString += day + " ";
+                StringBuilder daysString = new StringBuilder();
+                for (Integer day : choices.getDaysChosen()) {
+                    daysString.append(day).append(" ");
                 }
-                values.put(KEY_DAYS_CHOSEN, daysString);
+                values.put(KEY_DAYS_CHOSEN, daysString.toString());
             }
 
         } else {
@@ -656,18 +656,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteReminder(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         deleteReminder(db, id);
-    }
-
-    // Setting KEY_REPEAT_TYPE to -1 denotes that FrequencyChoice is null and will appear as null
-    // to the program until a new FrequencyChoice is inserted
-    public void deleteFrequencyChoiceDelete(int id) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(KEY_REPEAT_TYPE, -1);
-
-        db.update(TABLE_REMINDERS, values, KEY_ID + " = ?",
-                new String[]{String.valueOf(id)});
     }
 
 } // DataBaseHandler() end

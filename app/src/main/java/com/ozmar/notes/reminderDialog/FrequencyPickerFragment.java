@@ -44,7 +44,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private TextView timeUnitTextView;
 
     private View contentView;
-    private ViewSwitcher viewSwitcher;
+    private ViewSwitcher typeViewSwitcher;
 
     private ViewSwitcher bottomViewSwitcher;
     private EditText numberOfEventsEditText;
@@ -116,7 +116,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         contentView = mainView.findViewById(R.id.reminderDialogContent);
         numberEditText = contentView.findViewById(R.id.everyNumberEditText);
         timeUnitTextView = contentView.findViewById(R.id.timeUnitTextView);
-        viewSwitcher = contentView.findViewById(R.id.viewSwitcher);
+        typeViewSwitcher = contentView.findViewById(R.id.viewSwitcher);
 
         bottomViewSwitcher = contentView.findViewById(R.id.nextToBottomSpinner);
         numberOfEventsEditText = bottomViewSwitcher.findViewById(R.id.numberOfEventsEditText);
@@ -126,16 +126,12 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
         calendarButton.setText(FormatUtils.getMonthDayFormatShort(dateTime));
 
-        // TODO: Combine this if() with same if() statement a couple lines down below
         if (choices != null) {
-            if (choices.getRepeatToSpecificDate() != 0) {
-                calendarButton.setText(FormatUtils.getMonthDayFormatShort(choices.getRepeatToSpecificDate()));
-            }
-            weeklyHelper = new WeeklyLayoutHelper(viewSwitcher.findViewById(R.id.repeatWeeklyLayout), doneButton, choices.getDaysChosen());
-            monthlyHelper = new MonthlyLayoutHelper(viewSwitcher.findViewById(R.id.repeatMonthlyLayout), choices.getMonthRepeatType());
+            weeklyHelper = new WeeklyLayoutHelper(typeViewSwitcher.findViewById(R.id.repeatWeeklyLayout), doneButton, choices.getDaysChosen());
+            monthlyHelper = new MonthlyLayoutHelper(typeViewSwitcher.findViewById(R.id.repeatMonthlyLayout), choices.getMonthRepeatType());
         } else {
-            weeklyHelper = new WeeklyLayoutHelper(viewSwitcher.findViewById(R.id.repeatWeeklyLayout), doneButton);
-            monthlyHelper = new MonthlyLayoutHelper(viewSwitcher.findViewById(R.id.repeatMonthlyLayout));
+            weeklyHelper = new WeeklyLayoutHelper(typeViewSwitcher.findViewById(R.id.repeatWeeklyLayout), doneButton);
+            monthlyHelper = new MonthlyLayoutHelper(typeViewSwitcher.findViewById(R.id.repeatMonthlyLayout));
         }
 
         SimpleAdapter adapter = new SimpleAdapter(getContext(), android.R.layout.simple_spinner_item,
@@ -148,29 +144,38 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         numberEditText.addTextChangedListener(this);
         numberOfEventsEditText.addTextChangedListener(this);
 
-//        if (choices != null) {
-//            topSpinner.setSelection(choices.getRepeatType());
-//            if(choices.getRepeatToSpecificDate() != 0) {
-//                bottomSpinner.setSelection(1);
-//            } else if(choices.getHowManyRepeatEvents() != 0) {
-//                bottomSpinner.setSelection(2);
-//            }
-//        }
-//
+        // Not Sure why but I have to call showNextView() twice if I want to show the previous
+        // reminder choices
+        // I do not have to do this if this is a new reminder being created instead of being modified
+        // Could be something having to do with ViewSwitcher
+        // This should have been taken care of by just setting the necessary spinner positions
+        if (choices != null) {
+            if (choices.getRepeatType() == 1) {
+                showNextView(typeViewSwitcher, weeklyHelper.getMainView());
+            } else if (choices.getRepeatType() == 2) {
+                showNextView(typeViewSwitcher, monthlyHelper.getMainView());
+            }
+            numberEditText.setText(String.valueOf(choices.getRepeatTypeHowOften()));
+            topSpinner.setSelection(choices.getRepeatType());
+
+            if (choices.getRepeatToSpecificDate() != 0) {
+                bottomSpinner.setSelection(1);
+                bottomViewSwitcher.setVisibility(View.VISIBLE);
+                calendarButton.setVisibility(View.VISIBLE);
+                calendarButton.setText(FormatUtils.getMonthDayFormatShort(choices.getRepeatToSpecificDate()));
+
+            } else if (choices.getHowManyRepeatEvents() != 0) {
+                bottomSpinner.setSelection(2);
+                bottomViewSwitcher.setVisibility(View.VISIBLE);
+                numberOfEventsEditText.setVisibility(View.VISIBLE);
+                numberOfEventsEditText.setText(String.valueOf(choices.getHowManyRepeatEvents()));
+            }
+        }
+
         setUpSpinnerListeners();
         setUpSwitchListener();
         setUpDoneListener();
         setUpCalendarListener();
-
-        if (choices != null) {
-            topSpinner.setSelection(choices.getRepeatType());
-            if(choices.getRepeatToSpecificDate() != 0) {
-                bottomSpinner.setSelection(1);
-            } else if(choices.getHowManyRepeatEvents() != 0) {
-                bottomSpinner.setSelection(2);
-            }
-        }
-
 
         return mainView;
     }
@@ -182,21 +187,15 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                 switch (position) {
                     case 0:     // Daily View
                     case 3:     // Yearly View
-                        viewSwitcher.setVisibility(View.GONE);
+                        typeViewSwitcher.setVisibility(View.GONE);
                         break;
 
                     case 1:     // Weekly View
-                        viewSwitcher.setVisibility(View.VISIBLE);
-                        if (viewSwitcher.getNextView() == weeklyHelper.getMainView()) {
-                            viewSwitcher.showNext();
-                        }
+                        showNextView(typeViewSwitcher, weeklyHelper.getMainView());
                         break;
 
                     case 2:     // Monthly View
-                        viewSwitcher.setVisibility(View.VISIBLE);
-                        if (viewSwitcher.getNextView() == monthlyHelper.getMainView()) {
-                            viewSwitcher.showNext();
-                        }
+                        showNextView(typeViewSwitcher, monthlyHelper.getMainView());
                         break;
                 }
 
@@ -219,16 +218,10 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                         bottomViewSwitcher.setVisibility(View.GONE);
                         break;
                     case 1:
-                        bottomViewSwitcher.setVisibility(View.VISIBLE);
-                        if (bottomViewSwitcher.getNextView() == calendarButton) {
-                            bottomViewSwitcher.showNext();
-                        }
+                        showNextView(bottomViewSwitcher, calendarButton);
                         break;
                     case 2:
-                        bottomViewSwitcher.setVisibility(View.VISIBLE);
-                        if (bottomViewSwitcher.getNextView() == eventsMainView) {
-                            bottomViewSwitcher.showNext();
-                        }
+                        showNextView(bottomViewSwitcher, eventsMainView);
                         break;
                 }
 
@@ -241,6 +234,13 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
             }
         });
+    }
+
+    private void showNextView(ViewSwitcher viewSwitcher, View view) {
+        viewSwitcher.setVisibility(View.VISIBLE);
+        if (viewSwitcher.getNextView() == view) {
+            viewSwitcher.showNext();
+        }
     }
 
     private void setUpSwitchListener() {

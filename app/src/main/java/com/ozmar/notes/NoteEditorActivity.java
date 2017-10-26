@@ -234,6 +234,8 @@ public class NoteEditorActivity extends AppCompatActivity
 
         if (choices != null) {
             currentNote.set_hasFrequencyChoices(true);
+        } else {
+            currentNote.set_hasFrequencyChoices(false);
         }
     }
 
