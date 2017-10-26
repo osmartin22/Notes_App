@@ -65,6 +65,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + KEY_TIME_CREATED + " INTEGER, "
             + KEY_TIME_MODIFIED + " INTEGER);";
 
+
+    // TABLE_REMINDERS
     private static final String TABLE_REMINDERS = "frequencyChoices";
     private static final String KEY_NEXT_REMINDER_TIME = "reminder";
     private static final String KEY_REPEAT_TYPE = "repeatType";
@@ -629,12 +631,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             values.put(KEY_REPEAT_EVENTS, choices.getHowManyRepeatEvents());
             values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());
 
-            String daysString = "";
-            for (Integer day : choices.getDaysChosen()) {
-                daysString += day + " ";
+            List<Integer> chosenDays = choices.getDaysChosen();
+            if (chosenDays != null) {
+                String daysString = "";
+                for (Integer day : chosenDays) {
+                    daysString += day + " ";
+                }
+                values.put(KEY_DAYS_CHOSEN, daysString);
             }
 
-            values.put(KEY_DAYS_CHOSEN, daysString);
+        } else {
+            values.put(KEY_REPEAT_TYPE, -1);
         }
 
         db.update(TABLE_REMINDERS, values, KEY_ID + " = ?",
@@ -653,7 +660,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Setting KEY_REPEAT_TYPE to -1 denotes that FrequencyChoice is null and will appear as null
     // to the program until a new FrequencyChoice is inserted
-    public void partialFrequencyChoiceDelete(int id) {
+    public void deleteFrequencyChoiceDelete(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();

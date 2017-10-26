@@ -6,9 +6,6 @@ public class NoteChanges {
     private boolean favoriteChanged = false;
     private boolean reminderIdChanged = false;
 
-    private boolean reminderTimeChanged = false;
-
-
     public NoteChanges() {
 
     }
@@ -35,13 +32,5 @@ public class NoteChanges {
 
     public void setReminderIdChanged(boolean reminderIdChanged) {
         this.reminderIdChanged = reminderIdChanged;
-    }
-
-    public boolean isReminderTimeChanged() {
-        return reminderTimeChanged;
-    }
-
-    public void setReminderTimeChanged(boolean reminderTimeChanged) {
-        this.reminderTimeChanged = reminderTimeChanged;
     }
 }
