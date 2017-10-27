@@ -575,14 +575,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 choices.setHowManyRepeatEvents(cursor.getInt(5));
                 choices.setMonthRepeatType(cursor.getInt(6));
 
-                String days = cursor.getString(7);
-
-                Scanner scanner = new Scanner(days);
-                List<Integer> list = new ArrayList<>();
-                while (scanner.hasNextInt()) {
-                    list.add(scanner.nextInt());
+                if (cursor.getString(7) != null) {
+                    Scanner scanner = new Scanner(cursor.getString(7));
+                    List<Integer> list = new ArrayList<>();
+                    while (scanner.hasNextInt()) {
+                        list.add(scanner.nextInt());
+                    }
+                    choices.setDaysChosen(list);
                 }
-                choices.setDaysChosen(list);
 
             } while (cursor.moveToNext());
         }

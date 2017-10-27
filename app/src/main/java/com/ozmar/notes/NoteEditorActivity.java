@@ -1,6 +1,5 @@
 package com.ozmar.notes;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -10,9 +9,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +29,8 @@ import static com.ozmar.notes.MainActivity.db;
 
 // TODO: Add Clock Symbol and repeat symbol to reminder display
 
+// TODO: Make sure reminders are deleted properly when deleting from this activity
+
 // TODO: Possibly pass a copy of FrequencyChoices to ReminderDialogFragment instead
 // To do == comparison at the end to check whether the alarm needs updating
 // Currently, FrequencyChoices will always change so the alarm always needs updating
@@ -50,7 +49,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
     private String[] noteResult;
 
-    private Button reminderButton;
+    private TextView reminderText;
     private long reminderTime = 0;
 
     private void contextualActionResult(MenuItem item) {
@@ -247,7 +246,7 @@ public class NoteEditorActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_note_editor);
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -256,9 +255,9 @@ public class NoteEditorActivity extends AppCompatActivity
 
         noteResult = getResources().getStringArray(R.array.noteResultArray);
 
-        reminderButton = (Button) findViewById(R.id.reminderText);
-        editTextTitle = (EditText) findViewById(R.id.editTextTitle);
-        editTextContent = (EditText) findViewById(R.id.editTextContent);
+        editTextTitle = findViewById(R.id.editTextTitle);
+        editTextContent = findViewById(R.id.editTextContent);
+        reminderText = findViewById(R.id.reminderText);
 
         Intent intent = getIntent();
         notePosition = intent.getIntExtra("noteID", 0);
@@ -271,26 +270,27 @@ public class NoteEditorActivity extends AppCompatActivity
     private void setUpNoteView() {
         if (currentNote != null) {
 
-            // TODO: Check why I need this if() statement
             if (listUsed == 2 && currentNote.is_favorite()) {
                 currentNote.set_favorite(false);
             } else {
                 favorite = currentNote.is_favorite();
             }
 
-            Log.d("Reminder", "ReminderID -> " + currentNote.get_reminderId());
-            Log.d("Reminder", "HasFrequency -> " + currentNote.hasFrequencyChoices());
             if (currentNote.get_reminderId() != -1) {
                 if (currentNote.hasFrequencyChoices()) {
-                    // TODO: Possibly use AsyncTask for this
+                    reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
+                            0, 0, 0);
                     choices = db.getFrequencyChoice(currentNote.get_reminderId());
+                } else {
+                    reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
+                            0, 0, 0);
                 }
                 reminderTime = currentNote.get_nextReminderTime();
-                reminderButton.setText(FormatUtils.getReminderText(getApplication(), new DateTime(reminderTime)));
-                reminderButton.setVisibility(View.VISIBLE);
+                reminderText.setText(FormatUtils.getReminderText(getApplication(), new DateTime(reminderTime)));
+                reminderText.setVisibility(View.VISIBLE);
             }
 
-            TextView timeTextView = (TextView) findViewById(R.id.lastModified);
+            TextView timeTextView = findViewById(R.id.lastModified);
             timeTextView.setText(FormatUtils.lastUpdated(getApplicationContext(), currentNote.get_timeModified()));
 
             editTextTitle.setText(currentNote.get_title());
@@ -300,18 +300,16 @@ public class NoteEditorActivity extends AppCompatActivity
 
             // Keyboard does not pop up until the user clicks on the screen
             // allowing the user to see the entire note at the start
-            View.OnTouchListener editTextListener = new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (listUsed == 3) {
-                        // TODO: Possibly change to SnackBar
-                        Toast.makeText(getApplicationContext(), "Can't edit in Trash", Toast.LENGTH_SHORT).show();
-                    } else {
-                        view.setFocusableInTouchMode(true);
-                        view.requestFocus();
-                    }
-                    return false;
+            View.OnTouchListener editTextListener = (view, motionEvent) -> {
+                if (listUsed == 3) {
+                    // TODO: Possibly change to SnackBar
+                    Toast.makeText(getApplicationContext(), "Can't edit in Trash", Toast.LENGTH_SHORT).show();
+                } else {
+                    view.performClick();
+                    view.setFocusableInTouchMode(true);
+                    view.requestFocus();
                 }
+                return false;
             };
 
             editTextTitle.setOnTouchListener(editTextListener);
@@ -400,35 +398,55 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @Override
     public void onReminderPicked(DateTime dateTime, int frequencyPicked, FrequencyChoices choices) {
-        // TODO: Do something with frequencyPicked
-
-        if (this.choices != choices) {
-            this.choices = choices;
+        if(this.choices != choices) {
+            this.choices =choices;
         }
 
+        // TODO: Use FrequencyPicked value
+        // Can store frequencyPicked value in database as new column
+        // or
+        // Use frequencyPicked value to create a FrequencyChoice
+        // If doing this method, do this in FrequencyPickerFragment and DO NOT pass frequencyPicked
+        if(frequencyPicked == 0) {
+            // No Repeat
+            reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
+                    0, 0, 0);
+        } else {
+            // Repeat
+            reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
+                    0, 0, 0);
+        }
+
+
+//        if(choices == null) {
+//            reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
+//                    0, 0, 0);
+//        } else if(this.choices != choices) {
+//            this.choices = choices;
+//            reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
+//                    0, 0, 0);
+//        }
+
         reminderTime = dateTime.getMillis();
-        reminderButton.setText(FormatUtils.getReminderText(getApplication(), dateTime));
-        reminderButton.setVisibility(View.VISIBLE);
+        reminderText.setText(FormatUtils.getReminderText(getApplication(), dateTime));
+        reminderText.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onReminderDelete() {
         choices = null;
         reminderTime = 0;
-        reminderButton.setVisibility(View.INVISIBLE);
+        reminderText.setVisibility(View.INVISIBLE);
     }
 
     // TODO: Add deletion of Reminder if Exists
     private void deleteNoteForever() {
         new AlertDialog.Builder(NoteEditorActivity.this)
                 .setMessage("Do you want to delete this note?")
-                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        new BasicDBAsync(db, null, currentNote, listUsed, 3).execute();
-                        noteModifiedResult(noteResult[2]);
-                        finish();
-                    }
+                .setPositiveButton("Delete", (dialogInterface, i) -> {
+                    new BasicDBAsync(db, null, currentNote, listUsed, 3).execute();
+                    noteModifiedResult(noteResult[2]);
+                    finish();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
