@@ -15,8 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
-    // TODO: Need to Update all get methods to look at TABLE_REMINDER if KEY_REMINDER_ID != -1
-
     // TODO: Change unnecessary passing of SingleNote when only KEY_ID is needed (i.e deleting)
 
     // TODO: Close Database in onDestroy() of MainActivity

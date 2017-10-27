@@ -189,13 +189,13 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             case 0:
                 NotesViewHolderTitle viewHolderTitle = (NotesViewHolderTitle) viewHolder;
                 viewHolderTitle.noteTitle.setText(note.get_title());
-                displayReminder(note, viewHolderTitle.reminderView, viewHolderTitle.reminderText, displayReminder);
+                displayReminder(note, viewHolderTitle.reminderText, displayReminder);
                 break;
 
             case 1:
                 NotesViewHolderContent viewHolderContent = (NotesViewHolderContent) viewHolder;
                 viewHolderContent.noteContent.setText(note.get_content());
-                displayReminder(note, viewHolderContent.reminderView, viewHolderContent.reminderText, displayReminder);
+                displayReminder(note, viewHolderContent.reminderText, displayReminder);
                 break;
 
             case 2:
@@ -203,17 +203,25 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 NotesViewHolder notesViewHolder = (NotesViewHolder) viewHolder;
                 notesViewHolder.noteTitle.setText(note.get_title());
                 notesViewHolder.noteContent.setText(note.get_content());
-                displayReminder(note, notesViewHolder.reminderView, notesViewHolder.reminderText, displayReminder);
+                displayReminder(note, notesViewHolder.reminderText, displayReminder);
                 break;
         }
     }
 
-    private void displayReminder(SingleNote note, View reminderView, TextView reminderText, boolean displayReminder) {
+    private void displayReminder(SingleNote note, TextView reminderText, boolean displayReminder) {
         if (displayReminder) {
+            if (note.hasFrequencyChoices()) {
+                reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
+                        0, 0, 0);
+            } else {
+                reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
+                        0, 0, 0);
+            }
+
             reminderText.setText(FormatUtils.getReminderText(context, new DateTime(note.get_nextReminderTime())));
-            reminderView.setVisibility(View.VISIBLE);
+            reminderText.setVisibility(View.VISIBLE);
         } else {
-            reminderView.setVisibility(View.GONE);
+            reminderText.setVisibility(View.GONE);
         }
     }
 

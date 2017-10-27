@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/reminderText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/reminderMargin"
+        android:layout_marginStart="@dimen/reminderMargin"
+        android:background="@color/cardview_shadow_start_color"
+        android:fontFamily="sans-serif-condensed"
+        android:gravity="center"
+        android:paddingEnd="@dimen/reminderLayoutEndPadding"
+        android:paddingStart="@dimen/reminderLayoutStartPadding"
+        android:textAllCaps="false"
+        android:textSize="@dimen/reminderTextSize"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent" />
+
+</merge>

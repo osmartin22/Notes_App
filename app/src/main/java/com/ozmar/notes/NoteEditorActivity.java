@@ -28,6 +28,8 @@ import org.joda.time.DateTime;
 
 import static com.ozmar.notes.MainActivity.db;
 
+// TODO: Implement Frequency repetition and use extra variable returned from ReminderDialog
+
 // TODO: Add Clock Symbol and repeat symbol to reminder display
 
 // TODO: Possibly pass a copy of FrequencyChoices to ReminderDialogFragment instead
