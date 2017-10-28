@@ -568,21 +568,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         FrequencyChoices choices = null;
         if (cursor.moveToFirst()) {
             do {
-                choices = new FrequencyChoices();
-                choices.setRepeatType(cursor.getInt(2));
-                choices.setRepeatTypeHowOften(cursor.getInt(3));
-                choices.setRepeatToSpecificDate(cursor.getLong(4));
-                choices.setHowManyRepeatEvents(cursor.getInt(5));
-                choices.setMonthRepeatType(cursor.getInt(6));
+                int repeatType = cursor.getInt(2);
+                int repeatEvery = cursor.getInt(3);
+                long repeatToDate = cursor.getLong(4);
+                int repeatEvents = cursor.getInt(5);
+                int monthRepeatType = cursor.getInt(6);
+                List<Integer> list = null;
 
                 if (cursor.getString(7) != null) {
                     Scanner scanner = new Scanner(cursor.getString(7));
-                    List<Integer> list = new ArrayList<>();
+                    list = new ArrayList<>();
                     while (scanner.hasNextInt()) {
                         list.add(scanner.nextInt());
                     }
-                    choices.setDaysChosen(list);
                 }
+
+                choices = new FrequencyChoices(repeatType, repeatEvery, repeatToDate, repeatEvents,
+                        monthRepeatType, list);
 
             } while (cursor.moveToNext());
         }
@@ -599,9 +601,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_NEXT_REMINDER_TIME, nextReminderTime);
         if (choices != null) {
             values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
-            values.put(KEY_REPEAT_TYPE_HOW_OFTEN, choices.getRepeatTypeHowOften());
-            values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToSpecificDate());
-            values.put(KEY_REPEAT_EVENTS, choices.getHowManyRepeatEvents());
+            values.put(KEY_REPEAT_TYPE_HOW_OFTEN, choices.getRepeatEvery());
+            values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToDate());
+            values.put(KEY_REPEAT_EVENTS, choices.getRepeatEvents());
             values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());
 
             List<Integer> chosenDays = choices.getDaysChosen();
@@ -624,9 +626,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_NEXT_REMINDER_TIME, nextReminderTime);
         if (choices != null) {
             values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
-            values.put(KEY_REPEAT_TYPE_HOW_OFTEN, choices.getRepeatTypeHowOften());
-            values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToSpecificDate());
-            values.put(KEY_REPEAT_EVENTS, choices.getHowManyRepeatEvents());
+            values.put(KEY_REPEAT_TYPE_HOW_OFTEN, choices.getRepeatEvery());
+            values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToDate());
+            values.put(KEY_REPEAT_EVENTS, choices.getRepeatEvents());
             values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());
 
             List<Integer> chosenDays = choices.getDaysChosen();

@@ -36,4 +36,8 @@ public class NDSpinner extends AppCompatSpinner {
         }
     }
 
+    @Override
+    public boolean performClick() {
+        return super.performClick();
+    }
 }

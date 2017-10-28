@@ -2,13 +2,11 @@ package com.ozmar.notes.reminderDialog;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Toast;
@@ -21,6 +19,9 @@ import com.ozmar.notes.utils.FormatUtils;
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ReminderDialogFragment extends DialogFragment
@@ -129,26 +130,17 @@ public class ReminderDialogFragment extends DialogFragment
         reminderDialog.setView(view);
         reminderDialog.setTitle("Add Reminder");
 
-        reminderDialog.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+        reminderDialog.setPositiveButton("Save", (dialogInterface, i) -> {
 
-            }
         });
 
-        reminderDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+        reminderDialog.setNegativeButton("Cancel", (dialogInterface, i) -> {
 
-            }
         });
 
-        reminderDialog.setNeutralButton("Delete", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                if (myCallback != null) {
-                    myCallback.onReminderDelete();
-                }
+        reminderDialog.setNeutralButton("Delete", (dialogInterface, i) -> {
+            if (myCallback != null) {
+                myCallback.onReminderDelete();
             }
         });
 
@@ -162,24 +154,25 @@ public class ReminderDialogFragment extends DialogFragment
         // Use a different OnClickListener than default to allow checking of user input
         final AlertDialog dialog = (AlertDialog) getDialog();
         if (dialog != null) {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
 
-                    DateTime dateTime = new DateTime(year, month, day, hour, minute);
-                    if (dateTime.getMillis() < System.currentTimeMillis()) {
+                DateTime dateTime = new DateTime(year, month, day, hour, minute);
+                if (dateTime.getMillis() < System.currentTimeMillis()) {
 
-                        Snackbar snackBar = Snackbar.make(getActivity().findViewById(R.id.noteEditorLayout)
-                                , "The Time Has Already Passed", Snackbar.LENGTH_LONG);
-                        snackBar.show();
+                    Snackbar snackBar = Snackbar.make(getActivity().findViewById(R.id.noteEditorLayout)
+                            , "The Time Has Already Passed", Snackbar.LENGTH_LONG);
+                    snackBar.show();
 
-                    } else {
-                        Toast.makeText(getActivity(), dateTime.toString(DateTimeFormat.mediumDateTime()), Toast.LENGTH_SHORT).show();
-                        if (myCallback != null) {
-                            myCallback.onReminderPicked(dateTime, currentFrequencySelection, choices);
+                } else {
+                    Toast.makeText(getActivity(), dateTime.toString(DateTimeFormat.mediumDateTime()), Toast.LENGTH_SHORT).show();
+                    if (myCallback != null) {
+
+                        if (currentFrequencySelection != 5) { // User selected a preset Frequency
+                            decideFrequencyChoice();
                         }
-                        dialog.dismiss();
+                        myCallback.onReminderPicked(dateTime, currentFrequencySelection, choices);
                     }
+                    dialog.dismiss();
                 }
             });
         }
@@ -191,17 +184,16 @@ public class ReminderDialogFragment extends DialogFragment
         dateArray[1] = FormatUtils.getMonthDayFormatLong(dateTimeNow.plusDays(1));
         dateArray[2] = FormatUtils.getMonthDayFormatLong(dateTimeNow.plusWeeks(1));
         dateArray[3] = FormatUtils.getMonthDayFormatLong(dateTimeNow.plusMonths(1));
-        dateArray[4] = "Pick A Date...";      // TODO: Set with reminderDate if available
+        dateArray[4] = "Pick A Date...";
 
         timeArray[0] = FormatUtils.getTimeFormat(getContext(), preferences.getMorningTime());
         timeArray[1] = FormatUtils.getTimeFormat(getContext(), preferences.getAfternoonTime());
         timeArray[2] = FormatUtils.getTimeFormat(getContext(), preferences.getEveningTime());
         timeArray[3] = FormatUtils.getTimeFormat(getContext(), preferences.getNightTime());
-        timeArray[4] = "Pick A Time...";      // TODO: Set with reminderTime if available
+        timeArray[4] = "Pick A Time...";
 
         frequencyArray = getActivity().getResources().getStringArray(R.array.frequencyXMLArrayListItem);
         frequencyArray[2] += " on " + FormatUtils.getCurrentDayOfWeek(1);
-        // TODO: Set with reminderFrequency if available
     }
 
     // Set Spinner positions to reflect previous user reminder if available
@@ -245,12 +237,10 @@ public class ReminderDialogFragment extends DialogFragment
         //------------------------------------------------------------------------------------------
         // Date Spinner Listeners
         //------------------------------------------------------------------------------------------
-        dateSpinner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                dateSpinnerTouched = true;
-                return false;
-            }
+        dateSpinner.setOnTouchListener((v, event) -> {
+            v.performClick();
+            dateSpinnerTouched = true;
+            return false;
         });
 
         dateSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -313,13 +303,12 @@ public class ReminderDialogFragment extends DialogFragment
         //------------------------------------------------------------------------------------------
         // Time Spinner Listeners
         //------------------------------------------------------------------------------------------
-        timeSpinner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                timeSpinnerTouched = true;
-                return false;
-            }
+        timeSpinner.setOnTouchListener((v, event) -> {
+            v.performClick();
+            timeSpinnerTouched = true;
+            return false;
         });
+
 
         timeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -372,12 +361,10 @@ public class ReminderDialogFragment extends DialogFragment
         //------------------------------------------------------------------------------------------
         // Reminder Spinner Listeners
         //------------------------------------------------------------------------------------------
-        frequencySpinner.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                frequencySpinnerTouched = true;
-                return false;
-            }
+        frequencySpinner.setOnTouchListener((v, event) -> {
+            v.performClick();
+            frequencySpinnerTouched = true;
+            return false;
         });
 
         frequencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -471,5 +458,27 @@ public class ReminderDialogFragment extends DialogFragment
         } else {
             frequencySpinner.setSelection(0);
         }
+    }
+
+    private void decideFrequencyChoice() {
+        switch (currentFrequencySelection) {
+            case 1:     // Daily
+                choices = new FrequencyChoices(0, 1, -1, -1, -1, null);
+                break;
+
+            case 2:     // Weekly
+                // TODO: Create list for today
+                List<Integer> list = new ArrayList<>(dateTimeNow.getDayOfWeek());
+                choices = new FrequencyChoices(1, 1, -1, -1, -1, list);
+                break;
+
+            case 3:     // Monthly
+                choices = new FrequencyChoices(2, 1, -1, -1, 0, null);
+                break;
+            case 4:     // Yearly
+                choices = new FrequencyChoices(3, 1, -1, -1, -1, null);
+                break;
+        }
+
     }
 }

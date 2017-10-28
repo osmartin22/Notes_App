@@ -8,65 +8,47 @@ import java.util.List;
 
 public class FrequencyChoices implements Parcelable {
 
-    private int repeatType = 0;       //day/week/month/year
-    private int repeatTypeHowOften = 0;     // Repeat every X (day/week/month/year)(counts as 1 reminder)
+    private int repeatType = 0;     // day/week/month/year
+    private int repeatEvery = 0;    // Repeat every X (day/week/month/year)
 
-    private long repeatToSpecificDate = 0;
-    private int howManyRepeatEvents = 0;    // Repeat reminder X times
+    private long repeatToDate = 0;
+    private int repeatEvents = 0;   // Repeat reminder for X events(times)
 
     private int monthRepeatType = 0;    // Set from RadioButton in monthly view
     private List<Integer> daysChosen;   // Set from weekly view
 
-    public FrequencyChoices() {
-
+    public FrequencyChoices(int repeatType, int repeatEvery, long repeatToDate, int repeatEvents,
+                            int monthRepeatType, List<Integer> daysChosen) {
+        this.repeatType = repeatType;
+        this.repeatEvery = repeatEvery;
+        this.repeatToDate = repeatToDate;
+        this.repeatEvents = repeatEvents;
+        this.monthRepeatType = monthRepeatType;
+        this.daysChosen = daysChosen;
     }
 
     public int getRepeatType() {
         return repeatType;
     }
 
-    public void setRepeatType(int repeatType) {
-        this.repeatType = repeatType;
+    public int getRepeatEvery() {
+        return repeatEvery;
     }
 
-    public int getRepeatTypeHowOften() {
-        return repeatTypeHowOften;
+    public long getRepeatToDate() {
+        return repeatToDate;
     }
 
-    public void setRepeatTypeHowOften(int repeatTypeHowOften) {
-        this.repeatTypeHowOften = repeatTypeHowOften;
-    }
-
-    public long getRepeatToSpecificDate() {
-        return repeatToSpecificDate;
-    }
-
-    public void setRepeatToSpecificDate(long repeatToSpecificDate) {
-        this.repeatToSpecificDate = repeatToSpecificDate;
-    }
-
-    public int getHowManyRepeatEvents() {
-        return howManyRepeatEvents;
-    }
-
-    public void setHowManyRepeatEvents(int howManyRepeatEvents) {
-        this.howManyRepeatEvents = howManyRepeatEvents;
+    public int getRepeatEvents() {
+        return repeatEvents;
     }
 
     public int getMonthRepeatType() {
         return monthRepeatType;
     }
 
-    public void setMonthRepeatType(int monthRepeatType) {
-        this.monthRepeatType = monthRepeatType;
-    }
-
     public List<Integer> getDaysChosen() {
         return daysChosen;
-    }
-
-    public void setDaysChosen(List<Integer> daysChosen) {
-        this.daysChosen = daysChosen;
     }
 
     @Override
@@ -82,18 +64,18 @@ public class FrequencyChoices implements Parcelable {
         FrequencyChoices choices = (FrequencyChoices) obj;
 
         return choices.repeatType == repeatType &&
-                choices.repeatTypeHowOften == repeatTypeHowOften &&
-                choices.repeatToSpecificDate == repeatToSpecificDate &&
-                choices.howManyRepeatEvents == howManyRepeatEvents &&
+                choices.repeatEvery == repeatEvery &&
+                choices.repeatToDate == repeatToDate &&
+                choices.repeatEvents == repeatEvents &&
                 choices.monthRepeatType == monthRepeatType &&
                 choices.daysChosen.containsAll(daysChosen);
     }
 
     public FrequencyChoices(Parcel in) {
         this.repeatType = in.readInt();
-        this.repeatTypeHowOften = in.readInt();
-        this.repeatToSpecificDate = in.readLong();
-        this.howManyRepeatEvents = in.readInt();
+        this.repeatEvery = in.readInt();
+        this.repeatToDate = in.readLong();
+        this.repeatEvents = in.readInt();
         this.monthRepeatType = in.readInt();
         this.daysChosen = new ArrayList<>();
         in.readList(daysChosen, List.class.getClassLoader());
@@ -108,9 +90,9 @@ public class FrequencyChoices implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(repeatType);
-        dest.writeInt(repeatTypeHowOften);
-        dest.writeLong(repeatToSpecificDate);
-        dest.writeInt(howManyRepeatEvents);
+        dest.writeInt(repeatEvery);
+        dest.writeLong(repeatToDate);
+        dest.writeInt(repeatEvents);
         dest.writeInt(monthRepeatType);
         dest.writeList(daysChosen);
     }

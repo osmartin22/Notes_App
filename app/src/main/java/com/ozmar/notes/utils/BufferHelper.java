@@ -5,7 +5,7 @@ import com.ozmar.notes.SingleNote;
 import java.util.ArrayList;
 import java.util.List;
 
-// Class made to easily manage a view, its note, and position
+
 public class BufferHelper {
     private final List<SingleNote> notes;
     private final List<Integer> positions;
@@ -24,10 +24,7 @@ public class BufferHelper {
     }
 
     public boolean checkIfEmpty() {
-        if(!notes.isEmpty()) {
-            return false;
-        }
-        return true;
+        return notes.isEmpty();
     }
 
     public void addToLists(SingleNote note, int position) {

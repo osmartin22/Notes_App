@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -23,6 +22,8 @@ import com.ozmar.notes.R;
 import com.ozmar.notes.utils.FormatUtils;
 
 import org.joda.time.DateTime;
+
+import java.util.List;
 
 
 public class FrequencyPickerFragment extends DialogFragment implements TextWatcher, View.OnClickListener,
@@ -155,20 +156,20 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
             } else if (choices.getRepeatType() == 2) {
                 showNextView(typeViewSwitcher, monthlyHelper.getMainView());
             }
-            numberEditText.setText(String.valueOf(choices.getRepeatTypeHowOften()));
+            numberEditText.setText(String.valueOf(choices.getRepeatEvery()));
             topSpinner.setSelection(choices.getRepeatType());
 
-            if (choices.getRepeatToSpecificDate() != 0) {
+            if (choices.getRepeatToDate() != 0) {
                 bottomSpinner.setSelection(1);
                 bottomViewSwitcher.setVisibility(View.VISIBLE);
                 calendarButton.setVisibility(View.VISIBLE);
-                calendarButton.setText(FormatUtils.getMonthDayFormatShort(choices.getRepeatToSpecificDate()));
+                calendarButton.setText(FormatUtils.getMonthDayFormatShort(choices.getRepeatToDate()));
 
-            } else if (choices.getHowManyRepeatEvents() != 0) {
+            } else if (choices.getRepeatEvents() != 0) {
                 bottomSpinner.setSelection(2);
                 bottomViewSwitcher.setVisibility(View.VISIBLE);
                 numberOfEventsEditText.setVisibility(View.VISIBLE);
-                numberOfEventsEditText.setText(String.valueOf(choices.getHowManyRepeatEvents()));
+                numberOfEventsEditText.setText(String.valueOf(choices.getRepeatEvents()));
             }
         }
 
@@ -245,17 +246,14 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private void setUpSwitchListener() {
         mySwitch.setChecked(true);
-        mySwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    setDoneButtonEnabled();
-                    setViewEnabled(true, TRANSPARENCY_OFF);
+        mySwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                setDoneButtonEnabled();
+                setViewEnabled(true, TRANSPARENCY_OFF);
 
-                } else {
-                    doneButton.setEnabled(true);
-                    setViewEnabled(false, TRANSPARENCY_ON);
-                }
+            } else {
+                doneButton.setEnabled(true);
+                setViewEnabled(false, TRANSPARENCY_ON);
             }
         });
     }
@@ -273,48 +271,46 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     }
 
     private void setUpDoneListener() {
-        doneButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        doneButton.setOnClickListener(v -> {
 
-                if (mySwitch.isChecked()) {
-                    choices = new FrequencyChoices();
-                    choices.setRepeatType(topSpinnerPosition);
-                    choices.setRepeatTypeHowOften(Integer.parseInt(numberEditText.getText().toString()));
+            if (mySwitch.isChecked()) {
+                List<Integer> list = null;
+                int monthRepeatType = -1;
+                long repeatToDate = -1;
+                int repeatEvents = -1;
 
-                    if (topSpinnerPosition == 1) {
-                        choices.setDaysChosen(weeklyHelper.getCheckedButtons());
-                    } else if (topSpinnerPosition == 2) {
-                        choices.setMonthRepeatType(monthlyHelper.getCheckedButton());
-                    }
-
-                    switch (bottomSpinnerPosition) {
-                        case 1:
-                            choices.setRepeatToSpecificDate(new DateTime(year, month, day, 0, 0, 0).getMillis());
-                            break;
-                        case 2:
-                            choices.setHowManyRepeatEvents(Integer.parseInt(numberOfEventsEditText.getText().toString()));
-                            break;
-                    }
-                } else {
-                    choices = null;
+                if (topSpinnerPosition == 1) {
+                    list = weeklyHelper.getCheckedButtons();
+                } else if (topSpinnerPosition == 2) {
+                    monthRepeatType = monthlyHelper.getCheckedButton();
                 }
 
-                if (myCallback != null) {
-                    myCallback.onFrequencyPicked(choices);
+                switch (bottomSpinnerPosition) {
+                    case 1:
+                        repeatToDate = new DateTime(year, month, day, 0, 0, 0).getMillis();
+                        break;
+                    case 2:
+                        repeatEvents = Integer.parseInt(numberOfEventsEditText.getText().toString());
+                        break;
                 }
-                dismiss();
+
+                choices = new FrequencyChoices(topSpinnerPosition, Integer.parseInt(numberEditText.getText().toString()),
+                        repeatToDate, repeatEvents, monthRepeatType, list);
+            } else {
+                choices = null;
             }
+
+            if (myCallback != null) {
+                myCallback.onFrequencyPicked(choices);
+            }
+            dismiss();
         });
     }
 
     private void setUpCalendarListener() {
-        calendarButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                DialogFragment newFragment = DatePickerFragment.newInstance(year, month - 1, day);
-                newFragment.show(getChildFragmentManager(), "datePicker");
-            }
+        calendarButton.setOnClickListener(v -> {
+            DialogFragment newFragment = DatePickerFragment.newInstance(year, month - 1, day);
+            newFragment.show(getChildFragmentManager(), "datePicker");
         });
     }
 
