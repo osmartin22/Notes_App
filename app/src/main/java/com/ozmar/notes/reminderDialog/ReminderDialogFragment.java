@@ -21,6 +21,7 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -467,8 +468,7 @@ public class ReminderDialogFragment extends DialogFragment
                 break;
 
             case 2:     // Weekly
-                // TODO: Create list for today
-                List<Integer> list = new ArrayList<>(dateTimeNow.getDayOfWeek());
+                List<Integer> list = new ArrayList<>(Collections.singletonList(dateTimeNow.getDayOfWeek()));
                 choices = new FrequencyChoices(1, 1, -1, -1, -1, list);
                 break;
 

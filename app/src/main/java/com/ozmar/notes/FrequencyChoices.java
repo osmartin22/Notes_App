@@ -6,16 +6,16 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FrequencyChoices implements Parcelable {
+public final class FrequencyChoices implements Parcelable {
 
-    private int repeatType = 0;     // day/week/month/year
-    private int repeatEvery = 0;    // Repeat every X (day/week/month/year)
+    private final int repeatType;     // day/week/month/year
+    private final int repeatEvery;    // Repeat every X (day/week/month/year)
 
-    private long repeatToDate = 0;
-    private int repeatEvents = 0;   // Repeat reminder for X events(times)
+    private final long repeatToDate;
+    private final int repeatEvents;   // Repeat reminder for X events(times)
 
-    private int monthRepeatType = 0;    // Set from RadioButton in monthly view
-    private List<Integer> daysChosen;   // Set from weekly view
+    private final int monthRepeatType;    // Set from RadioButton in monthly view
+    private final List<Integer> daysChosen;   // Set from weekly view
 
     public FrequencyChoices(int repeatType, int repeatEvery, long repeatToDate, int repeatEvents,
                             int monthRepeatType, List<Integer> daysChosen) {

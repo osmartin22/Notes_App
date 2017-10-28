@@ -217,7 +217,7 @@ public class FormatUtils {
         String frequencyText = "Repeats ";
         LocalDate localDate = LocalDate.now();
 
-        int repeatType = choices.getRepeatTypeHowOften();
+        int repeatType = choices.getRepeatEvery();
         // TODO: Create custom spinner to display long frequency choices
         switch (choices.getRepeatType()) {
             case 0:
@@ -246,12 +246,12 @@ public class FormatUtils {
                 break;
         }
 
-        if (choices.getRepeatToSpecificDate() != 0) {
-            frequencyText += "; until " + FormatUtils.getMonthDayFormatShort(choices.getRepeatToSpecificDate());
+        if (choices.getRepeatToDate() > 0) {
+            frequencyText += "; until " + FormatUtils.getMonthDayFormatShort(choices.getRepeatToDate());
 
-        } else if (choices.getHowManyRepeatEvents() != 0) {
+        } else if (choices.getRepeatEvents() > 0) {
             frequencyText += context.getResources().getQuantityString(R.plurals.repeatEvents,
-                    choices.getHowManyRepeatEvents(), choices.getHowManyRepeatEvents());
+                    choices.getRepeatEvents(), choices.getRepeatEvents());
         }
 
         return frequencyText;
@@ -260,20 +260,22 @@ public class FormatUtils {
     public static String getSelectedDays(FrequencyChoices choices) {
         List<Integer> chosen = choices.getDaysChosen();
 
-        String days = " on ";
         DateTimeFormatter dtfOut = DateTimeFormat.forPattern("EEE");
         LocalDate localDate = LocalDate.now();
+        StringBuilder sb = new StringBuilder();
+        sb.append(" on ");
 
         if (chosen.size() == 1) {
-            days += localDate.withDayOfWeek(chosen.get(0)).dayOfWeek().getAsText();
+            sb.append(localDate.withDayOfWeek(chosen.get(0)).dayOfWeek().getAsText());
         } else {
             for (int i = 0; i <= chosen.size() - 2; i++) {
-                days += dtfOut.print(localDate.withDayOfWeek(chosen.get(i))) + ", ";
+                sb.append(dtfOut.print(localDate.withDayOfWeek(chosen.get(i))));
+                sb.append(", ");
             }
-            days += dtfOut.print(localDate.withDayOfWeek(chosen.get(chosen.size() - 1)));
+            sb.append(dtfOut.print(localDate.withDayOfWeek(chosen.get(chosen.size() - 1))));
         }
 
-        return days;
+        return sb.toString();
     }
 
     public static boolean isToday(DateTime time) {
