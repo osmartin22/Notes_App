@@ -15,10 +15,6 @@ import java.util.concurrent.TimeUnit;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
-    // TODO: Change unnecessary passing of SingleNote when only KEY_ID is needed (i.e deleting)
-
-    // TODO: Close Database in onDestroy() of MainActivity
-
     private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "UserNotesDB";
 
@@ -68,7 +64,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String TABLE_REMINDERS = "frequencyChoices";
     private static final String KEY_NEXT_REMINDER_TIME = "reminder";
     private static final String KEY_REPEAT_TYPE = "repeatType";
-    private static final String KEY_REPEAT_TYPE_HOW_OFTEN = "repeatTypeHowOften";
+    private static final String KEY_REPEAT_EVERY = "repeatTypeHowOften";
     private static final String KEY_REPEAT_TO_DATE = "repeatToDate";
     private static final String KEY_REPEAT_EVENTS = "repeatEvents";
     private static final String KEY_MONTH_REPEAT_TYPE = "monthRepeatType";
@@ -79,10 +75,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + KEY_ID + " INTEGER PRIMARY KEY, "
             + KEY_NEXT_REMINDER_TIME + " INTEGER DEFAULT -1, "
             + KEY_REPEAT_TYPE + " INTEGER DEFAULT -1, "
-            + KEY_REPEAT_TYPE_HOW_OFTEN + " INTEGER DEFAULT 0, "
-            + KEY_REPEAT_TO_DATE + " INTEGER DEFAULT 0, "
-            + KEY_REPEAT_EVENTS + " INTEGER DEFAULT 0, "
-            + KEY_MONTH_REPEAT_TYPE + " INTEGER DEFAULT 0, "
+            + KEY_REPEAT_EVERY + " INTEGER DEFAULT -1, "
+            + KEY_REPEAT_TO_DATE + " INTEGER DEFAULT -1, "
+            + KEY_REPEAT_EVENTS + " INTEGER DEFAULT -1, "
+            + KEY_MONTH_REPEAT_TYPE + " INTEGER DEFAULT -1, "
             + KEY_DAYS_CHOSEN + " TEXT);";
 
     public DatabaseHandler(Context context) {
@@ -277,11 +273,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return (int) db.insert(TABLE_USER_NOTES, null, values);
     } // addNoteToUserList() end
 
-    public void deleteNoteFromUserList(SingleNote note) {
+    public void deleteNoteFromUserList(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(TABLE_USER_NOTES, KEY_ID + " = ?",
-                new String[]{String.valueOf(note.get_id())});
+                new String[]{String.valueOf(id)});
     } // deleteNoteFromUserList() end
 
     public void addListToUserList(List<SingleNote> list) {
@@ -391,11 +387,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(TABLE_ARCHIVE, null, values);
     } // addNoteToArchive() end
 
-    public void deleteNoteFromArchive(SingleNote note) {
+    public void deleteNoteFromArchive(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(TABLE_ARCHIVE, KEY_ID + " = ?",
-                new String[]{String.valueOf(note.get_id())});
+                new String[]{String.valueOf(id)});
     } // deleteNoteFromArchive() end
 
     public void addListToArchive(List<SingleNote> list) {
@@ -469,11 +465,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(TABLE_RECYCLE_BIN, null, values);
     } // addNoteToRecycleBin() end
 
-    public void deleteNoteFromRecycleBin(SingleNote note) {
+    public void deleteNoteFromRecycleBin(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(TABLE_RECYCLE_BIN, KEY_ID + " = ?",
-                new String[]{String.valueOf(note.get_id())});
+                new String[]{String.valueOf(id)});
     } // deleteNoteFromRecycleBin() end
 
     public void addListToRecycleBin(List<SingleNote> list) {
@@ -504,7 +500,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     } // deleteListFromRecycleBin() end
 
-    // TODO: Set daysForDeletion from SharedPreferences
     public void deleteNotesPastDeleteDay(int days) {
         long time = TimeUnit.DAYS.toMillis(days);
         long currentTime = System.currentTimeMillis();
@@ -601,7 +596,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_NEXT_REMINDER_TIME, nextReminderTime);
         if (choices != null) {
             values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
-            values.put(KEY_REPEAT_TYPE_HOW_OFTEN, choices.getRepeatEvery());
+            values.put(KEY_REPEAT_EVERY, choices.getRepeatEvery());
             values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToDate());
             values.put(KEY_REPEAT_EVENTS, choices.getRepeatEvents());
             values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());
@@ -626,7 +621,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_NEXT_REMINDER_TIME, nextReminderTime);
         if (choices != null) {
             values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
-            values.put(KEY_REPEAT_TYPE_HOW_OFTEN, choices.getRepeatEvery());
+            values.put(KEY_REPEAT_EVERY, choices.getRepeatEvery());
             values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToDate());
             values.put(KEY_REPEAT_EVENTS, choices.getRepeatEvents());
             values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());

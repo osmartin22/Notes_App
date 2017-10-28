@@ -63,7 +63,7 @@ public class ReminderDialogFragment extends DialogFragment
     private OnReminderPickedListener myCallback;
 
     public interface OnReminderPickedListener {
-        void onReminderPicked(DateTime dateTime, int frequencyPicked, FrequencyChoices choices);
+        void onReminderPicked(DateTime dateTime, FrequencyChoices choices);
 
         void onReminderDelete();
     }
@@ -161,7 +161,7 @@ public class ReminderDialogFragment extends DialogFragment
                 if (dateTime.getMillis() < System.currentTimeMillis()) {
 
                     Snackbar snackBar = Snackbar.make(getActivity().findViewById(R.id.noteEditorLayout)
-                            , "The Time Has Already Passed", Snackbar.LENGTH_LONG);
+                            , "That Time Has Already Passed", Snackbar.LENGTH_LONG);
                     snackBar.show();
 
                 } else {
@@ -169,9 +169,10 @@ public class ReminderDialogFragment extends DialogFragment
                     if (myCallback != null) {
 
                         if (currentFrequencySelection != 5) { // User selected a preset Frequency
-                            decideFrequencyChoice();
+                            makeFrequencyChoiceForPreset();
                         }
-                        myCallback.onReminderPicked(dateTime, currentFrequencySelection, choices);
+
+                        myCallback.onReminderPicked(dateTime, choices);
                     }
                     dialog.dismiss();
                 }
@@ -461,8 +462,11 @@ public class ReminderDialogFragment extends DialogFragment
         }
     }
 
-    private void decideFrequencyChoice() {
+    private void makeFrequencyChoiceForPreset() {
         switch (currentFrequencySelection) {
+            case 0:     // Does not repeat
+                choices = null;
+                break;
             case 1:     // Daily
                 choices = new FrequencyChoices(0, 1, -1, -1, -1, null);
                 break;

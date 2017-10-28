@@ -58,14 +58,14 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
                 if (list != null) {
                     db.deleteListFromUserList(list);
                 } else {
-                    db.deleteNoteFromUserList(note);
+                    db.deleteNoteFromUserList(note.get_id());
                 }
                 break;
             case 2:
                 if (list != null) {
                     db.deleteListFromArchive(list);
                 } else {
-                    db.deleteNoteFromArchive(note);
+                    db.deleteNoteFromArchive(note.get_id());
                 }
                 break;
         }
@@ -75,7 +75,7 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
         if (list != null) {
             db.deleteListFromRecycleBin(list);
         } else {
-            db.deleteNoteFromRecycleBin(note);
+            db.deleteNoteFromRecycleBin(note.get_id());
         }
     }
 

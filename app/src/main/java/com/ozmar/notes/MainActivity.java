@@ -1,6 +1,5 @@
 package com.ozmar.notes;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,7 +13,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -25,7 +26,6 @@ import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.DoMenuActionAsync;
 import com.ozmar.notes.async.NavMenuAsync;
-import com.ozmar.notes.utils.MainActivityUtils;
 import com.ozmar.notes.utils.MenuItemHelper;
 import com.ozmar.notes.utils.MultiSelectFlagHelper;
 import com.ozmar.notes.utils.UndoBuffer;
@@ -79,11 +79,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         startActivityForResult(intent, 1);
     } // launchIntent() end
 
+    private void restoreLayout() {
+        switch (layoutChoice) {
+            case 0:
+            default:
+                layoutItem.setIcon(R.drawable.ic_linear_layout);
+                rv.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+                break;
+            case 1:
+                layoutItem.setIcon(R.drawable.ic_staggered_grid_layout);
+                rv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        }
+    }
+
+    public int swapLayout() {
+        switch (layoutChoice) {
+            case 0:
+            default:
+                layoutItem.setIcon(R.drawable.ic_staggered_grid_layout);
+                rv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                return 1;
+            case 1:
+                layoutItem.setIcon(R.drawable.ic_linear_layout);
+                rv.setLayoutManager(new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+                return 0;
+        }
+    }
+
     private void setUpRecyclerView() {
         notesAdapter = new NotesAdapter(getApplicationContext(), db);
 
         layoutChoice = preferences.getLayoutChoice();
-        rv = (RecyclerView) findViewById(R.id.recyclerView);
+        rv = findViewById(R.id.recyclerView);
         rv.setHasFixedSize(true);
 
         DividerItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), VERTICAL);
@@ -138,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        myToolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
 
         db = new DatabaseHandler(MainActivity.this);
@@ -148,9 +175,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         new AutoDeleteAsync(db, preferences.getDaysInTrash()).execute();
 
-        fab = (FloatingActionButton) findViewById(R.id.floatingActionButton);
+        fab = findViewById(R.id.floatingActionButton);
 
-        drawer = (DrawerLayout) findViewById(R.id.drawerLayout);
+        drawer = findViewById(R.id.drawerLayout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, myToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
@@ -167,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
 
@@ -253,15 +280,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
         new AlertDialog.Builder(MainActivity.this)
                 .setMessage(message)
-                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        List<SingleNote> temp = new ArrayList<>(buffer.currentBufferNotes());
-                        new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
-                        notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
-                        buffer.clearBuffer();
-                        actionMode.finish();
-                    }
+                .setPositiveButton("Delete", (dialogInterface, i) -> {
+                    List<SingleNote> temp = new ArrayList<>(buffer.currentBufferNotes());
+                    new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
+                    notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+                    buffer.clearBuffer();
+                    actionMode.finish();
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
@@ -346,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_menu, menu);
         layoutItem = menu.findItem(R.id.layout);
-        MainActivityUtils.restoreLayout(getApplicationContext(), rv, layoutItem, layoutChoice);
+        restoreLayout();
         return super.onCreateOptionsMenu(menu);
     } // onCreateOptionsMenu() end
 
@@ -356,7 +380,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         switch (item.getItemId()) {
             case R.id.layout:
-                layoutChoice = MainActivityUtils.swapLayout(getApplicationContext(), rv, layoutItem, layoutChoice);
+                layoutChoice = swapLayout();
                 return true;
         }
 
@@ -392,32 +416,63 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (requestCode == 1 && data != null) {
             Bundle bundle = data.getExtras();
 
-            multiSelectHelper.setEditorAction(bundle.getInt("menuAction", -1));
-            if (multiSelectHelper.getEditorAction() != -1) {
+            if (bundle != null) {
+                multiSelectHelper.setEditorAction(bundle.getInt("menuAction", -1));
+                if (multiSelectHelper.getEditorAction() != -1) {
 
-                buffer.bufferToStartProcessing();
-                if (buffer.isBufferAvailable()) {
-                    buffer.swapBuffer();
+                    buffer.bufferToStartProcessing();
+                    if (buffer.isBufferAvailable()) {
+                        buffer.swapBuffer();
 
-                    multiSelectHelper.setNewNoteAction(bundle.getInt("New Note Action", -1));
-                    buffer.addDataToBuffer((SingleNote) bundle.getParcelable("Note"), bundle.getInt("Note Position", 0));
+                        multiSelectHelper.setNewNoteAction(bundle.getInt("New Note Action", -1));
+                        buffer.addDataToBuffer(bundle.getParcelable("Note"), bundle.getInt("Note Position", 0));
 
-                    if (multiSelectHelper.getNewNoteAction() != 1) {
-                        notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+                        if (multiSelectHelper.getNewNoteAction() != 1) {
+                            notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+                        }
+
+                        showSnackBar(null, multiSelectHelper.getEditorAction());
+
+
+                    } else {        // Buffer full
+                        multiSelectHelper.setEditorAction(-1);
+                        multiSelectHelper.setNewNoteAction(-1);
+                        Toast.makeText(getApplicationContext(),
+                                "Please wait while previous selections are completed", Toast.LENGTH_SHORT).show();
                     }
 
-                    showSnackBar(null, multiSelectHelper.getEditorAction());
+                } else {
+//                    MainActivityUtils.updateAdapter(getApplicationContext(), bundle, notesAdapter);
 
 
-                } else {        // Buffer full
-                    multiSelectHelper.setEditorAction(-1);
-                    multiSelectHelper.setNewNoteAction(-1);
-                    Toast.makeText(getApplicationContext(),
-                            "Please wait while previous selections are completed", Toast.LENGTH_SHORT).show();
+                    String[] noteResult = getResources().getStringArray(R.array.noteResultArray);
+
+                    String save = bundle.getString("Note Success", "");
+                    int position = bundle.getInt("Note Position", -1);
+                    boolean favorite = bundle.getBoolean("Note Favorite", false);
+                    SingleNote note = bundle.getParcelable("Note");
+                    int listUsed = notesAdapter.getListUsed();
+
+                    if (save.equals(noteResult[0])) {    // Update rv with noteChanges to the note
+                        notesAdapter.updateAt(position, note);
+
+                    } else if (save.equals(noteResult[1])) {    // Update rv with new note
+                        if (listUsed == 0) {
+                            notesAdapter.addAt(position, note);
+                        } else if (listUsed == 1 && favorite) {
+                            notesAdapter.addAt(position, note);
+                        }
+
+                    } else if (save.equals(noteResult[2])) {    // Remove note from rv (Delete Forever)
+                        notesAdapter.removeAt(position);
+
+                    } else if (save.equals(noteResult[3])) {    // Title/Content not modified but note is no longer a favorite
+                        if (listUsed == 1) {
+                            notesAdapter.removeAt(position);
+                        }
+                    }
+
                 }
-
-            } else {
-                MainActivityUtils.updateAdapter(getApplicationContext(), bundle, notesAdapter);
             }
         }
     } // onActivityResult() end
@@ -426,5 +481,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStop() {
         super.onStop();
         preferences.saveLayoutChoice(layoutChoice);
+    }
+
+    @Override
+    protected void onDestroy() {
+        db.close();
+        super.onDestroy();
     }
 } // MainActivity() end

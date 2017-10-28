@@ -397,35 +397,18 @@ public class NoteEditorActivity extends AppCompatActivity
     }
 
     @Override
-    public void onReminderPicked(DateTime dateTime, int frequencyPicked, FrequencyChoices choices) {
-        if(this.choices != choices) {
-            this.choices =choices;
+    public void onReminderPicked(DateTime dateTime, FrequencyChoices choices) {
+        if (this.choices != choices) {
+            this.choices = choices;
         }
 
-        // TODO: Use FrequencyPicked value
-        // Can store frequencyPicked value in database as new column
-        // or
-        // Use frequencyPicked value to create a FrequencyChoice
-        // If doing this method, do this in FrequencyPickerFragment and DO NOT pass frequencyPicked
-        if(frequencyPicked == 0) {
-            // No Repeat
+        if(choices == null) {
             reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
                     0, 0, 0);
         } else {
-            // Repeat
             reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
                     0, 0, 0);
         }
-
-
-//        if(choices == null) {
-//            reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
-//                    0, 0, 0);
-//        } else if(this.choices != choices) {
-//            this.choices = choices;
-//            reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
-//                    0, 0, 0);
-//        }
 
         reminderTime = dateTime.getMillis();
         reminderText.setText(FormatUtils.getReminderText(getApplication(), dateTime));
