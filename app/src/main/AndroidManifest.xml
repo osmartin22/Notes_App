@@ -24,7 +24,7 @@
             android:windowSoftInputMode="adjustResize" >
         </activity>
 
-        <receiver android:name=".reminderDialog.ReminderReceiver"/>
+        <receiver android:name=".notifications.ReminderReceiver"/>
     </application>
 
 </manifest>

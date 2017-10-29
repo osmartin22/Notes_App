@@ -1,9 +1,23 @@
 <resources>
     <string name="app_name">Notes</string>
 
-    <!-- Hint for title and content in note editor -->
+    <!-- Strings used for intents -->
+    <!-- Used to pass data to MainActivity from NoteEditorActivity -->
+    <string name="noteIntent">Note</string>
+    <string name="notePositionIntent">Note Position</string>
+    <string name="listUsedIntent">List Used</string>
+
+    <!-- Used to pass data from NoteEditorActivity from MainActivity -->
+    <string name="menuActionIntent">Menu Action Intent</string>
+    <string name="isNewNoteIntent">Is New Note Intent</string>
+    <string name="isFavoriteIntent">Is Favorite Intent</string>
+    <string name="noteSuccessIntent">Note Success</string>
+
+
+    <!-- Hint for title and content in NoteEditorActivity -->
     <string name="editTextNoteHint">Note</string>
     <string name="titleEditText">Title</string>
+
 
     <!-- MenuItem names for NoteEditorActivity-->
     <string name="favoriteNoteMenuItem">Favorite Note</string>
@@ -14,8 +28,10 @@
     <string name="deleteForeverMenuItem">Delete Forever</string>
     <string name="reminderNoteMenuItem">Add Reminder</string>
 
+
     <!-- MenuItem names for MainActivity -->
     <string name="layoutManager">Change Layout</string>
+
 
     <!-- String array used for checking what changed in the note -->
     <string-array name="noteChangesArray">
@@ -32,7 +48,14 @@
         <item>favoriteChanged</item>    <!-- Note not a favorite -->
     </string-array>
 
-    <!-- CAB menu items -->
+
+    <!-- Strings used for delete dialog fragment -->
+    <string name="messageDialog">Do you want to delete this note?</string>
+    <string name="deleteDialog">Delete</string>
+    <string name="cancelDialog">Cancel</string>
+
+
+    <!-- CAB menu items in MainActivity-->
     <string name="deleteContextualMenuItem">Delete</string>
     <string name="archiveContextualMenuItem">Archive</string>
     <string name="unarchiveContextualMenuItem">Unarchive</string>
@@ -44,6 +67,10 @@
         <item quantity="one">Delete note forever?</item>
         <item quantity="other">Delete notes forever?</item>
     </plurals>
+
+    <!-- String for multi select buffer full -->
+    <string name="bufferFull">Please wait while previous selections are completed</string>
+
 
     <!-- SnackBar output strings -->
     <plurals name="snackBarDelete">
@@ -74,9 +101,15 @@
     <string name="favoriteNotesDrawer">Favorite Notes</string>
     <string name="archiveNotesDrawer">Archive</string>
     <string name="recycleBinNotesDrawer">Trash</string>
-
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
+
+
+    <!-- Reminder Dialog title/button names -->
+    <string name="reminderDialogTitle">Add Reminder</string>
+    <string name="reminderDialogPositive">Save</string>
+    <string name="reminderDialogNeutral">Delete</string>
+    <string name="reminderDialogNegative">Cancel</string>
 
 
     <!-- String Arrays used for the Reminder Dialog -->
@@ -114,7 +147,8 @@
         <item>Custom&#8230;</item>
     </string-array>
 
-    <!-- Arrays and Strings for custom FrequencyPicker -->
+
+    <!-- Arrays, Strings, and Plurals for FrequencyPicker -->
     <string name="everyString">Every</string>
     <string name="xDayEditText">1</string>
     <string name="doneButton">DONE</string>
@@ -176,7 +210,7 @@
     <string name="fridayShort">FRI</string>
     <string name="saturdayShort">SAT</string>
 
-    <!-- Strings for showing FrequencyPicker choice -->
+    <!-- Strings for showing FrequencyPicker choice as text-->
     <plurals name="repeatDay">
         <item quantity="one">daily</item>
         <item quantity="other">every %d days</item>
@@ -201,5 +235,31 @@
         <item quantity="one">; for %d time</item>
         <item quantity="other">; for %d times</item>
     </plurals>
+
+
+    <!-- String used com.ozmar.notes.notificationsions/notification channels -->
+    <string name="reminderChannelId">Reminder Channel Id</string>
+    <string name="reminderChannelName">Reminder Channel Name</string>
+    <string name="reminderChannelDescription">Reminder Channel Description</string>
+
+    <!-- Notification intent strings -->
+    <string name="notificationId">Notification Id</string>
+    <string name="notificationTitle">Notification Title</string>
+    <string name="notificationContent">Notification Content</string>
+
+
+    <!-- SharedPreference strings -->
+    <string name="userSettingsPreference">User Settings</string>
+    <string name="layoutChoicePreference">Layout Choice Preference</string>
+    <string name="deleteTrashXDaysPreference">Delete Trash After X Days Preference</string>
+    <string name="morningHourPreference">Morning Hour Preference</string>
+    <string name="morningMinutePreference">Morning Minute Preference</string>
+    <string name="afternoonHourPreference">Afternoon Hour Preference</string>
+    <string name="afternoonMinutePreference">Afternoon Minute Preference</string>
+    <string name="eveningHourPreference">Evening Hour Preference</string>
+    <string name="eveningMinutePreference">Evening Minute Preference</string>
+    <string name="nightHourPreference">Night Hour Preference</string>
+    <string name="nightMinutePreference">Night Minute Preference</string>
+
 
 </resources>

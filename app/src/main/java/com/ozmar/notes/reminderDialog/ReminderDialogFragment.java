@@ -129,17 +129,20 @@ public class ReminderDialogFragment extends DialogFragment
 
         AlertDialog.Builder reminderDialog = new AlertDialog.Builder(getActivity());
         reminderDialog.setView(view);
-        reminderDialog.setTitle("Add Reminder");
+        reminderDialog.setTitle(getString(R.string.reminderDialogTitle));
 
-        reminderDialog.setPositiveButton("Save", (dialogInterface, i) -> {
+        reminderDialog.setPositiveButton(getString(R.string.reminderDialogPositive),
+                (dialogInterface, i) -> {
 
-        });
+                });
 
-        reminderDialog.setNegativeButton("Cancel", (dialogInterface, i) -> {
+        reminderDialog.setNegativeButton(getString(R.string.reminderDialogNegative),
+                (dialogInterface, i) -> {
 
-        });
+                });
 
-        reminderDialog.setNeutralButton("Delete", (dialogInterface, i) -> {
+        reminderDialog.setNeutralButton(getString(R.string.reminderDialogNeutral), (
+                dialogInterface, i) -> {
             if (myCallback != null) {
                 myCallback.onReminderDelete();
             }

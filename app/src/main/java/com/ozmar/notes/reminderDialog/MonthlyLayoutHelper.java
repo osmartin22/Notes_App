@@ -1,6 +1,5 @@
 package com.ozmar.notes.reminderDialog;
 
-import android.support.annotation.IdRes;
 import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -47,20 +46,17 @@ public class MonthlyLayoutHelper {
     }
 
     public void setRadioGroupListener() {
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, @IdRes int checkedId) {
-                switch (checkedId) {
-                    case R.id.topRadioButton:
-                        checkedButton = 0;
-                        break;
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            switch (checkedId) {
+                case R.id.topRadioButton:
+                    checkedButton = 0;
+                    break;
 
-                    case R.id.bottomRadioButton:
-                        checkedButton = 1;
-                        break;
-                }
-
+                case R.id.bottomRadioButton:
+                    checkedButton = 1;
+                    break;
             }
+
         });
     }
 

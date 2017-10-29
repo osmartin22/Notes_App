@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -17,7 +16,7 @@ import android.widget.Toast;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.UpdateNoteAsync;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
-import com.ozmar.notes.reminderDialog.ReminderManager;
+import com.ozmar.notes.notifications.ReminderManager;
 import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.utils.NoteChanges;
 
@@ -25,11 +24,7 @@ import org.joda.time.DateTime;
 
 import static com.ozmar.notes.MainActivity.db;
 
-// TODO: Implement Frequency repetition and use extra variable returned from ReminderDialog
-
-// TODO: Add Clock Symbol and repeat symbol to reminder display
-
-// TODO: Make sure reminders are deleted properly when deleting from this activity
+// TODO: When deleting an entire note, make sure the reminder is cancelled if it exists
 
 // TODO: Possibly pass a copy of FrequencyChoices to ReminderDialogFragment instead
 // To do == comparison at the end to check whether the alarm needs updating
@@ -74,27 +69,27 @@ public class NoteEditorActivity extends AppCompatActivity
 //                if (!(titleEmpty && contentEmpty)) {    // New note
 
                 createNewNote(title, content);
-                intent.putExtra("New Note Action", 1);
+                intent.putExtra(getString(R.string.isNewNoteIntent), 1);
 //                }
             }
 
             switch (item.getItemId()) {
                 case R.id.archive_note:
-                    intent.putExtra("menuAction", 0);
+                    intent.putExtra(getString(R.string.menuActionIntent), 0);
                     break;
                 case R.id.unarchive_note:
-                    intent.putExtra("menuAction", 1);
+                    intent.putExtra(getString(R.string.menuActionIntent), 1);
                     break;
                 case R.id.delete_note:
-                    intent.putExtra("menuAction", 2);
+                    intent.putExtra(getString(R.string.menuActionIntent), 2);
                     break;
                 case R.id.restore_note:
-                    intent.putExtra("menuAction", 3);
+                    intent.putExtra(getString(R.string.menuActionIntent), 3);
                     break;
             }
 
-            intent.putExtra("Note", currentNote);
-            intent.putExtra("Note Position", notePosition);
+            intent.putExtra(getString(R.string.notePositionIntent), notePosition);
+            intent.putExtra(getString(R.string.noteIntent), currentNote);
             setResult(RESULT_OK, intent);
 
         }
@@ -109,13 +104,13 @@ public class NoteEditorActivity extends AppCompatActivity
 
         if (value.equals(noteResult[1])) {
             if (favorite) {
-                intent.putExtra("Note Favorite", true);
+                intent.putExtra(getString(R.string.isFavoriteIntent), true);
             }
         }
 
-        intent.putExtra("Note Success", value);
-        intent.putExtra("Note Position", notePosition);
-        intent.putExtra("Note", currentNote);
+        intent.putExtra(getString(R.string.noteSuccessIntent), value);
+        intent.putExtra(getString(R.string.notePositionIntent), notePosition);
+        intent.putExtra(getString(R.string.noteIntent), currentNote);
         setResult(RESULT_OK, intent);
     } // noteModifiedResult() end
 
@@ -208,11 +203,9 @@ public class NoteEditorActivity extends AppCompatActivity
             currentNote.set_reminderId(newId);
             idChanged = true;
             ReminderManager.start(getApplicationContext(), currentNote);
-            Log.d("Reminder", "Add Reminder To Existing Note -> " + newId);
 
         } else if (currentNote.get_reminderId() != -1) {
             if (reminderTime == 0 && choices == null) {
-                Log.d("Reminder", "Delete Reminder From Existing Note -> " + currentNote.get_reminderId());
                 ReminderManager.cancel(getApplicationContext(), currentNote.get_id());
                 db.deleteReminder(currentNote.get_reminderId());
                 currentNote.set_reminderId(-1);
@@ -225,7 +218,6 @@ public class NoteEditorActivity extends AppCompatActivity
                 }
 
                 db.updateReminder(currentNote.get_reminderId(), choices, reminderTime);
-                Log.d("Reminder", "Updating Reminder Of Existing Note -> " + currentNote.get_reminderId());
             }
         }
 
@@ -260,9 +252,9 @@ public class NoteEditorActivity extends AppCompatActivity
         reminderText = findViewById(R.id.reminderText);
 
         Intent intent = getIntent();
-        notePosition = intent.getIntExtra("noteID", 0);
-        listUsed = intent.getIntExtra("listUsed", 0);
-        currentNote = intent.getParcelableExtra("Note");
+        notePosition = intent.getIntExtra(getString(R.string.notePositionIntent), 0);
+        listUsed = intent.getIntExtra(getString(R.string.listUsedIntent), 0);
+        currentNote = intent.getParcelableExtra(getString(R.string.noteIntent));
 
         setUpNoteView();
     } // onCreate() end
@@ -402,7 +394,7 @@ public class NoteEditorActivity extends AppCompatActivity
             this.choices = choices;
         }
 
-        if(choices == null) {
+        if (choices == null) {
             reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
                     0, 0, 0);
         } else {
@@ -422,16 +414,15 @@ public class NoteEditorActivity extends AppCompatActivity
         reminderText.setVisibility(View.INVISIBLE);
     }
 
-    // TODO: Add deletion of Reminder if Exists
     private void deleteNoteForever() {
         new AlertDialog.Builder(NoteEditorActivity.this)
-                .setMessage("Do you want to delete this note?")
-                .setPositiveButton("Delete", (dialogInterface, i) -> {
+                .setMessage(getString(R.string.messageDialog))
+                .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
                     new BasicDBAsync(db, null, currentNote, listUsed, 3).execute();
                     noteModifiedResult(noteResult[2]);
                     finish();
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancelDialog), null)
                 .show();
     } // deleteNoteMenu() end
 

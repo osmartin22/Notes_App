@@ -12,6 +12,7 @@ import com.ozmar.notes.SingleNote;
 
 import java.util.List;
 
+// TODO: Fix Leak
 
 public class NavMenuAsync extends AsyncTask<Void, Void, List<SingleNote>> {
 

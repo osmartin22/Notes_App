@@ -36,6 +36,9 @@ import java.util.List;
 import static android.support.v7.widget.DividerItemDecoration.HORIZONTAL;
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
+// TODO: When deleting an entire note, make sure the reminder is cancelled if it exists
+
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private NotesAdapter notesAdapter;
     private RecyclerView rv;
@@ -73,9 +76,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
-        intent.putExtra("Note", note);
-        intent.putExtra("noteID", position);
-        intent.putExtra("listUsed", listUsed);
+        intent.putExtra(getString(R.string.noteIntent), note);
+        intent.putExtra(getString(R.string.notePositionIntent), position);
+        intent.putExtra(getString(R.string.listUsedIntent), listUsed);
         startActivityForResult(intent, 1);
     } // launchIntent() end
 
@@ -150,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     } else {
                         // TODO: Possibly Modify later
                         Toast.makeText(getApplicationContext(),
-                                "Please wait while previous selections are completed.", Toast.LENGTH_SHORT).show();
+                                getString(R.string.bufferFull), Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     multiSelect(notesAdapter.getNoteAt(position), position);
@@ -280,14 +283,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
         new AlertDialog.Builder(MainActivity.this)
                 .setMessage(message)
-                .setPositiveButton("Delete", (dialogInterface, i) -> {
+                .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
                     List<SingleNote> temp = new ArrayList<>(buffer.currentBufferNotes());
                     new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
                     notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
                     buffer.clearBuffer();
                     actionMode.finish();
                 })
-                .setNegativeButton("Cancel", null)
+                .setNegativeButton(getString(R.string.cancelDialog), null)
                 .show();
     } // deleteForever() end
 
@@ -417,15 +420,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Bundle bundle = data.getExtras();
 
             if (bundle != null) {
-                multiSelectHelper.setEditorAction(bundle.getInt("menuAction", -1));
+                multiSelectHelper.setEditorAction(bundle.getInt(getString(R.string.menuActionIntent), -1));
                 if (multiSelectHelper.getEditorAction() != -1) {
 
                     buffer.bufferToStartProcessing();
                     if (buffer.isBufferAvailable()) {
                         buffer.swapBuffer();
 
-                        multiSelectHelper.setNewNoteAction(bundle.getInt("New Note Action", -1));
-                        buffer.addDataToBuffer(bundle.getParcelable("Note"), bundle.getInt("Note Position", 0));
+                        multiSelectHelper.setNewNoteAction(bundle.getInt(getString(R.string.isNewNoteIntent), -1));
+                        buffer.addDataToBuffer(bundle.getParcelable(getString(R.string.noteIntent)),
+                                bundle.getInt(getString(R.string.notePositionIntent), 0));
 
                         if (multiSelectHelper.getNewNoteAction() != 1) {
                             notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
@@ -438,19 +442,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         multiSelectHelper.setEditorAction(-1);
                         multiSelectHelper.setNewNoteAction(-1);
                         Toast.makeText(getApplicationContext(),
-                                "Please wait while previous selections are completed", Toast.LENGTH_SHORT).show();
+                                getString(R.string.bufferFull), Toast.LENGTH_SHORT).show();
                     }
 
                 } else {
-//                    MainActivityUtils.updateAdapter(getApplicationContext(), bundle, notesAdapter);
-
 
                     String[] noteResult = getResources().getStringArray(R.array.noteResultArray);
 
-                    String save = bundle.getString("Note Success", "");
-                    int position = bundle.getInt("Note Position", -1);
-                    boolean favorite = bundle.getBoolean("Note Favorite", false);
-                    SingleNote note = bundle.getParcelable("Note");
+                    String save = bundle.getString(getString(R.string.noteSuccessIntent), "");
+                    int position = bundle.getInt(getString(R.string.notePositionIntent), -1);
+                    boolean favorite = bundle.getBoolean(getString(R.string.isFavoriteIntent), false);
+                    SingleNote note = bundle.getParcelable(getString(R.string.noteIntent));
                     int listUsed = notesAdapter.getListUsed();
 
                     if (save.equals(noteResult[0])) {    // Update rv with noteChanges to the note
