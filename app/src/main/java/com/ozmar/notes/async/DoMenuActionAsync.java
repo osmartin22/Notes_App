@@ -10,9 +10,16 @@ import com.ozmar.notes.utils.MenuItemHelper;
 import com.ozmar.notes.utils.MultiSelectFlagHelper;
 import com.ozmar.notes.utils.UndoBuffer;
 
-// TODO: Fix Leak
+import java.lang.ref.WeakReference;
+
+// TODO: Change so that a ProgressBar is used for the RecyclerView
+// First empty RecyclerView -> NotesAdapter
+// Will no longer need Toolbar or Fab inside AsyncTask
 
 public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
+
+    private final WeakReference<Toolbar> weakToolbar;
+    private final WeakReference<FloatingActionButton> weakFab;
 
     private DatabaseHandler db;
     private MultiSelectFlagHelper flagHelper;
@@ -20,8 +27,6 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
     private UndoBuffer buffer;
     private int listUsed;
     private NotesAdapter adapter;
-    private Toolbar toolbar;
-    private FloatingActionButton fab;
     private int bufferInUse;
 
     public DoMenuActionAsync(DatabaseHandler db, MultiSelectFlagHelper flagHelper, MenuItemHelper itemHelper,
@@ -32,9 +37,10 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
         this.buffer = buffer;
         this.adapter = adapter;
         this.listUsed = adapter.getListUsed();
-        this.toolbar = toolbar;
-        this.fab = fab;
         this.bufferInUse = buffer.getBufferToProcess();
+
+        this.weakToolbar = new WeakReference<>(toolbar);
+        this.weakFab = new WeakReference<>(fab);
     }
 
     @Override
@@ -64,9 +70,14 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
             flagHelper.setAnotherMultiSelect(false);
         }
 
-        if (flagHelper.isInAsync()) {
-            adapter.clearView();
-            new NavMenuAsync(db, toolbar, fab, adapter, flagHelper.getCurrentNavMenu()).execute();
+        Toolbar toolbar = weakToolbar.get();
+        FloatingActionButton fab = weakFab.get();
+
+        if (toolbar != null && fab != null) {
+            if (flagHelper.isInAsync()) {
+                adapter.clearView();
+                new NavMenuAsync(db, toolbar, fab, adapter, flagHelper.getCurrentNavMenu()).execute();
+            }
         }
 
         flagHelper.setInAsync(false);

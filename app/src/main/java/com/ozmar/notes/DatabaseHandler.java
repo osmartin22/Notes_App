@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
+// TODO: Created 4 notes with reminders not set to favorite. Set them to favorite and
+    // switched to favorites, but they did not appear, even when switching back and forth
+    // Setting them to favorite again did work as expected
+
 public class DatabaseHandler extends SQLiteOpenHelper {
 
     private static final int DATABASE_VERSION = 4;

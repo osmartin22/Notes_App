@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             snackBar.dismiss();
         }
 
-        Intent intent = new Intent(this.getApplicationContext(), NoteEditorActivity.class);
+        Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
         intent.putExtra(getString(R.string.noteIntent), note);
         intent.putExtra(getString(R.string.notePositionIntent), position);
         intent.putExtra(getString(R.string.listUsedIntent), listUsed);
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
             case 1:
                 layoutItem.setIcon(R.drawable.ic_staggered_grid_layout);
-                rv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         }
     }
 
@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case 0:
             default:
                 layoutItem.setIcon(R.drawable.ic_staggered_grid_layout);
-                rv.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
                 return 1;
             case 1:
                 layoutItem.setIcon(R.drawable.ic_linear_layout);
@@ -110,19 +110,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void setUpRecyclerView() {
-        notesAdapter = new NotesAdapter(getApplicationContext(), db);
+        notesAdapter = new NotesAdapter(MainActivity.this, db);
 
         layoutChoice = preferences.getLayoutChoice();
         rv = findViewById(R.id.recyclerView);
         rv.setHasFixedSize(true);
 
-        DividerItemDecoration decoration = new DividerItemDecoration(getApplicationContext(), VERTICAL);
-        DividerItemDecoration decoration2 = new DividerItemDecoration(getApplicationContext(), HORIZONTAL);
+        DividerItemDecoration decoration = new DividerItemDecoration(MainActivity.this, VERTICAL);
+        DividerItemDecoration decoration2 = new DividerItemDecoration(MainActivity.this, HORIZONTAL);
         rv.addItemDecoration(decoration);
         rv.addItemDecoration(decoration2);
         rv.setAdapter(notesAdapter);
 
-        rv.addOnItemTouchListener(new RecyclerItemListener(getApplicationContext(),
+        rv.addOnItemTouchListener(new RecyclerItemListener(MainActivity.this,
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
                 if (multiSelectHelper.isMultiSelectFlag()) {
@@ -172,8 +172,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(myToolbar);
 
         db = new DatabaseHandler(MainActivity.this);
-        itemHelper = new MenuItemHelper(getApplicationContext(), db);
-        preferences = new Preferences(getApplicationContext());
+        itemHelper = new MenuItemHelper(MainActivity.this, db);
+        preferences = new Preferences(MainActivity.this);
         multiSelectHelper = new MultiSelectFlagHelper();
 
         new AutoDeleteAsync(db, preferences.getDaysInTrash()).execute();

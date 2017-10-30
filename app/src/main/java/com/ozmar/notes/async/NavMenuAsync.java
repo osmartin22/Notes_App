@@ -10,24 +10,29 @@ import com.ozmar.notes.NotesAdapter;
 import com.ozmar.notes.R;
 import com.ozmar.notes.SingleNote;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
-// TODO: Fix Leak
+// TODO: Change so that a ProgressBar is used for the RecyclerView
+    // First empty RecyclerView -> NotesAdapter
+    // Will no longer need Toolbar or Fab inside AsyncTask
 
 public class NavMenuAsync extends AsyncTask<Void, Void, List<SingleNote>> {
 
-    private DatabaseHandler db;
-    private Toolbar toolbar;
-    private FloatingActionButton fab;
-    private NotesAdapter adapter;
-    private MenuItem item;
+    private final WeakReference<Toolbar> weakToolbar;
+    private final WeakReference<FloatingActionButton> weakFab;
+
+    private final DatabaseHandler db;
+    private final NotesAdapter adapter;
+    private final MenuItem item;
 
     public NavMenuAsync(DatabaseHandler db, Toolbar toolbar, FloatingActionButton fab, NotesAdapter adapter, MenuItem item) {
         this.db = db;
-        this.toolbar = toolbar;
-        this.fab = fab;
         this.adapter = adapter;
         this.item = item;
+        this.weakToolbar = new WeakReference<>(toolbar);
+        this.weakFab = new WeakReference<>(fab);
+
     }
 
     @Override
@@ -61,27 +66,33 @@ public class NavMenuAsync extends AsyncTask<Void, Void, List<SingleNote>> {
     protected void onPostExecute(List<SingleNote> list) {
 
         adapter.getList(list);
-        switch (item.getItemId()) {
-            case R.id.all_notes_drawer:
-            default:
-                toolbar.setTitle("Notes");
-                fab.show();
-                break;
 
-            case R.id.favorite_notes_drawer:
-                toolbar.setTitle("Favorite Notes");
-                fab.show();
-                break;
+        Toolbar toolbar = weakToolbar.get();
+        FloatingActionButton fab = weakFab.get();
 
-            case R.id.archive_drawer:
-                toolbar.setTitle("Archive");
-                fab.hide();
-                break;
+        if (toolbar != null && fab != null) {
+            switch (item.getItemId()) {
+                case R.id.all_notes_drawer:
+                default:
+                    toolbar.setTitle("Notes");
+                    fab.show();
+                    break;
 
-            case R.id.recycle_bin_drawer:
-                toolbar.setTitle("Trash");
-                fab.hide();
-                break;
+                case R.id.favorite_notes_drawer:
+                    toolbar.setTitle("Favorite Notes");
+                    fab.show();
+                    break;
+
+                case R.id.archive_drawer:
+                    toolbar.setTitle("Archive");
+                    fab.hide();
+                    break;
+
+                case R.id.recycle_bin_drawer:
+                    toolbar.setTitle("Trash");
+                    fab.hide();
+                    break;
+            }
         }
     }
 }

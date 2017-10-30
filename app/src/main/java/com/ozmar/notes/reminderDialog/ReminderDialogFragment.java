@@ -226,8 +226,12 @@ public class ReminderDialogFragment extends DialogFragment
             LocalTime futureTime = FormatUtils.roundToTime(localTime.plusHours(3), 15);
 
             LocalTime firstPreset = preferences.getMorningTime();
-            if (localTime.isAfter(futureTime) || localTime.isBefore(firstPreset)) {
+            if (localTime.isAfter(futureTime) && localTime.isBefore(firstPreset)) {
                 dateSpinner.setSelection(1);
+                timeSpinner.setSelection(0);
+
+            } else if (localTime.isBefore(firstPreset)) {
+                dateSpinner.setSelection(0);
                 timeSpinner.setSelection(0);
             } else {
                 timeSpinner.setSelection(4);
@@ -376,7 +380,6 @@ public class ReminderDialogFragment extends DialogFragment
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                // TODO: Have selections for other positions that are not the FrequencyPicker
                 switch (i) {
                     case 0:     // Does Not Repeat
                         currentFrequencySelection = 0;
