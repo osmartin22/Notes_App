@@ -276,8 +276,8 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
             if (mySwitch.isChecked()) {
                 List<Integer> list = null;
                 int monthRepeatType = -1;
-                long repeatToDate = -1;
-                int repeatEvents = -1;
+                long repeatToDate = 0;
+                int repeatEvents = 0;
 
                 if (topSpinnerPosition == 1) {
                     list = weeklyHelper.getCheckedButtons();

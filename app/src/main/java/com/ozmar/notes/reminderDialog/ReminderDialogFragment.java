@@ -473,20 +473,20 @@ public class ReminderDialogFragment extends DialogFragment
             case 0:     // Does not repeat
                 choices = null;
                 break;
+
             case 1:     // Daily
-                choices = new FrequencyChoices(0, 1, -1, -1, -1, null);
+            case 4:     // Yearly
+                choices = new FrequencyChoices(currentFrequencySelection, 1, 0, 0, -1, null);
                 break;
 
             case 2:     // Weekly
                 List<Integer> list = new ArrayList<>(Collections.singletonList(dateTimeNow.getDayOfWeek()));
-                choices = new FrequencyChoices(1, 1, -1, -1, -1, list);
+                choices = new FrequencyChoices(1, 1, 0, 0, -1, list);
+
                 break;
 
             case 3:     // Monthly
-                choices = new FrequencyChoices(2, 1, -1, -1, 0, null);
-                break;
-            case 4:     // Yearly
-                choices = new FrequencyChoices(3, 1, -1, -1, -1, null);
+                choices = new FrequencyChoices(2, 1, 0, 0, 0, null);
                 break;
         }
 

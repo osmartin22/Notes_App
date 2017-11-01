@@ -30,7 +30,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private final int showTitle = 0, showContent = 1, showAll = 2;
 
-    // TODO: Use AsyncTask to get notes at the start
     public NotesAdapter(Context context, DatabaseHandler db) {
         this.context = context;
         notes = db.getUserNotes();

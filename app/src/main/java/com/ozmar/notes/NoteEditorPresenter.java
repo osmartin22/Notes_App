@@ -24,9 +24,12 @@ public class NoteEditorPresenter {
         }
     }
 
-    public void updateReminderDisplay(Long newReminderTime, String newReminderText, @Nullable FrequencyChoices choices) {
+    public void updateReminderDisplay(Long newReminderTime, @NonNull String newReminderText, @Nullable FrequencyChoices choices) {
         noteEditorView.updateDisplayReminder(newReminderTime, newReminderText, choices);
     }
+
+
+
 
     public SingleNote createNewNote(@NonNull DatabaseHandler db, @Nullable FrequencyChoices choices, @NonNull String title,
                                     @NonNull String content, boolean favorite, long reminderTime) {
@@ -52,8 +55,6 @@ public class NoteEditorPresenter {
 
         return newNote;
     }
-
-
 
     public void upDateNote(@NonNull SingleNote note, @Nullable NoteChanges noteChanges,
                            @NonNull String title, @NonNull String content) {
@@ -87,6 +88,12 @@ public class NoteEditorPresenter {
 
         boolean idChanged = false;
 
+        if (choices != null) {
+            note.set_hasFrequencyChoices(true);
+        } else {
+            note.set_hasFrequencyChoices(false);
+        }
+
         // New reminder
         if (note.get_reminderId() == -1 && reminderTime != 0) {
             idChanged = true;
@@ -118,12 +125,9 @@ public class NoteEditorPresenter {
             changes.setReminderIdChanged(idChanged);
         }
 
-        if (choices != null) {
-            note.set_hasFrequencyChoices(true);
-        } else {
-            note.set_hasFrequencyChoices(false);
-        }
     }
+
+
 
     public void onDestroy() {
         noteEditorView = null;

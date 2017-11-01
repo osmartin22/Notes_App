@@ -10,8 +10,8 @@ public class UndoBuffer {
     private final BufferHelper buffer1;
     private int currentBuffer;
 
-    private int bufferToProcess = 0;     // This value should be stored as an int if needed as it
-    // will change with user interaction
+    // This value should be stored as an int if needed as it will change with user interaction
+    private int bufferToProcess = 0;
 
     public UndoBuffer() {
         this.buffer0 = new BufferHelper();
@@ -44,7 +44,7 @@ public class UndoBuffer {
         return bufferToProcess;
     }
 
-    // Return buffer to start processing
+    // Return buffer to Start processing
     public void bufferToStartProcessing() {
         if (currentBuffer == 0) {
             bufferToProcess = 0;

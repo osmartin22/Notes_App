@@ -294,7 +294,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .show();
     } // deleteForever() end
 
-    private void showSnackBar(final MenuItem item, int num) {
+    private void showSnackBar(MenuItem item, int num) {
         String message;
         if (multiSelectHelper.getEditorAction() != -1) {
             message = itemHelper.noteEditorMessage(num);

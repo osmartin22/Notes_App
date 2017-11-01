@@ -237,7 +237,7 @@
     </plurals>
 
 
-    <!-- String used com.ozmar.notes.notificationsions/notification channels -->
+    <!-- String used for notifications/notification channels -->
     <string name="reminderChannelId">Reminder Channel Id</string>
     <string name="reminderChannelName">Reminder Channel Name</string>
     <string name="reminderChannelDescription">Reminder Channel Description</string>
@@ -246,6 +246,7 @@
     <string name="notificationId">Notification Id</string>
     <string name="notificationTitle">Notification Title</string>
     <string name="notificationContent">Notification Content</string>
+    <string name="notificationHasFrequency">Notification Has Frequency Choice</string>
 
 
     <!-- SharedPreference strings -->

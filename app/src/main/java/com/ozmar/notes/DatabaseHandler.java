@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.support.annotation.NonNull;
 
 import com.ozmar.notes.utils.NoteChanges;
 
@@ -14,12 +15,12 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 // TODO: Created 4 notes with reminders not set to favorite. Set them to favorite and
-    // switched to favorites, but they did not appear, even when switching back and forth
-    // Setting them to favorite again did work as expected
+// switched to favorites, but they did not appear, even when switching back and forth
+// Setting them to favorite again did work as expected
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
     private static final String DATABASE_NAME = "UserNotesDB";
 
     // TABLES
@@ -73,17 +74,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_REPEAT_EVENTS = "repeatEvents";
     private static final String KEY_MONTH_REPEAT_TYPE = "monthRepeatType";
     private static final String KEY_DAYS_CHOSEN = "daysChosen";
+    private static final String KEY_EVENTS_OCCURRED = "eventsOccurred";
 
     private static final String CREATE_TABLE_REMINDERS = "CREATE TABLE IF NOT EXISTS "
             + TABLE_REMINDERS + "("
             + KEY_ID + " INTEGER PRIMARY KEY, "
-            + KEY_NEXT_REMINDER_TIME + " INTEGER DEFAULT -1, "
+            + KEY_NEXT_REMINDER_TIME + " INTEGER, "
             + KEY_REPEAT_TYPE + " INTEGER DEFAULT -1, "
-            + KEY_REPEAT_EVERY + " INTEGER DEFAULT -1, "
-            + KEY_REPEAT_TO_DATE + " INTEGER DEFAULT -1, "
-            + KEY_REPEAT_EVENTS + " INTEGER DEFAULT -1, "
-            + KEY_MONTH_REPEAT_TYPE + " INTEGER DEFAULT -1, "
-            + KEY_DAYS_CHOSEN + " TEXT);";
+            + KEY_REPEAT_EVERY + " INTEGER, "
+            + KEY_REPEAT_TO_DATE + " INTEGER, "
+            + KEY_REPEAT_EVENTS + " INTEGER, "
+            + KEY_MONTH_REPEAT_TYPE + " INTEGER, "
+            + KEY_DAYS_CHOSEN + " TEXT , "
+            + KEY_EVENTS_OCCURRED + " INTEGER);";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -103,13 +106,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 //        sqLiteDatabase.execSQL(" ALTER TABLE " + TABLE_USER_NOTES + " ADD COLUMN " + KEY_REMINDER_ID + " INTEGER DEFAULT 0 ");
 //        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_ARCHIVE + " ADD COLUMN " + KEY_REMINDER_ID + " INTEGER DEFAULT 0 ");
 //        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_RECYCLE_BIN + " ADD COLUMN " + KEY_RECYCLE_BIN_TIME_MODIFIED + " INTEGER DEFAULT 0");
-
-        // OR
-        // Do separate code without break so that user gets all the new updates
-//        switch (oldVersion) {
-//            case 2:
-//            case 3:
-//        }
+        sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_REMINDERS + " ADD COLUMN " + KEY_EVENTS_OCCURRED + " INTEGER DEFAULT 0");
     }
 
     @Override
@@ -535,6 +532,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Reminders Table Specific Methods
     //--------------------------------------------------------------------------------------------//
 
+    @NonNull
     private NextReminderTime getNextReminderTime(SQLiteDatabase db, int id) {
         long nextReminderTime = 0;
         boolean isRepeating = false;
@@ -557,6 +555,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public NextReminderTime getNextReminderTime(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         return getNextReminderTime(db, id);
+    }
+
+    public void updateNextReminderTime(int id, long nextReminderTime) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_NEXT_REMINDER_TIME, nextReminderTime);
+
+        db.update(TABLE_REMINDERS, values, KEY_ID + " = ?",
+                new String[]{String.valueOf(id)});
     }
 
     public FrequencyChoices getFrequencyChoice(int id) {
@@ -596,23 +604,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-
         values.put(KEY_NEXT_REMINDER_TIME, nextReminderTime);
-        if (choices != null) {
-            values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
-            values.put(KEY_REPEAT_EVERY, choices.getRepeatEvery());
-            values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToDate());
-            values.put(KEY_REPEAT_EVENTS, choices.getRepeatEvents());
-            values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());
 
-            List<Integer> chosenDays = choices.getDaysChosen();
-            if (chosenDays != null) {
-                StringBuilder daysString = new StringBuilder();
-                for (Integer day : choices.getDaysChosen()) {
-                    daysString.append(day).append(" ");
-                }
-                values.put(KEY_DAYS_CHOSEN, daysString.toString());
-            }
+        if (choices != null) {
+            putFrequencyChoiceInValues(values, choices);
         }
 
         return (int) db.insert(TABLE_REMINDERS, null, values);
@@ -623,21 +618,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(KEY_NEXT_REMINDER_TIME, nextReminderTime);
-        if (choices != null) {
-            values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
-            values.put(KEY_REPEAT_EVERY, choices.getRepeatEvery());
-            values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToDate());
-            values.put(KEY_REPEAT_EVENTS, choices.getRepeatEvents());
-            values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());
 
-            List<Integer> chosenDays = choices.getDaysChosen();
-            if (chosenDays != null) {
-                StringBuilder daysString = new StringBuilder();
-                for (Integer day : choices.getDaysChosen()) {
-                    daysString.append(day).append(" ");
-                }
-                values.put(KEY_DAYS_CHOSEN, daysString.toString());
-            }
+        if (choices != null) {
+            putFrequencyChoiceInValues(values, choices);
 
         } else {
             values.put(KEY_REPEAT_TYPE, -1);
@@ -645,6 +628,27 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         db.update(TABLE_REMINDERS, values, KEY_ID + " = ?",
                 new String[]{String.valueOf(id)});
+    }
+
+    private void putFrequencyChoiceInValues(ContentValues values, @NonNull FrequencyChoices choices) {
+
+
+        values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
+        values.put(KEY_REPEAT_EVERY, choices.getRepeatEvery());
+        values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToDate());
+        values.put(KEY_REPEAT_EVENTS, choices.getRepeatEvents());
+        values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());
+
+        List<Integer> chosenDays = choices.getDaysChosen();
+        if (chosenDays != null) {
+            StringBuilder daysString = new StringBuilder();
+            for (Integer day : choices.getDaysChosen()) {
+                daysString.append(day).append(" ");
+            }
+            values.put(KEY_DAYS_CHOSEN, daysString.toString());
+        }
+
+        values.put(KEY_EVENTS_OCCURRED, 0);
     }
 
     private void deleteReminder(SQLiteDatabase db, int id) {
@@ -655,6 +659,34 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void deleteReminder(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         deleteReminder(db, id);
+    }
+
+    public int getEventsOccurred(int id) {
+        int eventsOccurred = 0;
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String selectQuery = "SELECT " + KEY_EVENTS_OCCURRED + " FROM " +
+                TABLE_REMINDERS + " WHERE ROWID = " + id;
+
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if (cursor.moveToFirst()) {
+            do {
+                eventsOccurred = cursor.getInt(0);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return eventsOccurred;
+    }
+
+    public void updateEventsOccurred(int id, int eventsOccurred) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(KEY_EVENTS_OCCURRED, eventsOccurred);
+
+        db.update(TABLE_REMINDERS, values, KEY_ID + " = ?",
+                new String[]{String.valueOf(id)});
     }
 
 } // DataBaseHandler() end
