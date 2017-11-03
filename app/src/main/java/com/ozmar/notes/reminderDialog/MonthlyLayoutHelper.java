@@ -15,6 +15,7 @@ public class MonthlyLayoutHelper {
     private final RadioButton topRadioButton;
     private final RadioButton bottomRadioButton;
     private int checkedButton;
+    private LocalDate mLocalDate;
 
     public MonthlyLayoutHelper(View view) {
         this(view, 0);
@@ -53,11 +54,17 @@ public class MonthlyLayoutHelper {
                     break;
 
                 case R.id.bottomRadioButton:
-                    checkedButton = 1;
+                    checkedButton = getNthDayOfMonth();
                     break;
             }
-
         });
+    }
+
+    private int getNthDayOfMonth() {
+        if (mLocalDate == null) {
+            mLocalDate = LocalDate.now();
+        }
+        return (mLocalDate.getDayOfMonth() / 7) + 1;
     }
 
     public void setViewEnabled(boolean flag) {

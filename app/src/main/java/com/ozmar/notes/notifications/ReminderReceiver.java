@@ -9,12 +9,9 @@ import android.support.annotation.NonNull;
 import com.ozmar.notes.DatabaseHandler;
 import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.R;
+import com.ozmar.notes.utils.ReminderUtils;
 
 import org.joda.time.DateTime;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 
 public class ReminderReceiver extends BroadcastReceiver {
@@ -99,101 +96,21 @@ public class ReminderReceiver extends BroadcastReceiver {
 
         switch (choices.getRepeatType()) {
             case 0:     // Daily
-                nextReminderTime = calculateDailyReminderTime(choices, dateTimeNow);
+                nextReminderTime = ReminderUtils.calculateDailyReminderTime(choices, dateTimeNow);
                 break;
 
             case 1:     // Weekly
-                nextReminderTime = calculateWeeklyReminderTime(choices, dateTimeReminder);
+                nextReminderTime = ReminderUtils.calculateWeeklyReminderTime(choices, dateTimeReminder);
                 break;
 
             case 2:     // Monthly
                 // TODO: Get week number for second option (i.e. 3rd week of the month)
-
+                nextReminderTime = ReminderUtils.calculateMonthlyReminderTime(choices, dateTimeReminder, dateTimeNow);
                 break;
 
             case 3:     // Yearly
-                nextReminderTime = calculateYearlyReminderTime(choices, dateTimeReminder, dateTimeNow);
+                nextReminderTime = ReminderUtils.calculateYearlyReminderTime(choices, dateTimeReminder, dateTimeNow);
                 break;
-        }
-
-        return nextReminderTime;
-    }
-
-    // Does not take into account if the phone changes date/time (i.e. user manually changes date)
-    private long calculateDailyReminderTime(FrequencyChoices choices, DateTime dateTimeNow) {
-        return dateTimeNow.plusDays(choices.getRepeatEvery()).getMillis();
-    }
-
-    // Does not take into account if the phone changes date/time (i.e. user manually changes date)
-    private long calculateWeeklyReminderTime(FrequencyChoices choices, DateTime dateTime) {
-        List<Integer> daysChosen = choices.getDaysChosen();
-        Collections.sort(daysChosen);
-
-        long nextReminderTime = dateTime.getMillis();
-        int currentDay = dateTime.getDayOfWeek();
-
-        // Repeats every day of the week
-        if (daysChosen.size() == 7) {
-            if (currentDay == 7) {
-                nextReminderTime += TimeUnit.DAYS.toMillis(1);
-                nextReminderTime += TimeUnit.DAYS.toMillis(7 * (choices.getRepeatEvery() - 1));
-            } else {
-                nextReminderTime += TimeUnit.DAYS.toMillis(1);
-            }
-
-            // Does not repeat every day of the week, need to finish current week reminders
-        } else if (daysChosen.get(daysChosen.size() - 1) > currentDay) {
-            int i = 0;
-            while (daysChosen.get(i) <= currentDay) {
-                i++;
-            }
-            int nextReminderDay = daysChosen.get(i);
-            nextReminderTime = TimeUnit.DAYS.toMillis(nextReminderDay - currentDay);
-
-            // Start over reminders for days chosen
-        } else {
-            nextReminderTime += TimeUnit.DAYS.toMillis(7 - currentDay);
-            nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(0));
-            nextReminderTime += TimeUnit.DAYS.toMillis(7 * (choices.getRepeatEvery() - 1));
-        }
-
-        return nextReminderTime;
-    }
-
-    private long calculateMonthlyReminderTime(FrequencyChoices choices, DateTime oldReminder, DateTime dateTimeNow) {
-        long nextReminderTime = 0;
-
-        DateTime currentYearReminder = oldReminder.withYear(dateTimeNow.getYear());
-        boolean reminderIsAfterNow = currentYearReminder.isAfterNow();
-
-        if (choices.getMonthRepeatType() == 0) {
-
-        }
-
-        return nextReminderTime;
-    }
-
-    // Takes into account if phone changes date/time (i.e. user manually changes time)
-    private long calculateYearlyReminderTime(FrequencyChoices choices, DateTime oldReminder, DateTime dateTimeNow) {
-
-        DateTime currentYearReminder = oldReminder.withYear(dateTimeNow.getYear());
-
-        long nextReminderTime;
-        int yearDiff = currentYearReminder.getYear() - oldReminder.getYear();
-        int moduloDiff = yearDiff % choices.getRepeatEvery();
-        int yearsToAdd = choices.getRepeatEvery() - moduloDiff;
-
-        // Reminder will not occur in current year
-        if (moduloDiff != 0) {
-            nextReminderTime = currentYearReminder.plusYears(yearsToAdd).getMillis();
-
-            // Reminder possibly occurs in current year
-        } else {
-            if (currentYearReminder.isAfter(dateTimeNow)) {
-                nextReminderTime = currentYearReminder.getMillis();
-            } else {
-                nextReminderTime = currentYearReminder.plusYears(choices.getMonthRepeatType()).getMillis();
-            }
         }
 
         return nextReminderTime;

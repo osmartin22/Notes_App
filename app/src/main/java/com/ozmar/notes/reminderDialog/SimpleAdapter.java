@@ -11,9 +11,6 @@ import android.widget.TextView;
 
 import com.ozmar.notes.R;
 
-/**
- * Created by ozmar on 10/18/2017.
- */
 
 public class SimpleAdapter extends ArrayAdapter<String> {
 

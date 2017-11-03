@@ -48,7 +48,7 @@ public final class FrequencyChoices implements Parcelable {
     }
 
     public List<Integer> getDaysChosen() {
-        return daysChosen;
+        return new ArrayList<>(daysChosen);
     }
 
     @Override

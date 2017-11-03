@@ -15,6 +15,7 @@ import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.Preferences;
 import com.ozmar.notes.R;
 import com.ozmar.notes.utils.FormatUtils;
+import com.ozmar.notes.utils.ReminderUtils;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
@@ -59,6 +60,7 @@ public class ReminderDialogFragment extends DialogFragment
 
     private FrequencyChoices choices = null;
 
+    private Context mContext;
     private Preferences preferences;
     private OnReminderPickedListener myCallback;
 
@@ -84,6 +86,7 @@ public class ReminderDialogFragment extends DialogFragment
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        mContext = context;
         try {
             myCallback = (OnReminderPickedListener) context;
         } catch (ClassCastException e) {
@@ -95,10 +98,12 @@ public class ReminderDialogFragment extends DialogFragment
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle bundle = getArguments();
-        choices = bundle.getParcelable("Frequency Choices");
-        long reminderTimeMillis = bundle.getLong("Next Reminder Time", 0);
-        if (reminderTimeMillis != 0) {
-            chosenDateTime = new DateTime(reminderTimeMillis);
+        if (bundle != null) {
+            choices = bundle.getParcelable("Frequency Choices");
+            long reminderTimeMillis = bundle.getLong("Next Reminder Time", 0);
+            if (reminderTimeMillis != 0) {
+                chosenDateTime = new DateTime(reminderTimeMillis);
+            }
         }
 
         View view = View.inflate(getActivity(), R.layout.reminder_dialog_layout, null);
@@ -109,13 +114,13 @@ public class ReminderDialogFragment extends DialogFragment
         timeSpinner = view.findViewById(R.id.spinnerTime);
         frequencySpinner = view.findViewById(R.id.spinnerReminder);
 
-        String[] dropDownArray = getActivity().getResources().getStringArray(R.array.dateXMLArray);
+        String[] dropDownArray = getResources().getStringArray(R.array.dateXMLArray);
         dropDownArray[2] += " " + FormatUtils.getCurrentDayOfWeek(1);
         dateSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
                 dateArray, dropDownArray, 0);
         dateSpinner.setAdapter(dateSpinnerAdapter);
 
-        dropDownArray = getActivity().getResources().getStringArray(R.array.timeXMLArray);
+        dropDownArray = getResources().getStringArray(R.array.timeXMLArray);
         timeSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
                 timeArray, dropDownArray, 0);
         timeSpinner.setAdapter(timeSpinnerAdapter);
@@ -125,9 +130,9 @@ public class ReminderDialogFragment extends DialogFragment
         frequencySpinner.setAdapter(frequencySpinnerAdapter);
 
         setSpinnerListener();
-        setSpinnerPosition();
+        setSpinnerPosition(choices);
 
-        AlertDialog.Builder reminderDialog = new AlertDialog.Builder(getActivity());
+        AlertDialog.Builder reminderDialog = new AlertDialog.Builder(mContext);
         reminderDialog.setView(view);
         reminderDialog.setTitle(getString(R.string.reminderDialogTitle));
 
@@ -162,19 +167,22 @@ public class ReminderDialogFragment extends DialogFragment
 
                 DateTime dateTime = new DateTime(year, month, day, hour, minute);
                 if (dateTime.getMillis() < System.currentTimeMillis()) {
-
-                    Snackbar snackBar = Snackbar.make(getActivity().findViewById(R.id.noteEditorLayout)
-                            , "That Time Has Already Passed", Snackbar.LENGTH_LONG);
-                    snackBar.show();
+                    if (getActivity() != null) {
+                        Snackbar snackBar = Snackbar.make(getActivity().findViewById(R.id.noteEditorLayout)
+                                , "That Time Has Already Passed", Snackbar.LENGTH_LONG);
+                        snackBar.show();
+                    }
 
                 } else {
-                    Toast.makeText(getActivity(), dateTime.toString(DateTimeFormat.mediumDateTime()), Toast.LENGTH_SHORT).show();
                     if (myCallback != null) {
 
                         if (currentFrequencySelection != 5) { // User selected a preset Frequency
-                            makeFrequencyChoiceForPreset();
+                            choices = makeFrequencyChoiceForPreset(currentFrequencySelection);
                         }
 
+                        dateTime = checkFrequencySelection(dateTime, choices);
+
+                        Toast.makeText(getActivity(), dateTime.toString(DateTimeFormat.mediumDateTime()), Toast.LENGTH_SHORT).show();
                         myCallback.onReminderPicked(dateTime, choices);
                     }
                     dialog.dismiss();
@@ -197,13 +205,13 @@ public class ReminderDialogFragment extends DialogFragment
         timeArray[3] = FormatUtils.getTimeFormat(getContext(), preferences.getNightTime());
         timeArray[4] = "Pick A Time...";
 
-        frequencyArray = getActivity().getResources().getStringArray(R.array.frequencyXMLArrayListItem);
+        frequencyArray = getResources().getStringArray(R.array.frequencyXMLArrayListItem);
         frequencyArray[2] += " on " + FormatUtils.getCurrentDayOfWeek(1);
     }
 
     // Set Spinner positions to reflect previous user reminder if available
     // or to x hours into the future
-    private void setSpinnerPosition() {
+    private void setSpinnerPosition(FrequencyChoices choices) {
         if (choices != null) {
             frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices);
             frequencySpinner.setSelection(5);
@@ -468,9 +476,11 @@ public class ReminderDialogFragment extends DialogFragment
         }
     }
 
-    private void makeFrequencyChoiceForPreset() {
+    private FrequencyChoices makeFrequencyChoiceForPreset(int currentFrequencySelection) {
+        FrequencyChoices choices;
         switch (currentFrequencySelection) {
             case 0:     // Does not repeat
+            default:
                 choices = null;
                 break;
 
@@ -489,6 +499,35 @@ public class ReminderDialogFragment extends DialogFragment
                 choices = new FrequencyChoices(2, 1, 0, 0, 0, null);
                 break;
         }
+        return choices;
+    }
 
+    // Force date to align with FrequencyChoice
+    // i.e. User wants to reminder to repeat weekly on Monday but date chosen is a saturday,
+    // change saturday to the next monday to align with repeat on Monday
+    // i.e Repeat on the second Monday of a month but date chosen is the third Monday
+    // Change date to the second Monday of next month to align with repeat
+    private DateTime checkFrequencySelection(DateTime dateTime, FrequencyChoices choices) {
+
+        long nextReminderTime = dateTime.getMillis();
+
+        if (choices.getRepeatType() == 1) {     // Weekly
+            int currentDayOfWeek = dateTime.getDayOfWeek();
+
+            // Update date to fit with FrequencyChoice
+            List<Integer> daysChosen = choices.getDaysChosen();
+            Collections.sort(daysChosen);
+
+            nextReminderTime += ReminderUtils.getNextWeeklyReminderTime(daysChosen, currentDayOfWeek, 1);
+
+        } else if (choices.getRepeatType() == 2)
+
+        {   // Monthly
+
+        }
+
+        return new
+
+                DateTime(nextReminderTime);
     }
 }
