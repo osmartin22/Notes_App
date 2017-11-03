@@ -121,7 +121,7 @@ public class ReminderDialogFragment extends DialogFragment
         timeSpinner.setAdapter(timeSpinnerAdapter);
 
         frequencySpinnerAdapter = new ReminderFrequencyAdapter(getContext(),
-                android.R.layout.simple_spinner_item, frequencyArray);
+                R.layout.multi_line_spinner_item, frequencyArray);
         frequencySpinner.setAdapter(frequencySpinnerAdapter);
 
         setSpinnerListener();

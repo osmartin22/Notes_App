@@ -160,8 +160,15 @@ public class ReminderReceiver extends BroadcastReceiver {
         return nextReminderTime;
     }
 
-    private long calculateMonthlyReminderTime(FrequencyChoices choices, DateTime dateTime) {
+    private long calculateMonthlyReminderTime(FrequencyChoices choices, DateTime oldReminder, DateTime dateTimeNow) {
         long nextReminderTime = 0;
+
+        DateTime currentYearReminder = oldReminder.withYear(dateTimeNow.getYear());
+        boolean reminderIsAfterNow = currentYearReminder.isAfterNow();
+
+        if (choices.getMonthRepeatType() == 0) {
+
+        }
 
         return nextReminderTime;
     }

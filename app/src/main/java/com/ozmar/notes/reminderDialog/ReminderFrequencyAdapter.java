@@ -18,6 +18,7 @@ public class ReminderFrequencyAdapter extends ArrayAdapter<String> implements Sp
     private LayoutInflater inflater;
     private String[] listItems;
     private String[] dropDownItems;
+    private TextView mTextView;
 
     public ReminderFrequencyAdapter(Context context, int resource, String[] listItems) {
         super(context, resource, listItems);
@@ -31,8 +32,10 @@ public class ReminderFrequencyAdapter extends ArrayAdapter<String> implements Sp
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         View view = super.getView(position, convertView, parent);
         if (position == 5) {
-            TextView textView = view.findViewById(android.R.id.text1);
-            textView.setText(listItems[5]);
+            if (mTextView == null) {
+                mTextView = view.findViewById(R.id.frequencySpinnerItem);
+            }
+            mTextView.setText(listItems[5]);
         }
 
         return view;
