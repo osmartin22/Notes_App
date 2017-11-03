@@ -11,7 +11,6 @@ import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.R;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
 import java.util.Collections;
 import java.util.List;
@@ -88,17 +87,19 @@ public class ReminderReceiver extends BroadcastReceiver {
     // On subsequent calls to restore the reminder, it should not have to calculate the nth week
     // and just use the passed value instead
 
+    // Possible optimization is to not immediately set an alarm manager when a new reminder is created
+    // A reminder 2 months away does not need to be created.
+    // Can have a separate alarm that runs every week that sets up any reminders that
+    // will occur in that week
     private long calculateNextReminderTime(FrequencyChoices choices, long currentReminderTime) {
         long nextReminderTime = 0;
 
         DateTime dateTimeNow = DateTime.now();
-
-        // Set datetime with desired reminder but with the current year;
         DateTime dateTimeReminder = new DateTime(currentReminderTime);
 
         switch (choices.getRepeatType()) {
             case 0:     // Daily
-                nextReminderTime = calculateDailyReminderTime(choices, dateTimeReminder, dateTimeNow);
+                nextReminderTime = calculateDailyReminderTime(choices, dateTimeNow);
                 break;
 
             case 1:     // Weekly
@@ -110,7 +111,6 @@ public class ReminderReceiver extends BroadcastReceiver {
 
                 break;
 
-            // TODO: FIX TO CHECK DAY IS CORRECT WITH REMINDER
             case 3:     // Yearly
                 nextReminderTime = calculateYearlyReminderTime(choices, dateTimeReminder, dateTimeNow);
                 break;
@@ -119,27 +119,12 @@ public class ReminderReceiver extends BroadcastReceiver {
         return nextReminderTime;
     }
 
-    private long calculateDailyReminderTime(FrequencyChoices choices, DateTime dateTimeReminder, DateTime dateTimeNow) {
-        long nextReminderTime;
-
-        // Set reminder to current month/day/year
-        dateTimeReminder.withDate(new LocalDate(dateTimeNow)).withYear(dateTimeNow.getYear());
-
-        if (dateTimeReminder.isAfter(dateTimeNow)) {
-            nextReminderTime = dateTimeReminder.getMillis();
-        } else {
-
-            if (choices.getRepeatEvery() == 1) {
-                nextReminderTime = dateTimeReminder.plusDays(1).getMillis();
-            } else {
-                nextReminderTime = dateTimeReminder.plusDays(choices.getRepeatEvery()).getMillis();
-
-            }
-        }
-
-        return nextReminderTime;
+    // Does not take into account if the phone changes date/time (i.e. user manually changes date)
+    private long calculateDailyReminderTime(FrequencyChoices choices, DateTime dateTimeNow) {
+        return dateTimeNow.plusDays(choices.getRepeatEvery()).getMillis();
     }
 
+    // Does not take into account if the phone changes date/time (i.e. user manually changes date)
     private long calculateWeeklyReminderTime(FrequencyChoices choices, DateTime dateTime) {
         List<Integer> daysChosen = choices.getDaysChosen();
         Collections.sort(daysChosen);
@@ -181,6 +166,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         return nextReminderTime;
     }
 
+    // Takes into account if phone changes date/time (i.e. user manually changes time)
     private long calculateYearlyReminderTime(FrequencyChoices choices, DateTime oldReminder, DateTime dateTimeNow) {
 
         DateTime currentYearReminder = oldReminder.withYear(dateTimeNow.getYear());
