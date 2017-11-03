@@ -65,7 +65,7 @@
                 app:layout_constraintLeft_toRightOf="@+id/everyTextView" />
 
             <TextView
-                android:id="@+id/timeUnitTextView"
+                android:id="@+id/typeTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
@@ -73,7 +73,7 @@
                 app:layout_constraintLeft_toRightOf="@+id/everyNumberEditText" />
 
             <ViewSwitcher
-                android:id="@+id/viewSwitcher"
+                android:id="@+id/typeViewSwitcher"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:measureAllChildren="false"
@@ -99,7 +99,7 @@
                 android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/viewSwitcher" />
+                app:layout_constraintTop_toBottomOf="@+id/typeViewSwitcher" />
 
             <include layout="@layout/next_to_bottom_spinner_layout" />
 

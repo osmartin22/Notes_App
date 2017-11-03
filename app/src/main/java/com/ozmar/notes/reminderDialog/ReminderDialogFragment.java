@@ -180,7 +180,10 @@ public class ReminderDialogFragment extends DialogFragment
                             choices = makeFrequencyChoiceForPreset(currentFrequencySelection);
                         }
 
-                        dateTime = checkFrequencySelection(dateTime, choices);
+                        if (choices != null) {
+                            dateTime = checkFrequencySelection(dateTime, choices);
+                        }
+
 
                         Toast.makeText(getActivity(), dateTime.toString(DateTimeFormat.mediumDateTime()), Toast.LENGTH_SHORT).show();
                         myCallback.onReminderPicked(dateTime, choices);
@@ -507,7 +510,7 @@ public class ReminderDialogFragment extends DialogFragment
     // change saturday to the next monday to align with repeat on Monday
     // i.e Repeat on the second Monday of a month but date chosen is the third Monday
     // Change date to the second Monday of next month to align with repeat
-    private DateTime checkFrequencySelection(DateTime dateTime, FrequencyChoices choices) {
+    private DateTime checkFrequencySelection(@NonNull DateTime dateTime, @NonNull FrequencyChoices choices) {
 
         long nextReminderTime = dateTime.getMillis();
 
@@ -520,14 +523,10 @@ public class ReminderDialogFragment extends DialogFragment
 
             nextReminderTime += ReminderUtils.getNextWeeklyReminderTime(daysChosen, currentDayOfWeek, 1);
 
-        } else if (choices.getRepeatType() == 2)
-
-        {   // Monthly
+        } else if (choices.getRepeatType() == 2) {   // Monthly
 
         }
 
-        return new
-
-                DateTime(nextReminderTime);
+        return new DateTime(nextReminderTime);
     }
 }
