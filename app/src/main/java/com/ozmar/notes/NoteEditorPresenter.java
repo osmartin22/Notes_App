@@ -13,7 +13,6 @@ public class NoteEditorPresenter {
         this.noteEditorView = noteEditorView;
     }
 
-
     public void setUpNoteView(@NonNull SingleNote note) {
         noteEditorView.setUpNoteEditTexts(note);
     }
@@ -27,7 +26,6 @@ public class NoteEditorPresenter {
     public void updateReminderDisplay(Long newReminderTime, @NonNull String newReminderText, @Nullable FrequencyChoices choices) {
         noteEditorView.updateDisplayReminder(newReminderTime, newReminderText, choices);
     }
-
 
     public SingleNote createNewNote(@NonNull DatabaseHandler db, @Nullable FrequencyChoices choices, @NonNull String title,
                                     @NonNull String content, boolean favorite, long reminderTime) {
@@ -125,7 +123,6 @@ public class NoteEditorPresenter {
         }
 
     }
-
 
     public void onDestroy() {
         noteEditorView = null;

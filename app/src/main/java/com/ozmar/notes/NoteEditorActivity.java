@@ -17,8 +17,8 @@ import android.widget.Toast;
 
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.UpdateNoteAsync;
-import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.notifications.ReminderManager;
+import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.utils.NoteChanges;
 
@@ -28,9 +28,6 @@ import static com.ozmar.notes.MainActivity.db;
 
 // TODO: When deleting an entire note, make sure the reminder is cancelled if it exists
 
-// TODO: Possibly pass a copy of FrequencyChoices to ReminderDialogFragment instead
-// To do == comparison at the end to check whether the alarm needs updating
-// Currently, FrequencyChoices will always change so the alarm always needs updating
 
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener, NoteEditorView {
@@ -96,7 +93,6 @@ public class NoteEditorActivity extends AppCompatActivity
         finish();   // Only allow undo for notes that are not new
     }
 
-    // Check strings.xml for meaning of noteResult[]
     private void noteModifiedResult(@Nullable SingleNote note, @NonNull String value) {
         Intent intent = new Intent(NoteEditorActivity.this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -145,10 +141,7 @@ public class NoteEditorActivity extends AppCompatActivity
             boolean titleEmpty = title.isEmpty();
             boolean contentEmpty = content.isEmpty();
             if (!(titleEmpty && contentEmpty)) {    // New note
-
-
                 note = noteEditorPresenter.createNewNote(db, choices, title, content, favorite, reminderTime);
-
                 noteModifiedResult(note, noteResult[1]);
             }
         }

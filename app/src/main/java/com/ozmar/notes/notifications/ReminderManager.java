@@ -26,9 +26,7 @@ public class ReminderManager {
                 myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         if (manager != null) {
-
-            manager.setAlarmClock(new AlarmManager.AlarmClockInfo(note.get_nextReminderTime(),
-                    pendingIntent), pendingIntent);
+            manager.setExact(AlarmManager.RTC_WAKEUP, note.get_nextReminderTime(), pendingIntent);
         }
     }
 
@@ -47,7 +45,7 @@ public class ReminderManager {
                 myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         if (manager != null) {
-            manager.setAlarmClock(new AlarmManager.AlarmClockInfo(nextReminderTime, pendingIntent), pendingIntent);
+            manager.setExact(AlarmManager.RTC_WAKEUP, nextReminderTime, pendingIntent);
         }
 
     }
