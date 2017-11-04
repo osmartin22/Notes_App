@@ -45,6 +45,8 @@ public class NoteEditorActivity extends AppCompatActivity
     private long reminderTime = 0;
     private TextView reminderText;
 
+    private boolean frequencyChoiceChanged = false;
+
     private NoteEditorPresenter noteEditorPresenter;
 
     private void contextualActionResult(@NonNull MenuItem item, @Nullable SingleNote note,
@@ -120,6 +122,7 @@ public class NoteEditorActivity extends AppCompatActivity
         if (note != null) {
 
             NoteChanges noteChanges = new NoteChanges();
+            noteChanges.setFrequencyChoiceChanged(frequencyChoiceChanged);
             noteEditorPresenter.upDateNote(note, noteChanges, title, content);
 
             // Don't allow changes to favorite if in archive list
@@ -272,6 +275,7 @@ public class NoteEditorActivity extends AppCompatActivity
     @Override
     public void onReminderPicked(DateTime dateTime, FrequencyChoices choices) {
         if (this.frequencyChoices != choices) {
+            frequencyChoiceChanged = true;
             this.frequencyChoices = choices;
         }
 
@@ -282,7 +286,10 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @Override
     public void onReminderDelete() {
-        frequencyChoices = null;
+        if (frequencyChoices != null) {
+            frequencyChoices = null;
+            frequencyChoiceChanged = true;
+        }
         reminderTime = 0;
         reminderText.setVisibility(View.INVISIBLE);
     }

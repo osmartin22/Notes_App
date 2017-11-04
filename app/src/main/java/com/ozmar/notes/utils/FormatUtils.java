@@ -177,8 +177,7 @@ public class FormatUtils {
         return timeToSet.withMinuteOfHour((timeToSet.getMinuteOfHour() / minute) * minute);
     }
 
-    // TODO: Rewrite
-    public static String formatNthDayOfMonthItIs(LocalDate localDate) {
+    public static String formatNthWeekOfMonth(LocalDate localDate) {
         String nthDay = "";
         int week = (localDate.getDayOfMonth() / 7) + 1;
         boolean lastWeek = false;
@@ -219,7 +218,6 @@ public class FormatUtils {
         LocalDate localDate = LocalDate.now();
 
         int repeatType = choices.getRepeatEvery();
-        // TODO: Create custom spinner to display long frequency choices
         switch (choices.getRepeatType()) {
             case 0:
                 // Repeats Daily
@@ -237,7 +235,7 @@ public class FormatUtils {
                 frequencyText += context.getResources().getQuantityString(R.plurals.repeatMonth,
                         repeatType, repeatType);
                 if (choices.getMonthRepeatType() == 1) {
-                    frequencyText += " (on every " + FormatUtils.formatNthDayOfMonthItIs(localDate) + ")";
+                    frequencyText += " (on every " + FormatUtils.formatNthWeekOfMonth(localDate) + ")";
                 }
                 break;
             case 3:

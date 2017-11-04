@@ -489,7 +489,7 @@ public class ReminderDialogFragment extends DialogFragment
 
             case 1:     // Daily
             case 4:     // Yearly
-                choices = new FrequencyChoices(currentFrequencySelection, 1, 0, 0, -1, null);
+                choices = new FrequencyChoices(currentFrequencySelection - 1, 1, 0, 0, -1, null);
                 break;
 
             case 2:     // Weekly
@@ -518,7 +518,9 @@ public class ReminderDialogFragment extends DialogFragment
             int currentDayOfWeek = dateTime.getDayOfWeek();
 
             // Update date to fit with FrequencyChoice
+            // NOTE: choices.getDaysChosen can return NULL but it should never be NULL if in this statement
             List<Integer> daysChosen = choices.getDaysChosen();
+            assert daysChosen != null;
             Collections.sort(daysChosen);
 
             nextReminderTime += ReminderUtils.getNextWeeklyReminderTime(daysChosen, currentDayOfWeek, 1);

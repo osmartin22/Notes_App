@@ -89,12 +89,11 @@ public class NoteEditorPresenter {
             note.set_hasFrequencyChoices(false);
         }
 
-        note.set_nextReminderTime(reminderTime);
-
         // New reminder
         if (note.get_reminderId() == -1 && reminderTime != 0) {
             idChanged = true;
             int newId = db.addReminder(choices, reminderTime);
+            note.set_nextReminderTime(reminderTime);
             note.set_reminderId(newId);
             noteEditorView.setupReminder(note);
 
@@ -106,15 +105,18 @@ public class NoteEditorPresenter {
                 noteEditorView.cancelReminder(note.get_reminderId());
                 db.deleteReminder(note.get_reminderId());
                 note.set_reminderId(-1);
+                note.set_nextReminderTime(reminderTime);
 
                 // Updating reminder
             } else {
                 if (reminderTime != note.get_nextReminderTime()) {
                     note.set_nextReminderTime(reminderTime);
                     noteEditorView.setupReminder(note);
-                }
+                    db.updateReminder(note.get_reminderId(), choices, reminderTime);
 
-                db.updateReminder(note.get_reminderId(), choices, reminderTime);
+                } else if (changes != null && changes.isFrequencyChoiceChanged()) {
+                    db.updateReminder(note.get_reminderId(), choices, reminderTime);
+                }
             }
         }
 

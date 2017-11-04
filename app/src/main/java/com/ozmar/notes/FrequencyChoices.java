@@ -2,6 +2,7 @@ package com.ozmar.notes;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,8 +48,13 @@ public final class FrequencyChoices implements Parcelable {
         return monthRepeatType;
     }
 
+    @Nullable
     public List<Integer> getDaysChosen() {
-        return new ArrayList<>(daysChosen);
+        if(daysChosen != null) {
+            return new ArrayList<>(daysChosen);
+        }
+
+        return null;
     }
 
     @Override
