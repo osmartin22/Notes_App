@@ -25,12 +25,13 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
     private final ToggleButton friday;
     private final ToggleButton saturday;
     private int buttonsChecked = 0;
+    private FrequencyPickerFlagHelper mFlagHelper;
 
-    public WeeklyLayoutHelper(View view, Button doneButton) {
-        this(view, doneButton, null);
+    public WeeklyLayoutHelper(View view, Button doneButton, FrequencyPickerFlagHelper flagHelper) {
+        this(view, doneButton, null, flagHelper);
     }
 
-    public WeeklyLayoutHelper(View view, Button doneButton, List<Integer> daysLastSelected) {
+    public WeeklyLayoutHelper(View view, Button doneButton, List<Integer> daysLastSelected, FrequencyPickerFlagHelper flagHelper) {
         this.view = view;
         this.doneButton = doneButton;
         this.sunday = view.findViewById(R.id.toggleButtonSunday);
@@ -40,6 +41,7 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
         this.thursday = view.findViewById(R.id.toggleButtonThursday);
         this.friday = view.findViewById(R.id.toggleButtonFriday);
         this.saturday = view.findViewById(R.id.toggleButtonSaturday);
+        this.mFlagHelper = flagHelper;
 
         sunday.setOnCheckedChangeListener(this);
         monday.setOnCheckedChangeListener(this);
@@ -107,8 +109,10 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
+            if (mFlagHelper.getBooleanResult()) {
+                doneButton.setEnabled(true);
+            }
             buttonsChecked++;
-            doneButton.setEnabled(true);
         } else {
             buttonsChecked--;
             if (buttonsChecked == 0) {

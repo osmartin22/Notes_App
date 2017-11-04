@@ -45,7 +45,6 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     // These views are shown based on user input
     private ViewSwitcher typeViewSwitcher;
-
     private ViewSwitcher bottomViewSwitcher;
     private EditText numberOfEventsEditText;
     private TextView eventsTextView;
@@ -57,7 +56,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private int year, month, day;
 
-    private boolean topEmpty = false, bottomEmpty = false;
+    private FrequencyPickerFlagHelper mFlagHelper;
 
     private FrequencyChoices choices;
 
@@ -126,6 +125,8 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         everyNumberEditText.setOnClickListener(this);
         everyNumberEditText.addTextChangedListener(this);
 
+        mFlagHelper = new FrequencyPickerFlagHelper();
+
         // Not Sure why but I have to call showNextView() twice if I want to show the previous
         // reminder choices
         // I do not have to do this if this is a new reminder being created instead of being modified
@@ -133,10 +134,15 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         // This should have been taken care of by just setting the necessary spinner positions
         if (choices != null) {
             if (choices.getRepeatType() == 1) {
-                weeklyHelper = new WeeklyLayoutHelper(typeViewSwitcher.findViewById(R.id.repeatWeeklyLayout), doneButton, choices.getDaysChosen());
+                weeklyHelper = new WeeklyLayoutHelper(typeViewSwitcher
+                        .findViewById(R.id.repeatWeeklyLayout), doneButton, choices.getDaysChosen(),
+                        mFlagHelper);
+
                 showNextView(typeViewSwitcher, weeklyHelper.getMainView());
             } else if (choices.getRepeatType() == 2) {
-                monthlyHelper = new MonthlyLayoutHelper(typeViewSwitcher.findViewById(R.id.repeatMonthlyLayout), choices.getMonthRepeatType());
+                monthlyHelper = new MonthlyLayoutHelper(typeViewSwitcher
+                        .findViewById(R.id.repeatMonthlyLayout), choices.getMonthRepeatType());
+
                 showNextView(typeViewSwitcher, monthlyHelper.getMainView());
             }
             everyNumberEditText.setText(String.valueOf(choices.getRepeatEvery()));
@@ -176,7 +182,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                     case 1:     // Weekly View
                         if (weeklyHelper == null) {
                             weeklyHelper = new WeeklyLayoutHelper(typeViewSwitcher
-                                    .findViewById(R.id.repeatWeeklyLayout), doneButton);
+                                    .findViewById(R.id.repeatWeeklyLayout), doneButton, mFlagHelper);
                         }
                         showNextView(typeViewSwitcher, weeklyHelper.getMainView());
                         break;
@@ -299,7 +305,8 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                         break;
                 }
 
-                choices = new FrequencyChoices(topSpinnerPosition, Integer.parseInt(everyNumberEditText.getText().toString()),
+                choices = new FrequencyChoices(topSpinnerPosition,
+                        Integer.parseInt(everyNumberEditText.getText().toString()),
                         repeatToDate, repeatEvents, monthRepeatType, list);
             } else {
                 choices = null;
@@ -347,16 +354,17 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         }
 
         if (s == everyNumberEditText.getText()) {
-            topEmpty = everyNumberEditText.getText().toString().isEmpty();
-            if (!topEmpty) {
+            mFlagHelper.topEmpty = everyNumberEditText.getText().toString().isEmpty();
+            if (!mFlagHelper.topEmpty) {
                 timeUnitNumber = Integer.parseInt(s.toString());
                 setTimeUnitString();
             }
 
         } else if (s == numberOfEventsEditText.getText()) {
-            bottomEmpty = numberOfEventsEditText.getText().toString().isEmpty();
-            if (!bottomEmpty) {
-                eventsTextView.setText(getResources().getQuantityString(R.plurals.event, Integer.parseInt(s.toString())));
+            mFlagHelper.bottomEmpty = numberOfEventsEditText.getText().toString().isEmpty();
+            if (!mFlagHelper.bottomEmpty) {
+                eventsTextView.setText(getResources().getQuantityString(R.plurals.event,
+                        Integer.parseInt(s.toString())));
             }
         }
         setDoneButtonEnabled();
@@ -366,26 +374,30 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         // Case for weekly view
         if (topSpinner.getSelectedItemPosition() == 1) {
             if (weeklyHelper.getCurrentDaysChecked() != 0) {
-                if (bottomSpinner.getSelectedItemPosition() == 2) {
-                    doneButton.setEnabled(!topEmpty && !bottomEmpty);
-                } else {
-                    doneButton.setEnabled(!topEmpty);
-                }
+                checkIfEditTextsAreEmpty();
             } else {
                 doneButton.setEnabled(false);
             }
 
             // Case for the other views
-        } else if (bottomSpinner.getSelectedItemPosition() == 2) {
-            doneButton.setEnabled(!topEmpty && !bottomEmpty);
         } else {
-            doneButton.setEnabled(!topEmpty);
+            checkIfEditTextsAreEmpty();
         }
     }
 
+    private void checkIfEditTextsAreEmpty() {
+        if (bottomSpinner.getSelectedItemPosition() == 2) {
+            mFlagHelper.bottomUsed = true;
+            doneButton.setEnabled(!mFlagHelper.topEmpty && !mFlagHelper.bottomEmpty);
+        } else {
+            mFlagHelper.bottomUsed = false;
+            doneButton.setEnabled(!mFlagHelper.topEmpty);
+        }
+    }
+
+    // TODO: Highlight text when user first clicks on text
     @Override
     public void onClick(View v) {
-        // TODO: Highlight text when user first clicks on text
         if (v == everyNumberEditText && !everyNumberEditText.hasFocus()) {
             everyNumberEditText.selectAll();
         } else if (v == numberOfEventsEditText && !numberOfEventsEditText.hasFocus()) {
@@ -415,7 +427,8 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         this.year = year;
         this.month = month;
         this.day = day;
-        calendarTextView.setText(FormatUtils.getMonthDayFormatShort(new DateTime(year, month, day, 0, 0, 0)));
+        calendarTextView.setText(FormatUtils
+                .getMonthDayFormatShort(new DateTime(year, month, day, 0, 0, 0)));
     }
 
     @Override
