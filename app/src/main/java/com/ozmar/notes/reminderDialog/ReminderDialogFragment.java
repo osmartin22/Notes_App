@@ -18,6 +18,7 @@ import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.utils.ReminderUtils;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 
@@ -510,15 +511,15 @@ public class ReminderDialogFragment extends DialogFragment
     // change saturday to the next monday to align with repeat on Monday
     // i.e Repeat on the second Monday of a month but date chosen is the third Monday
     // Change date to the second Monday of next month to align with repeat
-    private DateTime checkFrequencySelection(@NonNull DateTime dateTime, @NonNull FrequencyChoices choices) {
+    private DateTime checkFrequencySelection(@NonNull DateTime chosenDateTime, @NonNull FrequencyChoices choices) {
 
-        long nextReminderTime = dateTime.getMillis();
+        long nextReminderTime = chosenDateTime.getMillis();
 
         if (choices.getRepeatType() == 1) {     // Weekly
-            int currentDayOfWeek = dateTime.getDayOfWeek();
+            int currentDayOfWeek = chosenDateTime.getDayOfWeek();
 
             // Update date to fit with FrequencyChoice
-            // NOTE: choices.getDaysChosen can return NULL but it should never be NULL if in this statement
+            // NOTE: choices.getDaysChosen can return NULL but it should never be NULL in this if()
             List<Integer> daysChosen = choices.getDaysChosen();
             assert daysChosen != null;
             Collections.sort(daysChosen);
@@ -526,6 +527,22 @@ public class ReminderDialogFragment extends DialogFragment
             nextReminderTime += ReminderUtils.getNextWeeklyReminderTime(daysChosen, currentDayOfWeek, 1);
 
         } else if (choices.getRepeatType() == 2) {   // Monthly
+            int chosenDateWeekNumber = FormatUtils.getNthWeekOfMonth(chosenDateTime);
+            int weekNumberToForce = choices.getMonthRepeatType();
+
+            LocalDate chosenLocalDate = chosenDateTime.toLocalDate();
+            if (chosenDateWeekNumber != weekNumberToForce) {
+                // Need to find next occurrence
+
+                if (weekNumberToForce < chosenDateWeekNumber) {
+                    // Go to next month with week to force
+                    chosenLocalDate.plusMonths(1).dayOfMonth().withMinimumValue();
+
+                } else {
+                    // Got to current month with week to force
+                }
+
+            }
 
         }
 

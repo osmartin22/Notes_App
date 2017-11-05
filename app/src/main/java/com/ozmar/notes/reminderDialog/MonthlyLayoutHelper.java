@@ -57,14 +57,10 @@ public class MonthlyLayoutHelper {
                     break;
 
                 case R.id.bottomRadioButton:
-                    checkedButton = getNthDayOfMonth();
+                    checkedButton = FormatUtils.getNthWeekOfMonth(mLocalDate);
                     break;
             }
         });
-    }
-
-    private int getNthDayOfMonth() {
-        return (mLocalDate.getDayOfMonth() / 7) + 1;
     }
 
     public void setViewEnabled(boolean flag) {

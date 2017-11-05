@@ -12,10 +12,17 @@ public final class FrequencyChoices implements Parcelable {
     private final int repeatType;     // day/week/month/year
     private final int repeatEvery;    // Repeat every X (day/week/month/year)
 
+    private final boolean repeatForever = false;
+
     private final long repeatToDate;
     private final int repeatEvents;   // Repeat reminder for X events(times)
 
     private final int monthRepeatType;    // Set from RadioButton in monthly view
+
+    private final int monthWeekToRepeat = 0;
+    private final int monthDayOfWeekToRepeat = 0;
+
+
     private final List<Integer> daysChosen;   // Set from weekly view
 
     public FrequencyChoices(int repeatType, int repeatEvery, long repeatToDate, int repeatEvents,

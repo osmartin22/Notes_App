@@ -177,6 +177,14 @@ public class FormatUtils {
         return timeToSet.withMinuteOfHour((timeToSet.getMinuteOfHour() / minute) * minute);
     }
 
+    public static int getNthWeekOfMonth(LocalDate localDate){
+        return (localDate.getDayOfMonth() / 7) + 1;
+    }
+
+    public static int getNthWeekOfMonth(DateTime dateTime){
+        return (dateTime.getDayOfMonth() / 7) + 1;
+    }
+
     public static String formatNthWeekOfMonth(LocalDate localDate) {
         String nthDay = "";
         int week = (localDate.getDayOfMonth() / 7) + 1;
