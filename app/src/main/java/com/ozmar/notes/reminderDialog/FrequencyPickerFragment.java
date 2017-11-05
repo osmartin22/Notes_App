@@ -116,7 +116,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
         bottomSpinner = mainView.findViewById(R.id.bottomSpinner);
         doneButton = mainView.findViewById(R.id.reminderDoneButton);
 
-        // These views will be displayed based om spinner position
+        // These views will be displayed based on spinner position
         typeViewSwitcher = contentView.findViewById(R.id.typeViewSwitcher);
         bottomViewSwitcher = contentView.findViewById(R.id.nextToBottomSpinner);
 
@@ -293,6 +293,9 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                 int monthRepeatType = -1;
                 long repeatToDate = 0;
                 int repeatEvents = 0;
+                int repeatForever = 0;
+                int weekToRepeat = 0;
+                int dayOfWeekToRepeat = 0;
 
                 int topSpinnerPosition = topSpinner.getSelectedItemPosition();
 
@@ -300,9 +303,14 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                     list = weeklyHelper.getCheckedButtons();
                 } else if (topSpinnerPosition == 2) {
                     monthRepeatType = monthlyHelper.getCheckedButton();
+                    weekToRepeat = monthlyHelper.getWeekToRepeat();
+                    dayOfWeekToRepeat = monthlyHelper.getDayOfWeekToRepeat();
                 }
 
                 switch (bottomSpinner.getSelectedItemPosition()) {
+                    case 0:
+                        repeatForever = 1;
+                        break;
                     case 1:
                         repeatToDate = mDateTimeRepeatTo.getMillis();
                         break;
@@ -311,9 +319,10 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                         break;
                 }
 
-                choices = new FrequencyChoices(topSpinnerPosition,
-                        Integer.parseInt(everyNumberEditText.getText().toString()),
-                        repeatToDate, repeatEvents, monthRepeatType, list);
+                int repeatEvery = Integer.parseInt(everyNumberEditText.getText().toString());
+                choices = new FrequencyChoices(topSpinnerPosition, repeatEvery, repeatForever, repeatToDate,
+                        repeatEvents, monthRepeatType, weekToRepeat, dayOfWeekToRepeat, list);
+
             } else {
                 choices = null;
             }

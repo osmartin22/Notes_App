@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.ozmar.notes.utils.NoteChanges;
 
@@ -14,13 +15,10 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
-// TODO: Created 4 notes with reminders not set to favorite. Set them to favorite and
-// switched to favorites, but they did not appear, even when switching back and forth
-// Setting them to favorite again did work as expected
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 4;
     private static final String DATABASE_NAME = "UserNotesDB";
 
     // TABLES
@@ -70,9 +68,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_NEXT_REMINDER_TIME = "reminder";
     private static final String KEY_REPEAT_TYPE = "repeatType";
     private static final String KEY_REPEAT_EVERY = "repeatTypeHowOften";
+    private static final String KEY_REPEAT_FOREVER = "repeatForever";
     private static final String KEY_REPEAT_TO_DATE = "repeatToDate";
     private static final String KEY_REPEAT_EVENTS = "repeatEvents";
     private static final String KEY_MONTH_REPEAT_TYPE = "monthRepeatType";
+    private static final String KEY_MONTH_WEEK_TO_REPEAT = "monthWeekToRepeat";
+    private static final String KEY_MONTH_DAY_OF_WEEK_TO_REPEAT = "monthDayOfWeekToRepeat";
     private static final String KEY_DAYS_CHOSEN = "daysChosen";
     private static final String KEY_EVENTS_OCCURRED = "eventsOccurred";
 
@@ -82,9 +83,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             + KEY_NEXT_REMINDER_TIME + " INTEGER, "
             + KEY_REPEAT_TYPE + " INTEGER DEFAULT -1, "
             + KEY_REPEAT_EVERY + " INTEGER, "
+            + KEY_REPEAT_FOREVER + " INTEGER, "
             + KEY_REPEAT_TO_DATE + " INTEGER, "
             + KEY_REPEAT_EVENTS + " INTEGER, "
             + KEY_MONTH_REPEAT_TYPE + " INTEGER, "
+            + KEY_MONTH_WEEK_TO_REPEAT + " INTEGER, "
+            + KEY_MONTH_DAY_OF_WEEK_TO_REPEAT + " INTEGER, "
             + KEY_DAYS_CHOSEN + " TEXT , "
             + KEY_EVENTS_OCCURRED + " INTEGER);";
 
@@ -141,6 +145,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     //--------------------------------------------------------------------------------------------//
     // User Notes Table Specific Methods
     //--------------------------------------------------------------------------------------------//
+    @Nullable
     public List<SingleNote> getUserNotes() {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " ORDER BY ROWID DESC";
@@ -165,7 +170,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_timeModified(cursor.getLong(5));
                 note.set_reminderId(cursor.getInt(6));
 
-                // TODO: Test This
                 if (note.get_reminderId() != -1) {
                     NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
                     note.set_nextReminderTime(temp.nextReminderTime);
@@ -180,6 +184,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     } // getUserNotes() end
 
+    @Nullable
     public List<SingleNote> getFavoriteNotes() {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES
@@ -205,7 +210,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_timeModified(cursor.getLong(5));
                 note.set_reminderId(cursor.getInt(6));
 
-                // TODO: Test This
                 if (note.get_reminderId() != -1) {
                     NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
                     note.set_nextReminderTime(temp.nextReminderTime);
@@ -317,6 +321,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     //--------------------------------------------------------------------------------------------//
     // Archive Table Specific Methods
     //--------------------------------------------------------------------------------------------//
+    @Nullable
     public List<SingleNote> getArchiveNotes() {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_ARCHIVE + " ORDER BY ROWID DESC";
@@ -334,7 +339,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 note.set_timeModified(cursor.getLong(4));
                 note.set_reminderId(cursor.getInt(5));
 
-                // TODO: Test This
                 if (note.get_reminderId() != -1) {
                     NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
                     note.set_nextReminderTime(temp.nextReminderTime);
@@ -424,8 +428,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     //--------------------------------------------------------------------------------------------//
     // Recycle Bin Table Specific Methods
     //--------------------------------------------------------------------------------------------//
-
-    // Get all notes in RecycleBin
+    @Nullable
     public List<SingleNote> getRecycleBinNotes() {
         List<SingleNote> noteList = new ArrayList<>();
         String selectQuery = "SELECT * FROM " + TABLE_RECYCLE_BIN + " ORDER BY ROWID DESC";
@@ -552,6 +555,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return new NextReminderTime(nextReminderTime, isRepeating);
     }
 
+    @NonNull
     public NextReminderTime getNextReminderTime(int id) {
         SQLiteDatabase db = this.getReadableDatabase();
         return getNextReminderTime(db, id);
@@ -567,6 +571,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)});
     }
 
+    @NonNull
     public FrequencyChoices getFrequencyChoice(int id) {
         String selectQuery = "SELECT * FROM " + TABLE_REMINDERS + " WHERE ROWID = " + id;
         SQLiteDatabase db = this.getReadableDatabase();
@@ -577,21 +582,25 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             do {
                 int repeatType = cursor.getInt(2);
                 int repeatEvery = cursor.getInt(3);
-                long repeatToDate = cursor.getLong(4);
-                int repeatEvents = cursor.getInt(5);
-                int monthRepeatType = cursor.getInt(6);
+                int repeatForever = cursor.getInt(4);
+                long repeatToDate = cursor.getLong(5);
+                int repeatEvents = cursor.getInt(6);
+                int monthRepeatType = cursor.getInt(7);
+                int monthWeekToRepeat = cursor.getInt(8);
+                int monthDayOfWeekToRepeat = cursor.getInt(9);
+
                 List<Integer> list = null;
 
-                if (cursor.getString(7) != null) {
-                    Scanner scanner = new Scanner(cursor.getString(7));
+                if (cursor.getString(10) != null) {
+                    Scanner scanner = new Scanner(cursor.getString(10));
                     list = new ArrayList<>();
                     while (scanner.hasNextInt()) {
                         list.add(scanner.nextInt());
                     }
                 }
 
-                choices = new FrequencyChoices(repeatType, repeatEvery, repeatToDate, repeatEvents,
-                        monthRepeatType, list);
+                choices = new FrequencyChoices(repeatType, repeatEvery, repeatForever, repeatToDate,
+                        repeatEvents, monthRepeatType, monthWeekToRepeat, monthDayOfWeekToRepeat, list);
 
             } while (cursor.moveToNext());
         }
@@ -631,13 +640,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     private void putFrequencyChoiceInValues(ContentValues values, @NonNull FrequencyChoices choices) {
-
-
         values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
         values.put(KEY_REPEAT_EVERY, choices.getRepeatEvery());
         values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToDate());
         values.put(KEY_REPEAT_EVENTS, choices.getRepeatEvents());
         values.put(KEY_MONTH_REPEAT_TYPE, choices.getMonthRepeatType());
+        values.put(KEY_MONTH_WEEK_TO_REPEAT, choices.getMonthWeekToRepeat());
+        values.put(KEY_MONTH_DAY_OF_WEEK_TO_REPEAT, choices.getMonthDayOfWeekToRepeat());
 
         List<Integer> chosenDays = choices.getDaysChosen();
         if (chosenDays != null) {

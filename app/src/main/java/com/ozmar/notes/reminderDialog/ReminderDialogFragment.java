@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Toast;
@@ -18,7 +19,6 @@ import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.utils.ReminderUtils;
 
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 
@@ -217,7 +217,7 @@ public class ReminderDialogFragment extends DialogFragment
     // or to x hours into the future
     private void setSpinnerPosition(FrequencyChoices choices) {
         if (choices != null) {
-            frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices);
+            frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices, chosenDateTime);
             frequencySpinner.setSelection(5);
         }
 
@@ -473,7 +473,8 @@ public class ReminderDialogFragment extends DialogFragment
         this.choices = choices;
 
         if (choices != null) {
-            frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices);
+            // TODO: Update so that monthly repeats are displayed correctly
+            frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices, chosenDateTime);
             frequencySpinnerAdapter.notifyDataSetChanged();
         } else {
             frequencySpinner.setSelection(0);
@@ -490,17 +491,17 @@ public class ReminderDialogFragment extends DialogFragment
 
             case 1:     // Daily
             case 4:     // Yearly
-                choices = new FrequencyChoices(currentFrequencySelection - 1, 1, 0, 0, -1, null);
+                choices = new FrequencyChoices(currentFrequencySelection - 1, -1, null);
                 break;
 
             case 2:     // Weekly
                 List<Integer> list = new ArrayList<>(Collections.singletonList(dateTimeNow.getDayOfWeek()));
-                choices = new FrequencyChoices(1, 1, 0, 0, -1, list);
+                choices = new FrequencyChoices(1, -1, list);
 
                 break;
 
             case 3:     // Monthly
-                choices = new FrequencyChoices(2, 1, 0, 0, 0, null);
+                choices = new FrequencyChoices(2, 0, null);
                 break;
         }
         return choices;
@@ -527,25 +528,11 @@ public class ReminderDialogFragment extends DialogFragment
             nextReminderTime += ReminderUtils.getNextWeeklyReminderTime(daysChosen, currentDayOfWeek, 1);
 
         } else if (choices.getRepeatType() == 2) {   // Monthly
-            int chosenDateWeekNumber = FormatUtils.getNthWeekOfMonth(chosenDateTime);
-            int weekNumberToForce = choices.getMonthRepeatType();
-
-            LocalDate chosenLocalDate = chosenDateTime.toLocalDate();
-            if (chosenDateWeekNumber != weekNumberToForce) {
-                // Need to find next occurrence
-
-                if (weekNumberToForce < chosenDateWeekNumber) {
-                    // Go to next month with week to force
-                    chosenLocalDate.plusMonths(1).dayOfMonth().withMinimumValue();
-
-                } else {
-                    // Got to current month with week to force
-                }
-
-            }
-
+            nextReminderTime = ReminderUtils.getNextMonthlyReminder(chosenDateTime, choices);
+            Log.d("Millis", "checkFrequencySelection " + nextReminderTime);
         }
 
         return new DateTime(nextReminderTime);
     }
+
 }

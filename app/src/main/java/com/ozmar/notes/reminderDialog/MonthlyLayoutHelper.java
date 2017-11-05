@@ -29,7 +29,7 @@ public class MonthlyLayoutHelper {
         this.topRadioButton = radioGroup.findViewById(R.id.topRadioButton);
         this.bottomRadioButton = radioGroup.findViewById(R.id.bottomRadioButton);
 
-        if (checkedButton == 0) {
+        if (checkedButton == 0 || checkedButton == -1) {
             topRadioButton.setChecked(true);
         } else {
             bottomRadioButton.setChecked(true);
@@ -40,6 +40,7 @@ public class MonthlyLayoutHelper {
         setRadioGroupListener();
     }
 
+    @NonNull
     public View getMainView() {
         return radioGroup;
     }
@@ -57,7 +58,7 @@ public class MonthlyLayoutHelper {
                     break;
 
                 case R.id.bottomRadioButton:
-                    checkedButton = FormatUtils.getNthWeekOfMonth(mLocalDate);
+                    checkedButton = 1;
                     break;
             }
         });
@@ -70,5 +71,13 @@ public class MonthlyLayoutHelper {
 
     public int getCheckedButton() {
         return checkedButton;
+    }
+
+    public int getWeekToRepeat() {
+        return FormatUtils.getNthWeekOfMonth(mLocalDate);
+    }
+
+    public int getDayOfWeekToRepeat() {
+        return mLocalDate.getDayOfWeek();
     }
 }

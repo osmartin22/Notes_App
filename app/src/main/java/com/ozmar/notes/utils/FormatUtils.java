@@ -177,12 +177,46 @@ public class FormatUtils {
         return timeToSet.withMinuteOfHour((timeToSet.getMinuteOfHour() / minute) * minute);
     }
 
-    public static int getNthWeekOfMonth(LocalDate localDate){
+    public static int getNthWeekOfMonth(LocalDate localDate) {
         return (localDate.getDayOfMonth() / 7) + 1;
     }
 
-    public static int getNthWeekOfMonth(DateTime dateTime){
+    public static int getNthWeekOfMonth(DateTime dateTime) {
         return (dateTime.getDayOfMonth() / 7) + 1;
+    }
+
+    public static String formatNthWeekOfMonth(DateTime dateTime, int weekNumber) {
+        String nthDay = "";
+        boolean lastWeek = false;
+        if (dateTime.getMonthOfYear() != dateTime.plusWeeks(1).getMonthOfYear()) {
+            lastWeek = true;
+        }
+
+        switch (weekNumber) {
+            case 1:
+                nthDay += "first ";
+                break;
+            case 2:
+                nthDay += "second ";
+                break;
+            case 3:
+                nthDay += "third ";
+                break;
+            case 4:
+                if (lastWeek) {
+                    nthDay += "last ";
+                } else {
+                    nthDay += "fourth ";
+                }
+                break;
+            case 5:
+                nthDay += "last ";
+                break;
+        }
+
+        nthDay += FormatUtils.getChosenDayOfWeek(dateTime.toLocalDate(), 1);
+
+        return nthDay;
     }
 
     public static String formatNthWeekOfMonth(LocalDate localDate) {
@@ -221,9 +255,8 @@ public class FormatUtils {
         return nthDay;
     }
 
-    public static String formatFrequencyText(Context context, FrequencyChoices choices) {
+    public static String formatFrequencyText(Context context, FrequencyChoices choices, DateTime dateTime) {
         String frequencyText = "Repeats ";
-        LocalDate localDate = LocalDate.now();
 
         int repeatType = choices.getRepeatEvery();
         switch (choices.getRepeatType()) {
@@ -243,7 +276,7 @@ public class FormatUtils {
                 frequencyText += context.getResources().getQuantityString(R.plurals.repeatMonth,
                         repeatType, repeatType);
                 if (choices.getMonthRepeatType() == 1) {
-                    frequencyText += " (on every " + FormatUtils.formatNthWeekOfMonth(localDate) + ")";
+                    frequencyText += " (on every " + FormatUtils.formatNthWeekOfMonth(dateTime, choices.getMonthWeekToRepeat()) + ")";
                 }
                 break;
             case 3:

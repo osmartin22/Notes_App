@@ -12,26 +12,58 @@ public final class FrequencyChoices implements Parcelable {
     private final int repeatType;     // day/week/month/year
     private final int repeatEvery;    // Repeat every X (day/week/month/year)
 
-    private final boolean repeatForever = false;
+    private final int repeatForever;
 
     private final long repeatToDate;
     private final int repeatEvents;   // Repeat reminder for X events(times)
 
     private final int monthRepeatType;    // Set from RadioButton in monthly view
 
-    private final int monthWeekToRepeat = 0;
-    private final int monthDayOfWeekToRepeat = 0;
+    private final int monthWeekToRepeat;
+    private final int monthDayOfWeekToRepeat;
 
 
     private final List<Integer> daysChosen;   // Set from weekly view
 
-    public FrequencyChoices(int repeatType, int repeatEvery, long repeatToDate, int repeatEvents,
-                            int monthRepeatType, List<Integer> daysChosen) {
+//    public FrequencyChoices(int repeatType, int repeatEvery, long repeatToDate, int repeatEvents,
+//                            int monthRepeatType, List<Integer> daysChosen) {
+//        this.repeatType = repeatType;
+//        this.repeatEvery = repeatEvery;
+//        this.repeatToDate = repeatToDate;
+//        this.repeatEvents = repeatEvents;
+//        this.monthRepeatType = monthRepeatType;
+//        this.daysChosen = daysChosen;
+//
+////        this.repeatForever = 1;
+////        this.monthWeekToRepeat = 0;
+////        this.monthDayOfWeekToRepeat = 0;
+//    }
+
+    // Constructor for presets
+    public FrequencyChoices(int repeatType, int monthRepeatType, List<Integer> daysChosen) {
+        this.repeatType = repeatType;
+        this.repeatEvery = 1;
+        this.repeatForever = 1;
+        this.repeatToDate = 0;
+        this.repeatEvents = 0;
+        this.monthRepeatType = monthRepeatType;
+        this.monthWeekToRepeat = 0;
+        this.monthDayOfWeekToRepeat = 0;
+        this.daysChosen = daysChosen;
+
+    }
+
+
+    public FrequencyChoices(int repeatType, int repeatEvery, int repeatForever, long repeatToDate, int repeatEvents,
+                            int monthRepeatType, int monthWeekToRepeat, int monthDayOfWeekToRepeat, List<Integer> daysChosen) {
         this.repeatType = repeatType;
         this.repeatEvery = repeatEvery;
+        this.repeatForever = repeatForever;
         this.repeatToDate = repeatToDate;
         this.repeatEvents = repeatEvents;
         this.monthRepeatType = monthRepeatType;
+        this.monthWeekToRepeat = monthWeekToRepeat;
+        this.monthDayOfWeekToRepeat = monthDayOfWeekToRepeat;
         this.daysChosen = daysChosen;
     }
 
@@ -41,6 +73,10 @@ public final class FrequencyChoices implements Parcelable {
 
     public int getRepeatEvery() {
         return repeatEvery;
+    }
+
+    public int getRepeatForever() {
+        return repeatForever;
     }
 
     public long getRepeatToDate() {
@@ -55,9 +91,17 @@ public final class FrequencyChoices implements Parcelable {
         return monthRepeatType;
     }
 
+    public int getMonthWeekToRepeat() {
+        return monthWeekToRepeat;
+    }
+
+    public int getMonthDayOfWeekToRepeat() {
+        return monthDayOfWeekToRepeat;
+    }
+
     @Nullable
     public List<Integer> getDaysChosen() {
-        if(daysChosen != null) {
+        if (daysChosen != null) {
             return new ArrayList<>(daysChosen);
         }
 
@@ -78,18 +122,24 @@ public final class FrequencyChoices implements Parcelable {
 
         return choices.repeatType == repeatType &&
                 choices.repeatEvery == repeatEvery &&
+                choices.repeatForever == repeatForever &&
                 choices.repeatToDate == repeatToDate &&
                 choices.repeatEvents == repeatEvents &&
                 choices.monthRepeatType == monthRepeatType &&
+                choices.monthWeekToRepeat == monthWeekToRepeat &&
+                choices.monthDayOfWeekToRepeat == monthDayOfWeekToRepeat &&
                 choices.daysChosen.containsAll(daysChosen);
     }
 
     public FrequencyChoices(Parcel in) {
         this.repeatType = in.readInt();
         this.repeatEvery = in.readInt();
+        this.repeatForever = in.readInt();
         this.repeatToDate = in.readLong();
         this.repeatEvents = in.readInt();
         this.monthRepeatType = in.readInt();
+        this.monthWeekToRepeat = in.readInt();
+        this.monthDayOfWeekToRepeat = in.readInt();
         this.daysChosen = new ArrayList<>();
         in.readList(daysChosen, List.class.getClassLoader());
 
@@ -104,9 +154,12 @@ public final class FrequencyChoices implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(repeatType);
         dest.writeInt(repeatEvery);
+        dest.writeInt(repeatForever);
         dest.writeLong(repeatToDate);
         dest.writeInt(repeatEvents);
         dest.writeInt(monthRepeatType);
+        dest.writeInt(monthWeekToRepeat);
+        dest.writeInt(monthDayOfWeekToRepeat);
         dest.writeList(daysChosen);
     }
 

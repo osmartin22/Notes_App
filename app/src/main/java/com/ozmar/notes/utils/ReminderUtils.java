@@ -1,6 +1,7 @@
 package com.ozmar.notes.utils;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.ozmar.notes.FrequencyChoices;
 
@@ -24,6 +25,7 @@ public class ReminderUtils {
     // Does not take into account if the phone changes date/time (i.e. user manually changes date)
     public static long calculateWeeklyReminderTime(FrequencyChoices choices, DateTime dateTime) {
         List<Integer> daysChosen = choices.getDaysChosen();
+        assert daysChosen != null;
         Collections.sort(daysChosen);
 
         long nextReminderTime = dateTime.getMillis();
@@ -62,7 +64,6 @@ public class ReminderUtils {
         return nextReminderTime;
     }
 
-
     private static int getNextLargestDay(@NonNull List<Integer> daysChosen, int currentDayOfWeek) {
         int low = 0;
         int high = daysChosen.size();
@@ -91,6 +92,77 @@ public class ReminderUtils {
 
         return nextReminderTime;
     }
+
+    public static long getNextMonthlyReminder(DateTime dateTime, FrequencyChoices choices) {
+        long nextReminderTime = dateTime.getMillis();
+
+        int chosenDateWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime);
+        int weekNumberToForce = choices.getMonthWeekToRepeat();
+        int dayOfWeekToForce = choices.getMonthDayOfWeekToRepeat();
+
+        if (chosenDateWeekNumber != weekNumberToForce) {    // Need to find next occurrence
+
+            // Go to next month with week to force
+            if (weekNumberToForce < chosenDateWeekNumber) {
+
+                // Move to the first desired day of the next month
+                dateTime = dateTime.plusMonths(1).dayOfMonth().withMinimumValue()
+                        .withDayOfWeek(dayOfWeekToForce);
+
+            } else if (weekNumberToForce > chosenDateWeekNumber) {
+                dateTime.withDayOfWeek(dayOfWeekToForce);
+            }
+
+            nextReminderTime = getForcedWeek(dateTime, weekNumberToForce, chosenDateWeekNumber);
+
+        } else {
+            // TODO: Change
+            if(dayOfWeekToForce != dateTime.getDayOfWeek()) {
+                nextReminderTime = dateTime.withDayOfWeek(dayOfWeekToForce).getMillis();
+            }
+        }
+
+        Log.d("Millis", "getNextMonthlyReminder " + nextReminderTime);
+        return nextReminderTime;
+    }
+
+    private static long getForcedWeek(DateTime dateTime, int weekNumberToForce, int chosenDateWeekNumber) {
+        int maxDaysInMonth;
+        int newDay;
+        int daysToAdd;
+
+        maxDaysInMonth = dateTime.dayOfMonth().withMaximumValue().getDayOfMonth();
+        newDay = dateTime.getDayOfMonth();
+
+        // Check if a fifth week is possible in the month
+        if (weekNumberToForce == 5 && ReminderUtils.checkIfFifthWeekPossible(maxDaysInMonth, newDay)) {
+            weekNumberToForce = 4;
+        }
+
+        if (chosenDateWeekNumber != 1) {
+            daysToAdd = (weekNumberToForce - chosenDateWeekNumber) * 7;
+        } else {
+            daysToAdd = (weekNumberToForce - 1) * 7;
+        }
+
+        return dateTime.plusDays(daysToAdd).getMillis();
+    }
+
+    private static boolean checkIfFifthWeekPossible(int maxDaysInMonth, int day) {
+        boolean possible = true;
+        if (maxDaysInMonth == 31 && day > 3) {
+            possible = false;
+
+        } else if (maxDaysInMonth == 30 && day > 2) {
+            possible = false;
+
+        } else if (maxDaysInMonth == 29 && day > 1) {
+            possible = false;
+        }
+
+        return possible;
+    }
+
 
     // Takes into account if phone changes date/time (i.e. user manually changes time)
     public static long calculateYearlyReminderTime(FrequencyChoices choices, DateTime oldReminder, DateTime dateTimeNow) {
