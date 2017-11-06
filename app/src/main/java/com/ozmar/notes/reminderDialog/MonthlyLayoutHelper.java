@@ -74,7 +74,7 @@ public class MonthlyLayoutHelper {
     }
 
     public int getWeekToRepeat() {
-        return FormatUtils.getNthWeekOfMonth(mLocalDate);
+        return FormatUtils.getNthWeekOfMonth(mLocalDate.getDayOfMonth());
     }
 
     public int getDayOfWeekToRepeat() {

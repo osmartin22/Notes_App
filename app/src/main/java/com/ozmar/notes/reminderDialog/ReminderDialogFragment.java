@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Toast;
@@ -116,7 +115,7 @@ public class ReminderDialogFragment extends DialogFragment
         frequencySpinner = view.findViewById(R.id.spinnerReminder);
 
         String[] dropDownArray = getResources().getStringArray(R.array.dateXMLArray);
-        dropDownArray[2] += " " + FormatUtils.getCurrentDayOfWeek(1);
+        dropDownArray[2] += " " + FormatUtils.getCurrentDayOfWeek(dateTimeNow.toLocalDate(), 1);
         dateSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
                 dateArray, dropDownArray, 0);
         dateSpinner.setAdapter(dateSpinnerAdapter);
@@ -210,7 +209,7 @@ public class ReminderDialogFragment extends DialogFragment
         timeArray[4] = "Pick A Time...";
 
         frequencyArray = getResources().getStringArray(R.array.frequencyXMLArrayListItem);
-        frequencyArray[2] += " on " + FormatUtils.getCurrentDayOfWeek(1);
+        frequencyArray[2] += " on " + FormatUtils.getCurrentDayOfWeek(dateTimeNow.toLocalDate(), 1);
     }
 
     // Set Spinner positions to reflect previous user reminder if available
@@ -454,6 +453,8 @@ public class ReminderDialogFragment extends DialogFragment
         dateArray[4] = FormatUtils.getMonthDayFormatLong(new DateTime().withDate(year, month, day));
         dateSpinnerAdapter.notifyDataSetChanged();
 
+        chosenDateTime = new DateTime(year, month, day, hour, minute);
+
         this.year = year;
         this.month = month;
         this.day = day;
@@ -470,11 +471,18 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public void onFrequencyPicked(FrequencyChoices choices) {
-        this.choices = choices;
+
+        if (this.choices != choices) {
+            this.choices = choices;
+        }
 
         if (choices != null) {
-            // TODO: Update so that monthly repeats are displayed correctly
-            frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices, chosenDateTime);
+            if (chosenDateTime == null) {
+                frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices, dateTimeNow);
+            } else {
+                frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices, chosenDateTime);
+            }
+
             frequencySpinnerAdapter.notifyDataSetChanged();
         } else {
             frequencySpinner.setSelection(0);
@@ -529,7 +537,6 @@ public class ReminderDialogFragment extends DialogFragment
 
         } else if (choices.getRepeatType() == 2) {   // Monthly
             nextReminderTime = ReminderUtils.getNextMonthlyReminder(chosenDateTime, choices);
-            Log.d("Millis", "checkFrequencySelection " + nextReminderTime);
         }
 
         return new DateTime(nextReminderTime);

@@ -1,7 +1,6 @@
 package com.ozmar.notes.utils;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import com.ozmar.notes.FrequencyChoices;
 
@@ -96,7 +95,7 @@ public class ReminderUtils {
     public static long getNextMonthlyReminder(DateTime dateTime, FrequencyChoices choices) {
         long nextReminderTime = dateTime.getMillis();
 
-        int chosenDateWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime);
+        int chosenDateWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime.getDayOfMonth());
         int weekNumberToForce = choices.getMonthWeekToRepeat();
         int dayOfWeekToForce = choices.getMonthDayOfWeekToRepeat();
 
@@ -122,7 +121,6 @@ public class ReminderUtils {
             }
         }
 
-        Log.d("Millis", "getNextMonthlyReminder " + nextReminderTime);
         return nextReminderTime;
     }
 

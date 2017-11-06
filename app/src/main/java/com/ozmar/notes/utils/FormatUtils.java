@@ -1,6 +1,7 @@
 package com.ozmar.notes.utils;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 
 import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.R;
@@ -24,7 +25,8 @@ public class FormatUtils {
 
     }
 
-    public static String lastUpdated(Context context, long timeLastUpdated) {
+    @NonNull
+    public static String lastUpdated(@NonNull Context context, long timeLastUpdated) {
 
         Date current = new Date(System.currentTimeMillis());
         Date lastUpdated = new Date(timeLastUpdated);
@@ -67,7 +69,8 @@ public class FormatUtils {
         return timeModified;
     }
 
-    public static String getReminderText(Context context, DateTime chosenDateTime) {
+    @NonNull
+    public static String getReminderText(@NonNull Context context, @NonNull DateTime chosenDateTime) {
 
         String reminderDate = "";
         DateTime today = DateTime.now();
@@ -110,7 +113,8 @@ public class FormatUtils {
         return reminderDate;
     }
 
-    public static String getMonthDayFormatShort(DateTime chosen) {
+    @NonNull
+    public static String getMonthDayFormatShort(@NonNull DateTime chosen) {
         DateTimeFormatter dtfOut;
         LocalDate localDate = LocalDate.now();
 
@@ -123,11 +127,13 @@ public class FormatUtils {
         return dtfOut.print(chosen);
     }
 
+    @NonNull
     public static String getMonthDayFormatShort(long millis) {
         return FormatUtils.getMonthDayFormatShort(new DateTime(millis));
     }
 
-    public static String getMonthDayFormatLong(DateTime chosen) {
+    @NonNull
+    public static String getMonthDayFormatLong(@NonNull DateTime chosen) {
         DateTimeFormatter dtfOut;
         LocalDate localDate = LocalDate.now();
 
@@ -140,18 +146,20 @@ public class FormatUtils {
         return dtfOut.print(chosen);
     }
 
+    @NonNull
     public static String getMonthDayFormatLong(long millis) {
         return getMonthDayFormatLong(new DateTime(millis));
     }
 
-    public static String getTimeFormat(Context context, LocalTime localTime) {
+    @NonNull
+    public static String getTimeFormat(@NonNull Context context, @NonNull LocalTime localTime) {
         DateFormat timeFormat = android.text.format.DateFormat.getTimeFormat(context);
         return timeFormat.format(localTime.toDateTimeToday().toDate());
     }
 
-    public static String getCurrentDayOfWeek(int length) {
+    @NonNull
+    public static String getCurrentDayOfWeek(LocalDate localDate, int length) {
         String day;
-        LocalDate localDate = LocalDate.now();
 
         if (length == 0) {
             day = localDate.dayOfWeek().getAsShortText(Locale.getDefault());
@@ -162,7 +170,8 @@ public class FormatUtils {
         return day;
     }
 
-    public static String getChosenDayOfWeek(LocalDate localDate, int length) {
+    @NonNull
+    public static String getChosenDayOfWeek(@NonNull LocalDate localDate, int length) {
         String day;
         if (length == 0) {
             day = localDate.dayOfWeek().getAsShortText(Locale.getDefault());
@@ -172,20 +181,24 @@ public class FormatUtils {
         return day;
     }
 
-    public static LocalTime roundToTime(LocalTime localTime, int minute) {
+    @NonNull
+    public static LocalTime roundToTime(@NonNull LocalTime localTime, int minute) {
         LocalTime timeToSet = localTime.minuteOfHour().roundFloorCopy();
         return timeToSet.withMinuteOfHour((timeToSet.getMinuteOfHour() / minute) * minute);
     }
 
-    public static int getNthWeekOfMonth(LocalDate localDate) {
-        return (localDate.getDayOfMonth() / 7) + 1;
+    public static int getNthWeekOfMonth(int dayOfMonth) {
+        int week = dayOfMonth / 7;
+
+        if (dayOfMonth % 7 == 0) {
+            return week;
+        }
+
+        return week + 1;
     }
 
-    public static int getNthWeekOfMonth(DateTime dateTime) {
-        return (dateTime.getDayOfMonth() / 7) + 1;
-    }
-
-    public static String formatNthWeekOfMonth(DateTime dateTime, int weekNumber) {
+    @NonNull
+    public static String formatNthWeekOfMonth(@NonNull DateTime dateTime, int weekNumber) {
         String nthDay = "";
         boolean lastWeek = false;
         if (dateTime.getMonthOfYear() != dateTime.plusWeeks(1).getMonthOfYear()) {
@@ -219,9 +232,10 @@ public class FormatUtils {
         return nthDay;
     }
 
-    public static String formatNthWeekOfMonth(LocalDate localDate) {
+    @NonNull
+    public static String formatNthWeekOfMonth(@NonNull LocalDate localDate) {
         String nthDay = "";
-        int week = (localDate.getDayOfMonth() / 7) + 1;
+        int week = FormatUtils.getNthWeekOfMonth(localDate.getDayOfMonth());
         boolean lastWeek = false;
 
         if (localDate.getMonthOfYear() != localDate.plusWeeks(1).getMonthOfYear()) {
@@ -255,7 +269,8 @@ public class FormatUtils {
         return nthDay;
     }
 
-    public static String formatFrequencyText(Context context, FrequencyChoices choices, DateTime dateTime) {
+    @NonNull
+    public static String formatFrequencyText(@NonNull Context context, @NonNull FrequencyChoices choices, @NonNull DateTime dateTime) {
         String frequencyText = "Repeats ";
 
         int repeatType = choices.getRepeatEvery();
@@ -269,7 +284,8 @@ public class FormatUtils {
                 // Repeats Weekly (plus selected days)
                 frequencyText += context.getResources().getQuantityString(R.plurals.repeatWeek,
                         repeatType, repeatType);
-                frequencyText += FormatUtils.getSelectedDays(choices);
+                assert choices.getDaysChosen() != null;
+                frequencyText += FormatUtils.getSelectedDays(choices.getDaysChosen());
                 break;
             case 2:
                 // Repeats Monthly (plus chosen RadioButton)
@@ -297,36 +313,36 @@ public class FormatUtils {
         return frequencyText;
     }
 
-    public static String getSelectedDays(FrequencyChoices choices) {
-        List<Integer> chosen = choices.getDaysChosen();
+    @NonNull
+    public static String getSelectedDays(@NonNull List<Integer> daysChosen) {
 
-        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("EEE");
         LocalDate localDate = LocalDate.now();
         StringBuilder sb = new StringBuilder();
         sb.append(" on ");
 
-        if (chosen.size() == 1) {
-            sb.append(localDate.withDayOfWeek(chosen.get(0)).dayOfWeek().getAsText());
+        if (daysChosen.size() == 1) {
+            sb.append(localDate.withDayOfWeek(daysChosen.get(0)).dayOfWeek().getAsText());
         } else {
-            for (int i = 0; i <= chosen.size() - 2; i++) {
-                sb.append(dtfOut.print(localDate.withDayOfWeek(chosen.get(i))));
+            DateTimeFormatter dtfOut = DateTimeFormat.forPattern("EEE");
+            for (int i = 0; i <= daysChosen.size() - 2; i++) {
+                sb.append(dtfOut.print(localDate.withDayOfWeek(daysChosen.get(i))));
                 sb.append(", ");
             }
-            sb.append(dtfOut.print(localDate.withDayOfWeek(chosen.get(chosen.size() - 1))));
+            sb.append(dtfOut.print(localDate.withDayOfWeek(daysChosen.get(daysChosen.size() - 1))));
         }
 
         return sb.toString();
     }
 
-    public static boolean isToday(DateTime time) {
+    public static boolean isToday(@NonNull DateTime time) {
         return LocalDate.now().compareTo(new LocalDate(time)) == 0;
     }
 
-    public static boolean isTomorrow(DateTime time) {
+    public static boolean isTomorrow(@NonNull DateTime time) {
         return LocalDate.now().plusDays(1).compareTo(new LocalDate(time)) == 0;
     }
 
-    public static boolean isYesterday(DateTime time) {
+    public static boolean isYesterday(@NonNull DateTime time) {
         return LocalDate.now().minusDays(1).compareTo(new LocalDate(time)) == 0;
     }
 }
