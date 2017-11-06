@@ -70,19 +70,19 @@ public class FormatUtilsUnitTest {
 
     @Test
     public void getCurrentDayOfWeek_IsCorrect() {
-        LocalDate localDate ;
+        LocalDate localDate;
         String dayShort;
         String dayLong;
 
         localDate = LocalDate.now().withDayOfWeek(1);     // Monday
-        dayShort = FormatUtils.getCurrentDayOfWeek(localDate,0);
-        dayLong = FormatUtils.getCurrentDayOfWeek(localDate,1);
+        dayShort = FormatUtils.getCurrentDayOfWeek(localDate, 0);
+        dayLong = FormatUtils.getCurrentDayOfWeek(localDate, 1);
         Assert.assertEquals("Mon", dayShort);
         Assert.assertEquals("Monday", dayLong);
 
         localDate = LocalDate.now().withDayOfWeek(5);     // Friday
-        dayShort = FormatUtils.getCurrentDayOfWeek(localDate,0);
-        dayLong = FormatUtils.getCurrentDayOfWeek(localDate,1);
+        dayShort = FormatUtils.getCurrentDayOfWeek(localDate, 0);
+        dayLong = FormatUtils.getCurrentDayOfWeek(localDate, 1);
         Assert.assertEquals("Fri", dayShort);
         Assert.assertEquals("Friday", dayLong);
     }
@@ -222,10 +222,10 @@ public class FormatUtilsUnitTest {
     public void isToday_IsCorrect() throws Exception {
         boolean isToday;
 
-        isToday = FormatUtils.isToday(mDateTime);
+        isToday = FormatUtils.isToday(mDateTime.toLocalDate());
         Assert.assertEquals(true, isToday);
 
-        isToday = FormatUtils.isToday(mDateTime.plusDays(1));
+        isToday = FormatUtils.isToday(mDateTime.plusDays(1).toLocalDate());
         Assert.assertEquals(false, isToday);
     }
 
@@ -233,10 +233,10 @@ public class FormatUtilsUnitTest {
     public void isTomorrow() throws Exception {
         boolean isTomorrow;
 
-        isTomorrow = FormatUtils.isTomorrow(mDateTime);
+        isTomorrow = FormatUtils.isTomorrow(mDateTime.toLocalDate());
         Assert.assertEquals(false, isTomorrow);
 
-        isTomorrow = FormatUtils.isTomorrow(mDateTime.plusDays(1));
+        isTomorrow = FormatUtils.isTomorrow(mDateTime.plusDays(1).toLocalDate());
         Assert.assertEquals(true, isTomorrow);
     }
 
@@ -244,10 +244,10 @@ public class FormatUtilsUnitTest {
     public void isYesterday_IsCorrect() throws Exception {
         boolean isYesterday;
 
-        isYesterday = FormatUtils.isYesterday(mDateTime);
+        isYesterday = FormatUtils.isYesterday(mDateTime.toLocalDate());
         Assert.assertEquals(false, isYesterday);
 
-        isYesterday = FormatUtils.isYesterday(mDateTime.minusDays(1));
+        isYesterday = FormatUtils.isYesterday(mDateTime.minusDays(1).toLocalDate());
         Assert.assertEquals(true, isYesterday);
     }
 }

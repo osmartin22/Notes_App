@@ -13,31 +13,16 @@ public final class FrequencyChoices implements Parcelable {
     private final int repeatEvery;    // Repeat every X (day/week/month/year)
 
     private final int repeatForever;
-
     private final long repeatToDate;
     private final int repeatEvents;   // Repeat reminder for X events(times)
 
-    private final int monthRepeatType;    // Set from RadioButton in monthly view
-
+    private final int monthRepeatType;
     private final int monthWeekToRepeat;
     private final int monthDayOfWeekToRepeat;
 
 
-    private final List<Integer> daysChosen;   // Set from weekly view
+    private final List<Integer> daysChosen;
 
-//    public FrequencyChoices(int repeatType, int repeatEvery, long repeatToDate, int repeatEvents,
-//                            int monthRepeatType, List<Integer> daysChosen) {
-//        this.repeatType = repeatType;
-//        this.repeatEvery = repeatEvery;
-//        this.repeatToDate = repeatToDate;
-//        this.repeatEvents = repeatEvents;
-//        this.monthRepeatType = monthRepeatType;
-//        this.daysChosen = daysChosen;
-//
-////        this.repeatForever = 1;
-////        this.monthWeekToRepeat = 0;
-////        this.monthDayOfWeekToRepeat = 0;
-//    }
 
     // Constructor for presets
     public FrequencyChoices(int repeatType, int monthRepeatType, List<Integer> daysChosen) {
@@ -52,7 +37,6 @@ public final class FrequencyChoices implements Parcelable {
         this.daysChosen = daysChosen;
 
     }
-
 
     public FrequencyChoices(int repeatType, int repeatEvery, int repeatForever, long repeatToDate, int repeatEvents,
                             int monthRepeatType, int monthWeekToRepeat, int monthDayOfWeekToRepeat, List<Integer> daysChosen) {

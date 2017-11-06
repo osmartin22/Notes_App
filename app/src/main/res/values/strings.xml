@@ -211,6 +211,10 @@
     <string name="saturdayShort">SAT</string>
 
     <!-- Strings for showing FrequencyPicker choice as text-->
+    <string name="repeats">Repeats\u0020</string>
+    <string name="repeatEvery">\u0020(on every\u0020</string>
+    <string name="repeatUntil">; until\u0020</string>
+
     <plurals name="repeatDay">
         <item quantity="one">daily</item>
         <item quantity="other">every %d days</item>
@@ -261,6 +265,22 @@
     <string name="eveningMinutePreference">Evening Minute Preference</string>
     <string name="nightHourPreference">Night Hour Preference</string>
     <string name="nightMinutePreference">Night Minute Preference</string>
+
+
+    <!-- FormatUtils strings -->
+
+    <!-- lastUpdated strings -->
+    <string name="lastUpdatedFormatUtils">Last Updated \n</string>
+    <string name="todayFormatUtils">Today,\u0020</string>
+    <string name="tomorrowFormatUtils">Tomorrow,\u0020</string>
+    <string name="yesterdayFormatUtils">Yesterday,\u0020</string>
+
+    <!-- formatNthWeek strings -->
+    <string name="firstNthWeek">first\u0020</string>
+    <string name="secondNthWeek">second\u0020</string>
+    <string name="thirdNthWeek">third\u0020</string>
+    <string name="fourthNthWeek">fourth\u0020</string>
+    <string name="lastNthWeek">last\u0020</string>
 
 
 </resources>
