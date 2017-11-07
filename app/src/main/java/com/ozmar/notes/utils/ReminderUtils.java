@@ -17,12 +17,51 @@ public class ReminderUtils {
 
 
     // Does not take into account if the phone changes date/time (i.e. user manually changes date)
-    public static long calculateDailyReminderTime(FrequencyChoices choices, DateTime dateTimeNow) {
-        return dateTimeNow.plusDays(choices.getRepeatEvery()).getMillis();
+    public static long calculateDailyReminderTime(@NonNull FrequencyChoices choices, @NonNull DateTime dateTime) {
+        return dateTime.plusDays(choices.getRepeatEvery()).getMillis();
+    }
+
+    public static int getNextDayPosition(@NonNull List<Integer> daysChosen, int currentDayOfWeek) {
+        int low = 0;
+        int high = daysChosen.size();
+
+        while (low != high) {
+            int mid = (low + high) / 2;
+            if (daysChosen.get(mid) <= currentDayOfWeek) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+
+        // Occurs when at the end of the list, next day is now the first day in the list
+        if(high == daysChosen.size()){
+            high = 0;
+        }
+
+        return high;
+    }
+
+    // This returns the time difference from the starting day to the next day
+    public static long getNextWeeklyReminderTime(@NonNull List<Integer> daysChosen, int currentDayOfWeek,
+                                                 int repeatEvery) {
+        long nextReminderTime = 0;
+        int high = getNextDayPosition(daysChosen, currentDayOfWeek);
+        if (high != daysChosen.size()) {
+            nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(high) - currentDayOfWeek);
+
+            // Start at next X week
+        } else {
+            nextReminderTime += TimeUnit.DAYS.toMillis(7 - currentDayOfWeek);
+            nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(0));
+            nextReminderTime += TimeUnit.DAYS.toMillis(7 * (repeatEvery - 1));
+        }
+
+        return nextReminderTime;
     }
 
     // Does not take into account if the phone changes date/time (i.e. user manually changes date)
-    public static long calculateWeeklyReminderTime(FrequencyChoices choices, DateTime dateTime) {
+    public static long calculateWeeklyReminderTime(@NonNull FrequencyChoices choices, @NonNull DateTime dateTime) {
         List<Integer> daysChosen = choices.getDaysChosen();
         assert daysChosen != null;
         Collections.sort(daysChosen);
@@ -47,39 +86,9 @@ public class ReminderUtils {
         return nextReminderTime;
     }
 
-    public static long getNextWeeklyReminderTime(List<Integer> daysChosen, int currentDayOfWeek, int repeatEvery) {
-        long nextReminderTime = 0;
-        int high = getNextLargestDay(daysChosen, currentDayOfWeek);
-        if (high != daysChosen.size()) {
-            nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(high) - currentDayOfWeek);
 
-            // Start at next X week
-        } else {
-            nextReminderTime += TimeUnit.DAYS.toMillis(7 - currentDayOfWeek);
-            nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(0));
-            nextReminderTime += TimeUnit.DAYS.toMillis(7 * (repeatEvery - 1));
-        }
-
-        return nextReminderTime;
-    }
-
-    private static int getNextLargestDay(@NonNull List<Integer> daysChosen, int currentDayOfWeek) {
-        int low = 0;
-        int high = daysChosen.size();
-
-        while (low != high) {
-            int mid = (low + high) / 2;
-            if (daysChosen.get(mid) <= currentDayOfWeek) {
-                low = mid + 1;
-            } else {
-                high = mid;
-            }
-        }
-
-        return high;
-    }
-
-    public static long calculateMonthlyReminderTime(FrequencyChoices choices, DateTime oldReminder, DateTime dateTimeNow) {
+    public static long calculateMonthlyReminderTime(@NonNull FrequencyChoices choices,
+                                                    @NonNull DateTime oldReminder, @NonNull DateTime dateTimeNow) {
         long nextReminderTime = 0;
 
         DateTime currentYearReminder = oldReminder.withYear(dateTimeNow.getYear());
@@ -92,7 +101,7 @@ public class ReminderUtils {
         return nextReminderTime;
     }
 
-    public static long getNextMonthlyReminder(DateTime dateTime, FrequencyChoices choices) {
+    public static long getNextMonthlyReminder(@NonNull DateTime dateTime, @NonNull FrequencyChoices choices) {
         long nextReminderTime = dateTime.getMillis();
 
         int chosenDateWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime.getDayOfMonth());
@@ -116,7 +125,7 @@ public class ReminderUtils {
 
         } else {
             // TODO: Change
-            if(dayOfWeekToForce != dateTime.getDayOfWeek()) {
+            if (dayOfWeekToForce != dateTime.getDayOfWeek()) {
                 nextReminderTime = dateTime.withDayOfWeek(dayOfWeekToForce).getMillis();
             }
         }
@@ -124,7 +133,7 @@ public class ReminderUtils {
         return nextReminderTime;
     }
 
-    private static long getForcedWeek(DateTime dateTime, int weekNumberToForce, int chosenDateWeekNumber) {
+    public static long getForcedWeek(@NonNull DateTime dateTime, int weekNumberToForce, int chosenDateWeekNumber) {
         int maxDaysInMonth;
         int newDay;
         int daysToAdd;
@@ -146,7 +155,7 @@ public class ReminderUtils {
         return dateTime.plusDays(daysToAdd).getMillis();
     }
 
-    private static boolean checkIfFifthWeekPossible(int maxDaysInMonth, int day) {
+    public static boolean checkIfFifthWeekPossible(int maxDaysInMonth, int day) {
         boolean possible = true;
         if (maxDaysInMonth == 31 && day > 3) {
             possible = false;
@@ -163,7 +172,8 @@ public class ReminderUtils {
 
 
     // Takes into account if phone changes date/time (i.e. user manually changes time)
-    public static long calculateYearlyReminderTime(FrequencyChoices choices, DateTime oldReminder, DateTime dateTimeNow) {
+    public static long calculateYearlyReminderTime(@NonNull FrequencyChoices choices,
+                                                   @NonNull DateTime oldReminder, @NonNull DateTime dateTimeNow) {
 
         DateTime currentYearReminder = oldReminder.withYear(dateTimeNow.getYear());
 

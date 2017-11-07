@@ -84,7 +84,7 @@ public class ReminderReceiver extends BroadcastReceiver {
     // On subsequent calls to restore the reminder, it should not have to calculate the nth week
     // and just use the passed value instead
 
-    // Possible optimization is to not immediately set an alarm manager when a new reminder is created
+    // TODO: Possible optimization is to not immediately set an alarm manager when a new reminder is created
     // A reminder 2 months away does not need to be created.
     // Can have a separate alarm that runs every week that sets up any reminders that
     // will occur in that week

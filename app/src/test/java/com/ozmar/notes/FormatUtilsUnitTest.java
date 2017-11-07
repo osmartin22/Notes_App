@@ -16,6 +16,15 @@ import java.util.List;
 
 
 public class FormatUtilsUnitTest {
+
+    private static final int MONDAY = 1;
+    private static final int TUESDAY = 2;
+    private static final int WEDNESDAY = 3;
+    private static final int THURSDAY = 4;
+    private static final int FRIDAY = 5;
+    private static final int SATURDAY = 6;
+    private static final int SUNDAY = 7;
+
     private DateTime mDateTime = DateTime.now();
 
     @Test
@@ -74,13 +83,13 @@ public class FormatUtilsUnitTest {
         String dayShort;
         String dayLong;
 
-        localDate = LocalDate.now().withDayOfWeek(1);     // Monday
+        localDate = LocalDate.now().withDayOfWeek(MONDAY);
         dayShort = FormatUtils.getCurrentDayOfWeek(localDate, 0);
         dayLong = FormatUtils.getCurrentDayOfWeek(localDate, 1);
         Assert.assertEquals("Mon", dayShort);
         Assert.assertEquals("Monday", dayLong);
 
-        localDate = LocalDate.now().withDayOfWeek(5);     // Friday
+        localDate = LocalDate.now().withDayOfWeek(FRIDAY);
         dayShort = FormatUtils.getCurrentDayOfWeek(localDate, 0);
         dayLong = FormatUtils.getCurrentDayOfWeek(localDate, 1);
         Assert.assertEquals("Fri", dayShort);
@@ -93,13 +102,13 @@ public class FormatUtilsUnitTest {
         String dayLong;
         LocalDate localDate;
 
-        localDate = LocalDate.now().withDayOfWeek(1); // Monday
+        localDate = LocalDate.now().withDayOfWeek(MONDAY);
         dayShort = FormatUtils.getChosenDayOfWeek(localDate, 0);
         dayLong = FormatUtils.getChosenDayOfWeek(localDate, 1);
         Assert.assertEquals("Mon", dayShort);
         Assert.assertEquals("Monday", dayLong);
 
-        localDate = LocalDate.now().withDayOfWeek(5); // Friday
+        localDate = LocalDate.now().withDayOfWeek(FRIDAY);
         dayShort = FormatUtils.getChosenDayOfWeek(localDate, 0);
         dayLong = FormatUtils.getChosenDayOfWeek(localDate, 1);
         Assert.assertEquals("Fri", dayShort);
@@ -202,18 +211,18 @@ public class FormatUtilsUnitTest {
 
         // NOTE: 7(Sunday) should be put first if used
         expected = " on Mon, Tue, Wed";
-        daysChosen = new ArrayList<>(Arrays.asList(1, 2, 3));
+        daysChosen = new ArrayList<>(Arrays.asList(MONDAY, TUESDAY, WEDNESDAY));
         result = FormatUtils.getSelectedDays(daysChosen);
         Assert.assertEquals(expected, result);
 
-        daysChosen.add(5);
-        daysChosen.add(6);
+        daysChosen.add(FRIDAY);
+        daysChosen.add(SATURDAY);
         expected = " on Mon, Tue, Wed, Fri, Sat";
         result = FormatUtils.getSelectedDays(daysChosen);
         Assert.assertEquals(expected, result);
 
         expected = " on Sun, Tue, Thu, Fri, Sat";
-        daysChosen = new ArrayList<>(Arrays.asList(7, 2, 4, 5, 6));
+        daysChosen = new ArrayList<>(Arrays.asList(SUNDAY, TUESDAY, THURSDAY, FRIDAY, SATURDAY));
         result = FormatUtils.getSelectedDays(daysChosen);
         Assert.assertEquals(expected, result);
     }
