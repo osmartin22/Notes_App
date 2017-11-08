@@ -81,10 +81,6 @@ public class FormatUtilsWithContext {
         Assert.assertEquals("01:15:00", timeFormat);
     }
 
-    private void frequencyTextHelper(FrequencyChoices choices, String expected) {
-        Assert.assertEquals(expected, FormatUtils.formatFrequencyText(mContext, choices, mDateTime));
-    }
-
     @Test
     public void formatFrequencyText_IsCorrect() throws Exception {
         FrequencyChoices choices;
@@ -93,28 +89,28 @@ public class FormatUtilsWithContext {
 
         // Test presets
         // Repeat daily
-        choices = new FrequencyChoices(0, -1, null);
+        choices = new FrequencyChoices(0, null);
         Assert.assertEquals("Repeats daily",
                 FormatUtils.formatFrequencyText(mContext, choices, mDateTime));
 
         // Repeat weekly
-        choices = new FrequencyChoices(1, -1, daysChosen);
+        choices = new FrequencyChoices(1, daysChosen);
         Assert.assertEquals("Repeats weekly on Monday",
                 FormatUtils.formatFrequencyText(mContext, choices, mDateTime));
         // Repeat weekly multiple days
         daysChosen.add(2);
         daysChosen.add(5);
-        choices = new FrequencyChoices(1, -1, daysChosen);
+        choices = new FrequencyChoices(1, daysChosen);
         Assert.assertEquals("Repeats weekly on Mon, Tue, Fri",
                 FormatUtils.formatFrequencyText(mContext, choices, mDateTime));
 
         // Repeat monthly
-        choices = new FrequencyChoices(2, 0, null);
+        choices = new FrequencyChoices(2, null);
         Assert.assertEquals("Repeats monthly",
                 FormatUtils.formatFrequencyText(mContext, choices, mDateTime));
 
         // Repeat yearly
-        choices = new FrequencyChoices(3, -1, null);
+        choices = new FrequencyChoices(3, null);
         Assert.assertEquals("Repeats yearly",
                 FormatUtils.formatFrequencyText(mContext, choices, mDateTime));
 

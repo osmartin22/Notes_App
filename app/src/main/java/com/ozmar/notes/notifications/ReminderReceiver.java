@@ -96,20 +96,25 @@ public class ReminderReceiver extends BroadcastReceiver {
 
         switch (choices.getRepeatType()) {
             case 0:     // Daily
-                nextReminderTime = ReminderUtils.calculateDailyReminderTime(choices, dateTimeNow);
+                nextReminderTime = ReminderUtils.calculateDailyReminderTime(choices.getRepeatEvery(),
+                        dateTimeNow);
                 break;
 
             case 1:     // Weekly
-                nextReminderTime = ReminderUtils.calculateWeeklyReminderTime(choices, dateTimeReminder);
+                assert choices.getDaysChosen() != null;
+                nextReminderTime = ReminderUtils.calculateWeeklyReminderTime(choices.getRepeatEvery(),
+                        choices.getDaysChosen(), dateTimeReminder);
                 break;
 
             case 2:     // Monthly
                 // TODO: Get week number for second option (i.e. 3rd week of the month)
-                nextReminderTime = ReminderUtils.calculateMonthlyReminderTime(choices, dateTimeReminder, dateTimeNow);
+                nextReminderTime = ReminderUtils.calculateMonthlyReminderTime(choices, dateTimeReminder,
+                        dateTimeNow);
                 break;
 
             case 3:     // Yearly
-                nextReminderTime = ReminderUtils.calculateYearlyReminderTime(choices, dateTimeReminder, dateTimeNow);
+                nextReminderTime = ReminderUtils.calculateYearlyReminderTime(choices.getRepeatEvery(),
+                        dateTimeReminder, dateTimeNow);
                 break;
         }
 

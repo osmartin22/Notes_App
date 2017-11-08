@@ -20,22 +20,25 @@ public final class FrequencyChoices implements Parcelable {
     private final int monthWeekToRepeat;
     private final int monthDayOfWeekToRepeat;
 
-
     private final List<Integer> daysChosen;
 
 
     // Constructor for presets
-    public FrequencyChoices(int repeatType, int monthRepeatType, List<Integer> daysChosen) {
+    public FrequencyChoices(int repeatType, List<Integer> daysChosen) {
         this.repeatType = repeatType;
         this.repeatEvery = 1;
         this.repeatForever = 1;
         this.repeatToDate = 0;
         this.repeatEvents = 0;
-        this.monthRepeatType = monthRepeatType;
         this.monthWeekToRepeat = 0;
         this.monthDayOfWeekToRepeat = 0;
         this.daysChosen = daysChosen;
 
+        if (repeatType == 2) {
+            this.monthRepeatType = 0;
+        } else {
+            this.monthRepeatType = -1;
+        }
     }
 
     public FrequencyChoices(int repeatType, int repeatEvery, int repeatForever, long repeatToDate, int repeatEvents,

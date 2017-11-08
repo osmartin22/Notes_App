@@ -1,5 +1,6 @@
 package com.ozmar.notes.utils;
 
+import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
 import com.ozmar.notes.FrequencyChoices;
@@ -17,8 +18,8 @@ public class ReminderUtils {
 
 
     // Does not take into account if the phone changes date/time (i.e. user manually changes date)
-    public static long calculateDailyReminderTime(@NonNull FrequencyChoices choices, @NonNull DateTime dateTime) {
-        return dateTime.plusDays(choices.getRepeatEvery()).getMillis();
+    public static long calculateDailyReminderTime(int repeatEveryXDays, @NonNull DateTime dateTime) {
+        return dateTime.plusDays(repeatEveryXDays).getMillis();
     }
 
     public static int getNextDayPosition(@NonNull List<Integer> daysChosen, int currentDayOfWeek) {
@@ -35,7 +36,7 @@ public class ReminderUtils {
         }
 
         // Occurs when at the end of the list, next day is now the first day in the list
-        if(high == daysChosen.size()){
+        if (high == daysChosen.size()) {
             high = 0;
         }
 
@@ -45,25 +46,29 @@ public class ReminderUtils {
     // This returns the time difference from the starting day to the next day
     public static long getNextWeeklyReminderTime(@NonNull List<Integer> daysChosen, int currentDayOfWeek,
                                                  int repeatEvery) {
-        long nextReminderTime = 0;
-        int high = getNextDayPosition(daysChosen, currentDayOfWeek);
-        if (high != daysChosen.size()) {
-            nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(high) - currentDayOfWeek);
+        long nextReminderTime;
 
-            // Start at next X week
+        if (daysChosen.size() == 1 && daysChosen.get(0) == currentDayOfWeek) {
+            nextReminderTime = TimeUnit.DAYS.toMillis(repeatEvery * 7);
         } else {
-            nextReminderTime += TimeUnit.DAYS.toMillis(7 - currentDayOfWeek);
-            nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(0));
-            nextReminderTime += TimeUnit.DAYS.toMillis(7 * (repeatEvery - 1));
+
+            int nextDayPosition = getNextDayPosition(daysChosen, currentDayOfWeek);
+            if (daysChosen.get(nextDayPosition) > currentDayOfWeek) {
+                nextReminderTime = TimeUnit.DAYS.toMillis(daysChosen.get(nextDayPosition) - currentDayOfWeek);
+
+            } else {
+                nextReminderTime = TimeUnit.DAYS.toMillis(7 - currentDayOfWeek);
+                nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(nextDayPosition));
+                nextReminderTime += TimeUnit.DAYS.toMillis(7 * (repeatEvery - 1));
+            }
         }
 
         return nextReminderTime;
     }
 
     // Does not take into account if the phone changes date/time (i.e. user manually changes date)
-    public static long calculateWeeklyReminderTime(@NonNull FrequencyChoices choices, @NonNull DateTime dateTime) {
-        List<Integer> daysChosen = choices.getDaysChosen();
-        assert daysChosen != null;
+    public static long calculateWeeklyReminderTime(int repeatEveryXWeeks, @NonNull List<Integer> daysChosen,
+                                                   @NonNull DateTime dateTime) {
         Collections.sort(daysChosen);
 
         long nextReminderTime = dateTime.getMillis();
@@ -73,20 +78,21 @@ public class ReminderUtils {
         if (daysChosen.size() == 7) {
             if (currentDayOfWeek == 7) {
                 nextReminderTime += TimeUnit.DAYS.toMillis(1);
-                nextReminderTime += TimeUnit.DAYS.toMillis(7 * (choices.getRepeatEvery() - 1));
+                nextReminderTime += TimeUnit.DAYS.toMillis(7 * (repeatEveryXWeeks - 1));
             } else {
                 nextReminderTime += TimeUnit.DAYS.toMillis(1);
             }
 
             // Does not repeat every day of the week
         } else {
-            nextReminderTime += getNextWeeklyReminderTime(daysChosen, currentDayOfWeek, choices.getRepeatEvery());
+            nextReminderTime += getNextWeeklyReminderTime(daysChosen, currentDayOfWeek, repeatEveryXWeeks);
         }
 
         return nextReminderTime;
     }
 
 
+    //TODO: Replace FrequencyChoices
     public static long calculateMonthlyReminderTime(@NonNull FrequencyChoices choices,
                                                     @NonNull DateTime oldReminder, @NonNull DateTime dateTimeNow) {
         long nextReminderTime = 0;
@@ -101,27 +107,28 @@ public class ReminderUtils {
         return nextReminderTime;
     }
 
+    //TODO: Replace FrequencyChoices
     public static long getNextMonthlyReminder(@NonNull DateTime dateTime, @NonNull FrequencyChoices choices) {
         long nextReminderTime = dateTime.getMillis();
 
-        int chosenDateWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime.getDayOfMonth());
+        int currentWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime.getDayOfMonth());
         int weekNumberToForce = choices.getMonthWeekToRepeat();
         int dayOfWeekToForce = choices.getMonthDayOfWeekToRepeat();
 
-        if (chosenDateWeekNumber != weekNumberToForce) {    // Need to find next occurrence
+        if (currentWeekNumber != weekNumberToForce) {
 
             // Go to next month with week to force
-            if (weekNumberToForce < chosenDateWeekNumber) {
+            if (weekNumberToForce < currentWeekNumber) {
 
                 // Move to the first desired day of the next month
                 dateTime = dateTime.plusMonths(1).dayOfMonth().withMinimumValue()
                         .withDayOfWeek(dayOfWeekToForce);
 
-            } else if (weekNumberToForce > chosenDateWeekNumber) {
+            } else if (weekNumberToForce > currentWeekNumber) {
                 dateTime.withDayOfWeek(dayOfWeekToForce);
             }
 
-            nextReminderTime = getForcedWeek(dateTime, weekNumberToForce, chosenDateWeekNumber);
+            nextReminderTime = getForcedWeek(dateTime, weekNumberToForce, currentWeekNumber);
 
         } else {
             // TODO: Change
@@ -133,7 +140,9 @@ public class ReminderUtils {
         return nextReminderTime;
     }
 
-    public static long getForcedWeek(@NonNull DateTime dateTime, int weekNumberToForce, int chosenDateWeekNumber) {
+    public static long getForcedWeek(@NonNull DateTime dateTime,
+                                     @IntRange(from = 1, to = 5) int weekNumberToForce,
+                                     @IntRange(from = 1, to = 5) int currentWeekNumber) {
         int maxDaysInMonth;
         int newDay;
         int daysToAdd;
@@ -141,13 +150,12 @@ public class ReminderUtils {
         maxDaysInMonth = dateTime.dayOfMonth().withMaximumValue().getDayOfMonth();
         newDay = dateTime.getDayOfMonth();
 
-        // Check if a fifth week is possible in the month
-        if (weekNumberToForce == 5 && ReminderUtils.checkIfFifthWeekPossible(maxDaysInMonth, newDay)) {
+        if (weekNumberToForce == 5 && !ReminderUtils.checkIfFifthWeekPossible(maxDaysInMonth, newDay)) {
             weekNumberToForce = 4;
         }
 
-        if (chosenDateWeekNumber != 1) {
-            daysToAdd = (weekNumberToForce - chosenDateWeekNumber) * 7;
+        if (currentWeekNumber != 1) {
+            daysToAdd = (weekNumberToForce - currentWeekNumber) * 7;
         } else {
             daysToAdd = (weekNumberToForce - 1) * 7;
         }
@@ -155,16 +163,21 @@ public class ReminderUtils {
         return dateTime.plusDays(daysToAdd).getMillis();
     }
 
+    // Check if the given day of the week can have occur five times in the given month
     public static boolean checkIfFifthWeekPossible(int maxDaysInMonth, int day) {
-        boolean possible = true;
-        if (maxDaysInMonth == 31 && day > 3) {
-            possible = false;
+        boolean possible = false;
+        int dayModulo = day % 7;
 
-        } else if (maxDaysInMonth == 30 && day > 2) {
-            possible = false;
+        if (dayModulo != 0) {
+            if (maxDaysInMonth == 31 && dayModulo <= 3) {
+                possible = true;
 
-        } else if (maxDaysInMonth == 29 && day > 1) {
-            possible = false;
+            } else if (maxDaysInMonth == 30 && dayModulo <= 2) {
+                possible = true;
+
+            } else if (maxDaysInMonth == 29 && dayModulo <= 1) {
+                possible = true;
+            }
         }
 
         return possible;
@@ -172,15 +185,15 @@ public class ReminderUtils {
 
 
     // Takes into account if phone changes date/time (i.e. user manually changes time)
-    public static long calculateYearlyReminderTime(@NonNull FrequencyChoices choices,
-                                                   @NonNull DateTime oldReminder, @NonNull DateTime dateTimeNow) {
+    public static long calculateYearlyReminderTime(int repeatEveryXYears, @NonNull DateTime oldReminder,
+                                                   @NonNull DateTime currentDateTime) {
 
-        DateTime currentYearReminder = oldReminder.withYear(dateTimeNow.getYear());
+        DateTime currentYearReminder = oldReminder.withYear(currentDateTime.getYear());
 
         long nextReminderTime;
         int yearDiff = currentYearReminder.getYear() - oldReminder.getYear();
-        int moduloDiff = yearDiff % choices.getRepeatEvery();
-        int yearsToAdd = choices.getRepeatEvery() - moduloDiff;
+        int moduloDiff = yearDiff % repeatEveryXYears;
+        int yearsToAdd = repeatEveryXYears - moduloDiff;
 
         // Reminder will not occur in current year
         if (moduloDiff != 0) {
@@ -188,10 +201,10 @@ public class ReminderUtils {
 
             // Reminder possibly occurs in current year
         } else {
-            if (currentYearReminder.isAfter(dateTimeNow)) {
+            if (currentYearReminder.isAfter(currentDateTime)) {
                 nextReminderTime = currentYearReminder.getMillis();
             } else {
-                nextReminderTime = currentYearReminder.plusYears(choices.getMonthRepeatType()).getMillis();
+                nextReminderTime = currentYearReminder.plusYears(repeatEveryXYears).getMillis();
             }
         }
 
