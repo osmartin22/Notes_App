@@ -43,26 +43,19 @@ public class ReminderUtils {
         return high;
     }
 
-    // This returns the time difference from the starting day to the next day
+    // Returns the time difference to the next day in the list
     public static long getNextWeeklyReminderTime(@NonNull List<Integer> daysChosen, int currentDayOfWeek,
                                                  int repeatEvery) {
         long nextReminderTime;
+        int nextDayPosition = getNextDayPosition(daysChosen, currentDayOfWeek);
+        if (daysChosen.get(nextDayPosition) > currentDayOfWeek) {
+            nextReminderTime = TimeUnit.DAYS.toMillis(daysChosen.get(nextDayPosition) - currentDayOfWeek);
 
-        if (daysChosen.size() == 1 && daysChosen.get(0) == currentDayOfWeek) {
-            nextReminderTime = TimeUnit.DAYS.toMillis(repeatEvery * 7);
         } else {
-
-            int nextDayPosition = getNextDayPosition(daysChosen, currentDayOfWeek);
-            if (daysChosen.get(nextDayPosition) > currentDayOfWeek) {
-                nextReminderTime = TimeUnit.DAYS.toMillis(daysChosen.get(nextDayPosition) - currentDayOfWeek);
-
-            } else {
-                nextReminderTime = TimeUnit.DAYS.toMillis(7 - currentDayOfWeek);
-                nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(nextDayPosition));
-                nextReminderTime += TimeUnit.DAYS.toMillis(7 * (repeatEvery - 1));
-            }
+            nextReminderTime = TimeUnit.DAYS.toMillis(7 - currentDayOfWeek);
+            nextReminderTime += TimeUnit.DAYS.toMillis(daysChosen.get(nextDayPosition));
+            nextReminderTime += TimeUnit.DAYS.toMillis(7 * (repeatEvery - 1));
         }
-
         return nextReminderTime;
     }
 
@@ -128,7 +121,7 @@ public class ReminderUtils {
                 dateTime.withDayOfWeek(dayOfWeekToForce);
             }
 
-            nextReminderTime = getForcedWeek(dateTime, weekNumberToForce, currentWeekNumber);
+            nextReminderTime = getForcedWeekDate(dateTime, weekNumberToForce, currentWeekNumber);
 
         } else {
             // TODO: Change
@@ -140,24 +133,38 @@ public class ReminderUtils {
         return nextReminderTime;
     }
 
-    public static long getForcedWeek(@NonNull DateTime dateTime,
-                                     @IntRange(from = 1, to = 5) int weekNumberToForce,
-                                     @IntRange(from = 1, to = 5) int currentWeekNumber) {
+    public static long getForcedWeekDate(@NonNull DateTime dateTime,
+                                         @IntRange(from = 1, to = 5) int weekNumberToForce,
+                                         @IntRange(from = 1, to = 5) int currentWeekNumber) {
         int maxDaysInMonth;
         int newDay;
         int daysToAdd;
+        boolean fifthWeekPossible;
 
-        maxDaysInMonth = dateTime.dayOfMonth().withMaximumValue().getDayOfMonth();
         newDay = dateTime.getDayOfMonth();
+        maxDaysInMonth = dateTime.dayOfMonth().withMaximumValue().getDayOfMonth();
+        fifthWeekPossible = ReminderUtils.checkIfFifthWeekPossible(maxDaysInMonth, newDay);
 
-        if (weekNumberToForce == 5 && !ReminderUtils.checkIfFifthWeekPossible(maxDaysInMonth, newDay)) {
+        if (weekNumberToForce == 5 && !fifthWeekPossible) {
             weekNumberToForce = 4;
         }
 
-        if (currentWeekNumber != 1) {
-            daysToAdd = (weekNumberToForce - currentWeekNumber) * 7;
+        if (currentWeekNumber > weekNumberToForce) {
+            if (fifthWeekPossible) {
+                // Add to week five
+                daysToAdd = (5 - currentWeekNumber) * 7;
+            } else {
+                // Add to week four
+                daysToAdd = (4 - currentWeekNumber) * 7;
+            }
+            daysToAdd += weekNumberToForce * 7;
+
         } else {
-            daysToAdd = (weekNumberToForce - 1) * 7;
+            if (currentWeekNumber != 1) {
+                daysToAdd = (weekNumberToForce - currentWeekNumber) * 7;
+            } else {
+                daysToAdd = (weekNumberToForce - 1) * 7;
+            }
         }
 
         return dateTime.plusDays(daysToAdd).getMillis();
@@ -184,6 +191,8 @@ public class ReminderUtils {
     }
 
 
+    // TODO: Rewrite this to conform with the others and implement an alarm manager to
+    // check if alarm managers should be created for reminders close to occurring
     // Takes into account if phone changes date/time (i.e. user manually changes time)
     public static long calculateYearlyReminderTime(int repeatEveryXYears, @NonNull DateTime oldReminder,
                                                    @NonNull DateTime currentDateTime) {

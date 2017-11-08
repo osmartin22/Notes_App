@@ -50,15 +50,12 @@ public class ReminderUtilsUnitTest {
     public void getNextDayPosition_IsCorrect() throws Exception {
         List<Integer> daysChosen;
 
-        // Test if the current day is also in the list
         daysChosen = new ArrayList<>(Arrays.asList(MONDAY, WEDNESDAY, FRIDAY, SUNDAY));
         nextDayPositionHelper(daysChosen, MONDAY, WEDNESDAY);
         nextDayPositionHelper(daysChosen, WEDNESDAY, FRIDAY);
         nextDayPositionHelper(daysChosen, FRIDAY, SUNDAY);
         nextDayPositionHelper(daysChosen, SUNDAY, MONDAY);
 
-
-        // Test when the current day is not in the list
         daysChosen = new ArrayList<>(Collections.singletonList(SATURDAY));
         nextDayPositionHelper(daysChosen, THURSDAY, SATURDAY);
         nextDayPositionHelper(daysChosen, FRIDAY, SATURDAY);
@@ -86,36 +83,27 @@ public class ReminderUtilsUnitTest {
     public void getNextWeeklyReminderTime_IsCorrect() throws Exception {
         List<Integer> daysChosen;
 
-        // Test with only one day in the list
         daysChosen = new ArrayList<>(Collections.singletonList(MONDAY));
-        weeklyReminderHelper(MONDAY, 7, 1, daysChosen);
         weeklyReminderHelper(MONDAY, 21, 3, daysChosen);
         weeklyReminderHelper(MONDAY, 0, 0, daysChosen);
         weeklyReminderHelper(TUESDAY, 6, 1, daysChosen);
         weeklyReminderHelper(SUNDAY, 8, 2, daysChosen);
 
 
-        // Test when currentDayOfWeek is in the list returns the difference to the next day in the list
-        daysChosen = new ArrayList<>(Arrays.asList(MONDAY, TUESDAY));
-        weeklyReminderHelper(MONDAY, 1, 1, daysChosen);
-        weeklyReminderHelper(MONDAY, 1, 117, daysChosen);
-
-        daysChosen = new ArrayList<>(Arrays.asList(MONDAY, THURSDAY, SUNDAY));
-        weeklyReminderHelper(MONDAY, 3, 1, daysChosen);
-        weeklyReminderHelper(MONDAY, 3, 99, daysChosen);
-
-        daysChosen = new ArrayList<>(Arrays.asList(MONDAY, WEDNESDAY, THURSDAY, SUNDAY));
-        weeklyReminderHelper(FRIDAY, 2, 3, daysChosen);
+        daysChosen = new ArrayList<>(Arrays.asList(MONDAY, WEDNESDAY, SATURDAY));
+        weeklyReminderHelper(MONDAY, 2, 1, daysChosen);
+        weeklyReminderHelper(TUESDAY, 1, 71, daysChosen);
+        weeklyReminderHelper(WEDNESDAY, 3, 11, daysChosen);
+        weeklyReminderHelper(THURSDAY, 2, 0, daysChosen);
+        weeklyReminderHelper(FRIDAY, 1, 21, daysChosen);
 
 
-        // Test if time difference returned when at the end of the list is correct
         daysChosen = new ArrayList<>(Arrays.asList(MONDAY, WEDNESDAY, THURSDAY));
-        weeklyReminderHelper(SATURDAY, 2, 1, daysChosen);
+        weeklyReminderHelper(FRIDAY, 3, 1, daysChosen);
+        weeklyReminderHelper(FRIDAY, 31, 5, daysChosen);
         weeklyReminderHelper(SATURDAY, 16, 3, daysChosen);
-
-        daysChosen = new ArrayList<>(Arrays.asList(MONDAY, WEDNESDAY, THURSDAY));
-        weeklyReminderHelper(SATURDAY, 30, 5, daysChosen);
         weeklyReminderHelper(SATURDAY, 72, 11, daysChosen);
+        weeklyReminderHelper(SUNDAY, 22, 4, daysChosen);
     }
 
     @Test
@@ -133,45 +121,42 @@ public class ReminderUtilsUnitTest {
 
     }
 
-    private void forcedWeekHelper(DateTime dateTime, int weekNumberToForce, int weeksToAdd) {
+    private void forcedWeekDateHelper(DateTime dateTime, int weekNumberToForce, int weeksToAdd) {
         int currentWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime.getDayOfMonth());
-        long result = ReminderUtils.getForcedWeek(dateTime, weekNumberToForce, currentWeekNumber);
+        long result = ReminderUtils.getForcedWeekDate(dateTime, weekNumberToForce, currentWeekNumber);
         Assert.assertEquals(dateTime.plusWeeks(weeksToAdd).getMillis(), result);
     }
 
     @Test
-    public void getForcedWeek_IsCorrect() throws Exception {
+    public void getForcedWeekDate_IsCorrect() throws Exception {
         DateTime dateTime = new DateTime(2017, 11, 1, 12, 0);
 
         // First week of the month
         // 5 weeks possible for starting day
         for (int i = 1; i < 6; i++) {
-            forcedWeekHelper(dateTime, i, i - 1);
+            forcedWeekDateHelper(dateTime, i, i - 1);
         }
 
         // 5 weeks not possible for starting day
         dateTime = dateTime.withDayOfMonth(7);
         for (int i = 1; i < 5; i++) {
-            forcedWeekHelper(dateTime, i, i - 1);
+            forcedWeekDateHelper(dateTime, i, i - 1);
         }
-        forcedWeekHelper(dateTime, 5, 3);
+        forcedWeekDateHelper(dateTime, 5, 3);
 
 
         // Third week of the month
         // Test when forceWeekNumber is after currentWeekNumber
         dateTime = dateTime.withDayOfMonth(15); // 5 weeks possible for given day
         for (int i = 3; i < 6; i++) {
-            forcedWeekHelper(dateTime, i, i - 3);
+            forcedWeekDateHelper(dateTime, i, i - 3);
         }
 
         // Test when forceWeekNumber is before the currentWeekNumber
-//        forcedWeekHelper();
+        forcedWeekDateHelper(dateTime, 1, 3);
+        forcedWeekDateHelper(dateTime, 2, 4);
 
-//        forcedWeekHelper(dateTime, 1, 0);
-//        forcedWeekHelper(dateTime, 2, 1);
-//        forcedWeekHelper(dateTime, 3, 2);
-//        forcedWeekHelper(dateTime, 4, 3);
-//        forcedWeekHelper(dateTime, 5, 4);
+        // TODO: Test 4 weeks possible by trying to force a 5 week
     }
 
     @Test
@@ -209,52 +194,39 @@ public class ReminderUtilsUnitTest {
         }
     }
 
+    private void yearlyReminderHelper(DateTime current, DateTime expected, int repeatEveryXYears) {
+        long result = ReminderUtils.calculateYearlyReminderTime(repeatEveryXYears, expected, current);
+        Assert.assertEquals(expected.getMillis(), result);
+    }
+
     @Test
     public void calculateYearlyReminderTime_IsCorrect() throws Exception {
-
-        int currentYear;
-        DateTime oldDateTime;
         DateTime expectedDateTime;
         DateTime currentDateTime;
-        long result;
-
-        int repeatEveryXYears;
-
-        // DateTime to test against
-        currentYear = 2001;
-        repeatEveryXYears = 1;
-        oldDateTime = new DateTime(currentYear, 5, 2, 11, 0);
+        DateTime reminderDate = new DateTime(2001, 5, 2, 11, 0);
 
         // Repeat yearly
+        currentDateTime = reminderDate.minusMonths(2);
+        yearlyReminderHelper(currentDateTime, reminderDate, 1);
 
-        // Testing same year before the reminder date
-        currentDateTime = new DateTime(currentYear, 1, 22, 17, 59);
-        result = ReminderUtils.calculateYearlyReminderTime(repeatEveryXYears, oldDateTime, currentDateTime);
-        Assert.assertEquals(oldDateTime.getMillis(), result);
-
-        currentDateTime = new DateTime(currentYear, 5, 1, 1, 1);
-        result = ReminderUtils.calculateYearlyReminderTime(repeatEveryXYears, oldDateTime, currentDateTime);
-        Assert.assertEquals(oldDateTime.getMillis(), result);
+        currentDateTime.minusDays(1);
+        yearlyReminderHelper(currentDateTime, reminderDate, 1);
 
         // Testing same year after the reminder date
-        expectedDateTime = oldDateTime.plusYears(1);
+        expectedDateTime = reminderDate.plusYears(1);
 
-        currentDateTime = new DateTime(currentYear, 5, 2, 12, 0);
-        result = ReminderUtils.calculateYearlyReminderTime(repeatEveryXYears, oldDateTime, currentDateTime);
-        Assert.assertEquals(expectedDateTime.getMillis(), result);
+        currentDateTime = new DateTime(2001, 5, 2, 12, 0);
+        yearlyReminderHelper(currentDateTime, expectedDateTime, 1);
 
-        currentDateTime = new DateTime(currentYear, 12, 31, 12, 0);
-        result = ReminderUtils.calculateYearlyReminderTime(repeatEveryXYears, oldDateTime, currentDateTime);
-        Assert.assertEquals(expectedDateTime.getMillis(), result);
+        currentDateTime = new DateTime(2001, 12, 31, 12, 0);
+        yearlyReminderHelper(currentDateTime, expectedDateTime, 1);
 
 
         // Testing different years before expected reminder
-        currentDateTime = new DateTime(currentYear + 1, 1, 3, 17, 12, 43, 23);
-        result = ReminderUtils.calculateYearlyReminderTime(repeatEveryXYears, oldDateTime, currentDateTime);
-        Assert.assertEquals(expectedDateTime.getMillis(), result);
+        currentDateTime = new DateTime(2001 + 1, 1, 3, 17, 12, 43, 23);
+        yearlyReminderHelper(currentDateTime, expectedDateTime, 1);
 
-        currentDateTime = new DateTime(currentYear + 2, 1, 3, 17, 12, 43, 23);
-        result = ReminderUtils.calculateYearlyReminderTime(repeatEveryXYears, oldDateTime, currentDateTime);
-        Assert.assertEquals(expectedDateTime.plusYears(1).getMillis(), result);
+        currentDateTime = new DateTime(2001 + 2, 1, 3, 17, 12, 43, 23);
+        yearlyReminderHelper(currentDateTime, expectedDateTime.plusYears(1), 1);
     }
 }

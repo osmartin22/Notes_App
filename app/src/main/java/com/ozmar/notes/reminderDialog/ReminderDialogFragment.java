@@ -521,15 +521,15 @@ public class ReminderDialogFragment extends DialogFragment
         long nextReminderTime = chosenDateTime.getMillis();
 
         if (choices.getRepeatType() == 1) {     // Weekly
-            int currentDayOfWeek = chosenDateTime.getDayOfWeek();
 
-            // Update date to fit with FrequencyChoice
-            // NOTE: choices.getDaysChosen can return NULL but it should never be NULL in this if()
+            assert choices.getDaysChosen() != null;
             List<Integer> daysChosen = choices.getDaysChosen();
-            assert daysChosen != null;
-            Collections.sort(daysChosen);
 
-            nextReminderTime += ReminderUtils.getNextWeeklyReminderTime(daysChosen, currentDayOfWeek, 1);
+            if (!daysChosen.contains(dateTimeNow.getDayOfWeek())) {
+                int currentDayOfWeek = chosenDateTime.getDayOfWeek();
+                Collections.sort(daysChosen);
+                nextReminderTime += ReminderUtils.getNextWeeklyReminderTime(daysChosen, currentDayOfWeek, 1);
+            }
 
         } else if (choices.getRepeatType() == 2) {   // Monthly
             nextReminderTime = ReminderUtils.getNextMonthlyReminder(chosenDateTime, choices);
