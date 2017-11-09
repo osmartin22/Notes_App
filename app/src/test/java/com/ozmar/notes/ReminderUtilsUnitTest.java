@@ -1,6 +1,5 @@
 package com.ozmar.notes;
 
-import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.utils.ReminderUtils;
 
 import junit.framework.Assert;
@@ -116,47 +115,48 @@ public class ReminderUtilsUnitTest {
 
     }
 
-    @Test
-    public void getNextMonthlyReminder_IsCorrect() throws Exception {
-
-    }
-
-    private void forcedWeekDateHelper(DateTime dateTime, int weekNumberToForce, int weeksToAdd) {
-        int currentWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime.getDayOfMonth());
-        long result = ReminderUtils.getForcedWeekDate(dateTime, weekNumberToForce, currentWeekNumber);
+    private void nextMonthlyReminderHelper(DateTime dateTime, int weekNumberToForce, int weeksToAdd) {
+        long result = ReminderUtils.getNextMonthlyReminder(dateTime, weekNumberToForce);
         Assert.assertEquals(dateTime.plusWeeks(weeksToAdd).getMillis(), result);
     }
 
     @Test
-    public void getForcedWeekDate_IsCorrect() throws Exception {
+    public void getNextMonthlyReminder_IsCorrect() throws Exception {
         DateTime dateTime = new DateTime(2017, 11, 1, 12, 0);
 
         // First week of the month
         // 5 weeks possible for starting day
-        for (int i = 1; i < 6; i++) {
-            forcedWeekDateHelper(dateTime, i, i - 1);
+        nextMonthlyReminderHelper(dateTime, 1, 5);
+        for (int i = 2; i < 6; i++) {
+            nextMonthlyReminderHelper(dateTime, i, i - 1);
         }
 
         // 5 weeks not possible for starting day
         dateTime = dateTime.withDayOfMonth(7);
-        for (int i = 1; i < 5; i++) {
-            forcedWeekDateHelper(dateTime, i, i - 1);
+        nextMonthlyReminderHelper(dateTime, 1, 4);
+        for (int i = 2; i < 5; i++) {
+            nextMonthlyReminderHelper(dateTime, i, i - 1);
         }
-        forcedWeekDateHelper(dateTime, 5, 3);
+        nextMonthlyReminderHelper(dateTime, 5, 3);
 
 
         // Third week of the month
         // Test when forceWeekNumber is after currentWeekNumber
         dateTime = dateTime.withDayOfMonth(15); // 5 weeks possible for given day
-        for (int i = 3; i < 6; i++) {
-            forcedWeekDateHelper(dateTime, i, i - 3);
+        nextMonthlyReminderHelper(dateTime, 3, 5);
+        for (int i = 4; i < 6; i++) {
+            nextMonthlyReminderHelper(dateTime, i, i - 3);
         }
 
         // Test when forceWeekNumber is before the currentWeekNumber
-        forcedWeekDateHelper(dateTime, 1, 3);
-        forcedWeekDateHelper(dateTime, 2, 4);
+        nextMonthlyReminderHelper(dateTime, 1, 3);
+        nextMonthlyReminderHelper(dateTime, 2, 4);
 
-        // TODO: Test 4 weeks possible by trying to force a 5 week
+        // Test 4 weeks possible by trying to force a 5 week
+        dateTime = dateTime.withDayOfMonth(18);
+        nextMonthlyReminderHelper(dateTime, 3, 4);
+        nextMonthlyReminderHelper(dateTime, 4, 1);
+        nextMonthlyReminderHelper(dateTime, 5, 1);
     }
 
     @Test
@@ -199,6 +199,7 @@ public class ReminderUtilsUnitTest {
         Assert.assertEquals(expected.getMillis(), result);
     }
 
+    // TODO: Possibly change
     @Test
     public void calculateYearlyReminderTime_IsCorrect() throws Exception {
         DateTime expectedDateTime;

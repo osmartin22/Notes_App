@@ -100,61 +100,22 @@ public class ReminderUtils {
         return nextReminderTime;
     }
 
-    //TODO: Replace FrequencyChoices
-    public static long getNextMonthlyReminder(@NonNull DateTime dateTime, @NonNull FrequencyChoices choices) {
-        long nextReminderTime = dateTime.getMillis();
-
-        int currentWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime.getDayOfMonth());
-        int weekNumberToForce = choices.getMonthWeekToRepeat();
-        int dayOfWeekToForce = choices.getMonthDayOfWeekToRepeat();
-
-        if (currentWeekNumber != weekNumberToForce) {
-
-            // Go to next month with week to force
-            if (weekNumberToForce < currentWeekNumber) {
-
-                // Move to the first desired day of the next month
-                dateTime = dateTime.plusMonths(1).dayOfMonth().withMinimumValue()
-                        .withDayOfWeek(dayOfWeekToForce);
-
-            } else if (weekNumberToForce > currentWeekNumber) {
-                dateTime.withDayOfWeek(dayOfWeekToForce);
-            }
-
-            nextReminderTime = getForcedWeekDate(dateTime, weekNumberToForce, currentWeekNumber);
-
-        } else {
-            // TODO: Change
-            if (dayOfWeekToForce != dateTime.getDayOfWeek()) {
-                nextReminderTime = dateTime.withDayOfWeek(dayOfWeekToForce).getMillis();
-            }
-        }
-
-        return nextReminderTime;
-    }
-
-    public static long getForcedWeekDate(@NonNull DateTime dateTime,
-                                         @IntRange(from = 1, to = 5) int weekNumberToForce,
-                                         @IntRange(from = 1, to = 5) int currentWeekNumber) {
-        int maxDaysInMonth;
-        int newDay;
+    public static long getNextMonthlyReminder(@NonNull DateTime dateTime,
+                                              @IntRange(from = 1, to = 5) int weekNumberToForce) {
         int daysToAdd;
-        boolean fifthWeekPossible;
-
-        newDay = dateTime.getDayOfMonth();
-        maxDaysInMonth = dateTime.dayOfMonth().withMaximumValue().getDayOfMonth();
-        fifthWeekPossible = ReminderUtils.checkIfFifthWeekPossible(maxDaysInMonth, newDay);
+        int newDay = dateTime.getDayOfMonth();
+        int maxDaysInMonth = dateTime.dayOfMonth().withMaximumValue().getDayOfMonth();
+        int currentWeekNumber = FormatUtils.getNthWeekOfMonth(dateTime.getDayOfMonth());
+        boolean fifthWeekPossible = ReminderUtils.checkIfFifthWeekPossible(maxDaysInMonth, newDay);
 
         if (weekNumberToForce == 5 && !fifthWeekPossible) {
             weekNumberToForce = 4;
         }
 
-        if (currentWeekNumber > weekNumberToForce) {
+        if (currentWeekNumber >= weekNumberToForce) {
             if (fifthWeekPossible) {
-                // Add to week five
                 daysToAdd = (5 - currentWeekNumber) * 7;
             } else {
-                // Add to week four
                 daysToAdd = (4 - currentWeekNumber) * 7;
             }
             daysToAdd += weekNumberToForce * 7;
@@ -170,8 +131,9 @@ public class ReminderUtils {
         return dateTime.plusDays(daysToAdd).getMillis();
     }
 
-    // Check if the given day of the week can have occur five times in the given month
-    public static boolean checkIfFifthWeekPossible(int maxDaysInMonth, int day) {
+    // Check if the given day of the week can occur five times in the given month
+    public static boolean checkIfFifthWeekPossible(@IntRange(from = 28, to = 31) int maxDaysInMonth,
+                                                   @IntRange(from = 1, to = 31) int day) {
         boolean possible = false;
         int dayModulo = day % 7;
 

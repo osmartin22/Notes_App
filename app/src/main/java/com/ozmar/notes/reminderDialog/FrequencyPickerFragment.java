@@ -164,8 +164,13 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private void switchToWeekly() {
         if (weeklyHelper == null) {
-            weeklyHelper = new WeeklyLayoutHelper(typeViewSwitcher
-                    .findViewById(R.id.repeatWeeklyLayout), doneButton, mFlagHelper);
+            if (choices != null) {
+                weeklyHelper = new WeeklyLayoutHelper(typeViewSwitcher
+                        .findViewById(R.id.repeatWeeklyLayout), doneButton, choices.getDaysChosen(), mFlagHelper);
+            } else {
+                weeklyHelper = new WeeklyLayoutHelper(typeViewSwitcher
+                        .findViewById(R.id.repeatWeeklyLayout), doneButton, mFlagHelper);
+            }
         }
         showNextView(typeViewSwitcher, weeklyHelper.getMainView());
     }
@@ -222,7 +227,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                     case 1:
                         if (calendarTextView == null) {
                             setUpCalendarTextView();
-                            calendarTextView.setText(FormatUtils.getMonthDayFormatShort(mDateTimeRepeatTo));
+                            calendarTextView.setText(FormatUtils.getMonthDayFormatShort(mDateTimeRepeatTo.plusMonths(1)));
                         }
                         showNextView(bottomViewSwitcher, calendarTextView);
                         break;

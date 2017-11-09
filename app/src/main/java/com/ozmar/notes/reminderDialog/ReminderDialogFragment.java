@@ -107,7 +107,7 @@ public class ReminderDialogFragment extends DialogFragment
         }
 
         View view = View.inflate(getActivity(), R.layout.reminder_dialog_layout, null);
-        preferences = new Preferences(getContext());
+        preferences = new Preferences(mContext);
         setUpSpinnerStrings();
 
         dateSpinner = view.findViewById(R.id.spinnerDate);
@@ -116,16 +116,16 @@ public class ReminderDialogFragment extends DialogFragment
 
         String[] dropDownArray = getResources().getStringArray(R.array.dateXMLArray);
         dropDownArray[2] += " " + FormatUtils.getCurrentDayOfWeek(dateTimeNow.toLocalDate(), 1);
-        dateSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
+        dateSpinnerAdapter = new ReminderAdapter(mContext, android.R.layout.simple_spinner_item,
                 dateArray, dropDownArray, 0);
         dateSpinner.setAdapter(dateSpinnerAdapter);
 
         dropDownArray = getResources().getStringArray(R.array.timeXMLArray);
-        timeSpinnerAdapter = new ReminderAdapter(getContext(), android.R.layout.simple_spinner_item,
+        timeSpinnerAdapter = new ReminderAdapter(mContext, android.R.layout.simple_spinner_item,
                 timeArray, dropDownArray, 0);
         timeSpinner.setAdapter(timeSpinnerAdapter);
 
-        frequencySpinnerAdapter = new ReminderFrequencyAdapter(getContext(),
+        frequencySpinnerAdapter = new ReminderFrequencyAdapter(mContext,
                 R.layout.multi_line_spinner_item, frequencyArray);
         frequencySpinner.setAdapter(frequencySpinnerAdapter);
 
@@ -202,10 +202,10 @@ public class ReminderDialogFragment extends DialogFragment
         dateArray[3] = FormatUtils.getMonthDayFormatLong(dateTimeNow.plusMonths(1));
         dateArray[4] = "Pick A Date...";
 
-        timeArray[0] = FormatUtils.getTimeFormat(getContext(), preferences.getMorningTime());
-        timeArray[1] = FormatUtils.getTimeFormat(getContext(), preferences.getAfternoonTime());
-        timeArray[2] = FormatUtils.getTimeFormat(getContext(), preferences.getEveningTime());
-        timeArray[3] = FormatUtils.getTimeFormat(getContext(), preferences.getNightTime());
+        timeArray[0] = FormatUtils.getTimeFormat(mContext, preferences.getMorningTime());
+        timeArray[1] = FormatUtils.getTimeFormat(mContext, preferences.getAfternoonTime());
+        timeArray[2] = FormatUtils.getTimeFormat(mContext, preferences.getEveningTime());
+        timeArray[3] = FormatUtils.getTimeFormat(mContext, preferences.getNightTime());
         timeArray[4] = "Pick A Time...";
 
         frequencyArray = getResources().getStringArray(R.array.frequencyXMLArrayListItem);
@@ -216,7 +216,7 @@ public class ReminderDialogFragment extends DialogFragment
     // or to x hours into the future
     private void setSpinnerPosition(FrequencyChoices choices) {
         if (choices != null) {
-            frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices, chosenDateTime);
+            frequencyArray[5] = FormatUtils.formatFrequencyText(mContext, choices, chosenDateTime);
             frequencySpinner.setSelection(5);
         }
 
@@ -230,7 +230,7 @@ public class ReminderDialogFragment extends DialogFragment
             timeSpinner.setSelection(4);
             hour = chosenDateTime.getHourOfDay();
             minute = chosenDateTime.getMinuteOfHour();
-            timeArray[4] = FormatUtils.getTimeFormat(getContext(), new LocalTime(chosenDateTime.getMillis()));
+            timeArray[4] = FormatUtils.getTimeFormat(mContext, new LocalTime(chosenDateTime.getMillis()));
         } else {
 
             LocalTime localTime = LocalTime.now();
@@ -246,7 +246,7 @@ public class ReminderDialogFragment extends DialogFragment
                 timeSpinner.setSelection(0);
             } else {
                 timeSpinner.setSelection(4);
-                timeArray[4] = FormatUtils.getTimeFormat(getContext(), futureTime);
+                timeArray[4] = FormatUtils.getTimeFormat(mContext, futureTime);
                 hour = futureTime.getHourOfDay();
                 minute = futureTime.getMinuteOfHour();
             }
@@ -268,30 +268,27 @@ public class ReminderDialogFragment extends DialogFragment
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
-                DateTime futureTime = null;
                 switch (i) {
                     case 0:                                 // Today
-                        year = dateTimeNow.getYear();
-                        month = dateTimeNow.getMonthOfYear();
-                        day = dateTimeNow.getDayOfMonth();
+                        chosenDateTime = dateTimeNow;
                         currentDateSelection = 0;
                         dateArray[4] = "";
                         break;
 
                     case 1:                                 // Tomorrow
-                        futureTime = dateTimeNow.plusDays(1);
+                        chosenDateTime = dateTimeNow.plusDays(1);
                         currentDateSelection = 1;
                         dateArray[4] = "";
                         break;
 
-                    case 2:                                 // Nex Week (7 Days)
-                        futureTime = dateTimeNow.plusDays(7);
+                    case 2:                                 // Nex Week
+                        chosenDateTime = dateTimeNow.plusWeeks(1);
                         currentDateSelection = 2;
                         dateArray[4] = "";
                         break;
 
                     case 3:                                 // Next Month
-                        futureTime = dateTimeNow.plusMonths(1);
+                        chosenDateTime = dateTimeNow.plusMonths(1);
                         currentDateSelection = 3;
                         dateArray[4] = "";
                         break;
@@ -306,10 +303,10 @@ public class ReminderDialogFragment extends DialogFragment
                         break;
                 }
 
-                if (futureTime != null) {
-                    year = futureTime.getYear();
-                    month = futureTime.getMonthOfYear();
-                    day = futureTime.getDayOfMonth();
+                if (chosenDateTime != null) {
+                    year = chosenDateTime.getYear();
+                    month = chosenDateTime.getMonthOfYear();
+                    day = chosenDateTime.getDayOfMonth();
                 }
             }
 
@@ -431,7 +428,7 @@ public class ReminderDialogFragment extends DialogFragment
 
     @Override
     public void onTimePicked(int hour, int minute) {
-        timeArray[4] = FormatUtils.getTimeFormat(getContext(), new LocalTime(hour, minute));
+        timeArray[4] = FormatUtils.getTimeFormat(mContext, new LocalTime(hour, minute));
 
         timeSpinnerAdapter.notifyDataSetChanged();
 
@@ -478,9 +475,9 @@ public class ReminderDialogFragment extends DialogFragment
 
         if (choices != null) {
             if (chosenDateTime == null) {
-                frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices, dateTimeNow);
+                frequencyArray[5] = FormatUtils.formatFrequencyText(mContext, choices, dateTimeNow);
             } else {
-                frequencyArray[5] = FormatUtils.formatFrequencyText(getContext(), choices, chosenDateTime);
+                frequencyArray[5] = FormatUtils.formatFrequencyText(mContext, choices, chosenDateTime);
             }
 
             frequencySpinnerAdapter.notifyDataSetChanged();
@@ -532,10 +529,32 @@ public class ReminderDialogFragment extends DialogFragment
             }
 
         } else if (choices.getRepeatType() == 2) {   // Monthly
-            nextReminderTime = ReminderUtils.getNextMonthlyReminder(chosenDateTime, choices);
+
+            int l = (choices.getMonthWeekToRepeat()) * 7;
+            int m = choices.getMonthDayOfWeekToRepeat() - 1;
+            int n = l - m;
+
+            // TODO: Fix if() statement (day chosen occurs before the monthly repeat
+            // else() statement working as expected
+            int dayOfRepeat = ((choices.getMonthWeekToRepeat() - 1) * 7) - choices.getMonthDayOfWeekToRepeat() - 1;
+            if (dateTimeNow.getDayOfMonth() < dayOfRepeat) {
+                nextReminderTime = chosenDateTime.withDayOfMonth(dayOfRepeat).getMillis();
+            }
+
+//            int currentWeekNumber = FormatUtils.getNthWeekOfMonth(dateTimeNow.getDayOfMonth());
+//            if (currentWeekNumber == choices.getMonthWeekToRepeat() &&
+//                    dateTimeNow.getDayOfWeek() < choices.getMonthDayOfWeekToRepeat()) {
+//
+//                nextReminderTime = chosenDateTime.withDayOfWeek(dateTimeNow.getDayOfWeek()).getMillis();
+//
+//            }
+            else {
+                chosenDateTime = chosenDateTime.withDayOfWeek(choices.getMonthDayOfWeekToRepeat());
+                nextReminderTime = ReminderUtils.getNextMonthlyReminder(chosenDateTime,
+                        choices.getMonthWeekToRepeat());
+            }
         }
 
         return new DateTime(nextReminderTime);
     }
-
 }
