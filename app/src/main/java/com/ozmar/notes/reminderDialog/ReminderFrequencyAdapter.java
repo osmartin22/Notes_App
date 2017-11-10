@@ -15,9 +15,9 @@ import com.ozmar.notes.R;
 
 public class ReminderFrequencyAdapter extends ArrayAdapter<String> implements SpinnerAdapter {
 
-    private LayoutInflater inflater;
-    private String[] listItems;
-    private String[] dropDownItems;
+    private final LayoutInflater inflater;
+    private final String[] listItems;
+    private final String[] dropDownItems;
     private TextView mTextView;
 
     public ReminderFrequencyAdapter(Context context, int resource, String[] listItems) {

@@ -25,7 +25,7 @@ public class FormatUtilsUnitTest {
     private static final int SATURDAY = 6;
     private static final int SUNDAY = 7;
 
-    private DateTime mDateTime = DateTime.now();
+    private final DateTime mDateTime = DateTime.now();
 
     @Test
     public void getMonthDayFormatShort_IsCorrect() throws Exception {

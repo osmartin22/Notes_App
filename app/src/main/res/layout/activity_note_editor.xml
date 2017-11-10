@@ -50,7 +50,7 @@
                 android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
                 android:paddingBottom="16dp"
                 android:textAlignment="textStart"
-                android:textSize="@dimen/landContentTextSize" />
+                android:textSize="@dimen/layoutContentTextSize" />
 
             <android.support.constraint.ConstraintLayout
                 android:id="@+id/noteDetails"

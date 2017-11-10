@@ -571,7 +571,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)});
     }
 
-    @NonNull
+    @Nullable
     public FrequencyChoices getFrequencyChoice(int id) {
         String selectQuery = "SELECT * FROM " + TABLE_REMINDERS + " WHERE ROWID = " + id;
         SQLiteDatabase db = this.getReadableDatabase();

@@ -5,7 +5,6 @@
     android:id="@+id/drawerLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/mainActivityBackground"
     android:statusBarColor="@color/colorPrimaryDark"
     tools:context="com.ozmar.notes.MainActivity">
 
@@ -35,8 +34,7 @@
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/recyclerViewMargin"
-            android:layout_marginStart="@dimen/recyclerViewMargin"
+            android:background="@color/mainActivityBackground"
             android:scrollbars="vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 

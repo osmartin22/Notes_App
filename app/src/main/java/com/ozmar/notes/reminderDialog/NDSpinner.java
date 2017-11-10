@@ -22,6 +22,7 @@ public class NDSpinner extends AppCompatSpinner {
         super.setSelection(position, animate);
         if (sameSelected) {
             // Spinner does not call the OnItemSelectedListener if the same item is selected, so do it manually now
+            //noinspection ConstantConditions
             getOnItemSelectedListener().onItemSelected(this, getSelectedView(), position, getSelectedItemId());
         }
     }
@@ -32,6 +33,7 @@ public class NDSpinner extends AppCompatSpinner {
         super.setSelection(position);
         if (sameSelected) {
             // Spinner does not call the OnItemSelectedListener if the same item is selected, so do it manually now
+            //noinspection ConstantConditions
             getOnItemSelectedListener().onItemSelected(this, getSelectedView(), position, getSelectedItemId());
         }
     }

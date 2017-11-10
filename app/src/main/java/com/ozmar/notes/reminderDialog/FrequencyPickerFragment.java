@@ -57,18 +57,18 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private int year, month, day;
 
-    DateTime mDateTimeRepeatTo;
+    private DateTime mDateTimeRepeatTo;
     private FrequencyChoices choices;
     private FrequencyPickerFlagHelper mFlagHelper;
 
-    onFrequencyPickedListener myCallback;
+    private onFrequencyPickedListener myCallback;
 
 
     public interface onFrequencyPickedListener {
         void onFrequencyPicked(FrequencyChoices choices);
     }
 
-    public void onAttachParentFragment(Fragment fragment) {
+    private void onAttachParentFragment(Fragment fragment) {
         try {
             myCallback = (onFrequencyPickedListener) fragment;
         } catch (ClassCastException e) {

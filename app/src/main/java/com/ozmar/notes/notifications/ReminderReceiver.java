@@ -56,27 +56,29 @@ public class ReminderReceiver extends BroadcastReceiver {
         boolean onEventsSatisfied = false;
         boolean onDesiredEndDateSatisfied = false;
 
-        // User specified reminder to occur for X events
-        if (choices.getRepeatEvents() > 0) {
-            int eventsOccurred = db.getEventsOccurred(reminderId) + 1;  // Add 1 for the event that just occurred
-            db.updateEventsOccurred(reminderId, eventsOccurred);
-            onEventsSatisfied = eventsOccurred == choices.getRepeatEvents();
+        if (choices != null) {
+            // User specified reminder to occur for X events
+            if (choices.getRepeatEvents() > 0) {
+                int eventsOccurred = db.getEventsOccurred(reminderId) + 1;  // Add 1 for the event that just occurred
+                db.updateEventsOccurred(reminderId, eventsOccurred);
+                onEventsSatisfied = eventsOccurred == choices.getRepeatEvents();
 
-            // User specified an end date
-        } else if (choices.getRepeatToDate() > 0) {
-            onDesiredEndDateSatisfied = choices.getRepeatToDate() < System.currentTimeMillis();
-        }
-
-
-        // Only one of the booleans can be true at any time
-        if (!(onEventsSatisfied || onDesiredEndDateSatisfied)) {
-            nextReminderTime = calculateNextReminderTime(choices, currentReminderTime);
-
-            if (nextReminderTime > currentReminderTime) {
-                db.updateNextReminderTime(reminderId, nextReminderTime);
+                // User specified an end date
+            } else if (choices.getRepeatToDate() > 0) {
+                onDesiredEndDateSatisfied = choices.getRepeatToDate() < System.currentTimeMillis();
             }
-        }
 
+
+            // Only one of the booleans can be true at any time
+            if (!(onEventsSatisfied || onDesiredEndDateSatisfied)) {
+                nextReminderTime = calculateNextReminderTime(choices, currentReminderTime);
+
+                if (nextReminderTime > currentReminderTime) {
+                    db.updateNextReminderTime(reminderId, nextReminderTime);
+                }
+            }
+
+        }
         return nextReminderTime;
     }
 

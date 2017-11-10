@@ -21,13 +21,13 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
     private final WeakReference<Toolbar> weakToolbar;
     private final WeakReference<FloatingActionButton> weakFab;
 
-    private DatabaseHandler db;
-    private MultiSelectFlagHelper flagHelper;
-    private MenuItemHelper itemHelper;
-    private UndoBuffer buffer;
-    private int listUsed;
-    private NotesAdapter adapter;
-    private int bufferInUse;
+    private final DatabaseHandler db;
+    private final MultiSelectFlagHelper flagHelper;
+    private final MenuItemHelper itemHelper;
+    private final UndoBuffer buffer;
+    private final int listUsed;
+    private final NotesAdapter adapter;
+    private final int bufferInUse;
 
     public DoMenuActionAsync(DatabaseHandler db, MultiSelectFlagHelper flagHelper, MenuItemHelper itemHelper,
                              UndoBuffer buffer, NotesAdapter adapter, Toolbar toolbar, FloatingActionButton fab) {
@@ -41,11 +41,6 @@ public class DoMenuActionAsync extends AsyncTask<Void, Void, Void> {
 
         this.weakToolbar = new WeakReference<>(toolbar);
         this.weakFab = new WeakReference<>(fab);
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
     }
 
     @Override

@@ -30,7 +30,7 @@ public class ReminderDialogFragment extends DialogFragment
         implements DatePickerFragment.OnDatePickedListener, TimePickerFragment.OnTimePickedListener,
         FrequencyPickerFragment.onFrequencyPickedListener {
 
-    private DateTime dateTimeNow = DateTime.now();
+    private final DateTime dateTimeNow = DateTime.now();
     private DateTime chosenDateTime;
     private int year;
     private int month;
@@ -42,8 +42,8 @@ public class ReminderDialogFragment extends DialogFragment
     private NDSpinner timeSpinner;
     private NDSpinner frequencySpinner;
 
-    private String[] dateArray = new String[5];
-    private String[] timeArray = new String[5];
+    private final String[] dateArray = new String[5];
+    private final String[] timeArray = new String[5];
     private String[] frequencyArray = new String[6];
 
     private ReminderAdapter timeSpinnerAdapter;

@@ -36,11 +36,6 @@ public class NavMenuAsync extends AsyncTask<Void, Void, List<SingleNote>> {
     }
 
     @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-    }
-
-    @Override
     protected List<SingleNote> doInBackground(Void... voids) {
         switch (item.getItemId()) {
             case R.id.all_notes_drawer:

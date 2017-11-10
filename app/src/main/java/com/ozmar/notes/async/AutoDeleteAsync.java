@@ -6,17 +6,12 @@ import com.ozmar.notes.DatabaseHandler;
 
 
 public class AutoDeleteAsync extends AsyncTask<Void, Void, Void> {
-    private DatabaseHandler db;
-    private int days;
+    private final DatabaseHandler db;
+    private final int days;
 
     public AutoDeleteAsync(DatabaseHandler db, int days) {
         this.db = db;
         this.days = days;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
     }
 
     @Override

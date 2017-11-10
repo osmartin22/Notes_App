@@ -8,9 +8,9 @@ import org.joda.time.LocalTime;
 
 public class Preferences {
 
-    private Context context;
+    private final Context context;
+    private final SharedPreferences preferences;
     private SharedPreferences.Editor editor;
-    private SharedPreferences preferences;
 
     public Preferences(Context context) {
         this.context = context;

@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     static DatabaseHandler db;
 
     private ActionMode actionMode;
-    private UndoBuffer buffer = new UndoBuffer();
+    private final UndoBuffer buffer = new UndoBuffer();
 
     private int layoutChoice;
     private MenuItem layoutItem;
@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public int swapLayout() {
+    private int swapLayout() {
         switch (layoutChoice) {
             case 0:
             default:
@@ -213,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     } // onBackPressed() end
 
-    private ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
+    private final ActionMode.Callback actionModeCallback = new ActionMode.Callback() {
         boolean menuItemPressed = false;
 
         private void removeViews(ActionMode mode, MenuItem item) {
@@ -221,11 +221,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
             showSnackBar(item, 0);
             mode.finish();
-        }
-
-        @Override
-        public int hashCode() {
-            return super.hashCode();
         }
 
         @Override

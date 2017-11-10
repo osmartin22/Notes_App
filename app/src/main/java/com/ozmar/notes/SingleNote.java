@@ -80,20 +80,17 @@ public class SingleNote implements Parcelable {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(this.getClass().getSimpleName()).append("[ ");
-        sb.append("Id: ").append(_id);
-        sb.append(",    Title: ").append(_title);
-        sb.append(",    Content: ").append(_content);
-        sb.append(",    Favorite: ").append(_favorite);
-        sb.append(",    TimeCreated: ").append(_timeCreated);
-        sb.append(",    TimeModified: ").append(_timeModified);
-        sb.append(",    ReminderTime: ").append(_nextReminderTime);
-        sb.append(",    ReminderId: ").append(_reminderId);
-        sb.append(",    HasFrequencyChoice: ").append(_hasFrequencyChoices);
-        sb.append(" ]");
-
-        return sb.toString();
+        return this.getClass().getSimpleName() + "[ " +
+                "Id: " + _id +
+                ",    Title: " + _title +
+                ",    Content: " + _content +
+                ",    Favorite: " + _favorite +
+                ",    TimeCreated: " + _timeCreated +
+                ",    TimeModified: " + _timeModified +
+                ",    ReminderTime: " + _nextReminderTime +
+                ",    ReminderId: " + _reminderId +
+                ",    HasFrequencyChoice: " + _hasFrequencyChoices +
+                " ]";
     }
 
     public SingleNote(Parcel in) {

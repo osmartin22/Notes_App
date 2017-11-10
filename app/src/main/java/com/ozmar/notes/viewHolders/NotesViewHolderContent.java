@@ -8,8 +8,8 @@ import com.ozmar.notes.R;
 
 
 public class NotesViewHolderContent extends RecyclerView.ViewHolder{
-    public TextView noteContent;
-    public TextView reminderText;
+    public final TextView noteContent;
+    public final TextView reminderText;
 
     public NotesViewHolderContent(View itemView) {
         super(itemView);

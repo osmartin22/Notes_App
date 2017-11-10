@@ -6,14 +6,10 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
-/**
- * Created by ozmar on 9/27/2017.
- */
 
 public class RecyclerItemListener implements RecyclerView.OnItemTouchListener {
 
-    private RecyclerTouchListener listener;
-    private GestureDetector gd;
+    private final GestureDetector gd;
 
     public interface RecyclerTouchListener {
         void onClickItem(View view, int position);
@@ -23,7 +19,6 @@ public class RecyclerItemListener implements RecyclerView.OnItemTouchListener {
 
     public RecyclerItemListener(Context context, final RecyclerView rv,
                                 final RecyclerTouchListener listener) {
-        this.listener = listener;
         gd = new GestureDetector(context,
                 new GestureDetector.SimpleOnGestureListener() {
                     @Override

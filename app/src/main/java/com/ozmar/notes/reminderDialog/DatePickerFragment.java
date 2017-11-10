@@ -2,6 +2,7 @@ package com.ozmar.notes.reminderDialog;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -16,7 +17,8 @@ import org.joda.time.DateTime;
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener {
 
-    OnDatePickedListener myCallback;
+    private Context mContext;
+    private OnDatePickedListener myCallback;
 
     public interface OnDatePickedListener {
         void onDatePicked(int year, int month, int day);
@@ -24,7 +26,8 @@ public class DatePickerFragment extends DialogFragment
         void onDateCancel();
     }
 
-    public void onAttachParentFragment(Fragment fragment) {
+    private void onAttachParentFragment(Fragment fragment) {
+        mContext = getActivity();
         try {
             myCallback = (OnDatePickedListener) fragment;
         } catch (ClassCastException e) {
@@ -53,11 +56,21 @@ public class DatePickerFragment extends DialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         DateTime dateTime = DateTime.now();
         Bundle bundle = getArguments();
-        int year = bundle.getInt("Year", dateTime.getYear());
-        int month = bundle.getInt("Month", dateTime.getMonthOfYear() - 1);
-        int day = bundle.getInt("Day", dateTime.getDayOfMonth());
+        int year;
+        int month;
+        int day;
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(getActivity(), this, year, month, day);
+        if (bundle != null) {
+            year = bundle.getInt("Year", dateTime.getYear());
+            month = bundle.getInt("Month", dateTime.getMonthOfYear() - 1);
+            day = bundle.getInt("Day", dateTime.getDayOfMonth());
+        } else {
+            year = dateTime.getYear();
+            month = dateTime.getMonthOfYear() - 1;
+            day = dateTime.getDayOfMonth();
+        }
+
+        DatePickerDialog datePickerDialog = new DatePickerDialog(mContext, this, year, month, day);
         datePickerDialog.getDatePicker().setMinDate(dateTime.getMillis());
 
         return datePickerDialog;

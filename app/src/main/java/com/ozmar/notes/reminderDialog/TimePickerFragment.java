@@ -17,7 +17,7 @@ import org.joda.time.LocalTime;
 public class TimePickerFragment extends DialogFragment
         implements TimePickerDialog.OnTimeSetListener {
 
-    OnTimePickedListener myCallback;
+    private OnTimePickedListener myCallback;
 
     public interface OnTimePickedListener {
         void onTimePicked(int hour, int minute);
@@ -25,7 +25,7 @@ public class TimePickerFragment extends DialogFragment
         void onTimeCancel();
     }
 
-    public void onAttachToParentFragment(Fragment fragment) {
+    private void onAttachToParentFragment(Fragment fragment) {
         try {
             myCallback = (OnTimePickedListener) fragment;
         } catch (ClassCastException e) {
@@ -53,8 +53,15 @@ public class TimePickerFragment extends DialogFragment
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Bundle bundle = getArguments();
         LocalTime time = LocalTime.now().plusMinutes(1);
-        int hour = bundle.getInt("Hour", time.getHourOfDay());
-        int minute = bundle.getInt("Minute", time.getMinuteOfHour());
+        int hour;
+        int minute;
+        if (bundle != null) {
+            hour = bundle.getInt("Hour", time.getHourOfDay());
+            minute = bundle.getInt("Minute", time.getMinuteOfHour());
+        } else {
+            hour = time.getHourOfDay();
+            minute = time.getMinuteOfHour();
+        }
 
         return new TimePickerDialog(getActivity(), this, hour, minute, DateFormat.is24HourFormat(getActivity()));
     }

@@ -22,7 +22,7 @@ import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private Context context;
+    private final Context context;
     private int listUsed = 0;
 
     private final List<SingleNote> notes;

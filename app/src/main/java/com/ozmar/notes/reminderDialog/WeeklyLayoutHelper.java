@@ -25,7 +25,7 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
     private final ToggleButton friday;
     private final ToggleButton saturday;
     private int buttonsChecked = 0;
-    private FrequencyPickerFlagHelper mFlagHelper;
+    private final FrequencyPickerFlagHelper mFlagHelper;
 
     public WeeklyLayoutHelper(View view, Button doneButton, FrequencyPickerFlagHelper flagHelper) {
         this(view, doneButton, null, flagHelper);

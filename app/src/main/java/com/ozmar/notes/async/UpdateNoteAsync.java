@@ -11,11 +11,11 @@ import java.util.List;
 
 public class UpdateNoteAsync extends AsyncTask<Void, Void, Void> {
 
-    private DatabaseHandler db;
-    private List<SingleNote> list;
-    private SingleNote note;
-    private int listUsed;
-    private NoteChanges changes;
+    private final DatabaseHandler db;
+    private final List<SingleNote> list;
+    private final SingleNote note;
+    private final int listUsed;
+    private final NoteChanges changes;
 
     public UpdateNoteAsync(DatabaseHandler db, List<SingleNote> list, SingleNote note,
                            int listUsed, NoteChanges changes) {
@@ -24,11 +24,6 @@ public class UpdateNoteAsync extends AsyncTask<Void, Void, Void> {
         this.note = note;
         this.listUsed = listUsed;
         this.changes = changes;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
     }
 
     @Override

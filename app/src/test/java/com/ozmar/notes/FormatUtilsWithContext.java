@@ -22,8 +22,8 @@ import java.util.List;
 public class FormatUtilsWithContext {
 
     // Context is created with a 24 hour format
-    private Context mContext = RuntimeEnvironment.application.getApplicationContext();
-    private DateTime mDateTime = DateTime.now();
+    private final Context mContext = RuntimeEnvironment.application.getApplicationContext();
+    private final DateTime mDateTime = DateTime.now();
 
     @Test
     public void lastUpdated_IsCorrect() throws Exception {

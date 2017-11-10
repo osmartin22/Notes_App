@@ -16,7 +16,7 @@ import com.ozmar.notes.R;
 
 public class NotificationHelper {
 
-    public static void createChannel(Context context) {
+    private static void createChannel(Context context) {
         if (Build.VERSION.SDK_INT >= 26) {
             NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -47,7 +47,7 @@ public class NotificationHelper {
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context,
                 context.getString(R.string.reminderChannelId))
 
-                .setSmallIcon(R.drawable.ic_notes_drawer)
+                .setSmallIcon(R.drawable.ic_notification_icon)
                 .setContentTitle(title)
                 .setContentText(content)
                 .setDefaults(NotificationCompat.DEFAULT_ALL)

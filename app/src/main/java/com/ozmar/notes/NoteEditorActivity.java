@@ -28,6 +28,7 @@ import static com.ozmar.notes.MainActivity.db;
 
 // TODO: When deleting an entire note, make sure the reminder is cancelled if it exists
 
+// TODO: Fix bug where setting a favorite note to not favorite is not saved correctly
 
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener, NoteEditorView {
@@ -267,6 +268,7 @@ public class NoteEditorActivity extends AppCompatActivity
         return false;
     } // onOptionsItemSelected() end
 
+    @SuppressWarnings("WeakerAccess")
     public void addReminder(View view) {
         ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(frequencyChoices, reminderTime);
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
@@ -340,9 +342,9 @@ public class NoteEditorActivity extends AppCompatActivity
         if (note.get_reminderId() != -1) {
 
             if (note.hasFrequencyChoices()) {
+                frequencyChoices = db.getFrequencyChoice(note.get_reminderId());
                 reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
                         0, 0, 0);
-                frequencyChoices = db.getFrequencyChoice(note.get_reminderId());
 
             } else {
                 reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
@@ -380,11 +382,6 @@ public class NoteEditorActivity extends AppCompatActivity
         ReminderManager.cancel(getApplicationContext(), noteId);
     }
 
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
 
     @Override
     protected void onDestroy() {

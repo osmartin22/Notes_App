@@ -10,11 +10,11 @@ import java.util.List;
 
 public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
 
-    private DatabaseHandler db;
-    private List<SingleNote> list;
-    private SingleNote note;
-    private int listUsed;
-    private int action;
+    private final DatabaseHandler db;
+    private final List<SingleNote> list;
+    private final SingleNote note;
+    private final int listUsed;
+    private final int action;
 
     public BasicDBAsync(DatabaseHandler db, List<SingleNote> list, SingleNote note, int listUsed, int action) {
         this.db = db;
@@ -77,11 +77,6 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
         } else {
             db.deleteNoteFromRecycleBin(note.get_id());
         }
-    }
-
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
     }
 
     @Override

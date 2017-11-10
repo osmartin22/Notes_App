@@ -12,8 +12,8 @@ import java.util.List;
 
 public class MenuItemHelper {
 
-    private Context context;
-    private DatabaseHandler db;
+    private final Context context;
+    private final DatabaseHandler db;
 
     public MenuItemHelper(Context context, DatabaseHandler db) {
         this.context = context;

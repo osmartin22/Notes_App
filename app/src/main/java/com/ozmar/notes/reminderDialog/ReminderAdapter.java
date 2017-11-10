@@ -15,10 +15,10 @@ import com.ozmar.notes.R;
 
 public class ReminderAdapter extends ArrayAdapter<String> implements SpinnerAdapter {
 
-    private int spinnerStyle;
-    private LayoutInflater inflater;
-    private String[] dropDownItems;
-    private String[] listItems;
+    private final int spinnerStyle;
+    private final LayoutInflater inflater;
+    private final String[] dropDownItems;
+    private final String[] listItems;
 
     public ReminderAdapter(Context context, int textViewResourceId, String[] listItems, String[] dropDownItems, int spinnerStyle) {
         super(context, textViewResourceId, listItems);

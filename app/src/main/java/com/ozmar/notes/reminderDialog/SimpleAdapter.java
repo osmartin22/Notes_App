@@ -14,19 +14,13 @@ import com.ozmar.notes.R;
 
 public class SimpleAdapter extends ArrayAdapter<String> {
 
-    private String[] dropDownItems;
-    private LayoutInflater inflater;
+    private final String[] dropDownItems;
+    private final LayoutInflater inflater;
 
     public SimpleAdapter(Context context, int textViewResourceId, String[] listItems) {
         super(context, textViewResourceId, listItems);
         this.dropDownItems = context.getResources().getStringArray(R.array.bottomArrayDropDown);
         this.inflater = LayoutInflater.from(context);
-    }
-    
-    @NonNull
-    @Override
-    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        return super.getView(position, convertView, parent);
     }
 
     @Override

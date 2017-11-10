@@ -32,14 +32,6 @@
     <!-- MenuItem names for MainActivity -->
     <string name="layoutManager">Change Layout</string>
 
-
-    <!-- String array used for checking what changed in the note -->
-    <string-array name="noteChangesArray">
-        <item>noteModified</item>
-        <item>newNote</item>
-        <item>favoriteChanged</item>
-    </string-array>
-
     <!-- String array for how to update RecyclerView after NoteEditorActivity finishes -->
     <string-array name="noteResultArray">
         <item>noteModified</item>       <!-- Update note in RecyclerView-->
@@ -152,6 +144,8 @@
     <string name="everyString">Every</string>
     <string name="xDayEditText">1</string>
     <string name="doneButton">DONE</string>
+    <string name="xEventsEditText">1</string>
+    <string name="eventsTextView">event</string>
 
     <plurals name="day">
         <item quantity="one">day</item>
