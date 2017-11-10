@@ -530,28 +530,12 @@ public class ReminderDialogFragment extends DialogFragment
 
         } else if (choices.getRepeatType() == 2) {   // Monthly
 
-            int l = (choices.getMonthWeekToRepeat()) * 7;
-            int m = choices.getMonthDayOfWeekToRepeat() - 1;
-            int n = l - m;
+            int days = ReminderUtils.nthWeekDayOfMonth(chosenDateTime.toLocalDate(),
+                    choices.getMonthDayOfWeekToRepeat(), choices.getMonthWeekToRepeat());
 
-            // TODO: Fix if() statement (day chosen occurs before the monthly repeat
-            // else() statement working as expected
-            int dayOfRepeat = ((choices.getMonthWeekToRepeat() - 1) * 7) - choices.getMonthDayOfWeekToRepeat() - 1;
-            if (dateTimeNow.getDayOfMonth() < dayOfRepeat) {
-                nextReminderTime = chosenDateTime.withDayOfMonth(dayOfRepeat).getMillis();
-            }
-
-//            int currentWeekNumber = FormatUtils.getNthWeekOfMonth(dateTimeNow.getDayOfMonth());
-//            if (currentWeekNumber == choices.getMonthWeekToRepeat() &&
-//                    dateTimeNow.getDayOfWeek() < choices.getMonthDayOfWeekToRepeat()) {
-//
-//                nextReminderTime = chosenDateTime.withDayOfWeek(dateTimeNow.getDayOfWeek()).getMillis();
-//
-//            }
-            else {
-                chosenDateTime = chosenDateTime.withDayOfWeek(choices.getMonthDayOfWeekToRepeat());
-                nextReminderTime = ReminderUtils.getNextMonthlyReminder(chosenDateTime,
-                        choices.getMonthWeekToRepeat());
+            if (chosenDateTime.getDayOfMonth() != days) {
+                nextReminderTime = ReminderUtils.getNextMonthlyReminder(chosenDateTime, choices.getRepeatEvery(),
+                        choices.getMonthWeekToRepeat(), choices.getMonthDayOfWeekToRepeat());
             }
         }
 

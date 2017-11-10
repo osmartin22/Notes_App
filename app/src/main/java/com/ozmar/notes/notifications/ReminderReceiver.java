@@ -43,6 +43,9 @@ public class ReminderReceiver extends BroadcastReceiver {
 
     // TODO: Reset to zero when note reminder is modified in anyway
 
+    // TODO: Check if repeatEvents, or repeatToDate has not passed
+    // If not, calculate next reminder
+    // Check again if repeatToDate will be violated with the new reminder time
     public long getNextReminderTime(@NonNull Context context, int reminderId) {
         DatabaseHandler db = new DatabaseHandler(context);
 
@@ -78,12 +81,6 @@ public class ReminderReceiver extends BroadcastReceiver {
     }
 
 
-    // TODO: Put FormatUtils strings into resources
-    // TODO: Modify MonthlyLayoutHelper to accept and return the nth week of the month
-    // If the nth month of the week passed is 0, calculate it
-    // On subsequent calls to restore the reminder, it should not have to calculate the nth week
-    // and just use the passed value instead
-
     // TODO: Possible optimization is to not immediately set an alarm manager when a new reminder is created
     // A reminder 2 months away does not need to be created.
     // Can have a separate alarm that runs every week that sets up any reminders that
@@ -94,27 +91,37 @@ public class ReminderReceiver extends BroadcastReceiver {
         DateTime dateTimeNow = DateTime.now();
         DateTime dateTimeReminder = new DateTime(currentReminderTime);
 
+        // TODO: Decide which DateTime to use
         switch (choices.getRepeatType()) {
             case 0:     // Daily
-                nextReminderTime = ReminderUtils.calculateDailyReminderTime(choices.getRepeatEvery(),
+                nextReminderTime = ReminderUtils.getNextDailyReminderTime(choices.getRepeatEvery(),
                         dateTimeNow);
                 break;
 
             case 1:     // Weekly
                 assert choices.getDaysChosen() != null;
-                nextReminderTime = ReminderUtils.calculateWeeklyReminderTime(choices.getRepeatEvery(),
-                        choices.getDaysChosen(), dateTimeReminder);
+                nextReminderTime = dateTimeReminder.getMillis() +
+                        ReminderUtils.getNextWeeklyReminderTime(choices.getDaysChosen(),
+                                dateTimeReminder.getDayOfWeek(), choices.getRepeatEvery());
                 break;
 
             case 2:     // Monthly
-                // TODO: Get week number for second option (i.e. 3rd week of the month)
-                nextReminderTime = ReminderUtils.calculateMonthlyReminderTime(choices, dateTimeReminder,
-                        dateTimeNow);
+                if (choices.getMonthRepeatType() != 0) {
+                    nextReminderTime = dateTimeReminder.getMillis() +
+                            ReminderUtils.getNextMonthlyReminder(dateTimeReminder, choices.getRepeatEvery(),
+                                    choices.getMonthWeekToRepeat(), choices.getMonthDayOfWeekToRepeat());
+                } else {
+                    nextReminderTime = dateTimeReminder.plusMonths(1).getMillis();
+                }
                 break;
 
             case 3:     // Yearly
-                nextReminderTime = ReminderUtils.calculateYearlyReminderTime(choices.getRepeatEvery(),
-                        dateTimeReminder, dateTimeNow);
+//                nextReminderTime = ReminderUtils.calculateYearlyReminderTime(choices.getRepeatEvery(),
+//                        dateTimeReminder, dateTimeNow);
+
+                nextReminderTime = ReminderUtils.calculateYearlyReminderTime(dateTimeReminder,
+                        choices.getRepeatEvery());
+
                 break;
         }
 
