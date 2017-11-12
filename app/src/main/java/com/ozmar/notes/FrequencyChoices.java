@@ -2,6 +2,7 @@ package com.ozmar.notes;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.IntRange;
 import android.support.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public final class FrequencyChoices implements Parcelable {
 
 
     // Constructor for presets
-    public FrequencyChoices(int repeatType, List<Integer> daysChosen) {
+    public FrequencyChoices(@IntRange(from = 0, to = 4)int repeatType, @Nullable List<Integer> daysChosen) {
         this.repeatType = repeatType;
         this.repeatEvery = 1;
         this.repeatForever = 1;
@@ -41,8 +42,11 @@ public final class FrequencyChoices implements Parcelable {
         }
     }
 
-    public FrequencyChoices(int repeatType, int repeatEvery, int repeatForever, long repeatToDate, int repeatEvents,
-                            int monthRepeatType, int monthWeekToRepeat, int monthDayOfWeekToRepeat, List<Integer> daysChosen) {
+    public FrequencyChoices(@IntRange(from = 0, to = 4)int repeatType, int repeatEvery,
+                            @IntRange(from = 0, to = 1)int repeatForever, long repeatToDate, int repeatEvents,
+                            @IntRange(from = -1, to = 1)int monthRepeatType,
+                            @IntRange(from = 0, to = 5)int monthWeekToRepeat,
+                            @IntRange(from = 0, to = 7)int monthDayOfWeekToRepeat, @Nullable List<Integer> daysChosen) {
         this.repeatType = repeatType;
         this.repeatEvery = repeatEvery;
         this.repeatForever = repeatForever;

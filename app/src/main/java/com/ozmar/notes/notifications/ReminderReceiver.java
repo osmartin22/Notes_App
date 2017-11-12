@@ -38,11 +38,6 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
     }
 
-
-    // TODO: Add eventsAlreadyOccurred to database to handle events that should only occur X times
-
-    // TODO: Reset to zero when note reminder is modified in anyway
-
     // TODO: Check if repeatEvents, or repeatToDate has not passed
     // If not, calculate next reminder
     // Check again if repeatToDate will be violated with the new reminder time
@@ -87,17 +82,17 @@ public class ReminderReceiver extends BroadcastReceiver {
     // A reminder 2 months away does not need to be created.
     // Can have a separate alarm that runs every week that sets up any reminders that
     // will occur in that week
+
+
     private long calculateNextReminderTime(FrequencyChoices choices, long currentReminderTime) {
         long nextReminderTime = 0;
 
-        DateTime dateTimeNow = DateTime.now();
         DateTime dateTimeReminder = new DateTime(currentReminderTime);
 
-        // TODO: Decide which DateTime to use
         switch (choices.getRepeatType()) {
             case 0:     // Daily
                 nextReminderTime = ReminderUtils.getNextDailyReminderTime(choices.getRepeatEvery(),
-                        dateTimeNow);
+                        dateTimeReminder);
                 break;
 
             case 1:     // Weekly
@@ -109,18 +104,15 @@ public class ReminderReceiver extends BroadcastReceiver {
 
             case 2:     // Monthly
                 if (choices.getMonthRepeatType() != 0) {
-                    nextReminderTime = dateTimeReminder.getMillis() +
-                            ReminderUtils.getNextMonthlyReminder(dateTimeReminder, choices.getRepeatEvery(),
-                                    choices.getMonthWeekToRepeat(), choices.getMonthDayOfWeekToRepeat());
+                    nextReminderTime = ReminderUtils.getNextMonthlyReminder(dateTimeReminder,
+                            choices.getRepeatEvery(), choices.getMonthWeekToRepeat(),
+                            choices.getMonthDayOfWeekToRepeat());
                 } else {
                     nextReminderTime = dateTimeReminder.plusMonths(1).getMillis();
                 }
                 break;
 
             case 3:     // Yearly
-//                nextReminderTime = ReminderUtils.calculateYearlyReminderTime(choices.getRepeatEvery(),
-//                        dateTimeReminder, dateTimeNow);
-
                 nextReminderTime = ReminderUtils.calculateYearlyReminderTime(dateTimeReminder,
                         choices.getRepeatEvery());
 
@@ -130,6 +122,3 @@ public class ReminderReceiver extends BroadcastReceiver {
         return nextReminderTime;
     }
 }
-
-
-

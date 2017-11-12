@@ -530,12 +530,14 @@ public class ReminderDialogFragment extends DialogFragment
 
         } else if (choices.getRepeatType() == 2) {   // Monthly
 
-            int days = ReminderUtils.nthWeekDayOfMonth(chosenDateTime.toLocalDate(),
-                    choices.getMonthDayOfWeekToRepeat(), choices.getMonthWeekToRepeat());
+            if (choices.getMonthRepeatType() != 0) {
+                int days = ReminderUtils.nthWeekDayOfMonth(chosenDateTime.toLocalDate(),
+                        choices.getMonthDayOfWeekToRepeat(), choices.getMonthWeekToRepeat());
 
-            if (chosenDateTime.getDayOfMonth() != days) {
-                nextReminderTime = ReminderUtils.getNextMonthlyReminder(chosenDateTime, choices.getRepeatEvery(),
-                        choices.getMonthWeekToRepeat(), choices.getMonthDayOfWeekToRepeat());
+                if (chosenDateTime.getDayOfMonth() != days) {
+                    nextReminderTime = ReminderUtils.getNextMonthlyReminder(chosenDateTime, choices.getRepeatEvery(),
+                            choices.getMonthWeekToRepeat(), choices.getMonthDayOfWeekToRepeat());
+                }
             }
         }
 
