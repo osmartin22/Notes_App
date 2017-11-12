@@ -1,90 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/noteEditorLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context="com.ozmar.notes.NoteEditorActivity">
 
-    <include layout="@layout/note_editor_toolbar_layout" />
+    <data>
 
-    <ScrollView
+    </data>
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/noteEditorLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        android:fitsSystemWindows="true">
 
-        <LinearLayout
+        <include
+            android:id="@+id/my_toolbar"
+            layout="@layout/note_editor_toolbar_layout" />
+
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="match_parent"
+            android:fillViewport="true"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <EditText
-                android:id="@+id/editTextTitle"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/landTitleMarginSides"
-                android:layout_marginStart="@dimen/landTitleMarginSides"
-                android:ems="10"
-                android:fontFamily="sans-serif-condensed"
-                android:hint="@string/titleEditText"
-                android:inputType="textCapSentences|textAutoCorrect|textAutoComplete"
-                android:textSize="@dimen/landTitleTextSize"
-                android:textStyle="bold" />
+                android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/editTextContent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="@dimen/landContentMarginSides"
-                android:layout_marginStart="@dimen/landContentMarginSides"
-                android:background="@android:color/transparent"
-                android:ems="10"
-                android:fontFamily="sans-serif"
-                android:gravity="top|start"
-                android:hint="@string/editTextNoteHint"
-                android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
-                android:paddingBottom="16dp"
-                android:textAlignment="textStart"
-                android:textSize="@dimen/landContentTextSize" />
-
-            <android.support.constraint.ConstraintLayout
-                android:id="@+id/noteDetails"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/reminderText"
-                    android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/editTextTitle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="16dp"
-                    android:background="@color/cardview_shadow_start_color"
-                    android:gravity="center"
-                    android:onClick="addReminder"
-                    android:paddingEnd="8dp"
-                    android:paddingStart="0dp"
-                    android:visibility="invisible"
-                    app:layout_constraintLeft_toLeftOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:layout_marginEnd="@dimen/landTitleMarginSides"
+                    android:layout_marginStart="@dimen/landTitleMarginSides"
+                    android:ems="10"
+                    android:fontFamily="sans-serif-condensed"
+                    android:hint="@string/titleEditText"
+                    android:inputType="textCapSentences|textAutoCorrect|textAutoComplete"
+                    android:textSize="@dimen/landTitleTextSize"
+                    android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/lastModified"
-                    android:layout_width="wrap_content"
+                <EditText
+                    android:id="@+id/editTextContent"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:paddingEnd="16dp"
-                    android:paddingStart="16dp"
-                    app:layout_constraintHorizontal_bias="1"
-                    app:layout_constraintLeft_toRightOf="@id/reminderText"
-                    app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:layout_marginEnd="@dimen/landContentMarginSides"
+                    android:layout_marginStart="@dimen/landContentMarginSides"
+                    android:background="@android:color/transparent"
+                    android:ems="10"
+                    android:fontFamily="sans-serif"
+                    android:gravity="top|start"
+                    android:hint="@string/editTextNoteHint"
+                    android:inputType="textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
+                    android:paddingBottom="16dp"
+                    android:textAlignment="textStart"
+                    android:textSize="@dimen/landContentTextSize" />
 
-            </android.support.constraint.ConstraintLayout>
+                <android.support.constraint.ConstraintLayout
+                    android:id="@+id/noteDetails"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-        </LinearLayout>
+                    <TextView
+                        android:id="@+id/reminderText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:background="@color/cardview_shadow_start_color"
+                        android:gravity="center"
+                        android:onClick="addReminder"
+                        android:paddingEnd="8dp"
+                        android:paddingStart="0dp"
+                        android:visibility="invisible"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-    </ScrollView>
+                    <TextView
+                        android:id="@+id/lastModified"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingEnd="16dp"
+                        android:paddingStart="16dp"
+                        app:layout_constraintHorizontal_bias="1"
+                        app:layout_constraintLeft_toRightOf="@id/reminderText"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-</android.support.design.widget.CoordinatorLayout>
+                </android.support.constraint.ConstraintLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </android.support.design.widget.CoordinatorLayout>
+</layout>

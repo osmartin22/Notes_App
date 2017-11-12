@@ -1,13 +1,12 @@
 package com.ozmar.notes;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -16,7 +15,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -26,6 +24,7 @@ import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.DoMenuActionAsync;
 import com.ozmar.notes.async.NavMenuAsync;
+import com.ozmar.notes.databinding.ActivityMainBinding;
 import com.ozmar.notes.utils.MenuItemHelper;
 import com.ozmar.notes.utils.MultiSelectFlagHelper;
 import com.ozmar.notes.utils.UndoBuffer;
@@ -52,14 +51,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private MenuItem layoutItem;
     private Preferences preferences;
 
-    private Toolbar myToolbar;
-    private DrawerLayout drawer;
-    private FloatingActionButton fab;
-
     private Snackbar snackBar = null;
 
-    private MultiSelectFlagHelper multiSelectHelper;
+    private ActivityMainBinding mBinding;
     private MenuItemHelper itemHelper;
+    private MultiSelectFlagHelper multiSelectHelper;
 
 
     public void launchNoteEditor(View view) {
@@ -166,10 +162,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        myToolbar = findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+
+
+        setSupportActionBar(mBinding.myToolbar);
 
         db = new DatabaseHandler(MainActivity.this);
         itemHelper = new MenuItemHelper(MainActivity.this, db);
@@ -178,11 +175,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         new AutoDeleteAsync(db, preferences.getDaysInTrash()).execute();
 
-        fab = findViewById(R.id.floatingActionButton);
-
-        drawer = findViewById(R.id.drawerLayout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, myToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+                this, mBinding.drawerLayout, mBinding.myToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
 
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
@@ -194,20 +188,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         };
 
-        drawer.addDrawerListener(toggle);
+        mBinding.drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationView.getMenu().getItem(0).setChecked(true);
+        mBinding.navView.setNavigationItemSelectedListener(this);
+        mBinding.navView.getMenu().getItem(0).setChecked(true);
 
         setUpRecyclerView();
     } // onCreate() end
 
     @Override
     public void onBackPressed() {
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mBinding.drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
         }
@@ -314,7 +307,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         }
 
                         new DoMenuActionAsync(db, multiSelectHelper, itemHelper, buffer,
-                                notesAdapter, myToolbar, fab).execute();
+                                notesAdapter, mBinding.myToolbar, mBinding.fab).execute();
                     }
 
                     snackBar = null;
@@ -399,11 +392,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // If processing, that thread will set up the adapter list navigation selection
             if (!multiSelectHelper.isInAsync()) {
                 notesAdapter.clearView();
-                new NavMenuAsync(db, myToolbar, fab, notesAdapter, item).execute();
+                new NavMenuAsync(db, mBinding.myToolbar, mBinding.fab, notesAdapter, item).execute();
             }
         }
 
-        drawer.closeDrawer(GravityCompat.START);
+        mBinding.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     } // onNavigationItemSelected() end
 

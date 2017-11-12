@@ -1,6 +1,7 @@
 package com.ozmar.notes;
 
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,12 +12,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.UpdateNoteAsync;
+import com.ozmar.notes.databinding.ActivityNoteEditorBinding;
 import com.ozmar.notes.notifications.ReminderManager;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.FormatUtils;
@@ -35,7 +35,9 @@ public class NoteEditorActivity extends AppCompatActivity
 
     private SingleNote currentNote;
     private FrequencyChoices frequencyChoices;
-    private EditText editTextTitle, editTextContent;
+
+    private ActivityNoteEditorBinding mBinding;
+    private NoteEditorPresenter noteEditorPresenter;
 
     private int listUsed;
     private int notePosition;
@@ -44,17 +46,14 @@ public class NoteEditorActivity extends AppCompatActivity
     private String[] noteResult;
 
     private long reminderTime = 0;
-    private TextView reminderText;
 
     private boolean frequencyChoiceChanged = false;
-
-    private NoteEditorPresenter noteEditorPresenter;
 
     private void contextualActionResult(@NonNull MenuItem item, @Nullable SingleNote note,
                                         @Nullable FrequencyChoices choices, long reminderTime) {
 
-        String title = editTextTitle.getText().toString();
-        String content = editTextContent.getText().toString();
+        String title = mBinding.editTextTitle.getText().toString();
+        String content = mBinding.editTextContent.getText().toString();
 
         if (!(title.isEmpty() && content.isEmpty() && note == null)) {
             Intent intent = new Intent(NoteEditorActivity.this, MainActivity.class);
@@ -117,8 +116,8 @@ public class NoteEditorActivity extends AppCompatActivity
     private void saveNote(@Nullable SingleNote note, @Nullable FrequencyChoices choices, int listUsed,
                           long reminderTime) {
 
-        String title = editTextTitle.getText().toString();
-        String content = editTextContent.getText().toString();
+        String title = mBinding.editTextTitle.getText().toString();
+        String content = mBinding.editTextContent.getText().toString();
 
         if (note != null) {
 
@@ -157,20 +156,16 @@ public class NoteEditorActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_note_editor);
 
-        Toolbar myToolbar = findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_note_editor);
+
+        setSupportActionBar((Toolbar) mBinding.myToolbar);
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         noteResult = getResources().getStringArray(R.array.noteResultArray);
-
-        editTextTitle = findViewById(R.id.editTextTitle);
-        editTextContent = findViewById(R.id.editTextContent);
-        reminderText = findViewById(R.id.reminderText);
 
         Intent intent = getIntent();
         notePosition = intent.getIntExtra(getString(R.string.notePositionIntent), 0);
@@ -191,7 +186,7 @@ public class NoteEditorActivity extends AppCompatActivity
             noteEditorPresenter.setUpReminderDisplay(currentNote);
 
         } else {      // New note is being created, show keyboard at the StartForNextRepeat
-            editTextContent.requestFocus();
+            mBinding.editTextContent.requestFocus();
         }
 
     } // onCreate() end
@@ -293,7 +288,7 @@ public class NoteEditorActivity extends AppCompatActivity
             frequencyChoiceChanged = true;
         }
         reminderTime = 0;
-        reminderText.setVisibility(View.INVISIBLE);
+        mBinding.reminderText.setVisibility(View.INVISIBLE);
     }
 
     private void deleteNoteForever(@NonNull SingleNote note, int listUsed) {
@@ -311,13 +306,12 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @Override
     public void setUpNoteEditTexts(@NonNull SingleNote note) {
-        TextView timeTextView = findViewById(R.id.lastModified);
-        timeTextView.setText(FormatUtils.lastUpdated(NoteEditorActivity.this, note.get_timeModified()));
+        mBinding.lastModified.setText(FormatUtils.lastUpdated(NoteEditorActivity.this, note.get_timeModified()));
 
-        editTextTitle.setText(note.get_title());
-        editTextTitle.setFocusable(false);
-        editTextContent.setText(note.get_content());
-        editTextContent.setFocusable(false);
+        mBinding.editTextTitle.setText(note.get_title());
+        mBinding.editTextTitle.setFocusable(false);
+        mBinding.editTextContent.setText(note.get_content());
+        mBinding.editTextContent.setFocusable(false);
 
         // Keyboard does not pop up until the user clicks on the screen
         // allowing the user to see the entire note at the StartForNextRepeat
@@ -333,8 +327,8 @@ public class NoteEditorActivity extends AppCompatActivity
             return false;
         };
 
-        editTextTitle.setOnTouchListener(editTextListener);
-        editTextContent.setOnTouchListener(editTextListener);
+        mBinding.editTextTitle.setOnTouchListener(editTextListener);
+        mBinding.editTextContent.setOnTouchListener(editTextListener);
     }
 
     @Override
@@ -343,33 +337,33 @@ public class NoteEditorActivity extends AppCompatActivity
 
             if (note.hasFrequencyChoices()) {
                 frequencyChoices = db.getFrequencyChoice(note.get_reminderId());
-                reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
+                mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
                         0, 0, 0);
 
             } else {
-                reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
+                mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
                         0, 0, 0);
             }
 
             reminderTime = note.get_nextReminderTime();
-            reminderText.setText(FormatUtils.getReminderText(NoteEditorActivity.this,
+            mBinding.reminderText.setText(FormatUtils.getReminderText(NoteEditorActivity.this,
                     new DateTime(reminderTime)));
-            reminderText.setVisibility(View.VISIBLE);
+            mBinding.reminderText.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public void updateDisplayReminder(Long newReminderTime, @NonNull String newReminderText, @Nullable FrequencyChoices choices) {
         if (choices == null) {
-            reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
+            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
                     0, 0, 0);
         } else {
-            reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
+            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
                     0, 0, 0);
         }
 
-        reminderText.setText(newReminderText);
-        reminderText.setVisibility(View.VISIBLE);
+        mBinding.reminderText.setText(newReminderText);
+        mBinding.reminderText.setVisibility(View.VISIBLE);
     }
 
     @Override
