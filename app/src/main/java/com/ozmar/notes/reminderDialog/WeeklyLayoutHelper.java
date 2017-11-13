@@ -1,11 +1,12 @@
 package com.ozmar.notes.reminderDialog;
 
+import android.databinding.DataBindingUtil;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ToggleButton;
 
 import com.ozmar.notes.R;
+import com.ozmar.notes.databinding.RepeatWeeklyLayoutBinding;
 
 import org.joda.time.LocalDate;
 
@@ -15,41 +16,28 @@ import java.util.List;
 
 public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListener {
 
-    private final View view;
-    private final Button doneButton;
-    private final ToggleButton sunday;
-    private final ToggleButton monday;
-    private final ToggleButton tuesday;
-    private final ToggleButton wednesday;
-    private final ToggleButton thursday;
-    private final ToggleButton friday;
-    private final ToggleButton saturday;
     private int buttonsChecked = 0;
+    private final Button doneButton;
     private final FrequencyPickerFlagHelper mFlagHelper;
+
+    private final RepeatWeeklyLayoutBinding mBinding;
 
     public WeeklyLayoutHelper(View view, Button doneButton, FrequencyPickerFlagHelper flagHelper) {
         this(view, doneButton, null, flagHelper);
     }
 
     public WeeklyLayoutHelper(View view, Button doneButton, List<Integer> daysLastSelected, FrequencyPickerFlagHelper flagHelper) {
-        this.view = view;
+        this.mBinding = DataBindingUtil.getBinding(view.findViewById(R.id.repeatWeeklyLayout));
         this.doneButton = doneButton;
-        this.sunday = view.findViewById(R.id.toggleButtonSunday);
-        this.monday = view.findViewById(R.id.toggleButtonMonday);
-        this.tuesday = view.findViewById(R.id.toggleButtonTuesday);
-        this.wednesday = view.findViewById(R.id.toggleButtonWednesday);
-        this.thursday = view.findViewById(R.id.toggleButtonThursday);
-        this.friday = view.findViewById(R.id.toggleButtonFriday);
-        this.saturday = view.findViewById(R.id.toggleButtonSaturday);
         this.mFlagHelper = flagHelper;
 
-        sunday.setOnCheckedChangeListener(this);
-        monday.setOnCheckedChangeListener(this);
-        tuesday.setOnCheckedChangeListener(this);
-        wednesday.setOnCheckedChangeListener(this);
-        thursday.setOnCheckedChangeListener(this);
-        friday.setOnCheckedChangeListener(this);
-        saturday.setOnCheckedChangeListener(this);
+        mBinding.toggleButtonSunday.setOnCheckedChangeListener(this);
+        mBinding.toggleButtonMonday.setOnCheckedChangeListener(this);
+        mBinding.toggleButtonTuesday.setOnCheckedChangeListener(this);
+        mBinding.toggleButtonWednesday.setOnCheckedChangeListener(this);
+        mBinding.toggleButtonThursday.setOnCheckedChangeListener(this);
+        mBinding.toggleButtonFriday.setOnCheckedChangeListener(this);
+        mBinding.toggleButtonSaturday.setOnCheckedChangeListener(this);
 
         setUpStartingDaysChecked(daysLastSelected);
     }
@@ -62,48 +50,46 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
                 setCheckedDay(day);
             }
         }
-
-
     }
 
     private void setCheckedDay(int dayOfWeek) {
         switch (dayOfWeek) {
             case 1:
-                monday.setChecked(true);
+                mBinding.toggleButtonMonday.setChecked(true);
                 break;
             case 2:
-                tuesday.setChecked(true);
+                mBinding.toggleButtonTuesday.setChecked(true);
                 break;
             case 3:
-                wednesday.setChecked(true);
+                mBinding.toggleButtonWednesday.setChecked(true);
                 break;
             case 4:
-                thursday.setChecked(true);
+                mBinding.toggleButtonThursday.setChecked(true);
                 break;
             case 5:
-                friday.setChecked(true);
+                mBinding.toggleButtonFriday.setChecked(true);
                 break;
             case 6:
-                saturday.setChecked(true);
+                mBinding.toggleButtonSaturday.setChecked(true);
                 break;
             case 7:
-                sunday.setChecked(true);
+                mBinding.toggleButtonSunday.setChecked(true);
                 break;
         }
     }
 
     public void setViewEnabled(boolean flag) {
-        sunday.setEnabled(flag);
-        monday.setEnabled(flag);
-        tuesday.setEnabled(flag);
-        wednesday.setEnabled(flag);
-        thursday.setEnabled(flag);
-        friday.setEnabled(flag);
-        saturday.setEnabled(flag);
+        mBinding.toggleButtonSunday.setEnabled(flag);
+        mBinding.toggleButtonMonday.setEnabled(flag);
+        mBinding.toggleButtonTuesday.setEnabled(flag);
+        mBinding.toggleButtonWednesday.setEnabled(flag);
+        mBinding.toggleButtonThursday.setEnabled(flag);
+        mBinding.toggleButtonFriday.setEnabled(flag);
+        mBinding.toggleButtonSaturday.setEnabled(flag);
     }
 
     public View getMainView() {
-        return view;
+        return mBinding.getRoot();
     }
 
     @Override
@@ -129,25 +115,25 @@ public class WeeklyLayoutHelper implements CompoundButton.OnCheckedChangeListene
         List<Integer> chosen = new ArrayList<>();
 
         // Use ISO Standard for day numbering
-        if (sunday.isChecked()) {
+        if (mBinding.toggleButtonSunday.isChecked()) {
             chosen.add(7);
         }
-        if (monday.isChecked()) {
+        if (mBinding.toggleButtonMonday.isChecked()) {
             chosen.add(1);
         }
-        if (tuesday.isChecked()) {
+        if (mBinding.toggleButtonTuesday.isChecked()) {
             chosen.add(2);
         }
-        if (wednesday.isChecked()) {
+        if (mBinding.toggleButtonWednesday.isChecked()) {
             chosen.add(3);
         }
-        if (thursday.isChecked()) {
+        if (mBinding.toggleButtonThursday.isChecked()) {
             chosen.add(4);
         }
-        if (friday.isChecked()) {
+        if (mBinding.toggleButtonFriday.isChecked()) {
             chosen.add(5);
         }
-        if (saturday.isChecked()) {
+        if (mBinding.toggleButtonSaturday.isChecked()) {
             chosen.add(6);
         }
 

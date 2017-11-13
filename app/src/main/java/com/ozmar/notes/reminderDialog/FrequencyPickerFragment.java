@@ -35,11 +35,6 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private int timeUnitNumber = 1;
 
-    ReminderFrequencyPickerBinding mBinding;
-
-    // These views are always shown
-
-    // These views are shown based on user input
     private EditText numberOfEventsEditText;
     private TextView eventsTextView;
     private TextView calendarTextView;
@@ -53,6 +48,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private DateTime mDateTimeRepeatTo;
     private FrequencyChoices choices;
     private FrequencyPickerFlagHelper mFlagHelper;
+    private ReminderFrequencyPickerBinding mBinding;
 
     private onFrequencyPickedListener myCallback;
 
@@ -132,6 +128,7 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
             if (choices.getRepeatToDate() != 0) {
                 setUpCalendarTextView();
                 mBinding.bottomSpinner.setSelection(1);
+
                 calendarTextView.setText(FormatUtils.getMonthDayFormatShort(choices.getRepeatToDate()));
                 mBinding.bottomViewSwitcher.setVisibility(View.VISIBLE);
 
@@ -147,11 +144,11 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private void switchToWeekly() {
         if (weeklyHelper == null) {
             if (choices != null) {
-                weeklyHelper = new WeeklyLayoutHelper(mBinding.typeViewSwitcher
-                        .findViewById(R.id.repeatWeeklyLayout), mBinding.reminderDoneButton, choices.getDaysChosen(), mFlagHelper);
+                weeklyHelper = new WeeklyLayoutHelper(mBinding.typeViewSwitcher,
+                        mBinding.reminderDoneButton, choices.getDaysChosen(), mFlagHelper);
             } else {
-                weeklyHelper = new WeeklyLayoutHelper(mBinding.typeViewSwitcher
-                        .findViewById(R.id.repeatWeeklyLayout), mBinding.reminderDoneButton, mFlagHelper);
+                weeklyHelper = new WeeklyLayoutHelper(mBinding.typeViewSwitcher,
+                        mBinding.reminderDoneButton, mFlagHelper);
             }
         }
         showNextView(mBinding.typeViewSwitcher, weeklyHelper.getMainView());
@@ -160,11 +157,10 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
     private void switchToMonthly() {
         if (monthlyHelper == null) {
             if (choices != null) {
-                monthlyHelper = new MonthlyLayoutHelper(mBinding.typeViewSwitcher
-                        .findViewById(R.id.repeatMonthlyLayout), choices.getMonthRepeatType(), mDateTimeRepeatTo);
+                monthlyHelper = new MonthlyLayoutHelper(mBinding.typeViewSwitcher,
+                        choices.getMonthRepeatType(), mDateTimeRepeatTo);
             } else {
-                monthlyHelper = new MonthlyLayoutHelper(mBinding.typeViewSwitcher
-                        .findViewById(R.id.repeatMonthlyLayout), mDateTimeRepeatTo);
+                monthlyHelper = new MonthlyLayoutHelper(mBinding.typeViewSwitcher, mDateTimeRepeatTo);
             }
         }
         showNextView(mBinding.typeViewSwitcher, monthlyHelper.getMainView());
