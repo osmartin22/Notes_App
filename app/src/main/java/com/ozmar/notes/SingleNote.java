@@ -27,13 +27,13 @@ public class SingleNote implements Parcelable {
     }
 
     // New note has a reminder
-    public SingleNote(String title, String content, boolean favorite, long timeCreated, long _nextReminderTime, int reminderId) {
+    public SingleNote(String title, String content, boolean favorite, long timeCreated, long nextReminderTime, int reminderId) {
         this._title = title;
         this._content = content;
         this._favorite = favorite;
         this._timeCreated = timeCreated;
         this._timeModified = timeCreated;
-        this._nextReminderTime = _nextReminderTime;
+        this._nextReminderTime = nextReminderTime;
         this._reminderId = reminderId;
     }
 

@@ -2,9 +2,9 @@ package com.ozmar.notes.async;
 
 import android.os.AsyncTask;
 
+import com.ozmar.notes.ChangesInNote;
 import com.ozmar.notes.DatabaseHandler;
 import com.ozmar.notes.SingleNote;
-import com.ozmar.notes.utils.NoteChanges;
 
 import java.util.List;
 
@@ -15,10 +15,10 @@ public class UpdateNoteAsync extends AsyncTask<Void, Void, Void> {
     private final List<SingleNote> list;
     private final SingleNote note;
     private final int listUsed;
-    private final NoteChanges changes;
+    private final ChangesInNote changes;
 
     public UpdateNoteAsync(DatabaseHandler db, List<SingleNote> list, SingleNote note,
-                           int listUsed, NoteChanges changes) {
+                           int listUsed, ChangesInNote changes) {
         this.db = db;
         this.list = list;
         this.note = note;

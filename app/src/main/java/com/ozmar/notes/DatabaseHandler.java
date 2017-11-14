@@ -8,8 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.ozmar.notes.utils.NoteChanges;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -224,16 +222,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     } // getFavoriteNotes() end
 
-    public void updateNoteFromUserList(SingleNote note, NoteChanges changes) {
+    public void updateNoteFromUserList(@NonNull SingleNote note, @NonNull ChangesInNote changes) {
 
         ContentValues values = new ContentValues();
-        if (changes.getNoteTextChanges() != 0) {
-            if (changes.getNoteTextChanges() == 1) {
+
+        if (changes.isTitleChanged() || changes.isContentChanged()) {
+            if (changes.isTitleChanged()) {
                 values.put(KEY_TITLE, note.get_title());
-            } else if (changes.getNoteTextChanges() == 2) {
-                values.put(KEY_CONTENT, note.get_content());
-            } else if (changes.getNoteTextChanges() == 3) {
-                values.put(KEY_TITLE, note.get_title());
+            }
+            if (changes.isContentChanged()) {
                 values.put(KEY_CONTENT, note.get_content());
             }
             values.put(KEY_TIME_MODIFIED, note.get_timeModified());
@@ -247,9 +244,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             }
         }
 
-        if (changes.isReminderIdChanged()) {
-            values.put(KEY_REMINDER_ID, note.get_reminderId());
-        }
+//        if (changes.isReminderIdChanged()) {
+        values.put(KEY_REMINDER_ID, note.get_reminderId());
+//        }
 
         if (values.size() != 0) {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -258,7 +255,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    public int addNoteToUserList(SingleNote note) {
+    public int addNoteToUserList(@NonNull SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -285,7 +282,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)});
     } // deleteNoteFromUserList() end
 
-    public void addListToUserList(List<SingleNote> list) {
+    public void addListToUserList(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -308,7 +305,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    public void deleteListFromUserList(List<SingleNote> list) {
+    public void deleteListFromUserList(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         for (SingleNote note : list) {
@@ -353,24 +350,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     } // getArchiveNotes() end
 
-    public void updateNoteFromArchive(SingleNote note, NoteChanges changes) {
+    public void updateNoteFromArchive(@NonNull SingleNote note, @NonNull ChangesInNote changes) {
 
         ContentValues values = new ContentValues();
-        if (changes.getNoteTextChanges() != 0) {
-            if (changes.getNoteTextChanges() == 1) {
+
+        if (changes.isTitleChanged() || changes.isContentChanged()) {
+            if (changes.isTitleChanged()) {
                 values.put(KEY_TITLE, note.get_title());
-            } else if (changes.getNoteTextChanges() == 2) {
-                values.put(KEY_CONTENT, note.get_content());
-            } else if (changes.getNoteTextChanges() == 3) {
-                values.put(KEY_TITLE, note.get_title());
+            }
+            if (changes.isContentChanged()) {
                 values.put(KEY_CONTENT, note.get_content());
             }
             values.put(KEY_TIME_MODIFIED, note.get_timeModified());
         }
 
-        if (changes.isReminderIdChanged()) {
-            values.put(KEY_REMINDER_ID, note.get_reminderId());
-        }
+//        if (changes.isReminderIdChanged()) {
+        values.put(KEY_REMINDER_ID, note.get_reminderId());
+//        }
 
         if (values.size() != 0) {
             SQLiteDatabase db = this.getWritableDatabase();
@@ -379,7 +375,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
-    public void addNoteToArchive(SingleNote note) {
+    public void addNoteToArchive(@NonNull SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -399,7 +395,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)});
     } // deleteNoteFromArchive() end
 
-    public void addListToArchive(List<SingleNote> list) {
+    public void addListToArchive(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -415,7 +411,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     } // addListToArchive() end
 
-    public void deleteListFromArchive(List<SingleNote> list) {
+    public void deleteListFromArchive(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         for (SingleNote note : list) {
@@ -453,7 +449,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     } // getRecycleBinNotes() end
 
-    public void addNoteToRecycleBin(SingleNote note) {
+    public void addNoteToRecycleBin(@NonNull SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         if (note.get_reminderId() != -1) {
@@ -476,7 +472,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)});
     } // deleteNoteFromRecycleBin() end
 
-    public void addListToRecycleBin(List<SingleNote> list) {
+    public void addListToRecycleBin(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
 
@@ -495,7 +491,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     } // addListToRecycleBin() end
 
-    public void deleteListFromRecycleBin(List<SingleNote> list) {
+    public void deleteListFromRecycleBin(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         for (SingleNote note : list) {
@@ -536,7 +532,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     //--------------------------------------------------------------------------------------------//
 
     @NonNull
-    private NextReminderTime getNextReminderTime(SQLiteDatabase db, int id) {
+    private NextReminderTime getNextReminderTime(@NonNull SQLiteDatabase db, int id) {
         long nextReminderTime = 0;
         boolean isRepeating = false;
 
@@ -609,7 +605,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return choices;
     }
 
-    public int addReminder(FrequencyChoices choices, long nextReminderTime) {
+    public int addReminder(@Nullable FrequencyChoices choices, long nextReminderTime) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -622,7 +618,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return (int) db.insert(TABLE_REMINDERS, null, values);
     }
 
-    public void updateReminder(int id, FrequencyChoices choices, long nextReminderTime) {
+    public void updateReminder(int id, @Nullable FrequencyChoices choices, long nextReminderTime) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -639,7 +635,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 new String[]{String.valueOf(id)});
     }
 
-    private void putFrequencyChoiceInValues(ContentValues values, @NonNull FrequencyChoices choices) {
+    private void putFrequencyChoiceInValues(@NonNull ContentValues values, @NonNull FrequencyChoices choices) {
         values.put(KEY_REPEAT_TYPE, choices.getRepeatType());
         values.put(KEY_REPEAT_EVERY, choices.getRepeatEvery());
         values.put(KEY_REPEAT_TO_DATE, choices.getRepeatToDate());
@@ -660,7 +656,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_EVENTS_OCCURRED, 0);
     }
 
-    private void deleteReminder(SQLiteDatabase db, int id) {
+    private void deleteReminder(@NonNull SQLiteDatabase db, int id) {
         db.delete(TABLE_REMINDERS, KEY_ID + " = ?",
                 new String[]{String.valueOf(id)});
     }

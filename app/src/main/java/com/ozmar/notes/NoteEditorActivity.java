@@ -15,42 +15,44 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.ozmar.notes.async.BasicDBAsync;
-import com.ozmar.notes.async.UpdateNoteAsync;
 import com.ozmar.notes.databinding.ActivityNoteEditorBinding;
 import com.ozmar.notes.notifications.ReminderManager;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.FormatUtils;
-import com.ozmar.notes.utils.NoteChanges;
 
 import org.joda.time.DateTime;
 
 import static com.ozmar.notes.MainActivity.db;
 
-// TODO: When deleting an entire note, make sure the reminder is cancelled if it exists
-
 // TODO: Fix bug where setting a favorite note to not favorite is not saved correctly
+
+// TODO: Make menu action buttons to represent the same action
+// Currently in MainActivity and NoteEditorActivity, they do the same action but are
+// represented differently
+
+// TODO: Change anything to do with AlarmManager to be handled in the Model
+
+// TODO: Fix data being lost on orientation change
+
+// TODO: Decide if currentNote should stay in view
 
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener, NoteEditorView {
 
-    private SingleNote currentNote;
-    private FrequencyChoices frequencyChoices;
+    private static final int All_NOTES = 0;
+    private static final int FAVORITE_NOTES = 1;
+    private static final int ARCHIVE_NOTES = 2;
+    private static final int RECYCLE_BIN_NOTES = 3;
+
+    private int listUsed;
+    private int notePosition;
+
+    private String[] noteResult;
 
     private ActivityNoteEditorBinding mBinding;
     private NoteEditorPresenter noteEditorPresenter;
 
-    private int listUsed;
-    private int notePosition;
-    private boolean favorite = false;
-
-    private String[] noteResult;
-
-    private long reminderTime = 0;
-
-    private boolean frequencyChoiceChanged = false;
-
-    private void contextualActionResult(@NonNull MenuItem item, @Nullable SingleNote note,
-                                        @Nullable FrequencyChoices choices, long reminderTime) {
+    private void contextualActionResult(@NonNull MenuItem item, @Nullable SingleNote note, long reminderTime) {
 
         String title = mBinding.editTextTitle.getText().toString();
         String content = mBinding.editTextContent.getText().toString();
@@ -60,13 +62,13 @@ public class NoteEditorActivity extends AppCompatActivity
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
             if (note != null) {
-                note.set_favorite(favorite);
+                note.set_favorite(noteEditorPresenter.getFavorite());
 
-                noteEditorPresenter.upDateNote(note, null, title, content);
-                noteEditorPresenter.saveReminder(db, note, choices, null, reminderTime);
+                noteEditorPresenter.updateNote(note, null, title, content);
+                noteEditorPresenter.saveReminder(db, note, null, reminderTime);
 
             } else {
-                note = noteEditorPresenter.createNewNote(db, choices, title, content, favorite, reminderTime);
+                note = noteEditorPresenter.createNewNote(db, title, content);
                 intent.putExtra(getString(R.string.isNewNoteIntent), 1);
             }
 
@@ -88,10 +90,8 @@ public class NoteEditorActivity extends AppCompatActivity
             intent.putExtra(getString(R.string.notePositionIntent), notePosition);
             intent.putExtra(getString(R.string.noteIntent), note);
             setResult(RESULT_OK, intent);
-
         }
 
-        // TODO: Change this to allow new/old notes
         finish();   // Only allow undo for notes that are not new
     }
 
@@ -100,7 +100,7 @@ public class NoteEditorActivity extends AppCompatActivity
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
         if (value.equals(noteResult[1])) {
-            if (favorite) {
+            if (noteEditorPresenter.getFavorite()) {
                 intent.putExtra(getString(R.string.isFavoriteIntent), true);
             }
         }
@@ -109,48 +109,7 @@ public class NoteEditorActivity extends AppCompatActivity
         intent.putExtra(getString(R.string.notePositionIntent), notePosition);
         intent.putExtra(getString(R.string.noteIntent), note);
         setResult(RESULT_OK, intent);
-    } // noteModifiedResult() end
-
-
-    // Save note into db and go back to MainActivity
-    private void saveNote(@Nullable SingleNote note, @Nullable FrequencyChoices choices, int listUsed,
-                          long reminderTime) {
-
-        String title = mBinding.editTextTitle.getText().toString();
-        String content = mBinding.editTextContent.getText().toString();
-
-        if (note != null) {
-
-            NoteChanges noteChanges = new NoteChanges();
-            noteChanges.setFrequencyChoiceChanged(frequencyChoiceChanged);
-            noteEditorPresenter.upDateNote(note, noteChanges, title, content);
-
-            // Don't allow changes to favorite if in archive list
-            if (listUsed != 2 && note.is_favorite() != favorite) {
-                note.set_favorite(favorite);
-                noteChanges.setFavoriteChanged(true);
-            }
-
-            noteEditorPresenter.saveReminder(db, note, choices, noteChanges, reminderTime);
-
-            new UpdateNoteAsync(db, null, note, listUsed, noteChanges).execute();
-            if (listUsed == 1 && noteChanges.isFavoriteChanged()) {       // Note not a favorite anymore
-                noteModifiedResult(note, noteResult[3]);
-            } else {
-                noteModifiedResult(note, noteResult[0]);
-            }
-
-        } else {
-            boolean titleEmpty = title.isEmpty();
-            boolean contentEmpty = content.isEmpty();
-            if (!(titleEmpty && contentEmpty)) {    // New note
-                note = noteEditorPresenter.createNewNote(db, choices, title, content, favorite, reminderTime);
-                noteModifiedResult(note, noteResult[1]);
-            }
-        }
-
-    } // saveNote() end
-
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -158,57 +117,79 @@ public class NoteEditorActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_note_editor);
+        setupToolbar();
 
+        Intent intent = getIntent();
+        notePosition = intent.getIntExtra(getString(R.string.notePositionIntent), 0);
+        listUsed = intent.getIntExtra(getString(R.string.listUsedIntent), All_NOTES);
+        SingleNote note = intent.getParcelableExtra(getString(R.string.noteIntent));
+
+        noteResult = getResources().getStringArray(R.array.noteResultArray);
+        noteEditorPresenter = new NoteEditorPresenter(NoteEditorActivity.this);
+        noteEditorPresenter.updateNote(note);
+        setupNoteView(noteEditorPresenter.getNote(), listUsed);
+    }
+
+    private void setupToolbar() {
         setSupportActionBar((Toolbar) mBinding.myToolbar);
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+    }
 
-        noteResult = getResources().getStringArray(R.array.noteResultArray);
+    private void setupNoteView(@Nullable SingleNote note, int listUsed) {
+        if (note != null) {
+            noteEditorPresenter.setNoteFavoriteAtStart(note, listUsed);
 
-        Intent intent = getIntent();
-        notePosition = intent.getIntExtra(getString(R.string.notePositionIntent), 0);
-        listUsed = intent.getIntExtra(getString(R.string.listUsedIntent), 0);
-        currentNote = intent.getParcelableExtra(getString(R.string.noteIntent));
-
-        noteEditorPresenter = new NoteEditorPresenter(NoteEditorActivity.this);
-
-        if (currentNote != null) {
-
-            if (listUsed == 2 && currentNote.is_favorite()) {
-                currentNote.set_favorite(false);
-            } else {
-                favorite = currentNote.is_favorite();
+            setupNoteEditTexts(note);
+            if (note.get_reminderId() != -1) {
+                displayReminder(note);
             }
 
-            noteEditorPresenter.setUpNoteView(currentNote);
-            noteEditorPresenter.setUpReminderDisplay(currentNote);
-
         } else {      // New note is being created, show keyboard at the StartForNextRepeat
+            noteEditorPresenter.updateFavorite(false);
             mBinding.editTextContent.requestFocus();
         }
+    }
 
-    } // onCreate() end
+
+    private void save() {
+        String title = mBinding.editTextTitle.getText().toString();
+        String content = mBinding.editTextContent.getText().toString();
+
+        if (listUsed == ARCHIVE_NOTES) {
+            noteEditorPresenter.updateFavorite(false);
+        }
+
+        int result = noteEditorPresenter.overall(noteEditorPresenter.getNote(), title, content, listUsed, db);
+        noteModifiedResult(noteEditorPresenter.getNote(), noteResult[result]);
+    }
 
     @Override
     public void onBackPressed() {
-        saveNote(currentNote, frequencyChoices, listUsed, reminderTime);
+
+        save();
+
         super.onBackPressed();
-    } // onBackPressed() end
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.note_editor_menu, menu);
+        setupToolbarIcons(noteEditorPresenter.getNote(), menu, listUsed);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-        if (listUsed != 3) {
-            if (listUsed == 2) {
+    private void setupToolbarIcons(@Nullable SingleNote note, @NonNull Menu menu, int listUsed) {
+        if (listUsed != RECYCLE_BIN_NOTES) {
+            if (listUsed == ARCHIVE_NOTES) {
                 menu.findItem(R.id.archive_note).setVisible(false);
                 menu.findItem(R.id.unarchive_note).setVisible(true);
             }
 
-            if (currentNote != null && currentNote.is_favorite()) {
+            if (note != null && note.is_favorite()) {
                 menu.findItem(R.id.favorite_note).setIcon(R.drawable.ic_favorite_star_on);
             }
 
@@ -219,11 +200,8 @@ public class NoteEditorActivity extends AppCompatActivity
             menu.findItem(R.id.archive_note).setVisible(false);
             menu.findItem(R.id.favorite_note).setVisible(false);
         }
+    }
 
-        return super.onCreateOptionsMenu(menu);
-    } // onCreateOptionsMenu() end
-
-    // To use for menu button on action bar
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
@@ -234,14 +212,7 @@ public class NoteEditorActivity extends AppCompatActivity
                 return true;
 
             case R.id.favorite_note:
-
-                favorite = !favorite;
-                if (favorite) {
-                    item.setIcon(R.drawable.ic_favorite_star_on);
-                } else {
-                    item.setIcon(R.drawable.ic_favorite_star_off);
-                }
-
+                setFavoriteIcon(item, noteEditorPresenter.getFavorite());
                 return true;
 
             case R.id.reminder:
@@ -249,45 +220,53 @@ public class NoteEditorActivity extends AppCompatActivity
                 return true;
 
             case R.id.delete_note_forever:
-                deleteNoteForever(currentNote, listUsed);
+                deleteNoteForever(noteEditorPresenter.getNote(), listUsed);
                 return true;
 
             case R.id.delete_note:
             case R.id.archive_note:
             case R.id.unarchive_note:
             case R.id.restore_note:
-                contextualActionResult(item, currentNote, frequencyChoices, reminderTime);
+                contextualActionResult(item, noteEditorPresenter.getNote(),
+                        noteEditorPresenter.getReminderTime());
                 return true;
         }
 
         return false;
-    } // onOptionsItemSelected() end
+    }
+
+    private void setFavoriteIcon(@NonNull MenuItem item, boolean favorite) {
+        noteEditorPresenter.updateFavorite(favorite);
+
+        if (noteEditorPresenter.getFavorite()) {
+            item.setIcon(R.drawable.ic_favorite_star_on);
+        } else {
+            item.setIcon(R.drawable.ic_favorite_star_off);
+        }
+    }
+
 
     @SuppressWarnings("WeakerAccess")
     public void addReminder(View view) {
-        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(frequencyChoices, reminderTime);
+        long time = noteEditorPresenter.getReminderTime();
+        FrequencyChoices choices = noteEditorPresenter.getFrequencyChoices();
+
+        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(choices, time);
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
     }
 
     @Override
-    public void onReminderPicked(DateTime dateTime, FrequencyChoices choices) {
-        if (this.frequencyChoices != choices) {
-            frequencyChoiceChanged = true;
-            this.frequencyChoices = choices;
-        }
-
-        reminderTime = dateTime.getMillis();
+    public void onReminderPicked(@NonNull DateTime dateTime, @Nullable FrequencyChoices choices) {
+        noteEditorPresenter.updateFrequencyChoices(choices);
+        noteEditorPresenter.updateReminderTime(dateTime.getMillis());
         String newReminderText = FormatUtils.getReminderText(getApplication(), dateTime);
-        noteEditorPresenter.updateReminderDisplay(reminderTime, newReminderText, choices);
+        updateDisplayReminder(newReminderText, noteEditorPresenter.getFrequencyChoices());
     }
 
     @Override
     public void onReminderDelete() {
-        if (frequencyChoices != null) {
-            frequencyChoices = null;
-            frequencyChoiceChanged = true;
-        }
-        reminderTime = 0;
+        noteEditorPresenter.updateFrequencyChoices(null);
+        noteEditorPresenter.updateReminderTime(0);
         mBinding.reminderText.setVisibility(View.INVISIBLE);
     }
 
@@ -301,12 +280,13 @@ public class NoteEditorActivity extends AppCompatActivity
                 })
                 .setNegativeButton(getString(R.string.cancelDialog), null)
                 .show();
-    } // deleteNoteMenu() end
+    }
 
 
     @Override
-    public void setUpNoteEditTexts(@NonNull SingleNote note) {
-        mBinding.lastModified.setText(FormatUtils.lastUpdated(NoteEditorActivity.this, note.get_timeModified()));
+    public void setupNoteEditTexts(@NonNull SingleNote note) {
+        mBinding.lastModified.setText(FormatUtils.lastUpdated(NoteEditorActivity.this,
+                note.get_timeModified()));
 
         mBinding.editTextTitle.setText(note.get_title());
         mBinding.editTextTitle.setFocusable(false);
@@ -316,8 +296,8 @@ public class NoteEditorActivity extends AppCompatActivity
         // Keyboard does not pop up until the user clicks on the screen
         // allowing the user to see the entire note at the StartForNextRepeat
         View.OnTouchListener editTextListener = (view, motionEvent) -> {
-            if (listUsed == 3) {
-                // TODO: Possibly change to SnackBar
+            if (listUsed == RECYCLE_BIN_NOTES) {
+                // TODO: Possibly change to SnackBar as it is hard to see right now
                 Toast.makeText(getApplicationContext(), "Can't edit in Trash", Toast.LENGTH_SHORT).show();
             } else {
                 view.performClick();
@@ -331,49 +311,61 @@ public class NoteEditorActivity extends AppCompatActivity
         mBinding.editTextContent.setOnTouchListener(editTextListener);
     }
 
+
+    // TODO: Update FChoices and reminderTime(don't use db)
     @Override
     public void displayReminder(@NonNull SingleNote note) {
-        if (note.get_reminderId() != -1) {
+        if (note.hasFrequencyChoices()) {
 
-            if (note.hasFrequencyChoices()) {
-                frequencyChoices = db.getFrequencyChoice(note.get_reminderId());
-                mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
-                        0, 0, 0);
+            noteEditorPresenter.updateFrequencyChoices(db.getFrequencyChoice(note.get_reminderId()));
 
-            } else {
-                mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
-                        0, 0, 0);
-            }
+            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
+                    0, 0, 0);
 
-            reminderTime = note.get_nextReminderTime();
-            mBinding.reminderText.setText(FormatUtils.getReminderText(NoteEditorActivity.this,
-                    new DateTime(reminderTime)));
-            mBinding.reminderText.setVisibility(View.VISIBLE);
+        } else {
+            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
+                    0, 0, 0);
         }
+
+        long time = note.get_nextReminderTime();
+        noteEditorPresenter.updateReminderTime(time);
+        mBinding.reminderText.setText(FormatUtils.getReminderText(NoteEditorActivity.this,
+                new DateTime(time)));
+        mBinding.reminderText.setVisibility(View.VISIBLE);
     }
 
     @Override
-    public void updateDisplayReminder(Long newReminderTime, @NonNull String newReminderText, @Nullable FrequencyChoices choices) {
+    public void updateDisplayReminder(@NonNull String newReminderText,
+                                      @Nullable FrequencyChoices choices) {
         if (choices == null) {
-            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
-                    0, 0, 0);
+            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_reminder_dark_gray_small, 0, 0, 0);
         } else {
-            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
-                    0, 0, 0);
+            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_repeat_dark_gray_small, 0, 0, 0);
         }
 
         mBinding.reminderText.setText(newReminderText);
         mBinding.reminderText.setVisibility(View.VISIBLE);
     }
 
+    // TODO: Remove and add to Model
     @Override
     public void setupReminder(@NonNull SingleNote note) {
         ReminderManager.start(getApplicationContext(), note);
     }
 
+    // TODO: Remove and add to Model
     @Override
     public void cancelReminder(int noteId) {
         ReminderManager.cancel(getApplicationContext(), noteId);
+    }
+
+    @Override
+    public void noteResult(@Nullable SingleNote note, int result) {
+        if (result != 0 && note != null) {
+            noteModifiedResult(note, noteResult[result]);
+        }
     }
 
 
@@ -382,4 +374,4 @@ public class NoteEditorActivity extends AppCompatActivity
         noteEditorPresenter.onDestroy();
         super.onDestroy();
     }
-} // NoteEditorActivity() end
+}
