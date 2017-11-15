@@ -222,6 +222,45 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     } // getFavoriteNotes() end
 
+    @Nullable
+    public SingleNote getAUserNote(int id) {
+        String selectQuery = "SELECT * FROM " + TABLE_USER_NOTES + " WHERE ROWID = " + id;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        SingleNote note = null;
+
+        if (cursor.moveToFirst()) {
+            do {
+                note = new SingleNote();
+                note.set_id(cursor.getInt(0));
+                note.set_title(cursor.getString(1));
+                note.set_content(cursor.getString(2));
+
+                if (cursor.getInt(3) == 0) {
+                    note.set_favorite(false);
+                } else {
+                    note.set_favorite(true);
+                }
+
+                note.set_timeCreated(cursor.getLong(4));
+                note.set_timeModified(cursor.getLong(5));
+                note.set_reminderId(cursor.getInt(6));
+
+                if (note.get_reminderId() != -1) {
+                    NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
+                    note.set_nextReminderTime(temp.nextReminderTime);
+                    note.set_hasFrequencyChoices(temp.hasFrequencyChoices);
+                }
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return note;
+    }
+
     public void updateNoteFromUserList(@NonNull SingleNote note, @NonNull ChangesInNote changes) {
 
         ContentValues values = new ContentValues();
@@ -350,6 +389,38 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return noteList;
     } // getArchiveNotes() end
 
+    @Nullable
+    SingleNote getAnArchiveNote(int id) {
+        String selectQuery = "SELECT * FROM " + TABLE_ARCHIVE + " WHERE ROWID = " + id;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        SingleNote note = null;
+
+        if (cursor.moveToFirst()) {
+            do {
+                note = new SingleNote();
+                note.set_id(cursor.getInt(0));
+                note.set_title(cursor.getString(1));
+                note.set_content(cursor.getString(2));
+                note.set_timeCreated(cursor.getLong(3));
+                note.set_timeModified(cursor.getLong(4));
+                note.set_reminderId(cursor.getInt(5));
+
+                if (note.get_reminderId() != -1) {
+                    NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
+                    note.set_nextReminderTime(temp.nextReminderTime);
+                    note.set_hasFrequencyChoices(temp.hasFrequencyChoices);
+                }
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+
+        return note;
+    }
+
     public void updateNoteFromArchive(@NonNull SingleNote note, @NonNull ChangesInNote changes) {
 
         ContentValues values = new ContentValues();
@@ -448,6 +519,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
         return noteList;
     } // getRecycleBinNotes() end
+
+    @Nullable
+    public SingleNote getARecycleBinNote(int id) {
+        String selectQuery = "SELECT * FROM " + TABLE_ARCHIVE + " WHERE ROWID = " + id;
+
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        SingleNote note = null;
+        if (cursor.moveToFirst()) {
+            do {
+                note = new SingleNote();
+                note.set_id(cursor.getInt(0));
+                note.set_title(cursor.getString(1));
+                note.set_content(cursor.getString(2));
+                note.set_timeCreated(cursor.getLong(3));
+                note.set_timeModified(cursor.getLong(4));
+
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        return note;
+    }
 
     public void addNoteToRecycleBin(@NonNull SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();

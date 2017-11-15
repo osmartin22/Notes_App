@@ -8,13 +8,20 @@ public interface NoteEditorView {
 
     void setupNoteEditTexts(@NonNull SingleNote note);
 
-    void displayReminder(@NonNull SingleNote note);
+    void showReminder(@NonNull SingleNote note, long reminderTime);
 
-    void updateDisplayReminder(@NonNull String newReminderText, @Nullable FrequencyChoices choices);
+    void hideReminder();
+
+    void updateReminderDisplay(@NonNull String newReminderText, @Nullable FrequencyChoices choices);
+
+    void goBackToMainActivity(@Nullable SingleNote note, int result);
+
+    void updateFavoriteIcon(boolean favorite);
+
+    void requestFocusOnContent();
+
 
     void setupReminder(@NonNull SingleNote note);
 
     void cancelReminder(int noteId);
-
-    void noteResult(@Nullable SingleNote note, int result);
 }

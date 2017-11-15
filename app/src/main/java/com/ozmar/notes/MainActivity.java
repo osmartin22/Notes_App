@@ -72,6 +72,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
+
+        int id = note != null ? note.get_id() : -1;
+        intent.putExtra("Note ID", id);
+
         intent.putExtra(getString(R.string.noteIntent), note);
         intent.putExtra(getString(R.string.notePositionIntent), position);
         intent.putExtra(getString(R.string.listUsedIntent), listUsed);
