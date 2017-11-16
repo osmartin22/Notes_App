@@ -30,7 +30,7 @@ public class UpdateNoteAsync extends AsyncTask<Void, Void, Void> {
     protected Void doInBackground(Void... voids) {
 
         // TODO: Implement being able to pass a list
-        if (listUsed == 0) {
+        if (listUsed == 0 || listUsed == 1) {
             db.updateNoteFromUserList(note, changes);
         } else if (listUsed == 2) {
             db.updateNoteFromArchive(note, changes);

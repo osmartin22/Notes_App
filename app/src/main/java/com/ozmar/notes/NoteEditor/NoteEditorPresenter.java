@@ -1,10 +1,13 @@
-package com.ozmar.notes;
+package com.ozmar.notes.NoteEditor;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.ozmar.notes.ChangesInNote;
+import com.ozmar.notes.DatabaseHandler;
+import com.ozmar.notes.FrequencyChoices;
+import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.async.UpdateNoteAsync;
-import com.ozmar.notes.utils.NoteChanges;
 
 
 public class NoteEditorPresenter {
@@ -16,14 +19,13 @@ public class NoteEditorPresenter {
     private static final int RECYCLE_BIN_NOTES = 3;
 
     private int listUsed;
-    private SingleNote mNote;
     private long reminderTime = 0;
     private boolean favorite = false;
     private boolean frequencyChanged = false;
+
+    private SingleNote mNote;
+    private ChangesInNote mChangesInNote;
     private FrequencyChoices mFrequencyChoices;
-
-
-    private ChangesInNote mChangesInNote;   // TODO: Can probably be more local
 
     public NoteEditorPresenter(NoteEditorView noteEditorView) {
         this.noteEditorView = noteEditorView;
@@ -49,25 +51,16 @@ public class NoteEditorPresenter {
         return mFrequencyChoices;
     }
 
-
     public void initialize(DatabaseHandler db, int noteId, int listUsed) {
         this.listUsed = listUsed;
         requestNote(db, noteId);
 
         if (mNote != null) {
 
-
-            if (listUsed == ARCHIVE_NOTES && mNote.is_favorite()) {
-                favorite = false;
-                mNote.set_favorite(false);
-            } else {
-                favorite = mNote.is_favorite();
-            }
-
-
+            favorite = mNote.is_favorite();
             noteEditorView.setupNoteEditTexts(mNote);
-            if (mNote.get_reminderId() != -1) {
 
+            if (mNote.get_reminderId() != -1) {
 
                 mFrequencyChoices = db.getFrequencyChoice(mNote.get_reminderId());
                 reminderTime = mNote.get_nextReminderTime();
@@ -128,18 +121,18 @@ public class NoteEditorPresenter {
     }
 
     public void onSaveNote(@NonNull String title, @NonNull String content, @NonNull DatabaseHandler db) {
-        int result = 0;
+        int result = -1;
 
         if (listUsed == ARCHIVE_NOTES) {
-            onFavoriteClicked();
+            favorite = false;
         }
 
         if (mNote != null) {
             result = update(mNote, title, content);
-            saveReminder(db, mNote, reminderTime);
+            updateReminder(db, mNote, reminderTime);
             new UpdateNoteAsync(db, null, mNote, listUsed, mChangesInNote).execute();
-        } else {
 
+        } else {
             boolean titleEmpty = title.isEmpty();
             boolean contentEmpty = content.isEmpty();
             if (!(titleEmpty && contentEmpty)) {    // New note
@@ -149,13 +142,13 @@ public class NoteEditorPresenter {
         }
 
         // TODO: Change to create bundle in presenter before sending to View
-        noteEditorView.goBackToMainActivity(mNote, result);
+        noteEditorView.goBackToMainActivity(mNote, result, listUsed);
     }
 
 
     private int update(@NonNull SingleNote note, @NonNull String title, @NonNull String content) {
 
-        int result;
+        int result = -1;
         mChangesInNote = checkForDifferences(note, title, content);
 
         if (mChangesInNote.checkIfAllValuesFalse()) {
@@ -177,16 +170,16 @@ public class NoteEditorPresenter {
             note.set_timeModified(System.currentTimeMillis());
         }
 
-        if (listUsed == FAVORITE_NOTES && mChangesInNote.isFavoriteChanged()) {       // Note not a favorite anymore
+        if (listUsed == FAVORITE_NOTES && mChangesInNote.isFavoriteChanged()) {
             result = 3;
-        } else {
+        } else if (mChangesInNote.checkIfAllValuesFalse()) {
             result = 0;
         }
 
         return result;
     }
 
-    private void saveReminder(@NonNull DatabaseHandler db, @NonNull SingleNote note, long reminderTime) {
+    private void updateReminder(@NonNull DatabaseHandler db, @NonNull SingleNote note, long reminderTime) {
 
         if (mFrequencyChoices != null) {
             note.set_hasFrequencyChoices(true);
@@ -211,9 +204,9 @@ public class NoteEditorPresenter {
                 note.set_nextReminderTime(reminderTime);
 
                 // Updating reminder
-            } else {
-                // TODO: Temp solution
+            } else if (frequencyChanged) {
                 db.updateReminder(note.get_reminderId(), mFrequencyChoices, reminderTime);
+
             }
         }
     }
@@ -221,7 +214,6 @@ public class NoteEditorPresenter {
     public void onDestroy() {
         noteEditorView = null;
     }
-
 
     public void onReminderPicked(@Nullable FrequencyChoices choices, long nextReminderTime,
                                  @NonNull String newReminderText) {
@@ -243,87 +235,6 @@ public class NoteEditorPresenter {
         noteEditorView.hideReminder();
     }
 
-
-    public void testMenu() {
-
-    }
-
-
-    public void updateNote(@NonNull SingleNote note, @Nullable NoteChanges noteChanges,
-                           @NonNull String title, @NonNull String content) {
-        boolean titleTheSame = title.equals(note.get_title());
-        boolean contentTheSame = content.equals(note.get_content());
-
-        int changeNumber;
-        if (!(titleTheSame && contentTheSame)) {
-            if (titleTheSame) {
-                changeNumber = 2;
-                note.set_content(content);
-            } else if (contentTheSame) {
-                changeNumber = 1;
-                note.set_title(title);
-            } else {
-                changeNumber = 3;
-                note.set_title(title);
-                note.set_content(content);
-            }
-
-            if (noteChanges != null) {
-                noteChanges.setNoteTextChanges(changeNumber);
-            }
-
-            note.set_timeModified(System.currentTimeMillis());
-        }
-    }
-
-    public void saveReminder(@NonNull DatabaseHandler db, @NonNull SingleNote note,
-                             @Nullable NoteChanges changes, long reminderTime) {
-
-        boolean idChanged = false;
-
-        if (mFrequencyChoices != null) {
-            note.set_hasFrequencyChoices(true);
-        } else {
-            note.set_hasFrequencyChoices(false);
-        }
-
-        // New reminder
-        if (note.get_reminderId() == -1 && reminderTime != 0) {
-            idChanged = true;
-            int newId = db.addReminder(mFrequencyChoices, reminderTime);
-            note.set_nextReminderTime(reminderTime);
-            note.set_reminderId(newId);
-            noteEditorView.setupReminder(note);
-
-        } else if (note.get_reminderId() != -1) {
-
-            // Delete reminder
-            if (reminderTime == 0) {
-                idChanged = true;
-                noteEditorView.cancelReminder(note.get_reminderId());
-                db.deleteReminder(note.get_reminderId());
-                note.set_reminderId(-1);
-                note.set_nextReminderTime(reminderTime);
-
-                // Updating reminder
-            } else {
-                if (reminderTime != note.get_nextReminderTime()) {
-                    note.set_nextReminderTime(reminderTime);
-                    noteEditorView.setupReminder(note);
-                    db.updateReminder(note.get_reminderId(), mFrequencyChoices, reminderTime);
-
-                } else if (changes != null && changes.isFrequencyChoiceChanged()) {
-                    db.updateReminder(note.get_reminderId(), mFrequencyChoices, reminderTime);
-                }
-            }
-        }
-
-        if (changes != null) {
-            changes.setReminderIdChanged(idChanged);
-        }
-
-    }
-
     private void requestNote(DatabaseHandler db, int noteId) {
         if (noteId != -1) {
             if (listUsed == 0 || listUsed == 1) {
@@ -334,5 +245,5 @@ public class NoteEditorPresenter {
                 mNote = db.getARecycleBinNote(noteId);
             }
         }
-    }   // TODO: Should be in model
+    }
 }

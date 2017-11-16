@@ -1,4 +1,4 @@
-package com.ozmar.notes;
+package com.ozmar.notes.NoteEditor;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -14,6 +14,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.ozmar.notes.FrequencyChoices;
+import com.ozmar.notes.MainActivity;
+import com.ozmar.notes.R;
+import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.databinding.ActivityNoteEditorBinding;
 import com.ozmar.notes.notifications.ReminderManager;
@@ -36,7 +40,7 @@ public class NoteEditorActivity extends AppCompatActivity
     private int notePosition;
     private String[] noteResult;
 
-    int menuActionClickedId = -1;
+    private int menuActionClickedId = -1;
     private MenuItem favoriteIcon;
 
     private ActivityNoteEditorBinding mBinding;
@@ -55,7 +59,7 @@ public class NoteEditorActivity extends AppCompatActivity
         noteEditorPresenter = new NoteEditorPresenter(NoteEditorActivity.this);
 
         Intent intent = getIntent();
-        int noteId = intent.getIntExtra("Note ID", -1);
+        int noteId = intent.getIntExtra(getString(R.string.noteIdIntent), -1);
         int listUsed = intent.getIntExtra(getString(R.string.listUsedIntent), USER_NOTES);
         notePosition = intent.getIntExtra(getString(R.string.notePositionIntent), -1);
         noteEditorPresenter.initialize(db, noteId, listUsed);
@@ -131,7 +135,7 @@ public class NoteEditorActivity extends AppCompatActivity
         return false;
     }
 
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
     public void addReminder(View view) {
         long time = noteEditorPresenter.getReminderTime();
         FrequencyChoices choices = noteEditorPresenter.getFrequencyChoices();
@@ -152,7 +156,6 @@ public class NoteEditorActivity extends AppCompatActivity
         noteEditorPresenter.onSaveNote(title, content, db);
     }
 
-    // TODO: Update to not use context to be able to call in presenter(FormatUtils)
     @Override
     public void onReminderPicked(@NonNull DateTime dateTime, @Nullable FrequencyChoices choices) {
         String newReminderText = FormatUtils.getReminderText(getApplication(), dateTime);
@@ -170,7 +173,7 @@ public class NoteEditorActivity extends AppCompatActivity
                 .setMessage(getString(R.string.messageDialog))
                 .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
                     new BasicDBAsync(db, null, note, listUsed, 3).execute();
-                    goBackToMainActivity(note, 2);
+                    goBackToMainActivity(note, 2, listUsed);
                     finish();
                 })
                 .setNegativeButton(getString(R.string.cancelDialog), null)
@@ -192,8 +195,6 @@ public class NoteEditorActivity extends AppCompatActivity
         mBinding.editTextContent.setText(note.get_content());
         mBinding.editTextContent.setFocusable(false);
 
-        // Keyboard does not pop up until the user clicks on the screen
-        // allowing the user to see the entire note at the StartForNextRepeat
         View.OnTouchListener editTextListener = (view, motionEvent) -> {
             if (noteEditorPresenter.getListUsed() == RECYCLE_BIN_NOTES) {
                 Toast.makeText(getApplicationContext(), "Can't edit in Trash", Toast.LENGTH_SHORT).show();
@@ -254,23 +255,20 @@ public class NoteEditorActivity extends AppCompatActivity
     }
 
     @Override
-    public void goBackToMainActivity(@Nullable SingleNote note, int result) {
-        if (result != -1 && note != null) {
-            String value = noteResult[result];
-
+    public void goBackToMainActivity(@Nullable SingleNote note, int result, int listUsed) {
+        if (note != null) {
             Intent intent = new Intent(NoteEditorActivity.this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
-            if (value.equals(noteResult[1])) {
-                if (noteEditorPresenter.getFavorite()) {
-                    intent.putExtra(getString(R.string.isFavoriteIntent), true);
-                }
-            }
-
-            intent.putExtra(getString(R.string.noteSuccessIntent), value);
+            intent.putExtra(getString(R.string.listUsedIntent), listUsed);
+            intent.putExtra(getString(R.string.noteIdIntent), note.get_id());
             intent.putExtra(getString(R.string.notePositionIntent), notePosition);
+            intent.putExtra(getString(R.string.noteSuccessIntent), result);
 
-            intent.putExtra("Note ID", note.get_id());
+            if (result != -1 && noteResult[result].equals(noteResult[1])
+                    && noteEditorPresenter.getFavorite()) {
+                intent.putExtra(getString(R.string.isFavoriteIntent), true);
+            }
 
             checkIfMenuActionClicked(intent);
             setResult(RESULT_OK, intent);

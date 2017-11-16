@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.ozmar.notes.NoteEditor.NoteEditorActivity;
 import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.DoMenuActionAsync;
@@ -44,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NotesAdapter notesAdapter;
     private RecyclerView rv;
 
-    static DatabaseHandler db;
+    public static DatabaseHandler db;
 
     private ActionMode actionMode;
     private final UndoBuffer buffer = new UndoBuffer();
@@ -76,11 +77,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
 
         int id = note != null ? note.get_id() : -1;
-        intent.putExtra("Note ID", id);
-
-        intent.putExtra(getString(R.string.noteIntent), note);
+        intent.putExtra(getString(R.string.noteIdIntent), id);
         intent.putExtra(getString(R.string.notePositionIntent), position);
         intent.putExtra(getString(R.string.listUsedIntent), listUsed);
+
         startActivityForResult(intent, 1);
     } // launchIntent() end
 
@@ -415,38 +415,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             if (bundle != null) {
 
-                int noteId = bundle.getInt("Note ID", 0);
-                int listUsed = notesAdapter.getListUsed();
+                int noteId = bundle.getInt(getString(R.string.noteIdIntent), -1);
                 int notePosition = bundle.getInt(getString(R.string.notePositionIntent), -1);
+                int listUsed = bundle.getInt(getString(R.string.listUsedIntent), notesAdapter.getListUsed());
+                int noteResult = bundle.getInt(getString(R.string.noteSuccessIntent), -1);
+                int noteEditorAction = bundle.getInt(getString(R.string.menuActionIntent), -1);
+
                 boolean isNewNote = notePosition == -1;
                 if (isNewNote) {
                     notePosition = 0;
                 }
 
-                SingleNote testNote = null;
-                if (noteId != -1) {
+                SingleNote note = null;
+                if (noteId != -1 && (noteEditorAction != -1 || noteResult != -1)) {
                     if (listUsed == 0 || listUsed == 1) {
-                        testNote = db.getAUserNote(noteId);
+                        note = db.getAUserNote(noteId);
                     } else if (listUsed == 2) {
-                        testNote = db.getAnArchiveNote(noteId);
+                        note = db.getAnArchiveNote(noteId);
                     } else if (listUsed == 3) {
-                        testNote = db.getARecycleBinNote(noteId);
+                        note = db.getARecycleBinNote(noteId);
                     }
                 }
 
-                assert testNote != null;
-                multiSelectHelper.setEditorAction(bundle.getInt(getString(R.string.menuActionIntent), -1));
-                if (multiSelectHelper.getEditorAction() != -1) {
-                    temp1(testNote, notePosition, isNewNote);
-                } else {
-                    temp2(bundle, testNote, notePosition, listUsed);
+                if (note != null) {
+                    if (noteEditorAction != -1) {
+                        multiSelectHelper.setEditorAction(noteEditorAction);
+                        menuItemClickedInNoteEditor(note, notePosition, isNewNote);
+                    } else {
+                        noteModifiedInNoteEditor(bundle, note, notePosition, listUsed, noteResult);
+                    }
                 }
             }
         }
     } // onActivityResult() end
 
 
-    private void temp1(@NonNull SingleNote note, int notePosition, boolean isNewNote) {
+    private void menuItemClickedInNoteEditor(@NonNull SingleNote note, int notePosition, boolean isNewNote) {
         buffer.bufferToStartProcessing();
         if (buffer.isBufferAvailable()) {
             buffer.swapBuffer();
@@ -469,28 +473,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void temp2(@NonNull Bundle bundle, @NonNull SingleNote note, int notePosition, int listUsed) {
-        // TODO: Change to fetch note from database instead
-        // TODO: Make sure I don't unnecessarily read from the database if nothing is changed
-        String[] noteResult = getResources().getStringArray(R.array.noteResultArray);
+    private void noteModifiedInNoteEditor(@NonNull Bundle bundle, @NonNull SingleNote note,
+                                          int notePosition, int listUsed, int noteModifiedResult) {
+        String[] noteResultArray = getResources().getStringArray(R.array.noteResultArray);
 
-        String save = bundle.getString(getString(R.string.noteSuccessIntent), "");
+        String result = noteResultArray[noteModifiedResult];
         boolean favorite = bundle.getBoolean(getString(R.string.isFavoriteIntent), false);
 
-        if (save.equals(noteResult[0])) {    // Update rv with noteChanges to the note
+        if (result.equals(noteResultArray[0])) {    // Update rv with noteChanges to the note
             notesAdapter.updateAt(notePosition, note);
 
-        } else if (save.equals(noteResult[1])) {    // Update rv with new note
+        } else if (result.equals(noteResultArray[1])) {    // Update rv with new note
             if (listUsed == 0) {
                 notesAdapter.addAt(notePosition, note);
             } else if (listUsed == 1 && favorite) {
                 notesAdapter.addAt(notePosition, note);
             }
 
-        } else if (save.equals(noteResult[2])) {    // Remove note from rv (Delete Forever)
+        } else if (result.equals(noteResultArray[2])) {    // Remove note from rv (Delete Forever)
             notesAdapter.removeAt(notePosition);
 
-        } else if (save.equals(noteResult[3])) {    // Title/Content not modified but note is no longer a favorite
+        } else if (result.equals(noteResultArray[3])) {    // Title/Content not modified but note is no longer a favorite
             if (listUsed == 1) {
                 notesAdapter.removeAt(notePosition);
             }

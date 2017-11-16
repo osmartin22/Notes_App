@@ -120,6 +120,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
+    public class NextReminderTime {
+        public final long nextReminderTime;
+        public final boolean hasFrequencyChoices;
+
+        public NextReminderTime(long nextReminderTime, boolean hasFrequencyChoices) {
+            this.nextReminderTime = nextReminderTime;
+            this.hasFrequencyChoices = hasFrequencyChoices;
+        }
+    }
+
     public int getNotesCount(int table) {
         String countQuery;
         if (table == 0) {
@@ -390,7 +400,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     } // getArchiveNotes() end
 
     @Nullable
-    SingleNote getAnArchiveNote(int id) {
+    public SingleNote getAnArchiveNote(int id) {
         String selectQuery = "SELECT * FROM " + TABLE_ARCHIVE + " WHERE ROWID = " + id;
 
         SQLiteDatabase db = this.getReadableDatabase();

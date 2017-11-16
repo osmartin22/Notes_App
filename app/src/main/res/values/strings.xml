@@ -3,13 +3,12 @@
 
     <!-- Strings used for intents -->
     <!-- Used to pass data to MainActivity from NoteEditorActivity -->
-    <string name="noteIntent">Note</string>
+    <string name="noteIdIntent">Note ID</string>
     <string name="notePositionIntent">Note Position</string>
     <string name="listUsedIntent">List Used</string>
 
     <!-- Used to pass data from NoteEditorActivity from MainActivity -->
     <string name="menuActionIntent">Menu Action Intent</string>
-    <string name="isNewNoteIntent">Is New Note Intent</string>
     <string name="isFavoriteIntent">Is Favorite Intent</string>
     <string name="noteSuccessIntent">Note Success</string>
 
