@@ -37,6 +37,8 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
 // TODO: When deleting an entire note, make sure the reminder is cancelled if it exists
 
+// TODO: Rewrite parts of Undo Buffer to treat archive buttons in MainActivity and NoteEditorActivity as the same action
+
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private NotesAdapter notesAdapter;
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             actionMode.finish();
         }
 
-        launchIntent(null, 0, notesAdapter.getListUsed());
+        launchIntent(null, -1, notesAdapter.getListUsed());
     } // launchNoteEditor() end
 
     private void launchIntent(SingleNote note, int position, int listUsed) {
@@ -412,64 +414,88 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Bundle bundle = data.getExtras();
 
             if (bundle != null) {
+
+                int noteId = bundle.getInt("Note ID", 0);
+                int listUsed = notesAdapter.getListUsed();
+                int notePosition = bundle.getInt(getString(R.string.notePositionIntent), -1);
+                boolean isNewNote = notePosition == -1;
+                if (isNewNote) {
+                    notePosition = 0;
+                }
+
+                SingleNote testNote = null;
+                if (noteId != -1) {
+                    if (listUsed == 0 || listUsed == 1) {
+                        testNote = db.getAUserNote(noteId);
+                    } else if (listUsed == 2) {
+                        testNote = db.getAnArchiveNote(noteId);
+                    } else if (listUsed == 3) {
+                        testNote = db.getARecycleBinNote(noteId);
+                    }
+                }
+
+                assert testNote != null;
                 multiSelectHelper.setEditorAction(bundle.getInt(getString(R.string.menuActionIntent), -1));
                 if (multiSelectHelper.getEditorAction() != -1) {
-
-                    buffer.bufferToStartProcessing();
-                    if (buffer.isBufferAvailable()) {
-                        buffer.swapBuffer();
-
-                        multiSelectHelper.setNewNoteAction(bundle.getInt(getString(R.string.isNewNoteIntent), -1));
-                        buffer.addDataToBuffer(bundle.getParcelable(getString(R.string.noteIntent)),
-                                bundle.getInt(getString(R.string.notePositionIntent), 0));
-
-                        if (multiSelectHelper.getNewNoteAction() != 1) {
-                            notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
-                        }
-
-                        showSnackBar(null, multiSelectHelper.getEditorAction());
-
-
-                    } else {        // Buffer full
-                        multiSelectHelper.setEditorAction(-1);
-                        multiSelectHelper.setNewNoteAction(-1);
-                        Toast.makeText(getApplicationContext(),
-                                getString(R.string.bufferFull), Toast.LENGTH_SHORT).show();
-                    }
-
+                    temp1(testNote, notePosition, isNewNote);
                 } else {
-
-                    String[] noteResult = getResources().getStringArray(R.array.noteResultArray);
-
-                    String save = bundle.getString(getString(R.string.noteSuccessIntent), "");
-                    int position = bundle.getInt(getString(R.string.notePositionIntent), -1);
-                    boolean favorite = bundle.getBoolean(getString(R.string.isFavoriteIntent), false);
-                    SingleNote note = bundle.getParcelable(getString(R.string.noteIntent));
-                    int listUsed = notesAdapter.getListUsed();
-
-                    if (save.equals(noteResult[0])) {    // Update rv with noteChanges to the note
-                        notesAdapter.updateAt(position, note);
-
-                    } else if (save.equals(noteResult[1])) {    // Update rv with new note
-                        if (listUsed == 0) {
-                            notesAdapter.addAt(position, note);
-                        } else if (listUsed == 1 && favorite) {
-                            notesAdapter.addAt(position, note);
-                        }
-
-                    } else if (save.equals(noteResult[2])) {    // Remove note from rv (Delete Forever)
-                        notesAdapter.removeAt(position);
-
-                    } else if (save.equals(noteResult[3])) {    // Title/Content not modified but note is no longer a favorite
-                        if (listUsed == 1) {
-                            notesAdapter.removeAt(position);
-                        }
-                    }
-
+                    temp2(bundle, testNote, notePosition, listUsed);
                 }
             }
         }
     } // onActivityResult() end
+
+
+    private void temp1(@NonNull SingleNote note, int notePosition, boolean isNewNote) {
+        buffer.bufferToStartProcessing();
+        if (buffer.isBufferAvailable()) {
+            buffer.swapBuffer();
+
+            multiSelectHelper.setNewNoteAction(isNewNote ? 1 : -1);
+            buffer.addDataToBuffer(note, notePosition);
+
+            if (multiSelectHelper.getNewNoteAction() != 1) {
+                notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+            }
+
+            showSnackBar(null, multiSelectHelper.getEditorAction());
+
+
+        } else {        // Buffer full
+            multiSelectHelper.setEditorAction(-1);
+            multiSelectHelper.setNewNoteAction(-1);
+            Toast.makeText(getApplicationContext(),
+                    getString(R.string.bufferFull), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void temp2(@NonNull Bundle bundle, @NonNull SingleNote note, int notePosition, int listUsed) {
+        // TODO: Change to fetch note from database instead
+        // TODO: Make sure I don't unnecessarily read from the database if nothing is changed
+        String[] noteResult = getResources().getStringArray(R.array.noteResultArray);
+
+        String save = bundle.getString(getString(R.string.noteSuccessIntent), "");
+        boolean favorite = bundle.getBoolean(getString(R.string.isFavoriteIntent), false);
+
+        if (save.equals(noteResult[0])) {    // Update rv with noteChanges to the note
+            notesAdapter.updateAt(notePosition, note);
+
+        } else if (save.equals(noteResult[1])) {    // Update rv with new note
+            if (listUsed == 0) {
+                notesAdapter.addAt(notePosition, note);
+            } else if (listUsed == 1 && favorite) {
+                notesAdapter.addAt(notePosition, note);
+            }
+
+        } else if (save.equals(noteResult[2])) {    // Remove note from rv (Delete Forever)
+            notesAdapter.removeAt(notePosition);
+
+        } else if (save.equals(noteResult[3])) {    // Title/Content not modified but note is no longer a favorite
+            if (listUsed == 1) {
+                notesAdapter.removeAt(notePosition);
+            }
+        }
+    }
 
     @Override
     protected void onStop() {

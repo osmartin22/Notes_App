@@ -28,7 +28,7 @@ import static com.ozmar.notes.MainActivity.db;
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener, NoteEditorView {
 
-    private static final int All_NOTES = 0;
+    private static final int USER_NOTES = 0;
     private static final int FAVORITE_NOTES = 1;
     private static final int ARCHIVE_NOTES = 2;
     private static final int RECYCLE_BIN_NOTES = 3;
@@ -36,56 +36,12 @@ public class NoteEditorActivity extends AppCompatActivity
     private int notePosition;
     private String[] noteResult;
 
+    int menuActionClickedId = -1;
     private MenuItem favoriteIcon;
 
     private ActivityNoteEditorBinding mBinding;
     private NoteEditorPresenter noteEditorPresenter;
 
-//    private void contextualActionResult(@NonNull MenuItem item, @Nullable SingleNote note, long reminderTime) {
-//
-//        String title = mBinding.editTextTitle.getText().toString();
-//        String content = mBinding.editTextContent.getText().toString();
-//
-//        if (!(title.isEmpty() && content.isEmpty() && note == null)) {
-//            Intent intent = new Intent(NoteEditorActivity.this, MainActivity.class);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//
-//            if (note != null) {
-//                note.set_favorite(noteEditorPresenter.getFavorite());
-//
-//
-//                noteEditorPresenter.onSaveNote(note, title, content, listUsed, db);
-//
-////                noteEditorPresenter.updateNote(note, null, title, content);
-//                noteEditorPresenter.saveReminder(db, note, null, reminderTime);
-//
-//            } else {
-//                note = noteEditorPresenter.createNewNote(db, title, content);
-//                intent.putExtra(getString(R.string.isNewNoteIntent), 1);
-//            }
-//
-//            switch (item.getItemId()) {
-//                case R.id.archive_note:
-//                    intent.putExtra(getString(R.string.menuActionIntent), 0);
-//                    break;
-//                case R.id.unarchive_note:
-//                    intent.putExtra(getString(R.string.menuActionIntent), 1);
-//                    break;
-//                case R.id.delete_note:
-//                    intent.putExtra(getString(R.string.menuActionIntent), 2);
-//                    break;
-//                case R.id.restore_note:
-//                    intent.putExtra(getString(R.string.menuActionIntent), 3);
-//                    break;
-//            }
-//
-//            intent.putExtra(getString(R.string.notePositionIntent), notePosition);
-//            intent.putExtra(getString(R.string.noteIntent), note);
-//            setResult(RESULT_OK, intent);
-//        }
-//
-//        finish();   // Only allow undo for notes that are not new
-//    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,14 +51,13 @@ public class NoteEditorActivity extends AppCompatActivity
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_note_editor);
         setupToolbar();
 
-        Intent intent = getIntent();
-        int noteId = intent.getIntExtra("Note ID", -1);
-        notePosition = intent.getIntExtra(getString(R.string.notePositionIntent), 0);
-
         noteResult = getResources().getStringArray(R.array.noteResultArray);
         noteEditorPresenter = new NoteEditorPresenter(NoteEditorActivity.this);
 
-        int listUsed = intent.getIntExtra(getString(R.string.listUsedIntent), All_NOTES);
+        Intent intent = getIntent();
+        int noteId = intent.getIntExtra("Note ID", -1);
+        int listUsed = intent.getIntExtra(getString(R.string.listUsedIntent), USER_NOTES);
+        notePosition = intent.getIntExtra(getString(R.string.notePositionIntent), -1);
         noteEditorPresenter.initialize(db, noteId, listUsed);
     }
 
@@ -114,24 +69,11 @@ public class NoteEditorActivity extends AppCompatActivity
         getSupportActionBar().setDisplayShowHomeEnabled(true);
     }
 
-
-    private void onSaveNote() {
-        String title = mBinding.editTextTitle.getText().toString();
-        String content = mBinding.editTextContent.getText().toString();
-        int result = noteEditorPresenter.onSaveNote(title, content, db);
-        goBackToMainActivity(noteEditorPresenter.getNote(), result);                // TODO: Change this so that presenter handles the call
-    }
-
-    @Override
-    public void onBackPressed() {
-        onSaveNote();
-        super.onBackPressed();
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.note_editor_menu, menu);
+        favoriteIcon = menu.findItem(R.id.favorite_note);
         setupToolbarIcons(noteEditorPresenter.getNote(), menu, noteEditorPresenter.getListUsed());
         return super.onCreateOptionsMenu(menu);
     }
@@ -166,7 +108,6 @@ public class NoteEditorActivity extends AppCompatActivity
                 return true;
 
             case R.id.favorite_note:
-                favoriteIcon = item;
                 noteEditorPresenter.onFavoriteClicked();
                 return true;
 
@@ -182,21 +123,12 @@ public class NoteEditorActivity extends AppCompatActivity
             case R.id.archive_note:
             case R.id.unarchive_note:
             case R.id.restore_note:
-//                contextualActionResult(item, noteEditorPresenter.getNote(),
-//                        noteEditorPresenter.getReminderTime());
+                menuActionClickedId = item.getItemId();
+                onSaveNote();
                 return true;
         }
 
         return false;
-    }
-
-    @Override
-    public void updateFavoriteIcon(boolean favorite) {
-        if (favorite) {
-            favoriteIcon.setIcon(R.drawable.ic_favorite_star_on);
-        } else {
-            favoriteIcon.setIcon(R.drawable.ic_favorite_star_off);
-        }
     }
 
     @SuppressWarnings("WeakerAccess")
@@ -209,8 +141,21 @@ public class NoteEditorActivity extends AppCompatActivity
     }
 
     @Override
+    public void onBackPressed() {
+        onSaveNote();
+        super.onBackPressed();
+    }
+
+    private void onSaveNote() {
+        String title = mBinding.editTextTitle.getText().toString();
+        String content = mBinding.editTextContent.getText().toString();
+        noteEditorPresenter.onSaveNote(title, content, db);
+    }
+
+    // TODO: Update to not use context to be able to call in presenter(FormatUtils)
+    @Override
     public void onReminderPicked(@NonNull DateTime dateTime, @Nullable FrequencyChoices choices) {
-        String newReminderText = FormatUtils.getReminderText(getApplication(), dateTime);       // TODO: Update to not use context to be able to call in presenter
+        String newReminderText = FormatUtils.getReminderText(getApplication(), dateTime);
         noteEditorPresenter.onReminderPicked(choices, dateTime.getMillis(), newReminderText);
     }
 
@@ -219,7 +164,7 @@ public class NoteEditorActivity extends AppCompatActivity
         noteEditorPresenter.onReminderDeleted();
     }
 
-    // TODO:Make on click call presenter to delete note with Model
+    // TODO: Make on click call presenter to delete note with Model
     private void deleteNoteForever(@NonNull SingleNote note, int listUsed) {
         new AlertDialog.Builder(NoteEditorActivity.this)
                 .setMessage(getString(R.string.messageDialog))
@@ -232,6 +177,10 @@ public class NoteEditorActivity extends AppCompatActivity
                 .show();
     }
 
+    @Override
+    public void requestFocusOnContent() {
+        mBinding.editTextContent.requestFocus();
+    }
 
     @Override
     public void setupNoteEditTexts(@NonNull SingleNote note) {
@@ -276,6 +225,15 @@ public class NoteEditorActivity extends AppCompatActivity
     }
 
     @Override
+    public void updateFavoriteIcon(boolean favorite) {
+        if (favorite) {
+            favoriteIcon.setIcon(R.drawable.ic_favorite_star_on);
+        } else {
+            favoriteIcon.setIcon(R.drawable.ic_favorite_star_off);
+        }
+    }
+
+    @Override
     public void updateReminderDisplay(@NonNull String newReminderText,
                                       @Nullable FrequencyChoices choices) {
         if (choices == null) {
@@ -290,11 +248,14 @@ public class NoteEditorActivity extends AppCompatActivity
         mBinding.reminderText.setVisibility(View.VISIBLE);
     }
 
-    // TODO: Rename possibly
-    // Change returned values to take into account fetching note from DB instead of passing through intent
+    @Override
+    public void hideReminder() {
+        mBinding.reminderText.setVisibility(View.INVISIBLE);
+    }
+
     @Override
     public void goBackToMainActivity(@Nullable SingleNote note, int result) {
-        if (result != 0 && note != null) {
+        if (result != -1 && note != null) {
             String value = noteResult[result];
 
             Intent intent = new Intent(NoteEditorActivity.this, MainActivity.class);
@@ -308,33 +269,40 @@ public class NoteEditorActivity extends AppCompatActivity
 
             intent.putExtra(getString(R.string.noteSuccessIntent), value);
             intent.putExtra(getString(R.string.notePositionIntent), notePosition);
-            intent.putExtra(getString(R.string.noteIntent), note);
 
             intent.putExtra("Note ID", note.get_id());
 
+            checkIfMenuActionClicked(intent);
             setResult(RESULT_OK, intent);
         }
+
+        finish();
     }
 
+    private void checkIfMenuActionClicked(Intent intent) {
+        if (menuActionClickedId != -1) {
+            switch (menuActionClickedId) {
+                case R.id.archive_note:
+                    intent.putExtra(getString(R.string.menuActionIntent), 0);
+                    break;
+                case R.id.unarchive_note:
+                    intent.putExtra(getString(R.string.menuActionIntent), 1);
+                    break;
+                case R.id.delete_note:
+                    intent.putExtra(getString(R.string.menuActionIntent), 2);
+                    break;
+                case R.id.restore_note:
+                    intent.putExtra(getString(R.string.menuActionIntent), 3);
+                    break;
+            }
+        }
+    }
 
     @Override
     protected void onDestroy() {
         noteEditorPresenter.onDestroy();
         super.onDestroy();
     }
-
-
-    @Override
-    public void hideReminder() {
-        mBinding.reminderText.setVisibility(View.INVISIBLE);
-    }
-
-    @Override
-    public void requestFocusOnContent() {
-        mBinding.editTextContent.requestFocus();
-    }
-
-
 
 
     // TODO: Remove and add to Model

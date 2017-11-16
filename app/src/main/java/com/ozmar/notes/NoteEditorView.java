@@ -20,7 +20,6 @@ public interface NoteEditorView {
 
     void requestFocusOnContent();
 
-
     void setupReminder(@NonNull SingleNote note);
 
     void cancelReminder(int noteId);

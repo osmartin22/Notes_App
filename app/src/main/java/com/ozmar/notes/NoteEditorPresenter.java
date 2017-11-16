@@ -10,7 +10,7 @@ import com.ozmar.notes.utils.NoteChanges;
 public class NoteEditorPresenter {
     private NoteEditorView noteEditorView;
 
-    private static final int All_NOTES = 0;
+    private static final int USER_NOTES = 0;
     private static final int FAVORITE_NOTES = 1;
     private static final int ARCHIVE_NOTES = 2;
     private static final int RECYCLE_BIN_NOTES = 3;
@@ -127,13 +127,12 @@ public class NoteEditorPresenter {
 
     }
 
-    public int onSaveNote(@NonNull String title, @NonNull String content, @NonNull DatabaseHandler db) {
+    public void onSaveNote(@NonNull String title, @NonNull String content, @NonNull DatabaseHandler db) {
         int result = 0;
 
         if (listUsed == ARCHIVE_NOTES) {
-            onFavoriteClicked();        // TODO: Possible change
+            onFavoriteClicked();
         }
-
 
         if (mNote != null) {
             result = update(mNote, title, content);
@@ -150,7 +149,7 @@ public class NoteEditorPresenter {
         }
 
         // TODO: Change to create bundle in presenter before sending to View
-        return result;
+        noteEditorView.goBackToMainActivity(mNote, result);
     }
 
 
@@ -245,12 +244,9 @@ public class NoteEditorPresenter {
     }
 
 
+    public void testMenu() {
 
-
-
-
-
-
+    }
 
 
     public void updateNote(@NonNull SingleNote note, @Nullable NoteChanges noteChanges,
