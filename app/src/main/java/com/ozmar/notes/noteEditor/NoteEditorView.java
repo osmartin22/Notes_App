@@ -1,4 +1,4 @@
-package com.ozmar.notes.NoteEditor;
+package com.ozmar.notes.noteEditor;
 
 
 import android.support.annotation.NonNull;

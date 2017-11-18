@@ -20,7 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.ozmar.notes.NoteEditor.NoteEditorActivity;
+import com.ozmar.notes.noteEditor.NoteEditorActivity;
 import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.DoMenuActionAsync;
@@ -42,6 +42,12 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final int USER_NOTES = 0;
+    private static final int FAVORITE_NOTES = 1;
+    private static final int ARCHIVE_NOTES = 2;
+    private static final int RECYCLE_BIN_NOTES = 3;
+
     private NotesAdapter notesAdapter;
     private RecyclerView rv;
 
@@ -421,6 +427,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 int noteResult = bundle.getInt(getString(R.string.noteSuccessIntent), -1);
                 int noteEditorAction = bundle.getInt(getString(R.string.menuActionIntent), -1);
 
+                boolean noteIsFavorite = bundle.getBoolean(getString(R.string.noteIsFavoriteIntent), false);
+
                 boolean isNewNote = notePosition == -1;
                 if (isNewNote) {
                     notePosition = 0;
@@ -428,21 +436,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 SingleNote note = null;
                 if (noteId != -1 && (noteEditorAction != -1 || noteResult != -1)) {
-                    if (listUsed == 0 || listUsed == 1) {
+                    if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
                         note = db.getAUserNote(noteId);
-                    } else if (listUsed == 2) {
+                    } else if (listUsed == ARCHIVE_NOTES) {
                         note = db.getAnArchiveNote(noteId);
-                    } else if (listUsed == 3) {
+                    } else if (listUsed == RECYCLE_BIN_NOTES) {
                         note = db.getARecycleBinNote(noteId);
                     }
                 }
 
                 if (note != null) {
                     if (noteEditorAction != -1) {
+
+                        if (noteIsFavorite && listUsed == ARCHIVE_NOTES) {
+                            note.set_favorite(true);
+                        }
+
                         multiSelectHelper.setEditorAction(noteEditorAction);
                         menuItemClickedInNoteEditor(note, notePosition, isNewNote);
                     } else {
-                        noteModifiedInNoteEditor(bundle, note, notePosition, listUsed, noteResult);
+                        noteModifiedInNoteEditor(note, notePosition, listUsed, noteResult, noteIsFavorite);
                     }
                 }
             }
@@ -473,28 +486,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void noteModifiedInNoteEditor(@NonNull Bundle bundle, @NonNull SingleNote note,
-                                          int notePosition, int listUsed, int noteModifiedResult) {
-        String[] noteResultArray = getResources().getStringArray(R.array.noteResultArray);
+    private void noteModifiedInNoteEditor(@NonNull SingleNote note, int notePosition, int listUsed,
+                                          int noteModifiedResult, boolean noteIsFavorite) {
 
-        String result = noteResultArray[noteModifiedResult];
-        boolean favorite = bundle.getBoolean(getString(R.string.isFavoriteIntent), false);
 
-        if (result.equals(noteResultArray[0])) {    // Update rv with noteChanges to the note
+        if (noteModifiedResult == 0) {    // Update rv with noteChanges to the note
             notesAdapter.updateAt(notePosition, note);
 
-        } else if (result.equals(noteResultArray[1])) {    // Update rv with new note
+        } else if (noteModifiedResult == 1) {    // Update rv with new note
             if (listUsed == 0) {
                 notesAdapter.addAt(notePosition, note);
-            } else if (listUsed == 1 && favorite) {
+            } else if (listUsed == FAVORITE_NOTES && noteIsFavorite) {
                 notesAdapter.addAt(notePosition, note);
             }
 
-        } else if (result.equals(noteResultArray[2])) {    // Remove note from rv (Delete Forever)
+        } else if (noteModifiedResult == 2) {    // Remove note from rv (Delete Forever)
             notesAdapter.removeAt(notePosition);
 
-        } else if (result.equals(noteResultArray[3])) {    // Title/Content not modified but note is no longer a favorite
-            if (listUsed == 1) {
+        } else if (noteModifiedResult == 3) {    // Title/Content not modified but note is no longer a favorite
+            if (listUsed == FAVORITE_NOTES) {
                 notesAdapter.removeAt(notePosition);
             }
         }

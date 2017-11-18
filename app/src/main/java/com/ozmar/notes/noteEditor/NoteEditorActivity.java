@@ -1,4 +1,4 @@
-package com.ozmar.notes.NoteEditor;
+package com.ozmar.notes.noteEditor;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -38,9 +38,8 @@ public class NoteEditorActivity extends AppCompatActivity
     private static final int RECYCLE_BIN_NOTES = 3;
 
     private int notePosition;
-    private String[] noteResult;
-
     private int menuActionClickedId = -1;
+
     private MenuItem favoriteIcon;
 
     private ActivityNoteEditorBinding mBinding;
@@ -55,7 +54,6 @@ public class NoteEditorActivity extends AppCompatActivity
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_note_editor);
         setupToolbar();
 
-        noteResult = getResources().getStringArray(R.array.noteResultArray);
         noteEditorPresenter = new NoteEditorPresenter(NoteEditorActivity.this);
 
         Intent intent = getIntent();
@@ -197,7 +195,8 @@ public class NoteEditorActivity extends AppCompatActivity
 
         View.OnTouchListener editTextListener = (view, motionEvent) -> {
             if (noteEditorPresenter.getListUsed() == RECYCLE_BIN_NOTES) {
-                Toast.makeText(getApplicationContext(), "Can't edit in Trash", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), getString(R.string.editRecycleBinNote),
+                        Toast.LENGTH_SHORT).show();
             } else {
                 view.performClick();
                 view.setFocusableInTouchMode(true);
@@ -213,11 +212,11 @@ public class NoteEditorActivity extends AppCompatActivity
     @Override
     public void showReminder(@NonNull SingleNote note, long reminderTime) {
         if (note.hasFrequencyChoices()) {
-            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
-                    0, 0, 0);
+            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_repeat_dark_gray_small, 0, 0, 0);
         } else {
-            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
-                    0, 0, 0);
+            mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(
+                    R.drawable.ic_reminder_dark_gray_small, 0, 0, 0);
         }
 
         mBinding.reminderText.setVisibility(View.VISIBLE);
@@ -264,11 +263,7 @@ public class NoteEditorActivity extends AppCompatActivity
             intent.putExtra(getString(R.string.noteIdIntent), note.get_id());
             intent.putExtra(getString(R.string.notePositionIntent), notePosition);
             intent.putExtra(getString(R.string.noteSuccessIntent), result);
-
-            if (result != -1 && noteResult[result].equals(noteResult[1])
-                    && noteEditorPresenter.getFavorite()) {
-                intent.putExtra(getString(R.string.isFavoriteIntent), true);
-            }
+            intent.putExtra(getString(R.string.noteIsFavoriteIntent), note.is_favorite());
 
             checkIfMenuActionClicked(intent);
             setResult(RESULT_OK, intent);

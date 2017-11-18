@@ -147,7 +147,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         cursor.close();
 
         return count;
-    } // getNotesCount() end
+    }
 
 
     //--------------------------------------------------------------------------------------------//
@@ -190,7 +190,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         cursor.close();
         return noteList;
-    } // getUserNotes() end
+    }
 
     @Nullable
     public List<SingleNote> getFavoriteNotes() {
@@ -230,7 +230,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         cursor.close();
         return noteList;
-    } // getFavoriteNotes() end
+    }
 
     @Nullable
     public SingleNote getAUserNote(int id) {
@@ -322,14 +322,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_REMINDER_ID, note.get_reminderId());
 
         return (int) db.insert(TABLE_USER_NOTES, null, values);
-    } // addNoteToUserList() end
+    }
 
     public void deleteNoteFromUserList(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(TABLE_USER_NOTES, KEY_ID + " = ?",
                 new String[]{String.valueOf(id)});
-    } // deleteNoteFromUserList() end
+    }
 
     public void addListToUserList(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -361,7 +361,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.delete(TABLE_USER_NOTES, KEY_ID + " = ?",
                     new String[]{String.valueOf(note.get_id())});
         }
-    } // deleteListFromUserList() end
+    }
 
 
     //--------------------------------------------------------------------------------------------//
@@ -397,7 +397,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         cursor.close();
         return noteList;
-    } // getArchiveNotes() end
+    }
 
     @Nullable
     public SingleNote getAnArchiveNote(int id) {
@@ -467,14 +467,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_REMINDER_ID, note.get_reminderId());
 
         db.insert(TABLE_ARCHIVE, null, values);
-    } // addNoteToArchive() end
+    }
 
     public void deleteNoteFromArchive(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(TABLE_ARCHIVE, KEY_ID + " = ?",
                 new String[]{String.valueOf(id)});
-    } // deleteNoteFromArchive() end
+    }
 
     public void addListToArchive(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -490,7 +490,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.insert(TABLE_ARCHIVE, null, values);
             values.clear();
         }
-    } // addListToArchive() end
+    }
 
     public void deleteListFromArchive(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -499,7 +499,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.delete(TABLE_ARCHIVE, KEY_ID + " = ?",
                     new String[]{String.valueOf(note.get_id())});
         }
-    } // deleteListFromArchive() end
+    }
 
 
     //--------------------------------------------------------------------------------------------//
@@ -528,7 +528,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         cursor.close();
         return noteList;
-    } // getRecycleBinNotes() end
+    }
 
     @Nullable
     public SingleNote getARecycleBinNote(int id) {
@@ -568,14 +568,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_TIME_MODIFIED, note.get_timeModified());
 
         db.insert(TABLE_RECYCLE_BIN, null, values);
-    } // addNoteToRecycleBin() end
+    }
 
     public void deleteNoteFromRecycleBin(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         db.delete(TABLE_RECYCLE_BIN, KEY_ID + " = ?",
                 new String[]{String.valueOf(id)});
-    } // deleteNoteFromRecycleBin() end
+    }
 
     public void addListToRecycleBin(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -594,7 +594,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.insert(TABLE_RECYCLE_BIN, null, values);
             values.clear();
         }
-    } // addListToRecycleBin() end
+    }
 
     public void deleteListFromRecycleBin(@NonNull List<SingleNote> list) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -603,7 +603,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             db.delete(TABLE_RECYCLE_BIN, KEY_ID + " = ?",
                     new String[]{String.valueOf(note.get_id())});
         }
-    } // deleteListFromRecycleBin() end
+    }
 
     public void deleteNotesPastDeleteDay(int days) {
         long time = TimeUnit.DAYS.toMillis(days);

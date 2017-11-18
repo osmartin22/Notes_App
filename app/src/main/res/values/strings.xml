@@ -2,15 +2,13 @@
     <string name="app_name">Notes</string>
 
     <!-- Strings used for intents -->
-    <!-- Used to pass data to MainActivity from NoteEditorActivity -->
+    <!-- Used to pass data between MainActivity and NoteEditorActivity -->
     <string name="noteIdIntent">Note ID</string>
-    <string name="notePositionIntent">Note Position</string>
     <string name="listUsedIntent">List Used</string>
-
-    <!-- Used to pass data from NoteEditorActivity from MainActivity -->
-    <string name="menuActionIntent">Menu Action Intent</string>
-    <string name="isFavoriteIntent">Is Favorite Intent</string>
     <string name="noteSuccessIntent">Note Success</string>
+    <string name="notePositionIntent">Note Position</string>
+    <string name="noteIsFavoriteIntent">Note Is Favorite</string>
+    <string name="menuActionIntent">Menu Action Intent</string>
 
 
     <!-- Hint for title and content in NoteEditorActivity -->
@@ -31,19 +29,14 @@
     <!-- MenuItem names for MainActivity -->
     <string name="layoutManager">Change Layout</string>
 
-    <!-- String array for how to update RecyclerView after NoteEditorActivity finishes -->
-    <string-array name="noteResultArray">
-        <item>noteModified</item>       <!-- Update note in RecyclerView-->
-        <item>newNote</item>            <!-- Add note to RecyclerView -->
-        <item>deleteNoteForever</item>  <!-- Remove note from RecyclerView -->
-        <item>favoriteChanged</item>    <!-- Note not a favorite -->
-    </string-array>
-
 
     <!-- Strings used for delete dialog fragment -->
     <string name="messageDialog">Do you want to delete this note?</string>
     <string name="deleteDialog">Delete</string>
     <string name="cancelDialog">Cancel</string>
+
+    <!-- String for trying to edit a Recycle Bin note -->
+    <string name="editRecycleBinNote">Can\'t edit note in Trash</string>
 
 
     <!-- CAB menu items in MainActivity-->

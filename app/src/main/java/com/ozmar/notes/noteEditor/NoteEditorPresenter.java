@@ -1,4 +1,4 @@
-package com.ozmar.notes.NoteEditor;
+package com.ozmar.notes.noteEditor;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,7 +25,6 @@ public class NoteEditorPresenter {
     private boolean frequencyChanged = false;
 
     private SingleNote mNote;
-    private ChangesInNote mChangesInNote;
     private FrequencyChoices mFrequencyChoices;
 
     public NoteEditorPresenter(NoteEditorView noteEditorView) {
@@ -111,27 +110,23 @@ public class NoteEditorPresenter {
         boolean contentChanged = !note.get_content().equals(content);
         boolean favoriteChanged = note.is_favorite() != favorite;
 
-        boolean reminderChanged = false;
+        boolean reminderTimeChanged = false;
         if (note.get_nextReminderTime() != 0) {
-            reminderChanged = note.get_nextReminderTime() != reminderTime;
+            reminderTimeChanged = note.get_nextReminderTime() != reminderTime;
         }
 
         return new ChangesInNote(titleChanged, contentChanged, favoriteChanged,
-                reminderChanged, frequencyChanged);
-
+                reminderTimeChanged, frequencyChanged);
     }
 
     public void onSaveNote(@NonNull String title, @NonNull String content, @NonNull DatabaseHandler db) {
         int result = -1;
 
-        if (listUsed == ARCHIVE_NOTES) {
-            favorite = false;
-        }
-
         if (mNote != null) {
-            result = update(mNote, title, content);
+            ChangesInNote changesInNote = checkForDifferences(mNote, title, content);
+            result = updateNote(mNote, changesInNote, title, content);
             updateReminder(db, mNote, reminderTime);
-            new UpdateNoteAsync(db, null, mNote, listUsed, mChangesInNote).execute();
+            new UpdateNoteAsync(db, null, mNote, listUsed, changesInNote).execute();
 
         } else {
             boolean titleEmpty = title.isEmpty();
@@ -142,38 +137,37 @@ public class NoteEditorPresenter {
             }
         }
 
-        // TODO: Change to create bundle in presenter before sending to View
         noteEditorView.goBackToMainActivity(mNote, result, listUsed);
     }
 
 
-    private int update(@NonNull SingleNote note, @NonNull String title, @NonNull String content) {
+    private int updateNote(@NonNull SingleNote note, @NonNull ChangesInNote changes,
+                           @NonNull String title, @NonNull String content) {
 
         int result = -1;
-        mChangesInNote = checkForDifferences(note, title, content);
 
-        if (mChangesInNote.checkIfAllValuesFalse()) {
-            if (mChangesInNote.isTitleChanged()) {
+        if (changes.checkIfAllValuesFalse()) {
+            if (changes.isTitleChanged()) {
                 note.set_title(title);
             }
-            if (mChangesInNote.isContentChanged()) {
+            if (changes.isContentChanged()) {
                 note.set_content(content);
             }
-            if (mChangesInNote.isFavoriteChanged()) {
+            if (changes.isFavoriteChanged()) {
                 note.set_favorite(favorite);
             }
-            if (mChangesInNote.isReminderTimeChanged()) {
+            if (changes.isReminderTimeChanged()) {
                 note.set_nextReminderTime(reminderTime);
             }
-            if (mChangesInNote.isFrequencyChanged()) {
+            if (changes.isFrequencyChanged()) {
 
             }
             note.set_timeModified(System.currentTimeMillis());
         }
 
-        if (listUsed == FAVORITE_NOTES && mChangesInNote.isFavoriteChanged()) {
+        if (listUsed == FAVORITE_NOTES && changes.isFavoriteChanged()) {
             result = 3;
-        } else if (mChangesInNote.checkIfAllValuesFalse()) {
+        } else if (changes.checkIfAllValuesFalse()) {
             result = 0;
         }
 
@@ -205,7 +199,7 @@ public class NoteEditorPresenter {
                 note.set_nextReminderTime(reminderTime);
 
                 // Updating reminder
-            } else if (frequencyChanged) {
+            } else {   // TODO: Temp, updates always right now
                 db.updateReminder(note.get_reminderId(), mFrequencyChoices, reminderTime);
 
             }
