@@ -254,13 +254,14 @@ public class ReminderUtilsUnitTest {
         }
     }
 
+    // Unit test for second method
 //    private void yearlyReminderHelper(DateTime current, DateTime expected, int repeatEveryXYears) {
-//        long result = ReminderUtils.calculateYearlyReminderTime(repeatEveryXYears, expected, current);
+//        long result = ReminderUtils.getNextYearlyReminder(repeatEveryXYears, expected, current);
 //        Assert.assertEquals(expected.getMillis(), result);
 //    }
 //
 //    @Test
-//    public void calculateYearlyReminderTime_IsCorrect() throws Exception {
+//    public void getNextYearlyReminder_IsCorrect() throws Exception {
 //        DateTime expectedDateTime = new DateTime(2001, 5, 2, 11, 0);
 //        DateTime currentDateTime;
 //
@@ -287,15 +288,45 @@ public class ReminderUtilsUnitTest {
 //    }
 
     @Test
-    public void calculateYearlyReminderTime_IsCorrect() throws Exception {
+    public void getNextYearlyReminder_IsCorrect() throws Exception {
         DateTime dateTime = new DateTime(2017, 11, 9, 12, 0);
         long result;
 
-        result = ReminderUtils.calculateYearlyReminderTime(dateTime,1);
+        result = ReminderUtils.getNextYearlyReminder(dateTime,1);
         Assert.assertEquals(dateTime.plusYears(1).getMillis(), result);
 
-        result = ReminderUtils.calculateYearlyReminderTime(dateTime,3);
+        result = ReminderUtils.getNextYearlyReminder(dateTime,3);
         Assert.assertEquals(dateTime.plusYears(3).getMillis(), result);
     }
 
+
+    @Test
+    public void getNextRepeatReminder_IsCorrect() throws Exception {
+        FrequencyChoices choices;
+        DateTime dateTime = new DateTime(2001, 5, 2, 12, 0);
+
+        long expectedTime;
+        long resultTime;
+
+        choices = new FrequencyChoices(0, null);
+        expectedTime = dateTime.plusDays(1).getMillis();
+        resultTime = ReminderUtils.getNextRepeatReminder(choices, dateTime.getMillis());
+        Assert.assertEquals(expectedTime, resultTime);
+
+        List<Integer> daysChosen = new ArrayList<>(Collections.singletonList(dateTime.getDayOfWeek()));
+        choices = new FrequencyChoices(1, daysChosen);
+        expectedTime = dateTime.plusWeeks(1).getMillis();
+        resultTime = ReminderUtils.getNextRepeatReminder(choices, dateTime.getMillis());
+        Assert.assertEquals(expectedTime, resultTime);
+
+        choices = new FrequencyChoices(2, null);
+        expectedTime = dateTime.plusMonths(1).getMillis();
+        resultTime = ReminderUtils.getNextRepeatReminder(choices, dateTime.getMillis());
+        Assert.assertEquals(expectedTime, resultTime);
+
+        choices = new FrequencyChoices(3, null);
+        expectedTime = dateTime.plusYears(1).getMillis();
+        resultTime = ReminderUtils.getNextRepeatReminder(choices, dateTime.getMillis());
+        Assert.assertEquals(expectedTime, resultTime);
+    }
 }

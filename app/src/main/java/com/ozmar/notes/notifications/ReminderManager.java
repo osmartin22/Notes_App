@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.support.annotation.NonNull;
 
 import com.ozmar.notes.R;
 import com.ozmar.notes.SingleNote;
@@ -14,24 +15,13 @@ import static android.content.Context.ALARM_SERVICE;
 public class ReminderManager {
 
     public static void start(Context context, SingleNote note) {
-        AlarmManager manager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
-        Intent myIntent = new Intent(context, ReminderReceiver.class);
-
-        myIntent.putExtra(context.getString(R.string.notificationId), note.get_reminderId());
-        myIntent.putExtra(context.getString(R.string.notificationTitle), note.get_title());
-        myIntent.putExtra(context.getString(R.string.notificationContent), note.get_content());
-        myIntent.putExtra(context.getString(R.string.notificationHasFrequency), note.hasFrequencyChoices());
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, note.get_reminderId(),
-                myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        if (manager != null) {
-            manager.setExact(AlarmManager.RTC_WAKEUP, note.get_nextReminderTime(), pendingIntent);
-        }
+        createReminder(context, note.get_reminderId(), note.get_title(), note.get_content(),
+                note.get_nextReminderTime(), note.hasFrequencyChoices());
     }
 
-    public static void startForNextRepeat(Context context, int reminderId, String title, String content,
-                                          long nextReminderTime) {
+    public static void createReminder(Context context, int reminderId, @NonNull String title,
+                                      @NonNull String content, long reminderTime,
+                                      boolean hasFrequencyChoice) {
 
         AlarmManager manager = (AlarmManager) context.getSystemService(ALARM_SERVICE);
         Intent myIntent = new Intent(context, ReminderReceiver.class);
@@ -39,13 +29,13 @@ public class ReminderManager {
         myIntent.putExtra(context.getString(R.string.notificationId), reminderId);
         myIntent.putExtra(context.getString(R.string.notificationTitle), title);
         myIntent.putExtra(context.getString(R.string.notificationContent), content);
-        myIntent.putExtra(context.getString(R.string.notificationHasFrequency), true);
+        myIntent.putExtra(context.getString(R.string.notificationHasFrequency), hasFrequencyChoice);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, reminderId,
                 myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         if (manager != null) {
-            manager.setExact(AlarmManager.RTC_WAKEUP, nextReminderTime, pendingIntent);
+            manager.setExact(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent);
         }
 
     }

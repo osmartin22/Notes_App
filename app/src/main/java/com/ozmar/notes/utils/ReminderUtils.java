@@ -3,6 +3,8 @@ package com.ozmar.notes.utils;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 
+import com.ozmar.notes.FrequencyChoices;
+
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
@@ -132,11 +134,11 @@ public class ReminderUtils {
     }
 
     // TODO: Decide which year calculation I will use
-    public static long calculateYearlyReminderTime(@NonNull DateTime dateTime, int repeatEveryXYears) {
+    public static long getNextYearlyReminder(@NonNull DateTime dateTime, int repeatEveryXYears) {
         return dateTime.plusYears(repeatEveryXYears).getMillis();
     }
 
-    //    public static long calculateYearlyReminderTime(int repeatEveryXYears, @NonNull DateTime oldReminder,
+    //    public static long getNextYearlyReminder(int repeatEveryXYears, @NonNull DateTime oldReminder,
 //                                                   @NonNull DateTime currentDateTime) {
 //
 //        DateTime currentYearReminder = oldReminder.withYear(currentDateTime.getYear());
@@ -161,4 +163,40 @@ public class ReminderUtils {
 //
 //        return nextReminderTime;
 //    }
+
+    public static long getNextRepeatReminder(FrequencyChoices choices, long currentReminderTime) {
+        long nextReminderTime = 0;
+
+        DateTime dateTimeReminder = new DateTime(currentReminderTime);
+
+        switch (choices.getRepeatType()) {
+            case 0:     // Daily
+                nextReminderTime = getNextDailyReminderTime(choices.getRepeatEvery(),
+                        dateTimeReminder);
+                break;
+
+            case 1:     // Weekly
+                assert choices.getDaysChosen() != null;
+                nextReminderTime = dateTimeReminder.getMillis() +
+                        getNextWeeklyReminderTime(choices.getDaysChosen(),
+                                dateTimeReminder.getDayOfWeek(), choices.getRepeatEvery());
+                break;
+
+            case 2:     // Monthly
+                if (choices.getMonthRepeatType() != 0) {
+                    nextReminderTime = getNextMonthlyReminder(dateTimeReminder,
+                            choices.getRepeatEvery(), choices.getMonthWeekToRepeat(),
+                            choices.getMonthDayOfWeekToRepeat());
+                } else {
+                    nextReminderTime = dateTimeReminder.plusMonths(1).getMillis();
+                }
+                break;
+
+            case 3:     // Yearly
+                nextReminderTime = getNextYearlyReminder(dateTimeReminder, choices.getRepeatEvery());
+                break;
+        }
+
+        return nextReminderTime;
+    }
 }

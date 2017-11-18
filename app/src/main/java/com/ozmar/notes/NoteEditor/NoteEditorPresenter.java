@@ -9,6 +9,7 @@ import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.async.UpdateNoteAsync;
 
+// TODO: Separate database calls from presenter
 
 public class NoteEditorPresenter {
     private NoteEditorView noteEditorView;
