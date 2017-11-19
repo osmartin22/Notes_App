@@ -13,8 +13,8 @@ public class SingleNote implements Parcelable {
 
     private long _timeCreated;
     private long _timeModified;
-    private long _nextReminderTime;
-    private int _reminderId;
+    private long _nextReminderTime = 0;
+    private int _reminderId = -1;
     private boolean _hasFrequencyChoices = false;
 
     public SingleNote() {

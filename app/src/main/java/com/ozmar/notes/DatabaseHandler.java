@@ -532,7 +532,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
     @Nullable
     public SingleNote getARecycleBinNote(int id) {
-        String selectQuery = "SELECT * FROM " + TABLE_ARCHIVE + " WHERE ROWID = " + id;
+        String selectQuery = "SELECT * FROM " + TABLE_RECYCLE_BIN + " WHERE ROWID = " + id;
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);

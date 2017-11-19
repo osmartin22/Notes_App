@@ -11,6 +11,9 @@ import com.ozmar.notes.async.UpdateNoteAsync;
 
 // TODO: Separate database calls from presenter
 
+// TODO: Reminders not updated correctly
+// TODO: Deleting a note through multi select does not cancel reminder notification
+
 public class NoteEditorPresenter {
     private NoteEditorView noteEditorView;
 
