@@ -1,5 +1,6 @@
 package com.ozmar.notes;
 
+import android.arch.persistence.room.ColumnInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.IntRange;
@@ -8,26 +9,46 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class FrequencyChoices implements Parcelable {
+public class FrequencyChoices implements Parcelable {
 
-    private final int repeatType;     // day/week/month/year
-    private final int repeatEvery;    // Repeat every X (day/week/month/year)
+    @ColumnInfo(name = "repeatType")
+    private int repeatType = -1;     // day/week/month/year
 
-    private final int repeatForever;
-    private final long repeatToDate;
-    private final int repeatEvents;   // Repeat reminder for X events(times)
+    @ColumnInfo(name = "repeatEvery")
+    private int repeatEvery;    // Repeat every X (day/week/month/year)
 
-    private final int monthRepeatType;
-    private final int monthWeekToRepeat;
-    private final int monthDayOfWeekToRepeat;
 
-    private final List<Integer> daysChosen;
+    @ColumnInfo(name = "repeatForever")
+    private int repeatForever;
 
-    private final int repeatEventsOccurred;
+    @ColumnInfo(name = "repeatToDate")
+    private long repeatToDate;
 
+    @ColumnInfo(name = "repeatEvents")
+    private int repeatEvents;   // Repeat reminder for X events(times)
+
+
+    @ColumnInfo(name = "monthRepeatType")
+    private int monthRepeatType;
+
+    @ColumnInfo(name = "monthWeekToRepeat")
+    private int monthWeekToRepeat;
+
+    @ColumnInfo(name = "monthDayOfWeekToRepeat")
+    private int monthDayOfWeekToRepeat;
+
+    @ColumnInfo(name = "daysChosen")
+    private List<Integer> daysChosen;
+
+    @ColumnInfo(name = "repeatEventsOccured")
+    private int repeatEventsOccurred;
+
+    public FrequencyChoices() {
+
+    }
 
     // Constructor for presets
-    public FrequencyChoices(@IntRange(from = 0, to = 4)int repeatType, @Nullable List<Integer> daysChosen) {
+    public FrequencyChoices(@IntRange(from = 0, to = 4) int repeatType, @Nullable List<Integer> daysChosen) {
         this.repeatType = repeatType;
         this.repeatEvery = 1;
         this.repeatForever = 1;
@@ -46,11 +67,11 @@ public final class FrequencyChoices implements Parcelable {
         this.repeatEventsOccurred = 0;
     }
 
-    public FrequencyChoices(@IntRange(from = 0, to = 4)int repeatType, int repeatEvery,
-                            @IntRange(from = 0, to = 1)int repeatForever, long repeatToDate, int repeatEvents,
-                            @IntRange(from = -1, to = 1)int monthRepeatType,
-                            @IntRange(from = 0, to = 5)int monthWeekToRepeat,
-                            @IntRange(from = 0, to = 7)int monthDayOfWeekToRepeat, @Nullable List<Integer> daysChosen) {
+    public FrequencyChoices(@IntRange(from = 0, to = 4) int repeatType, int repeatEvery,
+                            @IntRange(from = 0, to = 1) int repeatForever, long repeatToDate, int repeatEvents,
+                            @IntRange(from = -1, to = 1) int monthRepeatType,
+                            @IntRange(from = 0, to = 5) int monthWeekToRepeat,
+                            @IntRange(from = 0, to = 7) int monthDayOfWeekToRepeat, @Nullable List<Integer> daysChosen) {
         this.repeatType = repeatType;
         this.repeatEvery = repeatEvery;
         this.repeatForever = repeatForever;
@@ -67,45 +88,81 @@ public final class FrequencyChoices implements Parcelable {
         return repeatType;
     }
 
+    public void setRepeatType(int repeatType) {
+        this.repeatType = repeatType;
+    }
+
     public int getRepeatEvery() {
         return repeatEvery;
+    }
+
+    public void setRepeatEvery(int repeatEvery) {
+        this.repeatEvery = repeatEvery;
     }
 
     public int getRepeatForever() {
         return repeatForever;
     }
 
+    public void setRepeatForever(int repeatForever) {
+        this.repeatForever = repeatForever;
+    }
+
     public long getRepeatToDate() {
         return repeatToDate;
+    }
+
+    public void setRepeatToDate(long repeatToDate) {
+        this.repeatToDate = repeatToDate;
     }
 
     public int getRepeatEvents() {
         return repeatEvents;
     }
 
+    public void setRepeatEvents(int repeatEvents) {
+        this.repeatEvents = repeatEvents;
+    }
+
     public int getMonthRepeatType() {
         return monthRepeatType;
+    }
+
+    public void setMonthRepeatType(int monthRepeatType) {
+        this.monthRepeatType = monthRepeatType;
     }
 
     public int getMonthWeekToRepeat() {
         return monthWeekToRepeat;
     }
 
+    public void setMonthWeekToRepeat(int monthWeekToRepeat) {
+        this.monthWeekToRepeat = monthWeekToRepeat;
+    }
+
     public int getMonthDayOfWeekToRepeat() {
         return monthDayOfWeekToRepeat;
     }
 
+    public void setMonthDayOfWeekToRepeat(int monthDayOfWeekToRepeat) {
+        this.monthDayOfWeekToRepeat = monthDayOfWeekToRepeat;
+    }
+
     @Nullable
     public List<Integer> getDaysChosen() {
-        if (daysChosen != null) {
-            return new ArrayList<>(daysChosen);
-        }
+        return daysChosen;
+    }
 
-        return null;
+    public void setDaysChosen(List<Integer> daysChosen) {
+        this.daysChosen = daysChosen;
     }
 
     public int getRepeatEventsOccurred() {
         return repeatEventsOccurred;
+    }
+
+    public void setRepeatEventsOccurred(int repeatEventsOccurred) {
+        this.repeatEventsOccurred = repeatEventsOccurred;
     }
 
     @Override

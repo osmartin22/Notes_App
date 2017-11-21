@@ -1,53 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottomViewSwitcher"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
-    <ViewSwitcher
-        android:id="@+id/bottomViewSwitcher"
+    <TextView
+        android:id="@+id/calendarTextView"
+        style="?android:attr/listSeparatorTextViewStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:padding="8dp" />
 
-        <TextView
-            android:id="@+id/calendarTextView"
-            style="?android:attr/listSeparatorTextViewStyle"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/eventsView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/numberOfEventsEditText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp" />
+            android:inputType="number"
+            android:maxLength="3"
+            android:paddingEnd="24dp"
+            android:paddingStart="24dp"
+            android:text="@string/xEventsEditText"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <android.support.constraint.ConstraintLayout
-            android:id="@+id/eventsView"
+        <TextView
+            android:id="@+id/eventsTextView"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:text="@string/eventsTextView"
+            app:layout_constraintBaseline_toBaselineOf="@+id/numberOfEventsEditText"
+            app:layout_constraintLeft_toRightOf="@+id/numberOfEventsEditText" />
 
-            <EditText
-                android:id="@+id/numberOfEventsEditText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:maxLength="3"
-                android:paddingEnd="24dp"
-                android:paddingStart="24dp"
-                android:text="@string/xEventsEditText"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:ignore="LabelFor" />
+    </android.support.constraint.ConstraintLayout>
 
-            <TextView
-                android:id="@+id/eventsTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/eventsTextView"
-                app:layout_constraintBaseline_toBaselineOf="@+id/numberOfEventsEditText"
-                app:layout_constraintLeft_toRightOf="@+id/numberOfEventsEditText" />
-
-        </android.support.constraint.ConstraintLayout>
-
-    </ViewSwitcher>
-
-</android.support.constraint.ConstraintLayout>
+</ViewSwitcher>

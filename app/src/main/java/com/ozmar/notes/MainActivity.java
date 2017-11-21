@@ -1,5 +1,6 @@
 package com.ozmar.notes;
 
+import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -15,17 +16,20 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.ozmar.notes.noteEditor.NoteEditorActivity;
 import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.async.DoMenuActionAsync;
 import com.ozmar.notes.async.NavMenuAsync;
+import com.ozmar.notes.database.RecycleBinNote;
+import com.ozmar.notes.database.TestDB;
 import com.ozmar.notes.databinding.ActivityMainBinding;
+import com.ozmar.notes.noteEditor.NoteEditorActivity;
 import com.ozmar.notes.utils.MenuItemHelper;
 import com.ozmar.notes.utils.MultiSelectFlagHelper;
 import com.ozmar.notes.utils.UndoBuffer;
@@ -48,8 +52,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final int ARCHIVE_NOTES = 2;
     private static final int RECYCLE_BIN_NOTES = 3;
 
-    private NotesAdapter notesAdapter;
     private RecyclerView rv;
+    private NotesAdapter notesAdapter;
 
     public static DatabaseHandler db;
 
@@ -179,6 +183,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
 
         setSupportActionBar(mBinding.myToolbar);
+
+
+        TestDB testDB = Room.databaseBuilder(getApplicationContext(), TestDB.class, "test-db")
+                .allowMainThreadQueries()
+                .build();
+
+        RecycleBinNote note = new RecycleBinNote();
+        note.setTitle("Testing A Title");
+        note.setContent("Testing The Content");
+        note.setTimeCreated(System.currentTimeMillis());
+        note.setTimeModified(System.currentTimeMillis());
+        int id = (int)testDB.mDaoClass().addToRecycleBinNotes(note);
+
+        note = testDB.mDaoClass().getARecycleBinNotes(id);
+        if(note!=null){
+            Log.d("Test", note.getTitle());
+            Log.d("Test", note.getContent());
+        } else {
+            Log.d("Test", "NULL");
+        }
+
 
         db = new DatabaseHandler(MainActivity.this);
         itemHelper = new MenuItemHelper(MainActivity.this, db);

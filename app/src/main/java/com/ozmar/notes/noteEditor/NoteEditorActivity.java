@@ -139,7 +139,7 @@ public class NoteEditorActivity extends AppCompatActivity
         long time = noteEditorPresenter.getReminderTime();
         FrequencyChoices choices = noteEditorPresenter.getFrequencyChoices();
 
-        Reminder reminder = new Reminder(time, choices);
+        Reminder reminder = new Reminder(new DateTime(time), choices);
 
         ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(reminder);
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");

@@ -27,6 +27,9 @@ import org.joda.time.LocalDate;
 import java.util.List;
 
 
+// TODO: Choosing one of the bottom spinner selections for the first time does not show the view
+    // Only after selecting it again or switching to another selection
+    // Setting the selection from a previous FrequencyChoice works fine
 public class FrequencyPickerFragment extends DialogFragment implements TextWatcher, View.OnClickListener,
         DatePickerFragment.OnDatePickedListener {
 

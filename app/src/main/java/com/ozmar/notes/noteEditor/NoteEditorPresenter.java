@@ -10,6 +10,8 @@ import com.ozmar.notes.Reminder;
 import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.async.UpdateNoteAsync;
 
+import org.joda.time.DateTime;
+
 // TODO: Separate database calls from presenter
 
 // TODO: Deleting a note through multi select does not cancel reminder notification
@@ -23,13 +25,11 @@ public class NoteEditorPresenter {
     private static final int RECYCLE_BIN_NOTES = 3;
 
     private int listUsed;
-    private long reminderTime = 0;
     private boolean favorite = false;
     private boolean frequencyChanged = false;
 
     private SingleNote mNote;
     private Reminder mReminder;
-    private FrequencyChoices mFrequencyChoices;
 
     public NoteEditorPresenter(NoteEditorView noteEditorView) {
         this.noteEditorView = noteEditorView;
@@ -44,7 +44,7 @@ public class NoteEditorPresenter {
     }
 
     public long getReminderTime() {
-        return reminderTime;
+        return mReminder.getDateTime().getMillis();
     }
 
     public int getListUsed() {
@@ -52,7 +52,7 @@ public class NoteEditorPresenter {
     }
 
     public FrequencyChoices getFrequencyChoices() {
-        return mFrequencyChoices;
+        return mReminder.getFrequencyChoices();
     }
 
     public void initialize(DatabaseHandler db, int noteId, int listUsed) {
@@ -64,9 +64,10 @@ public class NoteEditorPresenter {
             noteEditorView.setupNoteEditTexts(mNote);
 
             if (mNote.getReminderId() != -1) {
-                mFrequencyChoices = db.getFrequencyChoice(mNote.getReminderId());
-                reminderTime = mNote.getNextReminderTime();
-                noteEditorView.showReminder(mNote, reminderTime);
+                FrequencyChoices choices = db.getFrequencyChoice(mNote.getReminderId());
+                long reminderTime = mNote.getNextReminderTime();
+                mReminder = new Reminder(new DateTime(reminderTime), choices);
+                noteEditorView.showReminder(mNote, mReminder.getDateTime().getMillis());
             }
 
         } else {
@@ -83,11 +84,14 @@ public class NoteEditorPresenter {
                                      @NonNull String content) {
         SingleNote newNote;
 
+        long reminderTime = mReminder.getDateTime().getMillis();
+        FrequencyChoices choices = mReminder.getFrequencyChoices();
+
         if (reminderTime != 0) {
-            int reminderId = db.addReminder(mFrequencyChoices, reminderTime);
+            int reminderId = db.addReminder(choices, reminderTime);
             newNote = new SingleNote(title, content, favorite, System.currentTimeMillis(),
                     reminderTime, reminderId);
-            newNote.setHasFrequencyChoices(mFrequencyChoices != null);
+            newNote.setHasFrequencyChoices(choices != null);
 
             noteEditorView.setupReminder(newNote);
 
@@ -107,7 +111,7 @@ public class NoteEditorPresenter {
         boolean titleChanged = !note.getTitle().equals(title);
         boolean contentChanged = !note.getContent().equals(content);
         boolean favoriteChanged = note.isFavorite() != favorite;
-        boolean reminderTimeChanged = note.getNextReminderTime() != reminderTime;
+        boolean reminderTimeChanged = note.getNextReminderTime() != mReminder.getDateTime().getMillis();
 
         return new ChangesInNote(titleChanged, contentChanged, favoriteChanged,
                 reminderTimeChanged, frequencyChanged);
@@ -119,7 +123,7 @@ public class NoteEditorPresenter {
         if (mNote != null) {
             ChangesInNote changesInNote = checkForDifferences(mNote, title, content);
             result = updateNote(mNote, changesInNote, title, content);
-            updateReminder(db, mNote, reminderTime);
+            updateReminder(db, mNote, mReminder.getDateTime().getMillis());
             new UpdateNoteAsync(db, null, mNote, listUsed, changesInNote).execute();
 
         } else {
@@ -156,10 +160,10 @@ public class NoteEditorPresenter {
                 note.setFavorite(favorite);
             }
             if (changes.isReminderTimeChanged()) {
-                note.setNextReminderTime(reminderTime);
+                note.setNextReminderTime(mReminder.getDateTime().getMillis());
             }
             if (changes.isFrequencyChanged()) {
-                note.setHasFrequencyChoices(mFrequencyChoices != null);
+                note.setHasFrequencyChoices(mReminder.getFrequencyChoices() != null);
             }
         }
 
@@ -176,7 +180,7 @@ public class NoteEditorPresenter {
 
         // New reminder
         if (note.getReminderId() == -1 && reminderTime != 0) {
-            int newId = db.addReminder(mFrequencyChoices, reminderTime);
+            int newId = db.addReminder(mReminder.getFrequencyChoices(), reminderTime);
             note.setNextReminderTime(reminderTime);
             note.setReminderId(newId);
             noteEditorView.setupReminder(note);
@@ -192,7 +196,7 @@ public class NoteEditorPresenter {
 
                 // Updating reminder
             } else {   // TODO: Temp, updates always right now
-                db.updateReminder(note.getReminderId(), mFrequencyChoices, reminderTime);
+                db.updateReminder(note.getReminderId(), mReminder.getFrequencyChoices(), reminderTime);
                 noteEditorView.setupReminder(note);
             }
         }
@@ -204,21 +208,21 @@ public class NoteEditorPresenter {
 
     public void onReminderPicked(@Nullable FrequencyChoices choices, long nextReminderTime,
                                  @NonNull String newReminderText) {
-        if (this.mFrequencyChoices != choices) {
-            this.mFrequencyChoices = choices;
+        if (mReminder.getFrequencyChoices() != choices) {
+            mReminder.setFrequencyChoices(choices);
             frequencyChanged = true;
         }
 
-        if (this.reminderTime != nextReminderTime) {
-            this.reminderTime = nextReminderTime;
+        if (mReminder.getDateTime().getMillis() != nextReminderTime) {
+            mReminder.setDateTime(new DateTime(nextReminderTime));
         }
 
-        noteEditorView.updateReminderDisplay(newReminderText, mFrequencyChoices);
+        noteEditorView.updateReminderDisplay(newReminderText, mReminder.getFrequencyChoices());
     }
 
     public void onReminderDeleted() {
-        mFrequencyChoices = null;
-        reminderTime = 0;
+        mReminder.setFrequencyChoices(null);
+        mReminder.setDateTime(new DateTime(0));
         noteEditorView.hideReminder();
     }
 

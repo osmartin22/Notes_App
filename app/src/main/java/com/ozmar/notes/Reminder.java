@@ -1,16 +1,28 @@
 package com.ozmar.notes;
 
+import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Embedded;
+import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import org.joda.time.DateTime;
 
+// TODO: Update rest of code to handle null DateTimes
 
+@Entity(tableName = "reminders")
 public final class Reminder implements Parcelable {
 
+    @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "id")
+    private int id;
+
+    @ColumnInfo(name = "reminderTime")
     private DateTime mDateTime;
-    private long reminderTime;
+
+    @Embedded
     private FrequencyChoices mFrequencyChoices;
 
 
@@ -18,12 +30,19 @@ public final class Reminder implements Parcelable {
 
     }
 
-    public Reminder(long reminderTime, @Nullable FrequencyChoices frequencyChoices) {
-
-        this.reminderTime = reminderTime;
+    public Reminder(DateTime dateTime, @Nullable FrequencyChoices frequencyChoices) {
+        this.mDateTime = dateTime;
         this.mFrequencyChoices = frequencyChoices;
     }
 
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 
     public DateTime getDateTime() {
         return mDateTime;
@@ -33,11 +52,12 @@ public final class Reminder implements Parcelable {
         mDateTime = dateTime;
     }
 
+    @Nullable
     public FrequencyChoices getFrequencyChoices() {
         return mFrequencyChoices;
     }
 
-    public void setFrequencyChoices(FrequencyChoices frequencyChoices) {
+    public void setFrequencyChoices(@Nullable FrequencyChoices frequencyChoices) {
         mFrequencyChoices = frequencyChoices;
     }
 
@@ -53,12 +73,12 @@ public final class Reminder implements Parcelable {
 
         Reminder reminder = (Reminder) obj;
 
-        return reminder.reminderTime == reminderTime &&
+        return reminder.mDateTime == mDateTime &&
                 reminder.mFrequencyChoices == mFrequencyChoices;
     }
 
     public Reminder(Parcel in) {
-        this.reminderTime = in.readLong();
+        this.mDateTime = new DateTime(in.readLong());
         this.mFrequencyChoices = in.readParcelable(this.getClass().getClassLoader());
     }
 
@@ -69,7 +89,7 @@ public final class Reminder implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(reminderTime);
+        dest.writeLong(mDateTime.getMillis());
         dest.writeParcelable(mFrequencyChoices, flags);
     }
 
