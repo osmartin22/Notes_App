@@ -6,16 +6,17 @@ import android.os.Parcelable;
 
 public class SingleNote implements Parcelable {
 
-    private int _id;
-    private String _title;
-    private String _content;
-    private boolean _favorite;
+    private int id;
+    private String title;
+    private String content;
+    private boolean favorite;
 
-    private long _timeCreated;
-    private long _timeModified;
-    private long _nextReminderTime = 0;
-    private int _reminderId = -1;
-    private boolean _hasFrequencyChoices = false;
+    private long timeCreated;
+    private long timeModified;
+    private int reminderId = -1;
+
+    private long nextReminderTime = 0;
+    private boolean hasFrequencyChoices = false;
 
     public SingleNote() {
 
@@ -28,29 +29,29 @@ public class SingleNote implements Parcelable {
 
     // New note has a reminder
     public SingleNote(String title, String content, boolean favorite, long timeCreated, long nextReminderTime, int reminderId) {
-        this._title = title;
-        this._content = content;
-        this._favorite = favorite;
-        this._timeCreated = timeCreated;
-        this._timeModified = timeCreated;
-        this._nextReminderTime = nextReminderTime;
-        this._reminderId = reminderId;
+        this.title = title;
+        this.content = content;
+        this.favorite = favorite;
+        this.timeCreated = timeCreated;
+        this.timeModified = timeCreated;
+        this.nextReminderTime = nextReminderTime;
+        this.reminderId = reminderId;
     }
 
     @Override
     public int hashCode() {
         int result = 22;
-        result = 31 * result + _id;
-        result = 31 * result + _title.hashCode();
-        result = 31 * result + _content.hashCode();
-        if (_favorite) {
+        result = 31 * result + id;
+        result = 31 * result + title.hashCode();
+        result = 31 * result + content.hashCode();
+        if (favorite) {
             result = 31 * result + 1;
         }
-        result = 31 * result + Long.valueOf(_timeCreated).hashCode();
-        result = 31 * result + Long.valueOf(_timeModified).hashCode();
-        result = 31 * result + Long.valueOf(_nextReminderTime).hashCode();
-        result = 31 * result + _reminderId;
-        if (_hasFrequencyChoices) {
+        result = 31 * result + Long.valueOf(timeCreated).hashCode();
+        result = 31 * result + Long.valueOf(timeModified).hashCode();
+        result = 31 * result + Long.valueOf(nextReminderTime).hashCode();
+        result = 31 * result + reminderId;
+        if (hasFrequencyChoices) {
             result = 31 * result + 1;
         }
         return result;
@@ -68,41 +69,41 @@ public class SingleNote implements Parcelable {
 
         SingleNote note = (SingleNote) obj;
 
-        return note._content.equals(_content) &&
-                note._title.equals(_title) &&
-                note._favorite == _favorite &&
-                note._timeCreated == _timeCreated &&
-                note._timeModified == _timeModified &&
-                note._nextReminderTime == _nextReminderTime &&
-                note._reminderId == _reminderId &&
-                note._hasFrequencyChoices == _hasFrequencyChoices;
+        return note.content.equals(content) &&
+                note.title.equals(title) &&
+                note.favorite == favorite &&
+                note.timeCreated == timeCreated &&
+                note.timeModified == timeModified &&
+                note.nextReminderTime == nextReminderTime &&
+                note.reminderId == reminderId &&
+                note.hasFrequencyChoices == hasFrequencyChoices;
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[ " +
-                "Id: " + _id +
-                ",    Title: " + _title +
-                ",    Content: " + _content +
-                ",    Favorite: " + _favorite +
-                ",    TimeCreated: " + _timeCreated +
-                ",    TimeModified: " + _timeModified +
-                ",    ReminderTime: " + _nextReminderTime +
-                ",    ReminderId: " + _reminderId +
-                ",    HasFrequencyChoice: " + _hasFrequencyChoices +
+                "Id: " + id +
+                ",    Title: " + title +
+                ",    Content: " + content +
+                ",    Favorite: " + favorite +
+                ",    TimeCreated: " + timeCreated +
+                ",    TimeModified: " + timeModified +
+                ",    ReminderTime: " + nextReminderTime +
+                ",    ReminderId: " + reminderId +
+                ",    HasFrequencyChoice: " + hasFrequencyChoices +
                 " ]";
     }
 
     public SingleNote(Parcel in) {
-        this._id = in.readInt();
-        this._title = in.readString();
-        this._content = in.readString();
-        this._favorite = (in.readInt() == 1);
-        this._timeCreated = in.readLong();
-        this._timeModified = in.readLong();
-        this._nextReminderTime = in.readLong();
-        this._reminderId = in.readInt();
-        this._hasFrequencyChoices = (in.readInt() == 1);
+        this.id = in.readInt();
+        this.title = in.readString();
+        this.content = in.readString();
+        this.favorite = (in.readInt() == 1);
+        this.timeCreated = in.readLong();
+        this.timeModified = in.readLong();
+        this.nextReminderTime = in.readLong();
+        this.reminderId = in.readInt();
+        this.hasFrequencyChoices = (in.readInt() == 1);
     }
 
     @Override
@@ -112,22 +113,22 @@ public class SingleNote implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(_id);
-        dest.writeString(_title);
-        dest.writeString(_content);
+        dest.writeInt(id);
+        dest.writeString(title);
+        dest.writeString(content);
 
-        if (_favorite) {
+        if (favorite) {
             dest.writeInt(1);
         } else {
             dest.writeInt(0);
         }
 
-        dest.writeLong(_timeCreated);
-        dest.writeLong(_timeModified);
-        dest.writeLong(_nextReminderTime);
-        dest.writeInt(_reminderId);
+        dest.writeLong(timeCreated);
+        dest.writeLong(timeModified);
+        dest.writeLong(nextReminderTime);
+        dest.writeInt(reminderId);
 
-        if (_hasFrequencyChoices) {
+        if (hasFrequencyChoices) {
             dest.writeInt(1);
         } else {
             dest.writeInt(0);
@@ -146,75 +147,75 @@ public class SingleNote implements Parcelable {
         }
     };
 
-    public int get_id() {
-        return _id;
+    public int getId() {
+        return id;
     }
 
-    public void set_id(int _id) {
-        this._id = _id;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String get_title() {
-        return _title;
+    public String getTitle() {
+        return title;
     }
 
-    public void set_title(String _title) {
-        this._title = _title;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
-    public String get_content() {
-        return _content;
+    public String getContent() {
+        return content;
     }
 
-    public void set_content(String _content) {
-        this._content = _content;
+    public void setContent(String content) {
+        this.content = content;
     }
 
-    public boolean is_favorite() {
-        return _favorite;
+    public boolean isFavorite() {
+        return favorite;
     }
 
-    public void set_favorite(boolean _favorite) {
-        this._favorite = _favorite;
+    public void setFavorite(boolean favorite) {
+        this.favorite = favorite;
     }
 
-    public long get_timeCreated() {
-        return _timeCreated;
+    public long getTimeCreated() {
+        return timeCreated;
     }
 
-    public void set_timeCreated(long _timeCreated) {
-        this._timeCreated = _timeCreated;
+    public void setTimeCreated(long timeCreated) {
+        this.timeCreated = timeCreated;
     }
 
-    public long get_timeModified() {
-        return _timeModified;
+    public long getTimeModified() {
+        return timeModified;
     }
 
-    public void set_timeModified(long _timeModified) {
-        this._timeModified = _timeModified;
+    public void setTimeModified(long timeModified) {
+        this.timeModified = timeModified;
     }
 
-    public long get_nextReminderTime() {
-        return _nextReminderTime;
+    public long getNextReminderTime() {
+        return nextReminderTime;
     }
 
-    public void set_nextReminderTime(long _nextReminderTime) {
-        this._nextReminderTime = _nextReminderTime;
+    public void setNextReminderTime(long nextReminderTime) {
+        this.nextReminderTime = nextReminderTime;
     }
 
-    public int get_reminderId() {
-        return _reminderId;
+    public int getReminderId() {
+        return reminderId;
     }
 
-    public void set_reminderId(int _reminderId) {
-        this._reminderId = _reminderId;
+    public void setReminderId(int reminderId) {
+        this.reminderId = reminderId;
     }
 
     public boolean hasFrequencyChoices() {
-        return _hasFrequencyChoices;
+        return hasFrequencyChoices;
     }
 
-    public void set_hasFrequencyChoices(boolean _hasFrequencyChoices) {
-        this._hasFrequencyChoices = _hasFrequencyChoices;
+    public void setHasFrequencyChoices(boolean hasFrequencyChoices) {
+        this.hasFrequencyChoices = hasFrequencyChoices;
     }
 }

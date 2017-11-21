@@ -23,6 +23,8 @@ public final class FrequencyChoices implements Parcelable {
 
     private final List<Integer> daysChosen;
 
+    private final int repeatEventsOccurred;
+
 
     // Constructor for presets
     public FrequencyChoices(@IntRange(from = 0, to = 4)int repeatType, @Nullable List<Integer> daysChosen) {
@@ -40,6 +42,8 @@ public final class FrequencyChoices implements Parcelable {
         } else {
             this.monthRepeatType = -1;
         }
+
+        this.repeatEventsOccurred = 0;
     }
 
     public FrequencyChoices(@IntRange(from = 0, to = 4)int repeatType, int repeatEvery,
@@ -56,6 +60,7 @@ public final class FrequencyChoices implements Parcelable {
         this.monthWeekToRepeat = monthWeekToRepeat;
         this.monthDayOfWeekToRepeat = monthDayOfWeekToRepeat;
         this.daysChosen = daysChosen;
+        this.repeatEventsOccurred = 0;
     }
 
     public int getRepeatType() {
@@ -99,6 +104,10 @@ public final class FrequencyChoices implements Parcelable {
         return null;
     }
 
+    public int getRepeatEventsOccurred() {
+        return repeatEventsOccurred;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -119,7 +128,8 @@ public final class FrequencyChoices implements Parcelable {
                 choices.monthRepeatType == monthRepeatType &&
                 choices.monthWeekToRepeat == monthWeekToRepeat &&
                 choices.monthDayOfWeekToRepeat == monthDayOfWeekToRepeat &&
-                choices.daysChosen.containsAll(daysChosen);
+                choices.daysChosen.containsAll(daysChosen) &&
+                choices.repeatEventsOccurred == repeatEventsOccurred;
     }
 
     public FrequencyChoices(Parcel in) {
@@ -133,6 +143,7 @@ public final class FrequencyChoices implements Parcelable {
         this.monthDayOfWeekToRepeat = in.readInt();
         this.daysChosen = new ArrayList<>();
         in.readList(daysChosen, List.class.getClassLoader());
+        this.repeatEventsOccurred = in.readInt();
 
     }
 
@@ -152,6 +163,7 @@ public final class FrequencyChoices implements Parcelable {
         dest.writeInt(monthWeekToRepeat);
         dest.writeInt(monthDayOfWeekToRepeat);
         dest.writeList(daysChosen);
+        dest.writeInt(repeatEventsOccurred);
     }
 
     public static final Parcelable.Creator<FrequencyChoices> CREATOR = new Parcelable.Creator<FrequencyChoices>() {

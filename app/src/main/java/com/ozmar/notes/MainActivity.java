@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
 
-        int id = note != null ? note.get_id() : -1;
+        int id = note != null ? note.getId() : -1;
         intent.putExtra(getString(R.string.noteIdIntent), id);
         intent.putExtra(getString(R.string.notePositionIntent), position);
         intent.putExtra(getString(R.string.listUsedIntent), listUsed);
@@ -449,7 +449,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (noteEditorAction != -1) {
 
                         if (noteIsFavorite && listUsed == ARCHIVE_NOTES) {
-                            note.set_favorite(true);
+                            note.setFavorite(true);
                         }
 
                         multiSelectHelper.setEditorAction(noteEditorAction);

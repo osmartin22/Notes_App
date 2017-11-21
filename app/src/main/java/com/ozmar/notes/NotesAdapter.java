@@ -182,26 +182,26 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.WHITE);
         }
 
-        boolean displayReminder = note.get_nextReminderTime() != 0;
+        boolean displayReminder = note.getNextReminderTime() != 0;
 
         switch (viewHolder.getItemViewType()) {
             case 0:
                 NotesViewHolderTitle viewHolderTitle = (NotesViewHolderTitle) viewHolder;
-                viewHolderTitle.noteTitle.setText(note.get_title());
+                viewHolderTitle.noteTitle.setText(note.getTitle());
                 displayReminder(note, viewHolderTitle.reminderText, displayReminder);
                 break;
 
             case 1:
                 NotesViewHolderContent viewHolderContent = (NotesViewHolderContent) viewHolder;
-                viewHolderContent.noteContent.setText(note.get_content());
+                viewHolderContent.noteContent.setText(note.getContent());
                 displayReminder(note, viewHolderContent.reminderText, displayReminder);
                 break;
 
             case 2:
             default:
                 NotesViewHolder notesViewHolder = (NotesViewHolder) viewHolder;
-                notesViewHolder.noteTitle.setText(note.get_title());
-                notesViewHolder.noteContent.setText(note.get_content());
+                notesViewHolder.noteTitle.setText(note.getTitle());
+                notesViewHolder.noteContent.setText(note.getContent());
                 displayReminder(note, notesViewHolder.reminderText, displayReminder);
                 break;
         }
@@ -217,7 +217,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         0, 0, 0);
             }
 
-            reminderText.setText(FormatUtils.getReminderText(context, new DateTime(note.get_nextReminderTime())));
+            reminderText.setText(FormatUtils.getReminderText(context, new DateTime(note.getNextReminderTime())));
             reminderText.setVisibility(View.VISIBLE);
         } else {
             reminderText.setVisibility(View.GONE);
@@ -231,8 +231,8 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public int getItemViewType(int position) {
-        boolean titleTextEmpty = notes.get(position).get_title().isEmpty();
-        boolean titleContentEmpty = notes.get(position).get_content().isEmpty();
+        boolean titleTextEmpty = notes.get(position).getTitle().isEmpty();
+        boolean titleContentEmpty = notes.get(position).getContent().isEmpty();
 
         if (titleTextEmpty && titleContentEmpty || titleContentEmpty) {
             return showTitle;

@@ -57,8 +57,8 @@ public class ExampleUnitTest {
 //                originalContent, null));
 //
 //        // Note not modified (does not include noteChanges to favorite)
-//        note.set_title(originalTitle);
-//        note.set_content(originalContent);
+//        note.setTitle(originalTitle);
+//        note.setContent(originalContent);
 //        assertEquals(noteChanges[2], NoteEditorUtils.changesToNote(context,
 //                originalTitle, originalContent, note));
 //
@@ -70,20 +70,20 @@ public class ExampleUnitTest {
 //    @Test
 //    public void updateNoteObject_isCorrect() throws Exception {
 //        NoteEditorUtils.updateNoteObject(note, newTitle, newContent, false, false);
-//        assertEquals(originalTitle, note.get_title());
-//        assertEquals(originalContent, note.get_content());
+//        assertEquals(originalTitle, note.getTitle());
+//        assertEquals(originalContent, note.getContent());
 //
 //        NoteEditorUtils.updateNoteObject(note, newTitle, newContent, true, false);
-//        assertEquals(newTitle, note.get_title());
-//        assertEquals(originalContent, note.get_content());
+//        assertEquals(newTitle, note.getTitle());
+//        assertEquals(originalContent, note.getContent());
 //
 //        NoteEditorUtils.updateNoteObject(note, newTitle, newContent, false, true);
-//        assertEquals(newTitle, note.get_title());
-//        assertEquals(newContent, note.get_content());
+//        assertEquals(newTitle, note.getTitle());
+//        assertEquals(newContent, note.getContent());
 //
 //        NoteEditorUtils.updateNoteObject(note, originalTitle, originalContent, true, true);
-//        assertEquals(originalTitle, note.get_title());
-//        assertEquals(originalContent, note.get_content());
+//        assertEquals(originalTitle, note.getTitle());
+//        assertEquals(originalContent, note.getContent());
 //    }
 //
 //

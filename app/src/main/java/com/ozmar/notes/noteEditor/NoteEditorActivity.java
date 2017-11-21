@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.MainActivity;
 import com.ozmar.notes.R;
+import com.ozmar.notes.Reminder;
 import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.databinding.ActivityNoteEditorBinding;
@@ -87,7 +88,7 @@ public class NoteEditorActivity extends AppCompatActivity
                 menu.findItem(R.id.unarchive_note).setVisible(true);
             }
 
-            if (note != null && note.is_favorite()) {
+            if (note != null && note.isFavorite()) {
                 menu.findItem(R.id.favorite_note).setIcon(R.drawable.ic_favorite_star_on);
             }
 
@@ -138,7 +139,9 @@ public class NoteEditorActivity extends AppCompatActivity
         long time = noteEditorPresenter.getReminderTime();
         FrequencyChoices choices = noteEditorPresenter.getFrequencyChoices();
 
-        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(choices, time);
+        Reminder reminder = new Reminder(time, choices);
+
+        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(reminder);
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
     }
 
@@ -154,10 +157,11 @@ public class NoteEditorActivity extends AppCompatActivity
         noteEditorPresenter.onSaveNote(title, content, db);
     }
 
+
     @Override
-    public void onReminderPicked(@NonNull DateTime dateTime, @Nullable FrequencyChoices choices) {
-        String newReminderText = FormatUtils.getReminderText(getApplication(), dateTime);
-        noteEditorPresenter.onReminderPicked(choices, dateTime.getMillis(), newReminderText);
+    public void onReminderPicked(@NonNull Reminder reminder) {
+        String newReminderText = FormatUtils.getReminderText(getApplication(), reminder.getDateTime());
+        noteEditorPresenter.onReminderPicked(reminder.getFrequencyChoices(), reminder.getDateTime().getMillis(), newReminderText);
     }
 
     @Override
@@ -186,11 +190,11 @@ public class NoteEditorActivity extends AppCompatActivity
     @Override
     public void setupNoteEditTexts(@NonNull SingleNote note) {
         mBinding.lastModified.setText(FormatUtils.lastUpdated(NoteEditorActivity.this,
-                note.get_timeModified()));
+                note.getTimeModified()));
 
-        mBinding.editTextTitle.setText(note.get_title());
+        mBinding.editTextTitle.setText(note.getTitle());
         mBinding.editTextTitle.setFocusable(false);
-        mBinding.editTextContent.setText(note.get_content());
+        mBinding.editTextContent.setText(note.getContent());
         mBinding.editTextContent.setFocusable(false);
 
         View.OnTouchListener editTextListener = (view, motionEvent) -> {
@@ -260,10 +264,10 @@ public class NoteEditorActivity extends AppCompatActivity
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
             intent.putExtra(getString(R.string.listUsedIntent), listUsed);
-            intent.putExtra(getString(R.string.noteIdIntent), note.get_id());
+            intent.putExtra(getString(R.string.noteIdIntent), note.getId());
             intent.putExtra(getString(R.string.notePositionIntent), notePosition);
             intent.putExtra(getString(R.string.noteSuccessIntent), result);
-            intent.putExtra(getString(R.string.noteIsFavoriteIntent), note.is_favorite());
+            intent.putExtra(getString(R.string.noteIsFavoriteIntent), note.isFavorite());
 
             checkIfMenuActionClicked(intent);
             setResult(RESULT_OK, intent);

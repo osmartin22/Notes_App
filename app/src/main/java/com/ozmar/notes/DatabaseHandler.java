@@ -164,24 +164,24 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 SingleNote note = new SingleNote();
-                note.set_id(cursor.getInt(0));
-                note.set_title(cursor.getString(1));
-                note.set_content(cursor.getString(2));
+                note.setId(cursor.getInt(0));
+                note.setTitle(cursor.getString(1));
+                note.setContent(cursor.getString(2));
 
                 if (cursor.getInt(3) == 0) {
-                    note.set_favorite(false);
+                    note.setFavorite(false);
                 } else {
-                    note.set_favorite(true);
+                    note.setFavorite(true);
                 }
 
-                note.set_timeCreated(cursor.getLong(4));
-                note.set_timeModified(cursor.getLong(5));
-                note.set_reminderId(cursor.getInt(6));
+                note.setTimeCreated(cursor.getLong(4));
+                note.setTimeModified(cursor.getLong(5));
+                note.setReminderId(cursor.getInt(6));
 
-                if (note.get_reminderId() != -1) {
-                    NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
-                    note.set_nextReminderTime(temp.nextReminderTime);
-                    note.set_hasFrequencyChoices(temp.hasFrequencyChoices);
+                if (note.getReminderId() != -1) {
+                    NextReminderTime temp = getNextReminderTime(note.getReminderId());
+                    note.setNextReminderTime(temp.nextReminderTime);
+                    note.setHasFrequencyChoices(temp.hasFrequencyChoices);
                 }
 
                 noteList.add(note);
@@ -204,24 +204,24 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 SingleNote note = new SingleNote();
-                note.set_id(cursor.getInt(0));
-                note.set_title(cursor.getString(1));
-                note.set_content(cursor.getString(2));
+                note.setId(cursor.getInt(0));
+                note.setTitle(cursor.getString(1));
+                note.setContent(cursor.getString(2));
 
                 if (cursor.getInt(3) == 0) {
-                    note.set_favorite(false);
+                    note.setFavorite(false);
                 } else {
-                    note.set_favorite(true);
+                    note.setFavorite(true);
                 }
 
-                note.set_timeCreated(cursor.getLong(4));
-                note.set_timeModified(cursor.getLong(5));
-                note.set_reminderId(cursor.getInt(6));
+                note.setTimeCreated(cursor.getLong(4));
+                note.setTimeModified(cursor.getLong(5));
+                note.setReminderId(cursor.getInt(6));
 
-                if (note.get_reminderId() != -1) {
-                    NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
-                    note.set_nextReminderTime(temp.nextReminderTime);
-                    note.set_hasFrequencyChoices(temp.hasFrequencyChoices);
+                if (note.getReminderId() != -1) {
+                    NextReminderTime temp = getNextReminderTime( note.getReminderId());
+                    note.setNextReminderTime(temp.nextReminderTime);
+                    note.setHasFrequencyChoices(temp.hasFrequencyChoices);
                 }
 
                 noteList.add(note);
@@ -244,24 +244,24 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 note = new SingleNote();
-                note.set_id(cursor.getInt(0));
-                note.set_title(cursor.getString(1));
-                note.set_content(cursor.getString(2));
+                note.setId(cursor.getInt(0));
+                note.setTitle(cursor.getString(1));
+                note.setContent(cursor.getString(2));
 
                 if (cursor.getInt(3) == 0) {
-                    note.set_favorite(false);
+                    note.setFavorite(false);
                 } else {
-                    note.set_favorite(true);
+                    note.setFavorite(true);
                 }
 
-                note.set_timeCreated(cursor.getLong(4));
-                note.set_timeModified(cursor.getLong(5));
-                note.set_reminderId(cursor.getInt(6));
+                note.setTimeCreated(cursor.getLong(4));
+                note.setTimeModified(cursor.getLong(5));
+                note.setReminderId(cursor.getInt(6));
 
-                if (note.get_reminderId() != -1) {
-                    NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
-                    note.set_nextReminderTime(temp.nextReminderTime);
-                    note.set_hasFrequencyChoices(temp.hasFrequencyChoices);
+                if (note.getReminderId() != -1) {
+                    NextReminderTime temp = getNextReminderTime( note.getReminderId());
+                    note.setNextReminderTime(temp.nextReminderTime);
+                    note.setHasFrequencyChoices(temp.hasFrequencyChoices);
                 }
             } while (cursor.moveToNext());
         }
@@ -277,16 +277,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         if (changes.isTitleChanged() || changes.isContentChanged()) {
             if (changes.isTitleChanged()) {
-                values.put(KEY_TITLE, note.get_title());
+                values.put(KEY_TITLE, note.getTitle());
             }
             if (changes.isContentChanged()) {
-                values.put(KEY_CONTENT, note.get_content());
+                values.put(KEY_CONTENT, note.getContent());
             }
-            values.put(KEY_TIME_MODIFIED, note.get_timeModified());
+            values.put(KEY_TIME_MODIFIED, note.getTimeModified());
         }
 
         if (changes.isFavoriteChanged()) {
-            if (note.is_favorite()) {
+            if (note.isFavorite()) {
                 values.put(KEY_FAVORITE, 1);
             } else {
                 values.put(KEY_FAVORITE, 0);
@@ -294,13 +294,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
 //        if (changes.isReminderIdChanged()) {
-        values.put(KEY_REMINDER_ID, note.get_reminderId());
+        values.put(KEY_REMINDER_ID, note.getReminderId());
 //        }
 
         if (values.size() != 0) {
             SQLiteDatabase db = this.getWritableDatabase();
             db.update(TABLE_USER_NOTES, values, KEY_ID + " = ?",
-                    new String[]{String.valueOf(note.get_id())});
+                    new String[]{String.valueOf(note.getId())});
         }
     }
 
@@ -308,18 +308,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_TITLE, note.get_title());
-        values.put(KEY_CONTENT, note.get_content());
+        values.put(KEY_TITLE, note.getTitle());
+        values.put(KEY_CONTENT, note.getContent());
 
-        if (note.is_favorite()) {
+        if (note.isFavorite()) {
             values.put(KEY_FAVORITE, 1);
         } else {
             values.put(KEY_FAVORITE, 0);
         }
 
-        values.put(KEY_TIME_CREATED, note.get_timeCreated());
-        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
-        values.put(KEY_REMINDER_ID, note.get_reminderId());
+        values.put(KEY_TIME_CREATED, note.getTimeCreated());
+        values.put(KEY_TIME_MODIFIED, note.getTimeModified());
+        values.put(KEY_REMINDER_ID, note.getReminderId());
 
         return (int) db.insert(TABLE_USER_NOTES, null, values);
     }
@@ -336,18 +336,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         for (SingleNote note : list) {
-            values.put(KEY_TITLE, note.get_title());
-            values.put(KEY_CONTENT, note.get_content());
+            values.put(KEY_TITLE, note.getTitle());
+            values.put(KEY_CONTENT, note.getContent());
 
-            if (note.is_favorite()) {
+            if (note.isFavorite()) {
                 values.put(KEY_FAVORITE, 1);
             } else {
                 values.put(KEY_FAVORITE, 0);
             }
 
-            values.put(KEY_TIME_CREATED, note.get_timeCreated());
-            values.put(KEY_TIME_MODIFIED, note.get_timeModified());
-            values.put(KEY_REMINDER_ID, note.get_reminderId());
+            values.put(KEY_TIME_CREATED, note.getTimeCreated());
+            values.put(KEY_TIME_MODIFIED, note.getTimeModified());
+            values.put(KEY_REMINDER_ID, note.getReminderId());
 
             db.insert(TABLE_USER_NOTES, null, values);
             values.clear();
@@ -359,7 +359,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         for (SingleNote note : list) {
             db.delete(TABLE_USER_NOTES, KEY_ID + " = ?",
-                    new String[]{String.valueOf(note.get_id())});
+                    new String[]{String.valueOf(note.getId())});
         }
     }
 
@@ -378,17 +378,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 SingleNote note = new SingleNote();
-                note.set_id(cursor.getInt(0));
-                note.set_title(cursor.getString(1));
-                note.set_content(cursor.getString(2));
-                note.set_timeCreated(cursor.getLong(3));
-                note.set_timeModified(cursor.getLong(4));
-                note.set_reminderId(cursor.getInt(5));
+                note.setId(cursor.getInt(0));
+                note.setTitle(cursor.getString(1));
+                note.setContent(cursor.getString(2));
+                note.setTimeCreated(cursor.getLong(3));
+                note.setTimeModified(cursor.getLong(4));
+                note.setReminderId(cursor.getInt(5));
 
-                if (note.get_reminderId() != -1) {
-                    NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
-                    note.set_nextReminderTime(temp.nextReminderTime);
-                    note.set_hasFrequencyChoices(temp.hasFrequencyChoices);
+                if (note.getReminderId() != -1) {
+                    NextReminderTime temp = getNextReminderTime( note.getReminderId());
+                    note.setNextReminderTime(temp.nextReminderTime);
+                    note.setHasFrequencyChoices(temp.hasFrequencyChoices);
                 }
 
                 noteList.add(note);
@@ -411,17 +411,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 note = new SingleNote();
-                note.set_id(cursor.getInt(0));
-                note.set_title(cursor.getString(1));
-                note.set_content(cursor.getString(2));
-                note.set_timeCreated(cursor.getLong(3));
-                note.set_timeModified(cursor.getLong(4));
-                note.set_reminderId(cursor.getInt(5));
+                note.setId(cursor.getInt(0));
+                note.setTitle(cursor.getString(1));
+                note.setContent(cursor.getString(2));
+                note.setTimeCreated(cursor.getLong(3));
+                note.setTimeModified(cursor.getLong(4));
+                note.setReminderId(cursor.getInt(5));
 
-                if (note.get_reminderId() != -1) {
-                    NextReminderTime temp = getNextReminderTime(db, note.get_reminderId());
-                    note.set_nextReminderTime(temp.nextReminderTime);
-                    note.set_hasFrequencyChoices(temp.hasFrequencyChoices);
+                if (note.getReminderId() != -1) {
+                    NextReminderTime temp = getNextReminderTime( note.getReminderId());
+                    note.setNextReminderTime(temp.nextReminderTime);
+                    note.setHasFrequencyChoices(temp.hasFrequencyChoices);
                 }
             } while (cursor.moveToNext());
         }
@@ -437,22 +437,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         if (changes.isTitleChanged() || changes.isContentChanged()) {
             if (changes.isTitleChanged()) {
-                values.put(KEY_TITLE, note.get_title());
+                values.put(KEY_TITLE, note.getTitle());
             }
             if (changes.isContentChanged()) {
-                values.put(KEY_CONTENT, note.get_content());
+                values.put(KEY_CONTENT, note.getContent());
             }
-            values.put(KEY_TIME_MODIFIED, note.get_timeModified());
+            values.put(KEY_TIME_MODIFIED, note.getTimeModified());
         }
 
 //        if (changes.isReminderIdChanged()) {
-        values.put(KEY_REMINDER_ID, note.get_reminderId());
+        values.put(KEY_REMINDER_ID, note.getReminderId());
 //        }
 
         if (values.size() != 0) {
             SQLiteDatabase db = this.getWritableDatabase();
             db.update(TABLE_ARCHIVE, values, KEY_ID + " = ?",
-                    new String[]{String.valueOf(note.get_id())});
+                    new String[]{String.valueOf(note.getId())});
         }
     }
 
@@ -460,11 +460,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
-        values.put(KEY_TITLE, note.get_title());
-        values.put(KEY_CONTENT, note.get_content());
-        values.put(KEY_TIME_CREATED, note.get_timeCreated());
-        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
-        values.put(KEY_REMINDER_ID, note.get_reminderId());
+        values.put(KEY_TITLE, note.getTitle());
+        values.put(KEY_CONTENT, note.getContent());
+        values.put(KEY_TIME_CREATED, note.getTimeCreated());
+        values.put(KEY_TIME_MODIFIED, note.getTimeModified());
+        values.put(KEY_REMINDER_ID, note.getReminderId());
 
         db.insert(TABLE_ARCHIVE, null, values);
     }
@@ -481,11 +481,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         for (SingleNote note : list) {
-            values.put(KEY_TITLE, note.get_title());
-            values.put(KEY_CONTENT, note.get_content());
-            values.put(KEY_TIME_CREATED, note.get_timeCreated());
-            values.put(KEY_TIME_MODIFIED, note.get_timeModified());
-            values.put(KEY_REMINDER_ID, note.get_reminderId());
+            values.put(KEY_TITLE, note.getTitle());
+            values.put(KEY_CONTENT, note.getContent());
+            values.put(KEY_TIME_CREATED, note.getTimeCreated());
+            values.put(KEY_TIME_MODIFIED, note.getTimeModified());
+            values.put(KEY_REMINDER_ID, note.getReminderId());
 
             db.insert(TABLE_ARCHIVE, null, values);
             values.clear();
@@ -497,7 +497,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         for (SingleNote note : list) {
             db.delete(TABLE_ARCHIVE, KEY_ID + " = ?",
-                    new String[]{String.valueOf(note.get_id())});
+                    new String[]{String.valueOf(note.getId())});
         }
     }
 
@@ -516,11 +516,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 SingleNote note = new SingleNote();
-                note.set_id(cursor.getInt(0));
-                note.set_title(cursor.getString(1));
-                note.set_content(cursor.getString(2));
-                note.set_timeCreated(cursor.getLong(3));
-                note.set_timeModified(cursor.getLong(4));
+                note.setId(cursor.getInt(0));
+                note.setTitle(cursor.getString(1));
+                note.setContent(cursor.getString(2));
+                note.setTimeCreated(cursor.getLong(3));
+                note.setTimeModified(cursor.getLong(4));
 
                 noteList.add(note);
             } while (cursor.moveToNext());
@@ -541,11 +541,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 note = new SingleNote();
-                note.set_id(cursor.getInt(0));
-                note.set_title(cursor.getString(1));
-                note.set_content(cursor.getString(2));
-                note.set_timeCreated(cursor.getLong(3));
-                note.set_timeModified(cursor.getLong(4));
+                note.setId(cursor.getInt(0));
+                note.setTitle(cursor.getString(1));
+                note.setContent(cursor.getString(2));
+                note.setTimeCreated(cursor.getLong(3));
+                note.setTimeModified(cursor.getLong(4));
 
             } while (cursor.moveToNext());
         }
@@ -557,15 +557,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public void addNoteToRecycleBin(@NonNull SingleNote note) {
         SQLiteDatabase db = this.getWritableDatabase();
 
-        if (note.get_reminderId() != -1) {
-            deleteReminder(db, note.get_reminderId());
+        if (note.getReminderId() != -1) {
+            deleteReminder( note.getReminderId());
         }
 
         ContentValues values = new ContentValues();
-        values.put(KEY_TITLE, note.get_title());
-        values.put(KEY_CONTENT, note.get_content());
-        values.put(KEY_TIME_CREATED, note.get_timeCreated());
-        values.put(KEY_TIME_MODIFIED, note.get_timeModified());
+        values.put(KEY_TITLE, note.getTitle());
+        values.put(KEY_CONTENT, note.getContent());
+        values.put(KEY_TIME_CREATED, note.getTimeCreated());
+        values.put(KEY_TIME_MODIFIED, note.getTimeModified());
 
         db.insert(TABLE_RECYCLE_BIN, null, values);
     }
@@ -582,13 +582,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
 
         for (SingleNote note : list) {
-            if (note.get_reminderId() != -1) {
-                deleteReminder(db, note.get_reminderId());
+            if (note.getReminderId() != -1) {
+                deleteReminder( note.getReminderId());
             }
 
-            values.put(KEY_TITLE, note.get_title());
-            values.put(KEY_CONTENT, note.get_content());
-            values.put(KEY_TIME_CREATED, note.get_timeCreated());
+            values.put(KEY_TITLE, note.getTitle());
+            values.put(KEY_CONTENT, note.getContent());
+            values.put(KEY_TIME_CREATED, note.getTimeCreated());
             values.put(KEY_TIME_MODIFIED, System.currentTimeMillis());
 
             db.insert(TABLE_RECYCLE_BIN, null, values);
@@ -601,7 +601,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         for (SingleNote note : list) {
             db.delete(TABLE_RECYCLE_BIN, KEY_ID + " = ?",
-                    new String[]{String.valueOf(note.get_id())});
+                    new String[]{String.valueOf(note.getId())});
         }
     }
 
@@ -635,9 +635,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     //--------------------------------------------------------------------------------------------//
     // Reminders Table Specific Methods
     //--------------------------------------------------------------------------------------------//
-
     @NonNull
-    private NextReminderTime getNextReminderTime(@NonNull SQLiteDatabase db, int id) {
+    public NextReminderTime getNextReminderTime(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
         long nextReminderTime = 0;
         boolean isRepeating = false;
 
@@ -654,12 +654,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         cursor.close();
         return new NextReminderTime(nextReminderTime, isRepeating);
-    }
-
-    @NonNull
-    public NextReminderTime getNextReminderTime(int id) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        return getNextReminderTime(db, id);
     }
 
     public void updateNextReminderTime(int id, long nextReminderTime) {
@@ -723,6 +717,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return (int) db.insert(TABLE_REMINDERS, null, values);
     }
 
+
+
     public void updateReminder(int id, @Nullable FrequencyChoices choices, long nextReminderTime) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -761,14 +757,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(KEY_EVENTS_OCCURRED, 0);
     }
 
-    private void deleteReminder(@NonNull SQLiteDatabase db, int id) {
-        db.delete(TABLE_REMINDERS, KEY_ID + " = ?",
-                new String[]{String.valueOf(id)});
-    }
-
     public void deleteReminder(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        deleteReminder(db, id);
+        db.delete(TABLE_REMINDERS, KEY_ID + " = ?",
+                new String[]{String.valueOf(id)});
     }
 
     public int getEventsOccurred(int id) {

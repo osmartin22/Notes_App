@@ -31,7 +31,7 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
                 if (list != null) {
                     db.addListToUserList(list);
                 } else {
-                    note.set_id(db.addNoteToUserList(note));
+                    note.setId(db.addNoteToUserList(note));
                 }
                 break;
             case 2:
@@ -58,14 +58,14 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
                 if (list != null) {
                     db.deleteListFromUserList(list);
                 } else {
-                    db.deleteNoteFromUserList(note.get_id());
+                    db.deleteNoteFromUserList(note.getId());
                 }
                 break;
             case 2:
                 if (list != null) {
                     db.deleteListFromArchive(list);
                 } else {
-                    db.deleteNoteFromArchive(note.get_id());
+                    db.deleteNoteFromArchive(note.getId());
                 }
                 break;
         }
@@ -75,7 +75,7 @@ public class BasicDBAsync extends AsyncTask<Void, Void, Void> {
         if (list != null) {
             db.deleteListFromRecycleBin(list);
         } else {
-            db.deleteNoteFromRecycleBin(note.get_id());
+            db.deleteNoteFromRecycleBin(note.getId());
         }
     }
 

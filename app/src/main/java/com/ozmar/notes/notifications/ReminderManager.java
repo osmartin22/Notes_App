@@ -15,8 +15,8 @@ import static android.content.Context.ALARM_SERVICE;
 public class ReminderManager {
 
     public static void start(Context context, SingleNote note) {
-        createReminder(context, note.get_reminderId(), note.get_title(), note.get_content(),
-                note.get_nextReminderTime(), note.hasFrequencyChoices());
+        createReminder(context, note.getReminderId(), note.getTitle(), note.getContent(),
+                note.getNextReminderTime(), note.hasFrequencyChoices());
     }
 
     public static void createReminder(Context context, int reminderId, @NonNull String title,
