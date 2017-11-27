@@ -9,6 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.ozmar.notes.database.AppDatabase;
+import com.ozmar.notes.database.NoteAndReminderPreview;
+import com.ozmar.notes.database.NotePreview;
+import com.ozmar.notes.database.NotePreviewWithReminderId;
+import com.ozmar.notes.database.ReminderPreview;
 import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.viewHolders.NotesViewHolder;
 import com.ozmar.notes.viewHolders.NotesViewHolderContent;
@@ -17,7 +22,6 @@ import com.ozmar.notes.viewHolders.NotesViewHolderTitle;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -25,20 +29,62 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final Context context;
     private int listUsed = 0;
 
-    private final List<SingleNote> notes;
+//    private final List<SingleNote> oldList;
+
+    private List<NoteAndReminderPreview> notes = new ArrayList<>();
+
     private final List<Integer> selectedIds = new ArrayList<>();
 
     private final int showTitle = 0, showContent = 1, showAll = 2;
 
-    public NotesAdapter(Context context, DatabaseHandler db) {
+    // TODO: Remove database from constructor
+    // Call function to get data from database from presenter instead
+    public NotesAdapter(Context context) {
         this.context = context;
-        notes = db.getUserNotes();
+
+//        oldList = db.getUserNotes();
+
+        convertList();
     }
 
-    public void getList(List<SingleNote> i) {
-        notes.addAll(i);
-        notifyDataSetChanged();
+    // TODO: Temp position of function(move to another place later)
+    private void convertList() {
+        if (listUsed == 3) {
+            ReminderPreview reminderPreview = new ReminderPreview(0, -1);
+            List<NotePreview> recycleBinList = AppDatabase.getAppDatabase(context).notesDao().getRecycleBinPreviews();
+            for (NotePreview notePreview : recycleBinList) {
+                NotePreviewWithReminderId newPreview = new NotePreviewWithReminderId(notePreview);
+                notes.add(new NoteAndReminderPreview(newPreview, reminderPreview));
+            }
+
+        } else if (listUsed == 0 || listUsed == 1 || listUsed == 2) {
+            List<NotePreviewWithReminderId> notePreviewList;
+            if (listUsed == 0) {
+                notePreviewList = AppDatabase.getAppDatabase(context).notesDao().getMainPreviews();
+            } else if (listUsed == 1) {
+                notePreviewList = AppDatabase.getAppDatabase(context).notesDao().getFavoritePreviews();
+            } else {
+                notePreviewList = AppDatabase.getAppDatabase(context).notesDao().getArchivePreviews();
+            }
+
+            for (NotePreviewWithReminderId note : notePreviewList) {
+                ReminderPreview reminderPreview;
+
+                if (note.getReminderId() != -1) {
+                    reminderPreview = AppDatabase.getAppDatabase(context).remindersDao().getReminderPreview(note.getReminderId());
+                } else {
+                    reminderPreview = new ReminderPreview(0, -1);
+                }
+
+                notes.add(new NoteAndReminderPreview(note, reminderPreview));
+            }
+        }
     }
+
+//    public void getList(List<SingleNote> i) {
+//        oldList.addAll(i);
+//        notifyDataSetChanged();
+//    }
 
     public void setListUsed(int listUsed) {
         this.listUsed = listUsed;
@@ -48,8 +94,8 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         return listUsed;
     }
 
-    public SingleNote getNoteAt(int position) {
-        return notes.get(position);
+    public int getNoteIdAt(int position) {
+        return notes.get(position).getNotePreview().getId();
     }
 
     public void removeAt(int position) {
@@ -59,13 +105,13 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public void addAt(int position, SingleNote note) {
-        notes.add(position, note);
+//        oldList.add(position, note);
         notifyItemInserted(position);
         notifyItemRangeChanged(position, notes.size());
     }
 
     public void updateAt(int position, SingleNote note) {
-        notes.set(position, note);
+//        oldList.set(position, note);
         notifyItemChanged(position);
     }
 
@@ -73,65 +119,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         int size = notes.size();
         notes.clear();
         notifyItemRangeRemoved(0, size);
-    }
-
-    public void removeSelectedViews(List<Integer> position) {
-        Collections.sort(position);
-        int amountOfViews = notes.size();
-        int amountOfViewsRemoved = position.size();
-        int minViewPositionChanged = position.get(0);
-        int maxViewPositionChanged = position.get(position.size() - 1);
-        int remainingViews = amountOfViews - amountOfViewsRemoved;
-
-        // Deleted entire list
-        if (remainingViews == 0) {
-            clearView();
-
-            // Deleted notes have views no longer in use
-        } else if (remainingViews <= minViewPositionChanged) {
-            notes.subList(minViewPositionChanged, notes.size()).clear();
-            notifyItemRangeRemoved(minViewPositionChanged, amountOfViews);
-
-            // Deleted notes were consecutive
-        } else if (maxViewPositionChanged - minViewPositionChanged == amountOfViewsRemoved - 1) {
-            notes.subList(minViewPositionChanged, maxViewPositionChanged + 1).clear();
-            notifyItemRangeRemoved(minViewPositionChanged, maxViewPositionChanged + 1);
-            notifyItemRangeChanged(maxViewPositionChanged, amountOfViews);
-
-            // Random deletes
-        } else {
-            for (int i = amountOfViewsRemoved - 1; i >= 0; i--) {
-                int pos = position.get(i);
-                notes.remove(pos);
-                notifyItemRemoved(pos);
-            }
-            notifyItemRangeChanged(minViewPositionChanged, amountOfViews);
-        }
-    }
-
-    public void addSelectedViews(List<Integer> position, List<SingleNote> addList) {
-        int size = notes.size();
-        int amountOfViewAdding = position.size();
-        int minViewPositionChanged = Collections.min(position);
-        int maxViewPositionChanged = Collections.max(position);
-
-        // Notes being added are consecutive
-        if (maxViewPositionChanged - minViewPositionChanged == amountOfViewAdding - 1) {
-            if (minViewPositionChanged != 0) {
-                notes.addAll(minViewPositionChanged, addList);
-            } else {
-                notes.addAll(0, addList);
-            }
-
-            notifyItemRangeInserted(minViewPositionChanged, maxViewPositionChanged);
-            notifyItemRangeChanged(minViewPositionChanged, notes.size());
-
-        } else {        // Notes added at random
-            for (int i = 0; i < amountOfViewAdding - 1; i++) {
-                notes.add(position.get(i), addList.get(i));
-            }
-            notifyItemRangeChanged(minViewPositionChanged, size);
-        }
     }
 
     public void addSelectedId(int position) {
@@ -174,7 +161,9 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int position) {
-        SingleNote note = this.notes.get(position);
+
+        NotePreview notePreview = notes.get(position).getNotePreview();
+        ReminderPreview reminderPreview = notes.get(position).getReminderPreview();
 
         if (selectedIds.contains(position)) {
             ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.GRAY);
@@ -182,34 +171,32 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.WHITE);
         }
 
-        boolean displayReminder = note.getNextReminderTime() != 0;
-
         switch (viewHolder.getItemViewType()) {
             case 0:
                 NotesViewHolderTitle viewHolderTitle = (NotesViewHolderTitle) viewHolder;
-                viewHolderTitle.noteTitle.setText(note.getTitle());
-                displayReminder(note, viewHolderTitle.reminderText, displayReminder);
+                viewHolderTitle.noteTitle.setText(notePreview.getTitle());
+                displayReminder(reminderPreview, viewHolderTitle.reminderText);
                 break;
 
             case 1:
                 NotesViewHolderContent viewHolderContent = (NotesViewHolderContent) viewHolder;
-                viewHolderContent.noteContent.setText(note.getContent());
-                displayReminder(note, viewHolderContent.reminderText, displayReminder);
+                viewHolderContent.noteContent.setText(notePreview.getContent());
+                displayReminder(reminderPreview, viewHolderContent.reminderText);
                 break;
 
             case 2:
             default:
                 NotesViewHolder notesViewHolder = (NotesViewHolder) viewHolder;
-                notesViewHolder.noteTitle.setText(note.getTitle());
-                notesViewHolder.noteContent.setText(note.getContent());
-                displayReminder(note, notesViewHolder.reminderText, displayReminder);
+                notesViewHolder.noteTitle.setText(notePreview.getTitle());
+                notesViewHolder.noteContent.setText(notePreview.getContent());
+                displayReminder(reminderPreview, notesViewHolder.reminderText);
                 break;
         }
     }
 
-    private void displayReminder(SingleNote note, TextView reminderText, boolean displayReminder) {
-        if (displayReminder) {
-            if (note.hasFrequencyChoices()) {
+    private void displayReminder(ReminderPreview reminderPreview, TextView reminderText) {
+        if (reminderPreview.getNextReminderTime() != 0) {
+            if (reminderPreview.getIsRepeating() != -1) {
                 reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
                         0, 0, 0);
             } else {
@@ -217,7 +204,8 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                         0, 0, 0);
             }
 
-            reminderText.setText(FormatUtils.getReminderText(context, new DateTime(note.getNextReminderTime())));
+            reminderText.setText(FormatUtils.getReminderText(context,
+                    new DateTime(reminderPreview.getNextReminderTime())));
             reminderText.setVisibility(View.VISIBLE);
         } else {
             reminderText.setVisibility(View.GONE);
@@ -231,8 +219,8 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     @Override
     public int getItemViewType(int position) {
-        boolean titleTextEmpty = notes.get(position).getTitle().isEmpty();
-        boolean titleContentEmpty = notes.get(position).getContent().isEmpty();
+        boolean titleTextEmpty = notes.get(position).getNotePreview().getTitle().isEmpty();
+        boolean titleContentEmpty = notes.get(position).getNotePreview().getContent().isEmpty();
 
         if (titleTextEmpty && titleContentEmpty || titleContentEmpty) {
             return showTitle;
@@ -247,4 +235,4 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public int getItemCount() {
         return this.notes.size();
     }
-} // NotesAdapter end
+}

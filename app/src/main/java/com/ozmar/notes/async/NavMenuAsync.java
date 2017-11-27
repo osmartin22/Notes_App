@@ -60,7 +60,7 @@ public class NavMenuAsync extends AsyncTask<Void, Void, List<SingleNote>> {
     @Override
     protected void onPostExecute(List<SingleNote> list) {
 
-        adapter.getList(list);
+//        adapter.getList(list);
 
         Toolbar toolbar = weakToolbar.get();
         FloatingActionButton fab = weakFab.get();

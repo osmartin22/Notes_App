@@ -11,7 +11,7 @@ import java.util.List;
 
 
 @Dao
-public interface DaoClass {
+public interface NotesDao {
 
     //---------------------------------------------------------------------------------------//
     // User Notes Table Specific Methods
@@ -29,7 +29,7 @@ public interface DaoClass {
     void updateAUserNote(MainNote note);
 
     @Insert
-    void insertToUserNotes(MainNote note);
+    long addToUserNotes(MainNote note);
 
     @Delete
     void deleteFromUserNotes(MainNote note);
@@ -39,6 +39,24 @@ public interface DaoClass {
 
     @Delete
     void deleteListFromUserNotes(List<MainNote> list);
+
+
+    @Query("SELECT id, content, title FROM userNotes")
+    List<NotePreview> getListMainPreview();
+
+
+    @Query("SELECT id, content, title, reminderId FROM userNotes")
+    List<NotePreviewWithReminderId> getMainPreviews();
+
+    @Query("SELECT id, content, title, reminderId FROM userNotes WHERE favorite = 1")
+    List<NotePreviewWithReminderId> getFavoritePreviews();
+
+
+//    @Query("SELECT id, content, title FROM userNotes WHERE id = :noteId")
+//    NotePreview getMainPreview(int noteId);
+//
+//    @Query("SELECT id, content, title FROM userNotes WHERE id = :noteId AND favorite = 1")
+//    NotePreview getFavoritePreview(int noteId);
 
 
     //---------------------------------------------------------------------------------------//
@@ -55,7 +73,7 @@ public interface DaoClass {
     void updateAnArchiveNote(ArchiveNote note);
 
     @Insert
-    void addToArchiveNotes(ArchiveNote note);
+    long addToArchiveNotes(ArchiveNote note);
 
     @Delete
     void deleteFromArchiveNotes(ArchiveNote note);
@@ -65,6 +83,9 @@ public interface DaoClass {
 
     @Delete
     void deleteListFromArchiveNotes(List<ArchiveNote> list);
+
+    @Query("SELECT id, title, content, reminderId FROM archiveNotes")
+    List<NotePreviewWithReminderId> getArchivePreviews();
 
 
     //---------------------------------------------------------------------------------------//
@@ -90,5 +111,8 @@ public interface DaoClass {
     void deleteListFromRecycleBinNotes(List<RecycleBinNote> list);
 
     // TODO: Delete notes too long in trash
+
+    @Query("SELECT id, title, content FROM recycleBinNotes")
+    List<NotePreview> getRecycleBinPreviews();
 
 }

@@ -3,6 +3,9 @@ package com.ozmar.notes.database;
 
 import com.ozmar.notes.SingleNote;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NoteConversion {
 
     private NoteConversion() {
@@ -75,7 +78,7 @@ public class NoteConversion {
         return recycleBinNote;
     }
 
-    public static SingleNote getSingleNotefromRecycleBinNote(RecycleBinNote note) {
+    public static SingleNote getSingleNoteFromRecycleBinNote(RecycleBinNote note) {
         SingleNote singleNote = new SingleNote();
 
         singleNote.setId(note.getId());
@@ -85,6 +88,41 @@ public class NoteConversion {
         singleNote.setTimeModified(note.getTimeModified());
 
         return singleNote;
+    }
+
+    public static Object getFromSingleNoteConversion(SingleNote note, int listUsed) {
+        Object object = null;
+        if (listUsed == 0 || listUsed == 1) {
+            object = NoteConversion.getMainNoteFromSingleNote(note);
+        } else if (listUsed == 2) {
+            object = NoteConversion.getArchiveNoteFromSingleNote(note);
+        } else if (listUsed == 3) {
+            object = NoteConversion.getRecycleBinNoteFromSingleNote(note);
+        }
+        return object;
+    }
+
+    public static SingleNote getToSingleNoteConversion(Object object, int listUsed) {
+        SingleNote note = null;
+        if (listUsed == 0 || listUsed == 1) {
+            note = NoteConversion.getSingleNoteFromMainNote((MainNote) object);
+        } else if (listUsed == 2) {
+            note = NoteConversion.getSingleNoteFromArchiveNote((ArchiveNote) object);
+        } else if (listUsed == 3) {
+            note = NoteConversion.getSingleNoteFromRecycleBinNote((RecycleBinNote) object);
+        }
+        return note;
+    }
+
+
+    public static List<SingleNote> tempList(List<MainNote> list) {
+        List<SingleNote> newList = new ArrayList<>();
+        if (!list.isEmpty()) {
+            for (MainNote note : list) {
+                newList.add(getSingleNoteFromMainNote(note));
+            }
+        }
+        return newList;
     }
 
 }

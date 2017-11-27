@@ -31,12 +31,12 @@
 
 
     <!-- Strings used for delete dialog fragment -->
-    <string name="messageDialog">Do you want to delete this note?</string>
+    <string name="messageDialog">Do you want to delete this notePreview?</string>
     <string name="deleteDialog">Delete</string>
     <string name="cancelDialog">Cancel</string>
 
-    <!-- String for trying to edit a Recycle Bin note -->
-    <string name="editRecycleBinNote">Can\'t edit note in Trash</string>
+    <!-- String for trying to edit a Recycle notePreviewnote -->
+    <string name="editRecycleBinNote">Can\'t edit notePreview in Trash</string>
 
 
     <!-- CAB menu items in MainActivity-->
@@ -48,7 +48,7 @@
 
     <!-- Delete forever dialog strings -->
     <plurals name="deleteForever">
-        <item quantity="one">Delete note forever?</item>
+        <item quantity="one">Delete notePreview forever?</item>
         <item quantity="other">Delete notes forever?</item>
     </plurals>
 

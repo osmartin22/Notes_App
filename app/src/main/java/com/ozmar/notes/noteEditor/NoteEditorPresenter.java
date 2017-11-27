@@ -16,6 +16,10 @@ import org.joda.time.DateTime;
 
 // TODO: Deleting a note through multi select does not cancel reminder notification
 
+// TODO: Opening a note without a reminder time crashes on return(reminder.datetime == null)
+// TODO: Exiting NoteEditorActivity with a reminder causes a notification to be created with the reminder time
+// Should not happen as the reminder already occurred
+
 public class NoteEditorPresenter {
     private NoteEditorView noteEditorView;
 
@@ -111,7 +115,8 @@ public class NoteEditorPresenter {
         boolean titleChanged = !note.getTitle().equals(title);
         boolean contentChanged = !note.getContent().equals(content);
         boolean favoriteChanged = note.isFavorite() != favorite;
-        boolean reminderTimeChanged = note.getNextReminderTime() != mReminder.getDateTime().getMillis();
+//        boolean reminderTimeChanged = note.getNextReminderTime() != mReminder.getDateTime().getMillis();
+        boolean reminderTimeChanged = false;
 
         return new ChangesInNote(titleChanged, contentChanged, favoriteChanged,
                 reminderTimeChanged, frequencyChanged);
@@ -123,7 +128,7 @@ public class NoteEditorPresenter {
         if (mNote != null) {
             ChangesInNote changesInNote = checkForDifferences(mNote, title, content);
             result = updateNote(mNote, changesInNote, title, content);
-            updateReminder(db, mNote, mReminder.getDateTime().getMillis());
+//            updateReminder(db, mNote, mReminder.getDateTime().getMillis());
             new UpdateNoteAsync(db, null, mNote, listUsed, changesInNote).execute();
 
         } else {
@@ -202,9 +207,11 @@ public class NoteEditorPresenter {
         }
     }
 
+
     public void onDestroy() {
         noteEditorView = null;
     }
+
 
     public void onReminderPicked(@Nullable FrequencyChoices choices, long nextReminderTime,
                                  @NonNull String newReminderText) {

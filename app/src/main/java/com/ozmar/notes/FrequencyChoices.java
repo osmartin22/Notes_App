@@ -1,6 +1,7 @@
 package com.ozmar.notes;
 
 import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Ignore;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.IntRange;
@@ -40,7 +41,7 @@ public class FrequencyChoices implements Parcelable {
     @ColumnInfo(name = "daysChosen")
     private List<Integer> daysChosen;
 
-    @ColumnInfo(name = "repeatEventsOccured")
+    @ColumnInfo(name = "repeatEventsOccurred")
     private int repeatEventsOccurred;
 
     public FrequencyChoices() {
@@ -48,6 +49,7 @@ public class FrequencyChoices implements Parcelable {
     }
 
     // Constructor for presets
+    @Ignore
     public FrequencyChoices(@IntRange(from = 0, to = 4) int repeatType, @Nullable List<Integer> daysChosen) {
         this.repeatType = repeatType;
         this.repeatEvery = 1;
@@ -67,6 +69,7 @@ public class FrequencyChoices implements Parcelable {
         this.repeatEventsOccurred = 0;
     }
 
+    @Ignore
     public FrequencyChoices(@IntRange(from = 0, to = 4) int repeatType, int repeatEvery,
                             @IntRange(from = 0, to = 1) int repeatForever, long repeatToDate, int repeatEvents,
                             @IntRange(from = -1, to = 1) int monthRepeatType,

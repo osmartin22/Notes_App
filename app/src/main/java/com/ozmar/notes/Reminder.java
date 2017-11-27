@@ -3,6 +3,7 @@ package com.ozmar.notes;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -12,11 +13,11 @@ import org.joda.time.DateTime;
 
 // TODO: Update rest of code to handle null DateTimes
 
-@Entity(tableName = "reminders")
+@Entity(tableName = "remindersTable")
 public final class Reminder implements Parcelable {
 
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "id")
+    @ColumnInfo(name = "reminderId")
     private int id;
 
     @ColumnInfo(name = "reminderTime")
@@ -30,6 +31,7 @@ public final class Reminder implements Parcelable {
 
     }
 
+    @Ignore
     public Reminder(DateTime dateTime, @Nullable FrequencyChoices frequencyChoices) {
         this.mDateTime = dateTime;
         this.mFrequencyChoices = frequencyChoices;

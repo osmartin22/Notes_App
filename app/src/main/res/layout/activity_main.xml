@@ -53,7 +53,7 @@
                 android:layout_marginEnd="@dimen/additionButtonMargins"
                 android:clickable="true"
                 android:focusable="true"
-                android:onClick="launchNoteEditor"
+                android:onClick="onFabClicked"
                 android:tint="#00bfa5"
                 app:backgroundTint="#424242"
                 app:fabSize="normal"
