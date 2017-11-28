@@ -19,8 +19,11 @@ import android.view.View;
 import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.NavMenuAsync;
 import com.ozmar.notes.database.AppDatabase;
+import com.ozmar.notes.database.MainNote;
 import com.ozmar.notes.databinding.ActivityMainBinding;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
+
+import org.joda.time.DateTime;
 
 import static android.support.v7.widget.DividerItemDecoration.HORIZONTAL;
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
@@ -91,6 +94,31 @@ public class MainActivity extends AppCompatActivity implements
 
         db = new DatabaseHandler(MainActivity.this);
         preferences = new Preferences(MainActivity.this);
+        AppDatabase.setUpAppDatabase(getApplicationContext());
+
+
+        MainNote test1 = new MainNote();
+        test1.setTitle("TestTitle1");
+        test1.setContent("TestContent1");
+        test1.setReminderId(-1);
+        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test1);
+
+        MainNote test2 = new MainNote();
+        test2.setTitle("TestTitle2");
+        test2.setContent("TestContent2");
+        test2.setReminderId(-1);
+        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test2);
+
+        MainNote test3 = new MainNote();
+        test3.setTitle("TestTitle3");
+        test3.setContent("TestContent3");
+        test3.setReminderId(-1);
+
+        Reminder reminder = new Reminder(DateTime.now(),new FrequencyChoices(2,null));
+        long reminderId = AppDatabase.getAppDatabase().remindersDao().addReminder(reminder);
+        test3.setReminderId((int) reminderId);
+        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test3);
+
 
         new AutoDeleteAsync(db, preferences.getDaysInTrash()).execute();
 

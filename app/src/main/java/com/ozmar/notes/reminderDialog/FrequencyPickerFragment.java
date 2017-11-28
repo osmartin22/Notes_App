@@ -1,4 +1,4 @@
-package com.ozmar.notes.reminderDialog;
+ package com.ozmar.notes.reminderDialog;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;

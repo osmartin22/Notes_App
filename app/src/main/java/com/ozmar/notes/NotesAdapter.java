@@ -26,6 +26,8 @@ import java.util.List;
 
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private static final int SHOW_TITLE = 0, SHOW_CONTENT = 1, SHOW_ALL = 2;
+
     private final Context context;
     private int listUsed = 0;
 
@@ -34,8 +36,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private List<NoteAndReminderPreview> notes = new ArrayList<>();
 
     private final List<Integer> selectedIds = new ArrayList<>();
-
-    private final int showTitle = 0, showContent = 1, showAll = 2;
 
     // TODO: Remove database from constructor
     // Call function to get data from database from presenter instead
@@ -51,7 +51,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private void convertList() {
         if (listUsed == 3) {
             ReminderPreview reminderPreview = new ReminderPreview(0, -1);
-            List<NotePreview> recycleBinList = AppDatabase.getAppDatabase(context).notesDao().getRecycleBinPreviews();
+            List<NotePreview> recycleBinList = AppDatabase.getAppDatabase().notesDao().getRecycleBinPreviews();
             for (NotePreview notePreview : recycleBinList) {
                 NotePreviewWithReminderId newPreview = new NotePreviewWithReminderId(notePreview);
                 notes.add(new NoteAndReminderPreview(newPreview, reminderPreview));
@@ -60,18 +60,18 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         } else if (listUsed == 0 || listUsed == 1 || listUsed == 2) {
             List<NotePreviewWithReminderId> notePreviewList;
             if (listUsed == 0) {
-                notePreviewList = AppDatabase.getAppDatabase(context).notesDao().getMainPreviews();
+                notePreviewList = AppDatabase.getAppDatabase().notesDao().getMainPreviews();
             } else if (listUsed == 1) {
-                notePreviewList = AppDatabase.getAppDatabase(context).notesDao().getFavoritePreviews();
+                notePreviewList = AppDatabase.getAppDatabase().notesDao().getFavoritePreviews();
             } else {
-                notePreviewList = AppDatabase.getAppDatabase(context).notesDao().getArchivePreviews();
+                notePreviewList = AppDatabase.getAppDatabase().notesDao().getArchivePreviews();
             }
 
             for (NotePreviewWithReminderId note : notePreviewList) {
                 ReminderPreview reminderPreview;
 
                 if (note.getReminderId() != -1) {
-                    reminderPreview = AppDatabase.getAppDatabase(context).remindersDao().getReminderPreview(note.getReminderId());
+                    reminderPreview = AppDatabase.getAppDatabase().remindersDao().getReminderPreview(note.getReminderId());
                 } else {
                     reminderPreview = new ReminderPreview(0, -1);
                 }
@@ -139,17 +139,17 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
         switch (viewType) {
-            case showTitle:
+            case SHOW_TITLE:
                 View viewShowTitle = inflater.inflate(R.layout.note_preview_title, parent, false);
                 viewHolder = new NotesViewHolderTitle(viewShowTitle);
                 break;
 
-            case showContent:
+            case SHOW_CONTENT:
                 View viewShowContent = inflater.inflate(R.layout.note_preview_content, parent, false);
                 viewHolder = new NotesViewHolderContent(viewShowContent);
                 break;
 
-            case showAll:
+            case SHOW_ALL:
             default:
                 View viewShowAll = inflater.inflate(R.layout.note_preview, parent, false);
                 viewHolder = new NotesViewHolder(viewShowAll);
@@ -223,11 +223,11 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         boolean titleContentEmpty = notes.get(position).getNotePreview().getContent().isEmpty();
 
         if (titleTextEmpty && titleContentEmpty || titleContentEmpty) {
-            return showTitle;
+            return SHOW_TITLE;
         } else if (titleTextEmpty) {
-            return showContent;
+            return SHOW_CONTENT;
         } else {
-            return showAll;
+            return SHOW_ALL;
         }
     }
 

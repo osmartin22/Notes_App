@@ -131,6 +131,9 @@
         <item>Custom&#8230;</item>
     </string-array>
 
+    <string name="pickADate">Pick A Date&#8230;</string>
+    <string name="pickATime">Pick A Time&#8230;</string>
+
 
     <!-- Arrays, Strings, and Plurals for FrequencyPicker -->
     <string name="everyString">Every</string>

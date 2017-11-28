@@ -61,7 +61,7 @@ public class NoteEditorActivity extends AppCompatActivity
         int noteId = intent.getIntExtra(getString(R.string.noteIdIntent), -1);
         int listUsed = intent.getIntExtra(getString(R.string.listUsedIntent), USER_NOTES);
         notePosition = intent.getIntExtra(getString(R.string.notePositionIntent), -1);
-        noteEditorPresenter.initialize(db, noteId, listUsed);
+        noteEditorPresenter.initialize(noteId, listUsed);
     }
 
     private void setupToolbar() {
@@ -136,12 +136,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
     public void addReminder(View view) {
-        long time = noteEditorPresenter.getReminderTime();
-        FrequencyChoices choices = noteEditorPresenter.getFrequencyChoices();
-
-        Reminder reminder = new Reminder(new DateTime(time), choices);
-
-        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(reminder);
+        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(noteEditorPresenter.getReminder());
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
     }
 
@@ -161,7 +156,7 @@ public class NoteEditorActivity extends AppCompatActivity
     @Override
     public void onReminderPicked(@NonNull Reminder reminder) {
         String newReminderText = FormatUtils.getReminderText(getApplication(), reminder.getDateTime());
-        noteEditorPresenter.onReminderPicked(reminder.getFrequencyChoices(), reminder.getDateTime().getMillis(), newReminderText);
+        noteEditorPresenter.onReminderPicked(reminder, newReminderText);
     }
 
     @Override

@@ -5,12 +5,13 @@ import android.support.annotation.Nullable;
 
 import com.ozmar.notes.ChangesInNote;
 import com.ozmar.notes.DatabaseHandler;
-import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.SingleNote;
-import com.ozmar.notes.async.UpdateNoteAsync;
+import com.ozmar.notes.database.AppDatabase;
+import com.ozmar.notes.database.MainNote;
+import com.ozmar.notes.database.NoteConversion;
 
-import org.joda.time.DateTime;
+import javax.annotation.Nonnull;
 
 // TODO: Separate database calls from presenter
 
@@ -30,15 +31,20 @@ public class NoteEditorPresenter {
 
     private int listUsed;
     private boolean favorite = false;
+    private boolean reminderChanged = false;
     private boolean frequencyChanged = false;
 
+    @Nullable
     private SingleNote mNote;
+
+    @Nullable
     private Reminder mReminder;
 
     public NoteEditorPresenter(NoteEditorView noteEditorView) {
         this.noteEditorView = noteEditorView;
     }
 
+    @Nullable
     public SingleNote getNote() {
         return mNote;
     }
@@ -47,30 +53,25 @@ public class NoteEditorPresenter {
         return favorite;
     }
 
-    public long getReminderTime() {
-        return mReminder.getDateTime().getMillis();
+    @Nullable
+    public Reminder getReminder() {
+        return mReminder;
     }
 
     public int getListUsed() {
         return listUsed;
     }
 
-    public FrequencyChoices getFrequencyChoices() {
-        return mReminder.getFrequencyChoices();
-    }
-
-    public void initialize(DatabaseHandler db, int noteId, int listUsed) {
+    public void initialize(int noteId, int listUsed) {
         this.listUsed = listUsed;
-        requestNote(db, noteId);
+        mNote = requestNote(noteId);
 
         if (mNote != null) {
             favorite = mNote.isFavorite();
             noteEditorView.setupNoteEditTexts(mNote);
 
             if (mNote.getReminderId() != -1) {
-                FrequencyChoices choices = db.getFrequencyChoice(mNote.getReminderId());
-                long reminderTime = mNote.getNextReminderTime();
-                mReminder = new Reminder(new DateTime(reminderTime), choices);
+                mReminder = AppDatabase.getAppDatabase().remindersDao().getReminder(mNote.getReminderId());
                 noteEditorView.showReminder(mNote, mReminder.getDateTime().getMillis());
             }
 
@@ -84,26 +85,22 @@ public class NoteEditorPresenter {
         noteEditorView.updateFavoriteIcon(favorite);
     }
 
-    private SingleNote createNewNote(@NonNull DatabaseHandler db, @NonNull String title,
+    private SingleNote createNewNote(@NonNull String title,
                                      @NonNull String content) {
         SingleNote newNote;
 
-        long reminderTime = mReminder.getDateTime().getMillis();
-        FrequencyChoices choices = mReminder.getFrequencyChoices();
+        if (mReminder != null) {
 
-        if (reminderTime != 0) {
-            int reminderId = db.addReminder(choices, reminderTime);
+            int reminderId = (int) AppDatabase.getAppDatabase().remindersDao().addReminder(mReminder);
             newNote = new SingleNote(title, content, favorite, System.currentTimeMillis(),
-                    reminderTime, reminderId);
-            newNote.setHasFrequencyChoices(choices != null);
-
+                    mReminder.getDateTime().getMillis(), reminderId);
             noteEditorView.setupReminder(newNote);
 
         } else {
             newNote = new SingleNote(title, content, favorite, System.currentTimeMillis());
         }
 
-        newNote.setId(db.addNoteToUserList(newNote));
+        newNote.setId((int) AppDatabase.getAppDatabase().notesDao().addToUserNotes(NoteConversion.getMainNoteFromSingleNote(newNote)));
 
         return newNote;
     }
@@ -128,14 +125,19 @@ public class NoteEditorPresenter {
         if (mNote != null) {
             ChangesInNote changesInNote = checkForDifferences(mNote, title, content);
             result = updateNote(mNote, changesInNote, title, content);
-//            updateReminder(db, mNote, mReminder.getDateTime().getMillis());
-            new UpdateNoteAsync(db, null, mNote, listUsed, changesInNote).execute();
+
+            if (reminderChanged) {
+                updateReminder(mNote, mReminder);
+            }
+
+            MainNote temp = NoteConversion.getMainNoteFromSingleNote(mNote);
+            AppDatabase.getAppDatabase().notesDao().updateAUserNote(temp);
 
         } else {
             boolean titleEmpty = title.isEmpty();
             boolean contentEmpty = content.isEmpty();
             if (!(titleEmpty && contentEmpty)) {    // New note
-                mNote = createNewNote(db, title, content);
+                mNote = createNewNote(title, content);
                 result = 1;
             }
         }
@@ -181,29 +183,26 @@ public class NoteEditorPresenter {
         return result;
     }
 
-    private void updateReminder(@NonNull DatabaseHandler db, @NonNull SingleNote note, long reminderTime) {
 
-        // New reminder
-        if (note.getReminderId() == -1 && reminderTime != 0) {
-            int newId = db.addReminder(mReminder.getFrequencyChoices(), reminderTime);
-            note.setNextReminderTime(reminderTime);
-            note.setReminderId(newId);
-            noteEditorView.setupReminder(note);
+    private void updateReminder(@NonNull SingleNote note, @Nullable Reminder reminder) {
 
-        } else if (note.getReminderId() != -1) {
-
-            // Delete reminder
-            if (reminderTime == 0) {
+        if (note.getReminderId() != -1) {
+            if (reminder == null) {
+                // Delete reminder
                 noteEditorView.cancelReminder(note.getReminderId());
-                db.deleteReminder(note.getReminderId());
+                AppDatabase.getAppDatabase().remindersDao().deleteReminder(note.getReminderId());
                 note.setReminderId(-1);
-                note.setNextReminderTime(reminderTime);
-
-                // Updating reminder
-            } else {   // TODO: Temp, updates always right now
-                db.updateReminder(note.getReminderId(), mReminder.getFrequencyChoices(), reminderTime);
+            } else {
+                // Update reminder
+                AppDatabase.getAppDatabase().remindersDao().updateReminder(reminder);
                 noteEditorView.setupReminder(note);
             }
+        } else if (reminder != null) {
+            // Add reminder to database
+            int newId = (int) AppDatabase.getAppDatabase().remindersDao().addReminder(reminder);
+            note.setNextReminderTime(reminder.getDateTime().getMillis());
+            note.setReminderId(newId);
+            noteEditorView.setupReminder(note);
         }
     }
 
@@ -213,35 +212,37 @@ public class NoteEditorPresenter {
     }
 
 
-    public void onReminderPicked(@Nullable FrequencyChoices choices, long nextReminderTime,
-                                 @NonNull String newReminderText) {
-        if (mReminder.getFrequencyChoices() != choices) {
-            mReminder.setFrequencyChoices(choices);
-            frequencyChanged = true;
+    public void onReminderPicked(@Nonnull Reminder reminder, @Nonnull String newReminderText) {
+        if (mReminder != reminder) {
+            mReminder = reminder;
+            reminderChanged = true;
         }
-
-        if (mReminder.getDateTime().getMillis() != nextReminderTime) {
-            mReminder.setDateTime(new DateTime(nextReminderTime));
-        }
-
         noteEditorView.updateReminderDisplay(newReminderText, mReminder.getFrequencyChoices());
     }
 
     public void onReminderDeleted() {
-        mReminder.setFrequencyChoices(null);
-        mReminder.setDateTime(new DateTime(0));
+        if (mNote != null) {
+            AppDatabase.getAppDatabase().remindersDao().deleteReminder(mReminder);
+        }
+        mReminder = null;
         noteEditorView.hideReminder();
     }
 
-    private void requestNote(DatabaseHandler db, int noteId) {
+    // TODO: Move out of presenter
+    private SingleNote requestNote(int noteId) {
         if (noteId != -1) {
+            Object object = null;
             if (listUsed == 0 || listUsed == 1) {
-                mNote = db.getAUserNote(noteId);
+                object = AppDatabase.getAppDatabase().notesDao().getAUserNote(noteId);
             } else if (listUsed == 2) {
-                mNote = db.getAnArchiveNote(noteId);
+                object = AppDatabase.getAppDatabase().notesDao().getAnArchiveNote(noteId);
             } else if (listUsed == 3) {
-                mNote = db.getARecycleBinNote(noteId);
+                object = AppDatabase.getAppDatabase().notesDao().getARecycleBinNotes(noteId);
             }
+
+            return NoteConversion.getToSingleNoteConversion(object, listUsed);
         }
+
+        return null;
     }
 }

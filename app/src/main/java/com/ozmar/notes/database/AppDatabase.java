@@ -20,7 +20,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract RemindersDao remindersDao();
 
-    public static AppDatabase getAppDatabase(Context context) {
+    public static void setUpAppDatabase(Context context) {
         if (INSTANCE == null) {
             INSTANCE =
                     Room.databaseBuilder(context.getApplicationContext(),
@@ -29,6 +29,10 @@ public abstract class AppDatabase extends RoomDatabase {
                             .fallbackToDestructiveMigration()
                             .build();
         }
+    }
+
+
+    public static AppDatabase getAppDatabase() {
         return INSTANCE;
     }
 
