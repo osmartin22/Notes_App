@@ -24,14 +24,14 @@ import org.joda.time.DateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int SHOW_TITLE = 0, SHOW_CONTENT = 1, SHOW_ALL = 2;
 
     private final Context context;
     private int listUsed = 0;
-
-//    private final List<SingleNote> oldList;
 
     private List<NoteAndReminderPreview> notes = new ArrayList<>();
 
@@ -41,50 +41,44 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     // Call function to get data from database from presenter instead
     public NotesAdapter(Context context) {
         this.context = context;
-
-//        oldList = db.getUserNotes();
-
         convertList();
     }
 
     // TODO: Temp position of function(move to another place later)
     private void convertList() {
         if (listUsed == 3) {
-            ReminderPreview reminderPreview = new ReminderPreview(0, -1);
             List<NotePreview> recycleBinList = AppDatabase.getAppDatabase().notesDao().getRecycleBinPreviews();
             for (NotePreview notePreview : recycleBinList) {
                 NotePreviewWithReminderId newPreview = new NotePreviewWithReminderId(notePreview);
-                notes.add(new NoteAndReminderPreview(newPreview, reminderPreview));
+                notes.add(new NoteAndReminderPreview(newPreview, null));
             }
 
         } else if (listUsed == 0 || listUsed == 1 || listUsed == 2) {
             List<NotePreviewWithReminderId> notePreviewList;
             if (listUsed == 0) {
-                notePreviewList = AppDatabase.getAppDatabase().notesDao().getMainPreviews();
+                notePreviewList = AppDatabase.getAppDatabase().notesDao().getMainPreviewList();
             } else if (listUsed == 1) {
-                notePreviewList = AppDatabase.getAppDatabase().notesDao().getFavoritePreviews();
+                notePreviewList = AppDatabase.getAppDatabase().notesDao().getFavoritePreviewList();
             } else {
                 notePreviewList = AppDatabase.getAppDatabase().notesDao().getArchivePreviews();
             }
 
             for (NotePreviewWithReminderId note : notePreviewList) {
-                ReminderPreview reminderPreview;
+                ReminderPreview reminderPreview = null;
 
                 if (note.getReminderId() != -1) {
-                    reminderPreview = AppDatabase.getAppDatabase().remindersDao().getReminderPreview(note.getReminderId());
-                } else {
-                    reminderPreview = new ReminderPreview(0, -1);
+                    reminderPreview = AppDatabase.getAppDatabase().remindersDao().
+                            getReminderPreview(note.getReminderId());
                 }
-
                 notes.add(new NoteAndReminderPreview(note, reminderPreview));
             }
         }
     }
 
-//    public void getList(List<SingleNote> i) {
-//        oldList.addAll(i);
-//        notifyDataSetChanged();
-//    }
+    public void getList(List<NoteAndReminderPreview> i) {
+        notes.addAll(i);
+        notifyDataSetChanged();
+    }
 
     public void setListUsed(int listUsed) {
         this.listUsed = listUsed;
@@ -104,14 +98,15 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notifyItemRangeChanged(position, notes.size());
     }
 
-    public void addAt(int position, SingleNote note) {
-//        oldList.add(position, note);
+
+    public void addAt(int position, NoteAndReminderPreview notePreview) {
+        notes.add(position, notePreview);
         notifyItemInserted(position);
         notifyItemRangeChanged(position, notes.size());
     }
 
-    public void updateAt(int position, SingleNote note) {
-//        oldList.set(position, note);
+    public void updateAt(int position, NoteAndReminderPreview notePreview) {
+        notes.set(position, notePreview);
         notifyItemChanged(position);
     }
 
@@ -194,8 +189,8 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    private void displayReminder(ReminderPreview reminderPreview, TextView reminderText) {
-        if (reminderPreview.getNextReminderTime() != 0) {
+    private void displayReminder(@Nullable ReminderPreview reminderPreview, TextView reminderText) {
+        if (reminderPreview != null) {
             if (reminderPreview.getIsRepeating() != -1) {
                 reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
                         0, 0, 0);

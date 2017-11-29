@@ -1,26 +1,21 @@
 package com.ozmar.notes.database;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class NoteAndReminderPreview {
 
     @Nonnull
     private NotePreviewWithReminderId mNotePreview;
 
-    @Nonnull
+    @Nullable
     private ReminderPreview mReminderPreview;
 
     public NoteAndReminderPreview(@Nonnull NotePreviewWithReminderId notePreview,
-                                  @Nonnull ReminderPreview reminderPreview) {
+                                  @Nullable ReminderPreview reminderPreview) {
         this.mNotePreview = notePreview;
         this.mReminderPreview = reminderPreview;
     }
-
-    public NoteAndReminderPreview(@Nonnull NotePreviewWithReminderId notePreview) {
-        this.mNotePreview = notePreview;
-        this.mReminderPreview = new ReminderPreview(0, -1);
-    }
-
 
     @Nonnull
     public NotePreview getNotePreview() {
@@ -31,12 +26,12 @@ public class NoteAndReminderPreview {
         this.mNotePreview = notePreview;
     }
 
-    @Nonnull
+    @Nullable
     public ReminderPreview getReminderPreview() {
         return mReminderPreview;
     }
 
-    public void setReminderPreview(@Nonnull ReminderPreview reminderPreview) {
+    public void setReminderPreview(@Nullable ReminderPreview reminderPreview) {
         this.mReminderPreview = reminderPreview;
     }
 }

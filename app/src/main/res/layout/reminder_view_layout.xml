@@ -15,6 +15,7 @@
         android:paddingStart="@dimen/reminderLayoutStartPadding"
         android:textAllCaps="false"
         android:textSize="@dimen/reminderTextSize"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" />
 

@@ -19,11 +19,9 @@ import android.view.View;
 import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.async.NavMenuAsync;
 import com.ozmar.notes.database.AppDatabase;
-import com.ozmar.notes.database.MainNote;
+import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.databinding.ActivityMainBinding;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
-
-import org.joda.time.DateTime;
 
 import static android.support.v7.widget.DividerItemDecoration.HORIZONTAL;
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
@@ -97,27 +95,36 @@ public class MainActivity extends AppCompatActivity implements
         AppDatabase.setUpAppDatabase(getApplicationContext());
 
 
-        MainNote test1 = new MainNote();
-        test1.setTitle("TestTitle1");
-        test1.setContent("TestContent1");
-        test1.setReminderId(-1);
-        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test1);
-
-        MainNote test2 = new MainNote();
-        test2.setTitle("TestTitle2");
-        test2.setContent("TestContent2");
-        test2.setReminderId(-1);
-        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test2);
-
-        MainNote test3 = new MainNote();
-        test3.setTitle("TestTitle3");
-        test3.setContent("TestContent3");
-        test3.setReminderId(-1);
-
-        Reminder reminder = new Reminder(DateTime.now(),new FrequencyChoices(2,null));
-        long reminderId = AppDatabase.getAppDatabase().remindersDao().addReminder(reminder);
-        test3.setReminderId((int) reminderId);
-        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test3);
+//        MainNote test1 = new MainNote();
+//        test1.setTitle("TestTitle1");
+//        test1.setContent("TestContent1");
+//        test1.setTimeCreated(System.currentTimeMillis());
+//        test1.setTimeModified(System.currentTimeMillis());
+//        test1.setFavorite(0);
+//        test1.setReminderId(-1);
+//        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test1);
+//
+//        MainNote test2 = new MainNote();
+//        test2.setTitle("TestTitle2");
+//        test2.setContent("TestContent2");
+//        test2.setTimeCreated(System.currentTimeMillis());
+//        test2.setTimeModified(System.currentTimeMillis());
+//        test2.setFavorite(1);
+//        test2.setReminderId(-1);
+//        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test2);
+//
+//        MainNote test3 = new MainNote();
+//        test3.setTitle("TestTitle3");
+//        test3.setContent("TestContent3");
+//        test3.setTimeCreated(System.currentTimeMillis());
+//        test3.setTimeModified(System.currentTimeMillis());
+//        test3.setFavorite(1);
+//        test3.setReminderId(-1);
+//
+//        Reminder reminder = new Reminder(DateTime.now(), new FrequencyChoices(2, null));
+//        long reminderId = AppDatabase.getAppDatabase().remindersDao().addReminder(reminder);
+//        test3.setReminderId((int) reminderId);
+//        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test3);
 
 
         new AutoDeleteAsync(db, preferences.getDaysInTrash()).execute();
@@ -220,44 +227,40 @@ public class MainActivity extends AppCompatActivity implements
                     notePosition = 0;
                 }
 
-                SingleNote note = null;
+                NoteAndReminderPreview preview = null;
                 if (noteId != -1 && (noteEditorAction != -1 || noteResult != -1)) {
-                    if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
-                        note = db.getAUserNote(noteId);
-                    } else if (listUsed == ARCHIVE_NOTES) {
-                        note = db.getAnArchiveNote(noteId);
-                    } else if (listUsed == RECYCLE_BIN_NOTES) {
-                        note = db.getARecycleBinNote(noteId);
-                    }
+                    preview = AppDatabase.getAppDatabase().previewsDao()
+                            .getNoteAndReminderPreview(noteId, listUsed);
                 }
 
-                if (note != null) {
+
+                if (preview != null) {
                     if (noteEditorAction != -1) {
 
-                        if (noteIsFavorite && listUsed == ARCHIVE_NOTES) {
-                            note.setFavorite(true);
-                        }
+//                        if (noteIsFavorite && listUsed == ARCHIVE_NOTES) {
+//                            note.setFavorite(true);
+//                        }
 
                     } else {
-                        noteModifiedInNoteEditor(note, notePosition, listUsed, noteResult, noteIsFavorite);
+                        noteModifiedInNoteEditor(preview, notePosition, listUsed, noteResult, noteIsFavorite);
                     }
                 }
             }
         }
     }
 
-    private void noteModifiedInNoteEditor(@NonNull SingleNote note, int notePosition, int listUsed,
+    private void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
                                           int noteModifiedResult, boolean noteIsFavorite) {
 
 
         if (noteModifiedResult == 0) {    // Update rv with noteChanges to the note
-            notesAdapter.updateAt(notePosition, note);
+            notesAdapter.updateAt(notePosition, preview);
 
         } else if (noteModifiedResult == 1) {    // Update rv with new note
             if (listUsed == 0) {
-                notesAdapter.addAt(notePosition, note);
+                notesAdapter.addAt(notePosition, preview);
             } else if (listUsed == FAVORITE_NOTES && noteIsFavorite) {
-                notesAdapter.addAt(notePosition, note);
+                notesAdapter.addAt(notePosition, preview);
             }
 
         } else if (noteModifiedResult == 2) {    // Remove note from rv (Delete Forever)

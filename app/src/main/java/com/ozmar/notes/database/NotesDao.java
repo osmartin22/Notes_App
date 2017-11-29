@@ -41,23 +41,14 @@ public interface NotesDao {
     void deleteListFromUserNotes(List<MainNote> list);
 
 
-    @Query("SELECT id, content, title FROM userNotes")
-    List<NotePreview> getListMainPreview();
+    @Query("SELECT id, title, content, reminderId FROM userNotes WHERE id = :noteId")
+    NotePreviewWithReminderId getAMainPreview(int noteId);
 
+    @Query("SELECT id, title, content, reminderId FROM userNotes")
+    List<NotePreviewWithReminderId> getMainPreviewList();
 
-    @Query("SELECT id, content, title, reminderId FROM userNotes")
-    List<NotePreviewWithReminderId> getMainPreviews();
-
-    @Query("SELECT id, content, title, reminderId FROM userNotes WHERE favorite = 1")
-    List<NotePreviewWithReminderId> getFavoritePreviews();
-
-
-//    @Query("SELECT id, content, title FROM userNotes WHERE id = :noteId")
-//    NotePreview getMainPreview(int noteId);
-//
-//    @Query("SELECT id, content, title FROM userNotes WHERE id = :noteId AND favorite = 1")
-//    NotePreview getFavoritePreview(int noteId);
-
+    @Query("SELECT id, title, content, reminderId FROM userNotes WHERE favorite = 1")
+    List<NotePreviewWithReminderId> getFavoritePreviewList();
 
     //---------------------------------------------------------------------------------------//
     // Archive Table Specific Methods

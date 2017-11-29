@@ -2,6 +2,9 @@ package com.ozmar.notes.database;
 
 
 import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Ignore;
+
+import javax.annotation.Nonnull;
 
 public class BaseNote {
 
@@ -16,6 +19,18 @@ public class BaseNote {
 
     @ColumnInfo(name = "timeModified")
     private long timeModified;
+
+    @Ignore
+    public BaseNote(){
+
+    }
+
+    public BaseNote(@Nonnull String title, @Nonnull String content, long timeCreated, long timeModified) {
+        this.title = title;
+        this.content = content;
+        this.timeCreated = timeCreated;
+        this.timeModified = timeModified;
+    }
 
 
     public String getTitle() {
