@@ -34,6 +34,9 @@ public interface NotesDao {
     @Delete
     void deleteFromUserNotes(MainNote note);
 
+    @Query("DELETE FROM userNotes WHERE id = :noteId")
+    void deleteFromUserNotes(int noteId);
+
     @Insert
     void addListToUserNotes(List<MainNote> list);
 
@@ -69,6 +72,9 @@ public interface NotesDao {
     @Delete
     void deleteFromArchiveNotes(ArchiveNote note);
 
+    @Query("DELETE FROM archiveNotes WHERE id = :noteId")
+    void deleteFromArchiveNotes(int noteId);
+
     @Insert
     void addListToArchiveNotes(List<ArchiveNote> list);
 
@@ -94,6 +100,10 @@ public interface NotesDao {
 
     @Delete
     void deleteFromRecycleBinNotes(RecycleBinNote note);
+
+    @Query("DELETE FROM recycleBinNotes WHERE id = :noteId")
+    void deleteFromRecycleBinNotes(int noteId);
+
 
     @Insert
     void addListToRecycleBinNotes(List<RecycleBinNote> list);

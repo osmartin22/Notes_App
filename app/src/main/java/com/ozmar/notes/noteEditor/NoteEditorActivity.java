@@ -19,15 +19,12 @@ import com.ozmar.notes.MainActivity;
 import com.ozmar.notes.R;
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.SingleNote;
-import com.ozmar.notes.async.BasicDBAsync;
 import com.ozmar.notes.databinding.ActivityNoteEditorBinding;
 import com.ozmar.notes.notifications.ReminderManager;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.FormatUtils;
 
 import org.joda.time.DateTime;
-
-import static com.ozmar.notes.MainActivity.db;
 
 
 public class NoteEditorActivity extends AppCompatActivity
@@ -42,7 +39,6 @@ public class NoteEditorActivity extends AppCompatActivity
     private int menuActionClickedId = -1;
 
     private MenuItem favoriteIcon;
-
     private ActivityNoteEditorBinding mBinding;
     private NoteEditorPresenter noteEditorPresenter;
 
@@ -119,7 +115,7 @@ public class NoteEditorActivity extends AppCompatActivity
                 return true;
 
             case R.id.delete_note_forever:
-                deleteNoteForever(noteEditorPresenter.getNote(), noteEditorPresenter.getListUsed());
+                deleteNoteForever();
                 return true;
 
             case R.id.delete_note:
@@ -136,22 +132,21 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @SuppressWarnings({"WeakerAccess", "SameParameterValue"})
     public void addReminder(View view) {
-        ReminderDialogFragment dialogFragment = ReminderDialogFragment.newInstance(noteEditorPresenter.getReminder());
+        ReminderDialogFragment dialogFragment = ReminderDialogFragment
+                .newInstance(noteEditorPresenter.getReminder());
         dialogFragment.show(getSupportFragmentManager(), "reminder_dialog_layout");
     }
 
     @Override
     public void onBackPressed() {
         onSaveNote();
-        super.onBackPressed();
     }
 
     private void onSaveNote() {
         String title = mBinding.editTextTitle.getText().toString();
         String content = mBinding.editTextContent.getText().toString();
-        noteEditorPresenter.onSaveNote(title, content, db);
+        noteEditorPresenter.onSaveNote(title, content);
     }
-
 
     @Override
     public void onReminderPicked(@NonNull Reminder reminder) {
@@ -164,13 +159,11 @@ public class NoteEditorActivity extends AppCompatActivity
         noteEditorPresenter.onReminderDeleted();
     }
 
-    // TODO: Make on click call presenter to delete note with Model
-    private void deleteNoteForever(@NonNull SingleNote note, int listUsed) {
+    private void deleteNoteForever() {
         new AlertDialog.Builder(NoteEditorActivity.this)
                 .setMessage(getString(R.string.messageDialog))
                 .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
-                    new BasicDBAsync(db, null, note, listUsed, 3).execute();
-                    goBackToMainActivity(note, 2, listUsed);
+                    noteEditorPresenter.onDeleteNoteForever();
                     finish();
                 })
                 .setNegativeButton(getString(R.string.cancelDialog), null)
@@ -297,13 +290,11 @@ public class NoteEditorActivity extends AppCompatActivity
     }
 
 
-    // TODO: Remove and add to Model
     @Override
     public void setupReminder(@NonNull SingleNote note) {
         ReminderManager.start(getApplicationContext(), note);
     }
 
-    // TODO: Remove and add to Model
     @Override
     public void cancelReminder(int noteId) {
         ReminderManager.cancel(getApplicationContext(), noteId);
