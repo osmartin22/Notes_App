@@ -6,26 +6,43 @@ import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Transaction;
 import android.support.annotation.IntRange;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Dao
 public abstract class NotePreviewsDao {
 
     @Query("SELECT id, title, content, reminderId FROM userNotes WHERE id = :noteId")
     public abstract NotePreviewWithReminderId getAMainPreview(int noteId);
 
+    @Query("SELECT id, title, content, reminderId FROM userNotes")
+    public abstract List<NotePreviewWithReminderId> getMainPreviewList();
+
+    @Query("SELECT id, title, content, reminderId FROM userNotes WHERE favorite = 1")
+    public abstract List<NotePreviewWithReminderId> getFavoritePreviewList();
+
+
     @Query("SELECT id, title, content, reminderId FROM archiveNotes WHERE id = :noteId")
     public abstract NotePreviewWithReminderId getAnArchivePreview(int noteId);
+
+    @Query("SELECT id, title, content, reminderId FROM archiveNotes")
+    public abstract List<NotePreviewWithReminderId> getArchivePreviewList();
+
 
     @Query("SELECT id, title, content FROM recycleBinNotes WHERE id =:noteId")
     public abstract NotePreview getARecycleBinPreview(int noteId);
 
+    @Query("SELECT id, title, content FROM recycleBinNotes")
+    public abstract List<NotePreview> getRecycleBinPreviewList();
+    
 
     @Query("SELECT reminderTime, repeatType FROM remindersTable WHERE reminderId = :reminderId")
     public abstract ReminderPreview getReminderPreview(int reminderId);
 
 
     @Transaction
-    public NoteAndReminderPreview getNoteAndReminderPreview(int noteId,
-                                                            @IntRange(from = 0, to = 3) int lisUsed) {
+    public NoteAndReminderPreview getANotePreview(int noteId,
+                                                  @IntRange(from = 0, to = 3) int lisUsed) {
         NotePreviewWithReminderId previewWithReminderId;
         if (lisUsed == 0 || lisUsed == 1) {
             previewWithReminderId = getAMainPreview(noteId);
@@ -45,5 +62,38 @@ public abstract class NotePreviewsDao {
         }
 
         return new NoteAndReminderPreview(previewWithReminderId, reminderPreview);
+    }
+
+    @Transaction
+    public List<NoteAndReminderPreview> getListOfNotePreviews(int listUsed) {
+        List<NoteAndReminderPreview> list = new ArrayList<>();
+        if (listUsed != 3) {
+
+            List<NotePreviewWithReminderId> notePreviewList;
+            if (listUsed == 0) {
+                notePreviewList = getMainPreviewList();
+            } else if (listUsed == 1) {
+                notePreviewList = getFavoritePreviewList();
+            } else {
+                notePreviewList = getArchivePreviewList();
+            }
+
+            for (NotePreviewWithReminderId note : notePreviewList) {
+                ReminderPreview reminderPreview = null;
+                if (note.getReminderId() != -1) {
+                    reminderPreview = getReminderPreview(note.getReminderId());
+                }
+                list.add(new NoteAndReminderPreview(note, reminderPreview));
+            }
+
+        } else {
+            List<NotePreview> recycleBinList = getRecycleBinPreviewList();
+            for (NotePreview notePreview : recycleBinList) {
+                NotePreviewWithReminderId newPreview = new NotePreviewWithReminderId(notePreview);
+                list.add(new NoteAndReminderPreview(newPreview, null));
+            }
+        }
+
+        return list;
     }
 }

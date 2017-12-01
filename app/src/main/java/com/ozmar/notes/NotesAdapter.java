@@ -9,10 +9,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.ozmar.notes.database.AppDatabase;
+import com.ozmar.notes.async.GetNotePreviewsList;
 import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.database.NotePreview;
-import com.ozmar.notes.database.NotePreviewWithReminderId;
 import com.ozmar.notes.database.ReminderPreview;
 import com.ozmar.notes.utils.FormatUtils;
 import com.ozmar.notes.viewHolders.NotesViewHolder;
@@ -26,7 +25,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
+        implements GetNotePreviewsList.PreviewsListResult {
 
     private static final int SHOW_TITLE = 0, SHOW_CONTENT = 1, SHOW_ALL = 2;
 
@@ -41,38 +41,14 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     // Call function to get data from database from presenter instead
     public NotesAdapter(Context context) {
         this.context = context;
-        convertList();
+        new GetNotePreviewsList(this, listUsed).execute();
     }
 
-    // TODO: Temp position of function(move to another place later)
-    private void convertList() {
-        if (listUsed == 3) {
-            List<NotePreview> recycleBinList = AppDatabase.getAppDatabase().notesDao().getRecycleBinPreviews();
-            for (NotePreview notePreview : recycleBinList) {
-                NotePreviewWithReminderId newPreview = new NotePreviewWithReminderId(notePreview);
-                notes.add(new NoteAndReminderPreview(newPreview, null));
-            }
 
-        } else if (listUsed == 0 || listUsed == 1 || listUsed == 2) {
-            List<NotePreviewWithReminderId> notePreviewList;
-            if (listUsed == 0) {
-                notePreviewList = AppDatabase.getAppDatabase().notesDao().getMainPreviewList();
-            } else if (listUsed == 1) {
-                notePreviewList = AppDatabase.getAppDatabase().notesDao().getFavoritePreviewList();
-            } else {
-                notePreviewList = AppDatabase.getAppDatabase().notesDao().getArchivePreviews();
-            }
-
-            for (NotePreviewWithReminderId note : notePreviewList) {
-                ReminderPreview reminderPreview = null;
-
-                if (note.getReminderId() != -1) {
-                    reminderPreview = AppDatabase.getAppDatabase().remindersDao().
-                            getReminderPreview(note.getReminderId());
-                }
-                notes.add(new NoteAndReminderPreview(note, reminderPreview));
-            }
-        }
+    @Override
+    public void getPreviewListResult(List<NoteAndReminderPreview> list) {
+        notes.addAll(list);
+        notifyDataSetChanged();
     }
 
     public void getList(List<NoteAndReminderPreview> i) {

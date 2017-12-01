@@ -20,9 +20,9 @@ import javax.annotation.Nonnull;
 // TODO: Deleting a note through multi select does not cancel reminder notification
 
 
-public class NoteEditorPresenter implements GetNoteAsync.GetNoteResult,
+public class NoteEditorPresenter implements GetNoteAsync.NoteResult,
         AddNoteAsync.NewNoteResult, AddReminderAsync.NewReminderResult,
-        GetReminderAsync.GetReminderResult {
+        GetReminderAsync.ReminderResult {
 
     private NoteEditorView mEditorView;
     private NoteEditorInteractor mEditorInteractor;
@@ -219,6 +219,7 @@ public class NoteEditorPresenter implements GetNoteAsync.GetNoteResult,
         if (note.getReminderId() != -1) {
             if (reminder == null) {     // Delete reminder
                 mEditorView.cancelReminder(note.getReminderId());
+                mEditorInteractor.deleteReminder(note.getReminderId());
                 mEditorInteractor.deleteReminder(note.getReminderId());
                 note.setReminderId(-1);
 

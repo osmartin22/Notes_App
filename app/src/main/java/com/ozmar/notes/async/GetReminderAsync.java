@@ -10,17 +10,17 @@ import javax.annotation.Nonnull;
 
 public class GetReminderAsync extends AsyncTask<Void, Void, Reminder> {
 
-    public interface GetReminderResult {
+    public interface ReminderResult {
         void getReminderResult(Reminder reminder);
     }
 
-    private final GetReminderResult mGetReminderResult;
+    private final ReminderResult mReminderResult;
 
     private final AppDatabase db;
     private final int reminderId;
 
-    public GetReminderAsync(@Nonnull GetReminderResult getReminderResult, int reminderId) {
-        this.mGetReminderResult = getReminderResult;
+    public GetReminderAsync(@Nonnull ReminderResult reminderResult, int reminderId) {
+        this.mReminderResult = reminderResult;
         this.reminderId = reminderId;
         this.db = AppDatabase.getAppDatabase();
     }
@@ -32,6 +32,6 @@ public class GetReminderAsync extends AsyncTask<Void, Void, Reminder> {
 
     @Override
     protected void onPostExecute(Reminder reminder) {
-        mGetReminderResult.getReminderResult(reminder);
+        mReminderResult.getReminderResult(reminder);
     }
 }

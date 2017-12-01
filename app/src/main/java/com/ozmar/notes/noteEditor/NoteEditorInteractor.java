@@ -70,5 +70,6 @@ public class NoteEditorInteractor {
 
     public void deleteReminder(int reminderId){
         new DeleteReminderAsync(reminderId).execute();
+        new DeleteReminderAsync(reminderId).execute();
     }
 }

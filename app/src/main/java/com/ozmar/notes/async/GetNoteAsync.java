@@ -12,11 +12,11 @@ import javax.annotation.Nonnull;
 
 public class GetNoteAsync extends AsyncTask<Void, Void, SingleNote> {
 
-    public interface GetNoteResult {
+    public interface NoteResult {
         void getNoteResult(SingleNote note);
     }
 
-    private final GetNoteResult mGetNoteResult;
+    private final NoteResult mNoteResult;
 
     private static final int USER_NOTES = 0;
     private static final int FAVORITE_NOTES = 1;
@@ -27,11 +27,11 @@ public class GetNoteAsync extends AsyncTask<Void, Void, SingleNote> {
     private final int listUsed;
     private final AppDatabase db;
 
-    public GetNoteAsync(@Nonnull GetNoteResult getNoteResult, int noteId,
+    public GetNoteAsync(@Nonnull NoteResult noteResult, int noteId,
                         @IntRange(from = 0, to = 3) int listUsed) {
         this.noteId = noteId;
         this.listUsed = listUsed;
-        this.mGetNoteResult = getNoteResult;
+        this.mNoteResult = noteResult;
         this.db = AppDatabase.getAppDatabase();
     }
 
@@ -55,6 +55,6 @@ public class GetNoteAsync extends AsyncTask<Void, Void, SingleNote> {
 
     @Override
     protected void onPostExecute(SingleNote note) {
-        mGetNoteResult.getNoteResult(note);
+        mNoteResult.getNoteResult(note);
     }
 }

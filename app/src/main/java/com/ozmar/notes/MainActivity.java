@@ -230,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements
                 NoteAndReminderPreview preview = null;
                 if (noteId != -1 && (noteEditorAction != -1 || noteResult != -1)) {
                     preview = AppDatabase.getAppDatabase().previewsDao()
-                            .getNoteAndReminderPreview(noteId, listUsed);
+                            .getANotePreview(noteId, listUsed);
                 }
 
 

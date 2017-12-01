@@ -44,15 +44,6 @@ public interface NotesDao {
     void deleteListFromUserNotes(List<MainNote> list);
 
 
-    @Query("SELECT id, title, content, reminderId FROM userNotes WHERE id = :noteId")
-    NotePreviewWithReminderId getAMainPreview(int noteId);
-
-    @Query("SELECT id, title, content, reminderId FROM userNotes")
-    List<NotePreviewWithReminderId> getMainPreviewList();
-
-    @Query("SELECT id, title, content, reminderId FROM userNotes WHERE favorite = 1")
-    List<NotePreviewWithReminderId> getFavoritePreviewList();
-
     //---------------------------------------------------------------------------------------//
     // Archive Table Specific Methods
     //---------------------------------------------------------------------------------------//
@@ -81,9 +72,6 @@ public interface NotesDao {
     @Delete
     void deleteListFromArchiveNotes(List<ArchiveNote> list);
 
-    @Query("SELECT id, title, content, reminderId FROM archiveNotes")
-    List<NotePreviewWithReminderId> getArchivePreviews();
-
 
     //---------------------------------------------------------------------------------------//
     // Recycle Bin Table Specific Methods
@@ -111,9 +99,6 @@ public interface NotesDao {
     @Delete
     void deleteListFromRecycleBinNotes(List<RecycleBinNote> list);
 
-    // TODO: Delete notes too long in trash
-
-    @Query("SELECT id, title, content FROM recycleBinNotes")
-    List<NotePreview> getRecycleBinPreviews();
+    // TODO: Add query to delete notes too long in trash
 
 }
