@@ -8,8 +8,10 @@ import com.ozmar.notes.ChangesInNote;
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.async.AddNoteAsync;
+import com.ozmar.notes.async.AddReminderAsync;
 import com.ozmar.notes.async.DeleteNoteAsync;
 import com.ozmar.notes.async.GetNoteAsync;
+import com.ozmar.notes.async.GetReminderAsync;
 
 import javax.annotation.Nonnull;
 
@@ -18,8 +20,10 @@ import javax.annotation.Nonnull;
 // TODO: Deleting a note through multi select does not cancel reminder notification
 
 
-public class NoteEditorPresenter implements GetNoteAsync.AsyncGetNoteResult,
-        AddNoteAsync.NewNoteResult {
+public class NoteEditorPresenter implements GetNoteAsync.GetNoteResult,
+        AddNoteAsync.NewNoteResult, AddReminderAsync.NewReminderResult,
+        GetReminderAsync.GetReminderResult {
+
     private NoteEditorView mEditorView;
     private NoteEditorInteractor mEditorInteractor;
 
@@ -73,14 +77,23 @@ public class NoteEditorPresenter implements GetNoteAsync.AsyncGetNoteResult,
         new GetNoteAsync(this, noteId, listUsed).execute();
     }
 
+
+    @Override
+    public void getReminderResult(Reminder reminder) {
+        mReminder = reminder;
+        assert mNote != null;
+        mEditorView.showReminder(mNote, mReminder.getDateTime().getMillis());
+    }
+
     private void setUpView(@Nullable SingleNote note) {
         if (note != null) {
             favorite = note.isFavorite();
             mEditorView.setupNoteEditTexts(note);
 
             if (note.getReminderId() != -1) {
-                mReminder = mEditorInteractor.getReminder(note.getReminderId());
-                mEditorView.showReminder(note, mReminder.getDateTime().getMillis());
+                new GetReminderAsync(this, note.getReminderId()).execute();
+//                mReminder = mEditorInteractor.getReminder(note.getReminderId());
+//                mEditorView.showReminder(note, mReminder.getDateTime().getMillis());
             }
 
         } else {
@@ -100,24 +113,30 @@ public class NoteEditorPresenter implements GetNoteAsync.AsyncGetNoteResult,
         mEditorView.goBackToMainActivity(mNote, 1, listUsed);
     }
 
-    private SingleNote createNewNote(@NonNull String title,
-                                     @NonNull String content) {
-        SingleNote newNote;
+    @Override
+    public void getNewReminderId(int reminderId) {
+        assert mReminder != null;
+        assert mNote != null;
+        mReminder.setId(reminderId);
+        mNote.setId(reminderId);
+    }
+
+    private void createNewNote(@NonNull String title,
+                               @NonNull String content) {
 
         if (mReminder != null) {
+            mNote = new SingleNote(title, content, favorite, System.currentTimeMillis(),
+                    mReminder.getDateTime().getMillis(), -1);
 
-            int reminderId = mEditorInteractor.addReminder(mReminder);
-            newNote = new SingleNote(title, content, favorite, System.currentTimeMillis(),
-                    mReminder.getDateTime().getMillis(), reminderId);
-            mEditorView.setupReminder(newNote);
+            new AddReminderAsync(this, mReminder).execute();
+            mEditorView.setupReminder(mNote);
 
         } else {
-            newNote = new SingleNote(title, content, favorite, System.currentTimeMillis());
+            mNote = new SingleNote(title, content, favorite, System.currentTimeMillis());
         }
 
-        new AddNoteAsync(this, newNote, listUsed).execute();
+        new AddNoteAsync(this, mNote, listUsed).execute();
 
-        return newNote;
     }
 
     @NonNull
@@ -151,7 +170,7 @@ public class NoteEditorPresenter implements GetNoteAsync.AsyncGetNoteResult,
             boolean titleEmpty = title.isEmpty();
             boolean contentEmpty = content.isEmpty();
             if (!(titleEmpty && contentEmpty)) {
-                mNote = createNewNote(title, content);
+                createNewNote(title, content);
             }
         }
     }
@@ -198,28 +217,26 @@ public class NoteEditorPresenter implements GetNoteAsync.AsyncGetNoteResult,
     private void updateReminder(@NonNull SingleNote note, @Nullable Reminder reminder) {
 
         if (note.getReminderId() != -1) {
-            if (reminder == null) {
-                // Delete reminder
+            if (reminder == null) {     // Delete reminder
                 mEditorView.cancelReminder(note.getReminderId());
                 mEditorInteractor.deleteReminder(note.getReminderId());
                 note.setReminderId(-1);
-            } else {
-                // Update reminder
+
+            } else {        // Update reminder
                 mEditorInteractor.updateReminder(reminder);
                 mEditorView.setupReminder(note);
             }
-        } else if (reminder != null) {
-            // Add reminder to database
-            int newId = mEditorInteractor.addReminder(reminder);
+
+        } else if (reminder != null) {      // Add reminder
+            new AddReminderAsync(this, reminder).execute();
             note.setNextReminderTime(reminder.getDateTime().getMillis());
-            note.setReminderId(newId);
             mEditorView.setupReminder(note);
         }
     }
 
     public void onDeleteNoteForever() {
         if (mNote != null) {
-            new DeleteNoteAsync(mNote.getId(), mNote.getReminderId(), listUsed);
+            new DeleteNoteAsync(mNote.getId(), mNote.getReminderId(), listUsed).execute();
             mEditorView.goBackToMainActivity(mNote, 2, listUsed);
         }
     }

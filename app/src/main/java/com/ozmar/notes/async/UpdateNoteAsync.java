@@ -1,50 +1,39 @@
 package com.ozmar.notes.async;
 
+
 import android.os.AsyncTask;
 
-import com.ozmar.notes.ChangesInNote;
-import com.ozmar.notes.DatabaseHandler;
 import com.ozmar.notes.SingleNote;
+import com.ozmar.notes.database.AppDatabase;
+import com.ozmar.notes.database.NoteConversion;
 
-import java.util.List;
-
+import javax.annotation.Nonnull;
 
 public class UpdateNoteAsync extends AsyncTask<Void, Void, Void> {
 
-    private final DatabaseHandler db;
-    private final List<SingleNote> list;
-    private final SingleNote note;
-    private final int listUsed;
-    private final ChangesInNote changes;
+    private static final int USER_NOTES = 0;
+    private static final int FAVORITE_NOTES = 1;
+    private static final int ARCHIVE_NOTES = 2;
+    private static final int RECYCLE_BIN_NOTES = 3;
 
-    public UpdateNoteAsync(DatabaseHandler db, List<SingleNote> list, SingleNote note,
-                           int listUsed, ChangesInNote changes) {
-        this.db = db;
-        this.list = list;
-        this.note = note;
+    private final AppDatabase db;
+    private final SingleNote mNote;
+    private final int listUsed;
+
+    public UpdateNoteAsync(@Nonnull SingleNote note, int listUsed) {
+        this.db = AppDatabase.getAppDatabase();
+        this.mNote = note;
         this.listUsed = listUsed;
-        this.changes = changes;
     }
 
     @Override
     protected Void doInBackground(Void... voids) {
-
-        // TODO: Implement being able to pass a list
-        if (listUsed == 0 || listUsed == 1) {
-            db.updateNoteFromUserList(note, changes);
-        } else if (listUsed == 2) {
-            db.updateNoteFromArchive(note, changes);
+        if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
+            db.notesDao().updateAUserNote(NoteConversion.getMainNoteFromSingleNote(mNote));
+        } else if (listUsed == ARCHIVE_NOTES) {
+            db.notesDao().updateAnArchiveNote(NoteConversion.getArchiveNoteFromSingleNote(mNote));
         }
 
         return null;
     }
-
-    @Override
-    protected void onPostExecute(Void aVoid) {
-        super.onPostExecute(aVoid);
-        if (list != null) {
-            list.clear();
-        }
-    }
-
 }

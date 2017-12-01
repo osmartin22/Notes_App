@@ -3,9 +3,14 @@ package com.ozmar.notes.noteEditor;
 
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.SingleNote;
+import com.ozmar.notes.async.DeleteReminderAsync;
+import com.ozmar.notes.async.UpdateNoteAsync;
+import com.ozmar.notes.async.UpdateReminderAsync;
 import com.ozmar.notes.database.AppDatabase;
 import com.ozmar.notes.database.MainNote;
 import com.ozmar.notes.database.NoteConversion;
+
+import javax.annotation.Nonnull;
 
 public class NoteEditorInteractor {
 
@@ -24,16 +29,6 @@ public class NoteEditorInteractor {
         MainNote noteToInsert = NoteConversion.getMainNoteFromSingleNote(note);
         return (int) db.notesDao().addToUserNotes(noteToInsert);
     }
-
-    // Notes in trash can not be updated
-    public void updateNote(SingleNote note, int listUsed) {
-        if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
-            db.notesDao().updateAUserNote(NoteConversion.getMainNoteFromSingleNote(note));
-        } else if (listUsed == ARCHIVE_NOTES) {
-            db.notesDao().updateAnArchiveNote(NoteConversion.getArchiveNoteFromSingleNote(note));
-        }
-    }
-
 
     public SingleNote getNote(int noteId, int listUsed) {
         if (noteId != -1) {
@@ -55,19 +50,25 @@ public class NoteEditorInteractor {
         return (int) db.remindersDao().addReminder(reminder);
     }
 
-    public void updateReminder(Reminder reminder) {
-        db.remindersDao().updateReminder(reminder);
-    }
-
-    public void deleteReminder(int reminderId) {
-        db.remindersDao().deleteReminder(reminderId);
-    }
-
-    public void deleteReminder(Reminder reminder) {
-        db.remindersDao().deleteReminder(reminder);
-    }
 
     public Reminder getReminder(int reminderId) {
         return db.remindersDao().getReminder(reminderId);
+    }
+
+    // Notes in trash can not be updated
+    public void updateNote(@Nonnull SingleNote note, int listUsed) {
+        new UpdateNoteAsync(note, listUsed).execute();
+    }
+
+    public void updateReminder(Reminder reminder) {
+        new UpdateReminderAsync(reminder).execute();
+    }
+
+    public void deleteReminder(Reminder reminder) {
+        new DeleteReminderAsync(reminder.getId()).execute();
+    }
+
+    public void deleteReminder(int reminderId){
+        new DeleteReminderAsync(reminderId).execute();
     }
 }
