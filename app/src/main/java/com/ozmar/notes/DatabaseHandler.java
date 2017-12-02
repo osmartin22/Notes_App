@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.ozmar.notes.noteEditor.ChangesInNote;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;

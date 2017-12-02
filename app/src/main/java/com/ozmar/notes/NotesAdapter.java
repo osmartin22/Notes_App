@@ -51,9 +51,13 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         notifyDataSetChanged();
     }
 
-    public void getList(List<NoteAndReminderPreview> i) {
-        notes.addAll(i);
-        notifyDataSetChanged();
+//    public void updateAdapterList(List<NoteAndReminderPreview> i) {
+//        notes.addAll(i);
+//        notifyDataSetChanged();
+//    }
+
+    public void updateAdapterList() {
+        new GetNotePreviewsList(this, listUsed).execute();
     }
 
     public void setListUsed(int listUsed) {

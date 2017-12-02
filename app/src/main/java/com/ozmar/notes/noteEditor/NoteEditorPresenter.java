@@ -4,7 +4,6 @@ import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.ozmar.notes.ChangesInNote;
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.async.AddNoteAsync;

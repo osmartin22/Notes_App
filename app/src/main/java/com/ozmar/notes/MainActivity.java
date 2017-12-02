@@ -7,7 +7,9 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.view.ActionMode;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,7 +19,6 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.ozmar.notes.async.AutoDeleteAsync;
-import com.ozmar.notes.async.NavMenuAsync;
 import com.ozmar.notes.database.AppDatabase;
 import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.databinding.ActivityMainBinding;
@@ -48,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements
     private int layoutChoice;
     private MenuItem layoutIcon;
     private Preferences preferences;
+
+
+    private ActionMode mActionMode;
 
     private ActivityMainBinding mBinding;
 
@@ -160,7 +164,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-
     private void restoreLayout(int layoutChoice) {
         switch (layoutChoice) {
             case 0:
@@ -174,6 +177,81 @@ public class MainActivity extends AppCompatActivity implements
                 rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
         }
     }
+
+
+    private final ActionMode.Callback mCallback = new ActionMode.Callback() {
+
+        boolean menuActionPressed = false;
+
+        private void removeViews(ActionMode mode, MenuItem item) {
+            menuActionPressed = true;
+//            notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+//            showSnackBar(item, 0);
+//            mode.finish();
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            mActionMode = actionMode;
+            mActionMode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            switch (menuItem.getItemId()) {
+                case R.id.contextualArchive:
+                case R.id.contextualUnarchive:
+                case R.id.contextualDelete:
+                case R.id.contextualRestore:
+//                    removeViews(mode, item);
+//                    multiSelectHelper.setItem(item);
+                    return true;
+                case R.id.contextualDeleteForever:
+//                    deleteForever(item);
+                    menuActionPressed = true;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode actionMode) {
+            mActionMode = null;
+//            notesAdapter.clearSelectedIds();
+//
+//            // Clear buffer if a CAB item was not pressed (i.e. adding note, open drawer, back pressed)
+//            if (!menuItemPressed) {
+//                buffer.clearBuffer();
+//                notesAdapter.notifyDataSetChanged();
+//            }
+//
+//            menuItemPressed = false;
+        }
+    };
+
+    private void deleteForever(MenuItem item) {
+//        String message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage("")
+                .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
+//                    List<SingleNote> temp = new ArrayList<>(buffer.currentBufferNotes());
+//                    new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
+//                    notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+//                    buffer.clearBuffer();
+//                    actionMode.finish();
+                })
+                .setNegativeButton(getString(R.string.cancelDialog), null)
+                .show();
+    }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -199,8 +277,35 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         notesAdapter.clearView();
-        new NavMenuAsync(db, mBinding.myToolbar, mBinding.fab, notesAdapter, item).execute();
 
+        switch (item.getItemId()) {
+            case R.id.all_notes_drawer:
+            default:
+                notesAdapter.setListUsed(0);
+                mBinding.myToolbar.setTitle("Notes");
+                mBinding.fab.show();
+                break;
+
+            case R.id.favorite_notes_drawer:
+                notesAdapter.setListUsed(1);
+                mBinding.myToolbar.setTitle("Favorite Notes");
+                mBinding.fab.show();
+                break;
+
+            case R.id.archive_drawer:
+                notesAdapter.setListUsed(2);
+                mBinding.myToolbar.setTitle("Archive");
+                mBinding.fab.hide();
+                break;
+
+            case R.id.recycle_bin_drawer:
+                notesAdapter.setListUsed(3);
+                mBinding.myToolbar.setTitle("Trash");
+                mBinding.fab.hide();
+                break;
+        }
+
+        notesAdapter.updateAdapterList();
         mBinding.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
