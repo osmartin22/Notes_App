@@ -9,6 +9,8 @@ import android.arch.persistence.room.Update;
 
 import java.util.List;
 
+import io.reactivex.Maybe;
+
 
 @Dao
 public interface NotesDao {
@@ -23,7 +25,7 @@ public interface NotesDao {
     List<MainNote> getAllFavoriteNotes();
 
     @Query("SELECT * FROM userNotes WHERE id = :noteId")
-    MainNote getAUserNote(int noteId);
+    Maybe<MainNote> getAUserNote(int noteId);
 
     @Update
     void updateAUserNote(MainNote note);
@@ -52,7 +54,7 @@ public interface NotesDao {
     List<ArchiveNote> getAllArchiveNotes();
 
     @Query("SELECT * FROM archiveNotes WHERE id = :noteId")
-    ArchiveNote getAnArchiveNote(int noteId);
+    Maybe<ArchiveNote> getAnArchiveNote(int noteId);
 
     @Update
     void updateAnArchiveNote(ArchiveNote note);
@@ -81,7 +83,7 @@ public interface NotesDao {
     List<RecycleBinNote> getAllRecycleBinNotes();
 
     @Query("SELECT * FROM recycleBinNotes WHERE id = :noteId")
-    RecycleBinNote getARecycleBinNotes(int noteId);
+    Maybe<RecycleBinNote> getARecycleBinNotes(int noteId);
 
     @Insert
     long addToRecycleBinNotes(RecycleBinNote note);

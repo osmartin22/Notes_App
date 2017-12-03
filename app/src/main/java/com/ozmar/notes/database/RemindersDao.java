@@ -8,6 +8,8 @@ import android.arch.persistence.room.Update;
 
 import com.ozmar.notes.Reminder;
 
+import io.reactivex.Single;
+
 
 @Dao
 public interface RemindersDao {
@@ -22,7 +24,7 @@ public interface RemindersDao {
     void updateReminder(Reminder reminder);
 
     @Query("SELECT * FROM remindersTable WHERE reminderId = :reminderId")
-    Reminder getReminder(int reminderId);
+    Single<Reminder> getReminder(int reminderId);
 
     @Query("DELETE FROM remindersTable WHERE reminderId = :reminderId")
     void deleteReminder(int reminderId);

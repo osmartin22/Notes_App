@@ -9,19 +9,19 @@ import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.async.AddNoteAsync;
 import com.ozmar.notes.async.AddReminderAsync;
 import com.ozmar.notes.async.DeleteNoteAsync;
-import com.ozmar.notes.async.GetNoteAsync;
-import com.ozmar.notes.async.GetReminderAsync;
 
 import javax.annotation.Nonnull;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
 // TODO: Separate database calls from presenter
 
 // TODO: Deleting a note through multi select does not cancel reminder notification
 
 
-public class NoteEditorPresenter implements GetNoteAsync.NoteResult,
-        AddNoteAsync.NewNoteResult, AddReminderAsync.NewReminderResult,
-        GetReminderAsync.ReminderResult {
+public class NoteEditorPresenter implements AddNoteAsync.NewNoteResult, AddReminderAsync.NewReminderResult {
 
     private NoteEditorView mEditorView;
     private NoteEditorInteractor mEditorInteractor;
@@ -36,6 +36,8 @@ public class NoteEditorPresenter implements GetNoteAsync.NoteResult,
     private boolean reminderChanged = false;
     private boolean frequencyChanged = false;
 
+    private final CompositeDisposable mDisposable;
+
     @Nullable
     private SingleNote mNote;
 
@@ -45,6 +47,7 @@ public class NoteEditorPresenter implements GetNoteAsync.NoteResult,
     public NoteEditorPresenter(NoteEditorView mEditorView) {
         this.mEditorView = mEditorView;
         this.mEditorInteractor = new NoteEditorInteractor();
+        this.mDisposable = new CompositeDisposable();
     }
 
     @Nullable
@@ -65,20 +68,22 @@ public class NoteEditorPresenter implements GetNoteAsync.NoteResult,
         return listUsed;
     }
 
-    @Override
-    public void getNoteResult(@Nullable SingleNote note) {
+    private void getNoteResult(@Nullable SingleNote note) {
         mNote = note;
         setUpView(note);
     }
 
     public void initialize(int noteId, @IntRange(from = 0, to = 3) int listUsed) {
         this.listUsed = listUsed;
-        new GetNoteAsync(this, noteId, listUsed).execute();
+
+        mDisposable.add(mEditorInteractor.getNote(noteId, listUsed)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::getNoteResult));
     }
 
 
-    @Override
-    public void getReminderResult(Reminder reminder) {
+    private void getReminderResult(Reminder reminder) {
         mReminder = reminder;
         assert mNote != null;
         mEditorView.showReminder(mNote, mReminder.getDateTime().getMillis());
@@ -90,9 +95,9 @@ public class NoteEditorPresenter implements GetNoteAsync.NoteResult,
             mEditorView.setupNoteEditTexts(note);
 
             if (note.getReminderId() != -1) {
-                new GetReminderAsync(this, note.getReminderId()).execute();
-//                mReminder = mEditorInteractor.getReminder(note.getReminderId());
-//                mEditorView.showReminder(note, mReminder.getDateTime().getMillis());
+                mDisposable.add(mEditorInteractor.getReminder(note.getReminderId())
+                        .observeOn(Schedulers.io())
+                        .subscribe(this::getReminderResult));
             }
 
         } else {
@@ -228,6 +233,11 @@ public class NoteEditorPresenter implements GetNoteAsync.NoteResult,
             }
 
         } else if (reminder != null) {      // Add reminder
+
+//            Single.fromCallable(() -> AppDatabase.getAppDatabase().remindersDao().addReminder(reminder))
+//                    .subscribeOn(Schedulers.newThread())
+//                    .subscribe();
+
             new AddReminderAsync(this, reminder).execute();
             note.setNextReminderTime(reminder.getDateTime().getMillis());
             mEditorView.setupReminder(note);
@@ -243,6 +253,7 @@ public class NoteEditorPresenter implements GetNoteAsync.NoteResult,
 
     public void onDestroy() {
         mEditorView = null;
+        mDisposable.clear();
     }
 
 

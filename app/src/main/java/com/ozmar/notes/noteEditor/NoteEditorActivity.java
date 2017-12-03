@@ -26,6 +26,7 @@ import com.ozmar.notes.utils.FormatUtils;
 
 import org.joda.time.DateTime;
 
+// TODO: Pressing back on a new empty note does not leave the activity (stuck)
 
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener, NoteEditorView {

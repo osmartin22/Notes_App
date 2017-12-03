@@ -27,7 +27,8 @@ public class GetReminderAsync extends AsyncTask<Void, Void, Reminder> {
 
     @Override
     protected Reminder doInBackground(Void... voids) {
-        return db.remindersDao().getReminder(reminderId);
+//        return db.remindersDao().getReminder(reminderId);
+        return null;
     }
 
     @Override
