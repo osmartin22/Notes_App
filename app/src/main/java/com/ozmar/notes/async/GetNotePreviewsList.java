@@ -33,7 +33,8 @@ public class GetNotePreviewsList extends AsyncTask<Void, Void, List<NoteAndRemin
 
     @Override
     protected List<NoteAndReminderPreview> doInBackground(Void... voids) {
-        return db.previewsDao().getListOfNotePreviews(listUsed);
+//        return db.previewsDao().getListOfNotePreviews(listUsed);
+        return null;
     }
 
     @Override

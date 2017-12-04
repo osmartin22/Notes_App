@@ -4,6 +4,7 @@ package com.ozmar.notes.database;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
@@ -27,10 +28,10 @@ public interface NotesDao {
     @Query("SELECT * FROM userNotes WHERE id = :noteId")
     Maybe<MainNote> getAUserNote(int noteId);
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateAUserNote(MainNote note);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     long addToUserNotes(MainNote note);
 
     @Delete
@@ -56,10 +57,10 @@ public interface NotesDao {
     @Query("SELECT * FROM archiveNotes WHERE id = :noteId")
     Maybe<ArchiveNote> getAnArchiveNote(int noteId);
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateAnArchiveNote(ArchiveNote note);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     long addToArchiveNotes(ArchiveNote note);
 
     @Delete
@@ -85,7 +86,7 @@ public interface NotesDao {
     @Query("SELECT * FROM recycleBinNotes WHERE id = :noteId")
     Maybe<RecycleBinNote> getARecycleBinNotes(int noteId);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     long addToRecycleBinNotes(RecycleBinNote note);
 
     @Delete

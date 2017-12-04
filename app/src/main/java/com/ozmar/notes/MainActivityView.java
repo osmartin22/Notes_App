@@ -1,6 +1,10 @@
 package com.ozmar.notes;
 
 
+import android.support.annotation.NonNull;
+
+import com.ozmar.notes.database.NoteAndReminderPreview;
+
 public interface MainActivityView {
 
 
@@ -12,6 +16,9 @@ public interface MainActivityView {
     void openNoteEditorActivity(int noteId, int notePosition, int listUsed);
 
      void swapLayout(int layout);
+
+     void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
+                                   int noteModifiedResult, boolean noteIsFavorite);
 
 //     void onDeleteForeverDialog();
 

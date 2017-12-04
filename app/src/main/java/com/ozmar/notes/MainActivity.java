@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private void setUpRecyclerView() {
         notesAdapter = new NotesAdapter(MainActivity.this);
+        notesAdapter.updateAdapterList();
 
         layoutChoice = preferences.getLayoutChoice();
         rv = mBinding.recyclerView;
@@ -252,7 +253,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_activity_menu, menu);
@@ -332,29 +332,16 @@ public class MainActivity extends AppCompatActivity implements
                     notePosition = 0;
                 }
 
-                NoteAndReminderPreview preview = null;
                 if (noteId != -1 && (noteEditorAction != -1 || noteResult != -1)) {
-                    preview = AppDatabase.getAppDatabase().previewsDao()
-                            .getANotePreview(noteId, listUsed);
-                }
-
-
-                if (preview != null) {
-                    if (noteEditorAction != -1) {
-
-//                        if (noteIsFavorite && listUsed == ARCHIVE_NOTES) {
-//                            note.setFavorite(true);
-//                        }
-
-                    } else {
-                        noteModifiedInNoteEditor(preview, notePosition, listUsed, noteResult, noteIsFavorite);
-                    }
+                    mainActivityPresenter.getNotePreview(noteId, listUsed, notePosition,
+                            noteResult, noteIsFavorite);
                 }
             }
         }
     }
 
-    private void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
+    @Override
+    public void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
                                           int noteModifiedResult, boolean noteIsFavorite) {
 
 

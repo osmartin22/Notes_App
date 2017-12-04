@@ -61,14 +61,15 @@ public abstract class NotePreviewsDao {
 
         }
 
+//        return Maybe.just(new NoteAndReminderPreview(previewWithReminderId, reminderPreview));
         return new NoteAndReminderPreview(previewWithReminderId, reminderPreview);
     }
 
     @Transaction
     public List<NoteAndReminderPreview> getListOfNotePreviews(int listUsed) {
+
         List<NoteAndReminderPreview> list = new ArrayList<>();
         if (listUsed != 3) {
-
             List<NotePreviewWithReminderId> notePreviewList;
             if (listUsed == 0) {
                 notePreviewList = getMainPreviewList();
@@ -94,6 +95,7 @@ public abstract class NotePreviewsDao {
             }
         }
 
+//        return Maybe.just(list);
         return list;
     }
 }

@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.ozmar.notes.async.GetNotePreviewsList;
+import com.ozmar.notes.database.AppDatabase;
 import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.database.NotePreview;
 import com.ozmar.notes.database.ReminderPreview;
@@ -25,8 +25,11 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
-        implements GetNotePreviewsList.PreviewsListResult {
+import io.reactivex.Maybe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
+public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int SHOW_TITLE = 0, SHOW_CONTENT = 1, SHOW_ALL = 2;
 
@@ -41,23 +44,19 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     // Call function to get data from database from presenter instead
     public NotesAdapter(Context context) {
         this.context = context;
-        new GetNotePreviewsList(this, listUsed).execute();
     }
 
 
-    @Override
-    public void getPreviewListResult(List<NoteAndReminderPreview> list) {
+    private void getPreviewListResult(List<NoteAndReminderPreview> list) {
         notes.addAll(list);
         notifyDataSetChanged();
     }
 
-//    public void updateAdapterList(List<NoteAndReminderPreview> i) {
-//        notes.addAll(i);
-//        notifyDataSetChanged();
-//    }
-
     public void updateAdapterList() {
-        new GetNotePreviewsList(this, listUsed).execute();
+        Maybe.fromCallable(() -> AppDatabase.getAppDatabase().previewsDao().getListOfNotePreviews(listUsed))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::getPreviewListResult);
     }
 
     public void setListUsed(int listUsed) {

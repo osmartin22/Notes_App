@@ -5,9 +5,6 @@ import android.support.annotation.IntRange;
 
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.SingleNote;
-import com.ozmar.notes.async.DeleteReminderAsync;
-import com.ozmar.notes.async.UpdateNoteAsync;
-import com.ozmar.notes.async.UpdateReminderAsync;
 import com.ozmar.notes.database.AppDatabase;
 import com.ozmar.notes.database.MainNote;
 import com.ozmar.notes.database.NoteConversion;
@@ -31,11 +28,10 @@ public class NoteEditorInteractor {
         this.db = AppDatabase.getAppDatabase();
     }
 
-    public int addNote(SingleNote note) {
+    public long addNote(SingleNote note) {
         MainNote noteToInsert = NoteConversion.getMainNoteFromSingleNote(note);
-        return (int) db.notesDao().addToUserNotes(noteToInsert);
+        return db.notesDao().addToUserNotes(noteToInsert);
     }
-
 
     public Maybe<SingleNote> getNote(int noteId, @IntRange(from = 0, to = 3) int listUsed) {
         if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
@@ -52,37 +48,39 @@ public class NoteEditorInteractor {
         }
     }
 
-    public Completable addReminder(Reminder reminder) {
-        return Completable.fromCallable(() -> db.remindersDao().addReminder(reminder));
-
-//        return Single.fromCallable(()->{
-//            db.remindersDao().addReminder(reminder);
-//        });
-
-
-//        return (int) db.remindersDao().addReminder(reminder);
+    public long addReminder(Reminder reminder) {
+        return db.remindersDao().addReminder(reminder);
     }
-
 
     public Single<Reminder> getReminder(int reminderId) {
         return db.remindersDao().getReminder(reminderId);
     }
 
     // Notes in trash can not be updated
-    public void updateNote(@Nonnull SingleNote note, int listUsed) {
-        new UpdateNoteAsync(note, listUsed).execute();
+    public Completable updateNote(@Nonnull SingleNote note, @IntRange(from = 0, to = 2) int listUsed) {
+        return Completable.fromAction(() -> {
+            if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
+                db.notesDao().updateAUserNote(NoteConversion.getMainNoteFromSingleNote(note));
+            } else {
+                db.notesDao().updateAnArchiveNote(NoteConversion.getArchiveNoteFromSingleNote(note));
+            }
+        });
     }
 
-    public void updateReminder(Reminder reminder) {
-        new UpdateReminderAsync(reminder).execute();
+//    public void updateReminder(Reminder reminder) {
+//        new UpdateReminderAsync(reminder).execute();
+//    }
+
+    public Completable updateReminder(Reminder reminder) {
+        return Completable.fromAction(() -> db.remindersDao().updateReminder(reminder));
     }
 
-    public void deleteReminder(Reminder reminder) {
-        new DeleteReminderAsync(reminder.getId()).execute();
+    public Completable deleteReminder(Reminder reminder) {
+        return Completable.fromAction(() -> db.remindersDao().deleteReminder(reminder));
     }
 
-    public void deleteReminder(int reminderId) {
-        new DeleteReminderAsync(reminderId).execute();
-        new DeleteReminderAsync(reminderId).execute();
+    public Completable deleteReminder(int reminderId) {
+        return Completable.fromAction(() -> db.remindersDao().deleteReminder(reminderId));
+//        new DeleteReminderAsync(reminderId).execute();
     }
 }

@@ -3,6 +3,7 @@ package com.ozmar.notes.database;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
@@ -17,10 +18,10 @@ public interface RemindersDao {
     @Query("SELECT reminderTime, repeatType FROM remindersTable WHERE reminderId = :reminderId")
     ReminderPreview getReminderPreview(int reminderId);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     long addReminder(Reminder reminder);
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     void updateReminder(Reminder reminder);
 
     @Query("SELECT * FROM remindersTable WHERE reminderId = :reminderId")
