@@ -19,11 +19,6 @@ public interface NotesDao {
     //---------------------------------------------------------------------------------------//
     // User Notes Table Specific Methods
     //---------------------------------------------------------------------------------------//
-    @Query("SELECT * FROM userNotes")
-    List<MainNote> getAllUserNotes();
-
-    @Query("SELECT * FROM userNotes WHERE favorite = 1")
-    List<MainNote> getAllFavoriteNotes();
 
     @Query("SELECT * FROM userNotes WHERE id = :noteId")
     Maybe<MainNote> getAUserNote(int noteId);
@@ -40,6 +35,12 @@ public interface NotesDao {
     @Query("DELETE FROM userNotes WHERE id = :noteId")
     void deleteFromUserNotes(int noteId);
 
+    @Query("SELECT * FROM userNotes")
+    List<MainNote> getAllUserNotes();
+
+    @Query("SELECT * FROM userNotes WHERE favorite = 1")
+    List<MainNote> getAllFavoriteNotes();
+
     @Insert
     void addListToUserNotes(List<MainNote> list);
 
@@ -50,9 +51,6 @@ public interface NotesDao {
     //---------------------------------------------------------------------------------------//
     // Archive Table Specific Methods
     //---------------------------------------------------------------------------------------//
-
-    @Query("SELECT * FROM archiveNotes")
-    List<ArchiveNote> getAllArchiveNotes();
 
     @Query("SELECT * FROM archiveNotes WHERE id = :noteId")
     Maybe<ArchiveNote> getAnArchiveNote(int noteId);
@@ -69,6 +67,9 @@ public interface NotesDao {
     @Query("DELETE FROM archiveNotes WHERE id = :noteId")
     void deleteFromArchiveNotes(int noteId);
 
+    @Query("SELECT * FROM archiveNotes")
+    List<ArchiveNote> getAllArchiveNotes();
+
     @Insert
     void addListToArchiveNotes(List<ArchiveNote> list);
 
@@ -79,9 +80,6 @@ public interface NotesDao {
     //---------------------------------------------------------------------------------------//
     // Recycle Bin Table Specific Methods
     //---------------------------------------------------------------------------------------//
-
-    @Query("SELECT * FROM recycleBinNotes")
-    List<RecycleBinNote> getAllRecycleBinNotes();
 
     @Query("SELECT * FROM recycleBinNotes WHERE id = :noteId")
     Maybe<RecycleBinNote> getARecycleBinNotes(int noteId);
@@ -95,13 +93,12 @@ public interface NotesDao {
     @Query("DELETE FROM recycleBinNotes WHERE id = :noteId")
     void deleteFromRecycleBinNotes(int noteId);
 
+    @Query("SELECT * FROM recycleBinNotes")
+    List<RecycleBinNote> getAllRecycleBinNotes();
 
     @Insert
     void addListToRecycleBinNotes(List<RecycleBinNote> list);
 
     @Delete
     void deleteListFromRecycleBinNotes(List<RecycleBinNote> list);
-
-    // TODO: Add query to delete notes too long in trash
-
 }

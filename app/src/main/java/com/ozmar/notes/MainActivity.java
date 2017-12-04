@@ -18,7 +18,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.ozmar.notes.async.AutoDeleteAsync;
 import com.ozmar.notes.database.AppDatabase;
 import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.databinding.ActivityMainBinding;
@@ -36,25 +35,15 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener, MainActivityView {
 
-    private static final int USER_NOTES = 0;
-    private static final int FAVORITE_NOTES = 1;
-    private static final int ARCHIVE_NOTES = 2;
-    private static final int RECYCLE_BIN_NOTES = 3;
-
     private RecyclerView rv;
     private NotesAdapter notesAdapter;
-
-    public static DatabaseHandler db;
 
     private int layoutChoice;
     private MenuItem layoutIcon;
     private Preferences preferences;
-
-
     private ActionMode mActionMode;
 
     private ActivityMainBinding mBinding;
-
     private MainActivityPresenter mainActivityPresenter;
 
     public void onFabClicked(View view) {
@@ -94,45 +83,8 @@ public class MainActivity extends AppCompatActivity implements
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         setSupportActionBar(mBinding.myToolbar);
-
-        db = new DatabaseHandler(MainActivity.this);
         preferences = new Preferences(MainActivity.this);
         AppDatabase.setUpAppDatabase(getApplicationContext());
-
-
-//        MainNote test1 = new MainNote();
-//        test1.setTitle("TestTitle1");
-//        test1.setContent("TestContent1");
-//        test1.setTimeCreated(System.currentTimeMillis());
-//        test1.setTimeModified(System.currentTimeMillis());
-//        test1.setFavorite(0);
-//        test1.setReminderId(-1);
-//        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test1);
-//
-//        MainNote test2 = new MainNote();
-//        test2.setTitle("TestTitle2");
-//        test2.setContent("TestContent2");
-//        test2.setTimeCreated(System.currentTimeMillis());
-//        test2.setTimeModified(System.currentTimeMillis());
-//        test2.setFavorite(1);
-//        test2.setReminderId(-1);
-//        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test2);
-//
-//        MainNote test3 = new MainNote();
-//        test3.setTitle("TestTitle3");
-//        test3.setContent("TestContent3");
-//        test3.setTimeCreated(System.currentTimeMillis());
-//        test3.setTimeModified(System.currentTimeMillis());
-//        test3.setFavorite(1);
-//        test3.setReminderId(-1);
-//
-//        Reminder reminder = new Reminder(DateTime.now(), new FrequencyChoices(2, null));
-//        long reminderId = AppDatabase.getAppDatabase().remindersDao().addReminder(reminder);
-//        test3.setReminderId((int) reminderId);
-//        AppDatabase.getAppDatabase().notesDao().addToUserNotes(test3);
-
-
-        new AutoDeleteAsync(db, preferences.getDaysInTrash()).execute();
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mBinding.drawerLayout, mBinding.myToolbar,
@@ -342,8 +294,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
-                                          int noteModifiedResult, boolean noteIsFavorite) {
+                                         int noteModifiedResult, boolean noteIsFavorite) {
 
+        final int FAVORITE_NOTES = 1;
 
         if (noteModifiedResult == 0) {    // Update rv with noteChanges to the note
             notesAdapter.updateAt(notePosition, preview);
@@ -387,7 +340,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        db.close();
         AppDatabase.destroyInstance();
         super.onDestroy();
     }

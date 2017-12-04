@@ -63,21 +63,21 @@ public class NoteEditorPresenter {
 
     public void initialize(int noteId, @IntRange(from = 0, to = 3) int listUsed) {
         this.listUsed = listUsed;
-        observableGetNote(noteId, listUsed);
+
+        if(noteId != -1) {
+            observableGetNote(noteId, listUsed);
+        } else {
+            mEditorView.requestFocusOnContent();
+        }
     }
 
-    private void setUpView(@Nullable SingleNote note) {
-        if (note != null) {
+    private void setUpView(@Nonnull SingleNote note) {
             favorite = note.isFavorite();
             mEditorView.setupNoteEditTexts(note);
 
             if (note.getReminderId() != -1) {
                 observableGetReminderWithId(note.getReminderId());
             }
-
-        } else {
-            mEditorView.requestFocusOnContent();
-        }
     }
 
     public void onFavoriteClicked() {
@@ -134,6 +134,8 @@ public class NoteEditorPresenter {
             boolean contentEmpty = content.isEmpty();
             if (!(titleEmpty && contentEmpty)) {
                 createNewNote(title, content);
+            } else {
+                mEditorView.goBackToMainActivity(null, -1, listUsed);
             }
         }
     }
@@ -214,7 +216,7 @@ public class NoteEditorPresenter {
         mEditorView.goBackToMainActivity(mNote, 1, listUsed);
     }
 
-    private void resultGetNoteObservable(@Nullable SingleNote note) {
+    private void resultGetNoteObservable(@Nonnull SingleNote note) {
         mNote = note;
         setUpView(note);
     }
@@ -239,14 +241,14 @@ public class NoteEditorPresenter {
                 .subscribe());
     }
 
-    private void observableAddNote(@Nonnull SingleNote note){
+    private void observableAddNote(@Nonnull SingleNote note) {
         mDisposable.add(Single.fromCallable(() -> mEditorInteractor.addNote(note))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aLong -> resultAddNoteObservable(aLong.intValue())));
     }
 
-    private void observableDeleteNote(){
+    private void observableDeleteNote() {
 
     }
 

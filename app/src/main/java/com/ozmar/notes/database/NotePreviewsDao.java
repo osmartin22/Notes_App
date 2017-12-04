@@ -15,26 +15,26 @@ public abstract class NotePreviewsDao {
     @Query("SELECT id, title, content, reminderId FROM userNotes WHERE id = :noteId")
     public abstract NotePreviewWithReminderId getAMainPreview(int noteId);
 
-    @Query("SELECT id, title, content, reminderId FROM userNotes")
+    @Query("SELECT id, title, content, reminderId FROM userNotes ORDER BY id DESC")
     public abstract List<NotePreviewWithReminderId> getMainPreviewList();
 
-    @Query("SELECT id, title, content, reminderId FROM userNotes WHERE favorite = 1")
+    @Query("SELECT id, title, content, reminderId FROM userNotes WHERE favorite = 1 ORDER BY id DESC")
     public abstract List<NotePreviewWithReminderId> getFavoritePreviewList();
 
 
     @Query("SELECT id, title, content, reminderId FROM archiveNotes WHERE id = :noteId")
     public abstract NotePreviewWithReminderId getAnArchivePreview(int noteId);
 
-    @Query("SELECT id, title, content, reminderId FROM archiveNotes")
+    @Query("SELECT id, title, content, reminderId FROM archiveNotes ORDER BY id DESC")
     public abstract List<NotePreviewWithReminderId> getArchivePreviewList();
 
 
     @Query("SELECT id, title, content FROM recycleBinNotes WHERE id =:noteId")
     public abstract NotePreview getARecycleBinPreview(int noteId);
 
-    @Query("SELECT id, title, content FROM recycleBinNotes")
+    @Query("SELECT id, title, content FROM recycleBinNotes ORDER BY id DESC")
     public abstract List<NotePreview> getRecycleBinPreviewList();
-    
+
 
     @Query("SELECT reminderTime, repeatType FROM remindersTable WHERE reminderId = :reminderId")
     public abstract ReminderPreview getReminderPreview(int reminderId);
@@ -61,7 +61,6 @@ public abstract class NotePreviewsDao {
 
         }
 
-//        return Maybe.just(new NoteAndReminderPreview(previewWithReminderId, reminderPreview));
         return new NoteAndReminderPreview(previewWithReminderId, reminderPreview);
     }
 
@@ -95,7 +94,6 @@ public abstract class NotePreviewsDao {
             }
         }
 
-//        return Maybe.just(list);
         return list;
     }
 }
