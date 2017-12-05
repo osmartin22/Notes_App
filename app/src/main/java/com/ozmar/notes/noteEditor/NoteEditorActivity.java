@@ -18,13 +18,11 @@ import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.MainActivity;
 import com.ozmar.notes.R;
 import com.ozmar.notes.Reminder;
-import com.ozmar.notes.SingleNote;
+import com.ozmar.notes.database.MainNote;
 import com.ozmar.notes.databinding.ActivityNoteEditorBinding;
 import com.ozmar.notes.notifications.ReminderManager;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.FormatUtils;
-
-import org.joda.time.DateTime;
 
 // TODO: Pressing back on a new empty note does not leave the activity (stuck)
 // TODO: Reminders not saving properly
@@ -79,14 +77,14 @@ public class NoteEditorActivity extends AppCompatActivity
         return super.onCreateOptionsMenu(menu);
     }
 
-    private void setupToolbarIcons(@Nullable SingleNote note, @NonNull Menu menu, int listUsed) {
+    private void setupToolbarIcons(@Nullable MainNote note, @NonNull Menu menu, int listUsed) {
         if (listUsed != RECYCLE_BIN_NOTES) {
             if (listUsed == ARCHIVE_NOTES) {
                 menu.findItem(R.id.archive_note).setVisible(false);
                 menu.findItem(R.id.unarchive_note).setVisible(true);
             }
 
-            if (note != null && note.isFavorite()) {
+            if (note != null && note.getFavorite() == 1) {
                 menu.findItem(R.id.favorite_note).setIcon(R.drawable.ic_favorite_star_on);
             }
 
@@ -178,7 +176,7 @@ public class NoteEditorActivity extends AppCompatActivity
     }
 
     @Override
-    public void setupNoteEditTexts(@NonNull SingleNote note) {
+    public void setupNoteEditTexts(@NonNull MainNote note) {
         mBinding.lastModified.setText(FormatUtils.lastUpdated(NoteEditorActivity.this,
                 note.getTimeModified()));
 
@@ -203,9 +201,10 @@ public class NoteEditorActivity extends AppCompatActivity
         mBinding.editTextContent.setOnTouchListener(editTextListener);
     }
 
+    // TODO: Update to use the Reminder instead
     @Override
-    public void showReminder(@NonNull SingleNote note, long reminderTime) {
-        if (note.hasFrequencyChoices()) {
+    public void showReminder(@NonNull Reminder reminder) {
+        if (reminder.getFrequencyChoices() != null) {
             mBinding.reminderText.setCompoundDrawablesWithIntrinsicBounds(
                     R.drawable.ic_repeat_dark_gray_small, 0, 0, 0);
         } else {
@@ -215,7 +214,7 @@ public class NoteEditorActivity extends AppCompatActivity
 
         mBinding.reminderText.setVisibility(View.VISIBLE);
         mBinding.reminderText.setText(FormatUtils.getReminderText(NoteEditorActivity.this,
-                new DateTime(reminderTime)));
+                reminder.getDateTime()));
     }
 
     @Override
@@ -248,7 +247,7 @@ public class NoteEditorActivity extends AppCompatActivity
     }
 
     @Override
-    public void goBackToMainActivity(@Nullable SingleNote note, int result, int listUsed) {
+    public void goBackToMainActivity(@Nullable MainNote note, int result, int listUsed) {
         if (note != null) {
             Intent intent = new Intent(NoteEditorActivity.this, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -257,7 +256,7 @@ public class NoteEditorActivity extends AppCompatActivity
             intent.putExtra(getString(R.string.noteIdIntent), note.getId());
             intent.putExtra(getString(R.string.notePositionIntent), notePosition);
             intent.putExtra(getString(R.string.noteSuccessIntent), result);
-            intent.putExtra(getString(R.string.noteIsFavoriteIntent), note.isFavorite());
+            intent.putExtra(getString(R.string.noteIsFavoriteIntent), note.getFavorite() == 1);
 
             checkIfMenuActionClicked(intent);
             setResult(RESULT_OK, intent);
@@ -293,8 +292,8 @@ public class NoteEditorActivity extends AppCompatActivity
 
 
     @Override
-    public void setupReminder(@NonNull SingleNote note) {
-        ReminderManager.start(getApplicationContext(), note);
+    public void setupReminder(@NonNull MainNote note) {
+//        ReminderManager.start(getApplicationContext(), note);
     }
 
     @Override

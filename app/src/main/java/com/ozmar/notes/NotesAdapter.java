@@ -36,12 +36,9 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final Context context;
     private int listUsed = 0;
 
-    private List<NoteAndReminderPreview> notes = new ArrayList<>();
-
+    private final List<NoteAndReminderPreview> notes = new ArrayList<>();
     private final List<Integer> selectedIds = new ArrayList<>();
 
-    // TODO: Remove database from constructor
-    // Call function to get data from database from presenter instead
     public NotesAdapter(Context context) {
         this.context = context;
     }

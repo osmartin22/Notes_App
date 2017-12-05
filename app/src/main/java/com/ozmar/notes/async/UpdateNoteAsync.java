@@ -5,7 +5,6 @@ import android.os.AsyncTask;
 
 import com.ozmar.notes.SingleNote;
 import com.ozmar.notes.database.AppDatabase;
-import com.ozmar.notes.database.NoteConversion;
 
 import javax.annotation.Nonnull;
 
@@ -28,11 +27,11 @@ public class UpdateNoteAsync extends AsyncTask<Void, Void, Void> {
 
     @Override
     protected Void doInBackground(Void... voids) {
-        if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
-            db.notesDao().updateAUserNote(NoteConversion.getMainNoteFromSingleNote(mNote));
-        } else if (listUsed == ARCHIVE_NOTES) {
-            db.notesDao().updateAnArchiveNote(NoteConversion.getArchiveNoteFromSingleNote(mNote));
-        }
+//        if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
+//            db.notesDao().updateAUserNote(NoteConversion.getMainNoteFromSingleNote(mNote));
+//        } else if (listUsed == ARCHIVE_NOTES) {
+//            db.notesDao().updateAnArchiveNote(NoteConversion.getArchiveNoteFromSingleNote(mNote));
+//        }
 
         return null;
     }

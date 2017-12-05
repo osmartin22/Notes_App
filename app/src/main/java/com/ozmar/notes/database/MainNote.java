@@ -21,10 +21,6 @@ public class MainNote extends BaseNote {
     @ColumnInfo(name = "reminderId")
     private int reminderId;
 
-    @Ignore
-    public MainNote() {
-
-    }
 
     public MainNote(int id, @Nonnull String title, @Nonnull String content, long timeCreated,
                     long timeModified, int favorite, int reminderId) {
@@ -32,6 +28,30 @@ public class MainNote extends BaseNote {
         this.id = id;
         this.favorite = favorite;
         this.reminderId = reminderId;
+    }
+
+    @Ignore
+    public MainNote(@Nonnull String title, @Nonnull String content, long timeCreated,
+                    int favorite, int reminderId) {
+        super(title, content, timeCreated);
+        this.favorite = favorite;
+        this.reminderId = reminderId;
+    }
+
+    @Ignore
+    public MainNote(@Nonnull ArchiveNote note) {
+        super(note);
+        this.id = note.getId();
+        this.favorite = 0;
+        this.reminderId = note.getReminderId();
+    }
+
+    @Ignore
+    public MainNote(@Nonnull RecycleBinNote note) {
+        super(note);
+        this.id = note.getId();
+        this.favorite = 0;
+        this.reminderId = -1;
     }
 
 

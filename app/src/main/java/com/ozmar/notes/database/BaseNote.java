@@ -20,16 +20,44 @@ public class BaseNote {
     @ColumnInfo(name = "timeModified")
     private long timeModified;
 
-    @Ignore
-    public BaseNote(){
-
-    }
 
     public BaseNote(@Nonnull String title, @Nonnull String content, long timeCreated, long timeModified) {
         this.title = title;
         this.content = content;
         this.timeCreated = timeCreated;
         this.timeModified = timeModified;
+    }
+
+    @Ignore
+    public BaseNote(@Nonnull String title, @Nonnull String content, long timeCreated) {
+        this.title = title;
+        this.content = content;
+        this.timeCreated = timeCreated;
+        this.timeModified = timeCreated;
+    }
+
+    @Ignore
+    BaseNote(@Nonnull MainNote note) {
+        this.title = note.getTitle();
+        this.content = note.getContent();
+        this.timeCreated = note.getTimeCreated();
+        this.timeModified = note.getTimeModified();
+    }
+
+    @Ignore
+    BaseNote(@Nonnull ArchiveNote note) {
+        this.title = note.getTitle();
+        this.content = note.getContent();
+        this.timeCreated = note.getTimeCreated();
+        this.timeModified = note.getTimeModified();
+    }
+
+    @Ignore
+    BaseNote(@Nonnull RecycleBinNote note) {
+        this.title = note.getTitle();
+        this.content = note.getContent();
+        this.timeCreated = note.getTimeCreated();
+        this.timeModified = note.getTimeModified();
     }
 
 

@@ -6,17 +6,12 @@ public class ChangesInNote {
     private final boolean titleChanged;
     private final boolean contentChanged;
     private final boolean favoriteChanged;
-    private final boolean reminderTimeChanged;
-    private final boolean frequencyChanged;
 
 
-    public ChangesInNote(boolean titleChanged, boolean contentChanged, boolean favoriteChanged,
-                         boolean reminderTimeChanged, boolean frequencyChanged) {
+    public ChangesInNote(boolean titleChanged, boolean contentChanged, boolean favoriteChanged) {
         this.titleChanged = titleChanged;
         this.contentChanged = contentChanged;
         this.favoriteChanged = favoriteChanged;
-        this.reminderTimeChanged = reminderTimeChanged;
-        this.frequencyChanged = frequencyChanged;
     }
 
     public boolean isTitleChanged() {
@@ -31,15 +26,7 @@ public class ChangesInNote {
         return favoriteChanged;
     }
 
-    public boolean isReminderTimeChanged() {
-        return reminderTimeChanged;
-    }
-
-    public boolean isFrequencyChanged() {
-        return frequencyChanged;
-    }
-
     public boolean checkIfAllValuesFalse() {
-        return titleChanged || contentChanged || favoriteChanged || reminderTimeChanged || frequencyChanged;
+        return titleChanged || contentChanged || favoriteChanged;
     }
 }
