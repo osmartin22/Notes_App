@@ -15,9 +15,6 @@ import io.reactivex.Single;
 @Dao
 public interface RemindersDao {
 
-    @Query("SELECT reminderTime, repeatType FROM remindersTable WHERE reminderId = :reminderId")
-    ReminderPreview getReminderPreview(int reminderId);
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long addReminder(Reminder reminder);
 

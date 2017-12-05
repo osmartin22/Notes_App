@@ -8,8 +8,6 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
-import java.util.List;
-
 import io.reactivex.Maybe;
 
 
@@ -35,19 +33,6 @@ public interface NotesDao {
     @Query("DELETE FROM userNotes WHERE id = :noteId")
     void deleteFromUserNotes(int noteId);
 
-    @Query("SELECT * FROM userNotes")
-    List<MainNote> getAllUserNotes();
-
-    @Query("SELECT * FROM userNotes WHERE favorite = 1")
-    List<MainNote> getAllFavoriteNotes();
-
-    @Insert
-    void addListToUserNotes(List<MainNote> list);
-
-    @Delete
-    void deleteListFromUserNotes(List<MainNote> list);
-
-
     //---------------------------------------------------------------------------------------//
     // Archive Table Specific Methods
     //---------------------------------------------------------------------------------------//
@@ -67,16 +52,6 @@ public interface NotesDao {
     @Query("DELETE FROM archiveNotes WHERE id = :noteId")
     void deleteFromArchiveNotes(int noteId);
 
-    @Query("SELECT * FROM archiveNotes")
-    List<ArchiveNote> getAllArchiveNotes();
-
-    @Insert
-    void addListToArchiveNotes(List<ArchiveNote> list);
-
-    @Delete
-    void deleteListFromArchiveNotes(List<ArchiveNote> list);
-
-
     //---------------------------------------------------------------------------------------//
     // Recycle Bin Table Specific Methods
     //---------------------------------------------------------------------------------------//
@@ -92,13 +67,4 @@ public interface NotesDao {
 
     @Query("DELETE FROM recycleBinNotes WHERE id = :noteId")
     void deleteFromRecycleBinNotes(int noteId);
-
-    @Query("SELECT * FROM recycleBinNotes")
-    List<RecycleBinNote> getAllRecycleBinNotes();
-
-    @Insert
-    void addListToRecycleBinNotes(List<RecycleBinNote> list);
-
-    @Delete
-    void deleteListFromRecycleBinNotes(List<RecycleBinNote> list);
 }

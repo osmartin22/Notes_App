@@ -27,7 +27,7 @@ public class NoteEditorInteractor {
         this.db = AppDatabase.getAppDatabase();
     }
 
-    public long addNote(MainNote note) {
+    public long addNote(@Nonnull MainNote note) {
         return db.notesDao().addToUserNotes(note);
     }
 
@@ -36,24 +36,13 @@ public class NoteEditorInteractor {
             return db.notesDao().getAUserNote(noteId);
 
         } else if (listUsed == ARCHIVE_NOTES) {
-            return db.notesDao().getAnArchiveNote(noteId)
-                    .map(MainNote::new);
+            return db.notesDao().getAnArchiveNote(noteId).map(MainNote::new);
 
         } else {
-            return db.notesDao().getARecycleBinNotes(noteId).
-                    map(MainNote::new);
+            return db.notesDao().getARecycleBinNotes(noteId).map(MainNote::new);
         }
     }
 
-    public long addReminder(Reminder reminder) {
-        return db.remindersDao().addReminder(reminder);
-    }
-
-    public Single<Reminder> getReminder(int reminderId) {
-        return db.remindersDao().getReminder(reminderId);
-    }
-
-    // Notes in trash can not be updated
     public Completable updateNote(@Nonnull MainNote note, @IntRange(from = 0, to = 2) int listUsed) {
         return Completable.fromAction(() -> {
             if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
@@ -64,20 +53,28 @@ public class NoteEditorInteractor {
         });
     }
 
-//    public void updateReminder(Reminder reminder) {
-//        new UpdateReminderAsync(reminder).execute();
+//    public Completable deleteNote(){
+//
 //    }
 
-    public Completable updateReminder(Reminder reminder) {
+
+    public long addReminder(@Nonnull Reminder reminder) {
+        return db.remindersDao().addReminder(reminder);
+    }
+
+    public Single<Reminder> getReminder(int reminderId) {
+        return db.remindersDao().getReminder(reminderId);
+    }
+
+    public Completable updateReminder(@Nonnull Reminder reminder) {
         return Completable.fromAction(() -> db.remindersDao().updateReminder(reminder));
     }
 
-    public Completable deleteReminder(Reminder reminder) {
+    public Completable deleteReminder(@Nonnull Reminder reminder) {
         return Completable.fromAction(() -> db.remindersDao().deleteReminder(reminder));
     }
 
     public Completable deleteReminder(int reminderId) {
         return Completable.fromAction(() -> db.remindersDao().deleteReminder(reminderId));
-//        new DeleteReminderAsync(reminderId).execute();
     }
 }

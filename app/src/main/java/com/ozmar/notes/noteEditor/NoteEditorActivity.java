@@ -24,8 +24,8 @@ import com.ozmar.notes.notifications.ReminderManager;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.FormatUtils;
 
-// TODO: Pressing back on a new empty note does not leave the activity (stuck)
-// TODO: Reminders not saving properly
+// TODO: Notes/Reminders not updating properly(as a result also can't add a reminder to a note,
+        // although the reminder is created and saved in the database
 
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener, NoteEditorView {
@@ -201,7 +201,6 @@ public class NoteEditorActivity extends AppCompatActivity
         mBinding.editTextContent.setOnTouchListener(editTextListener);
     }
 
-    // TODO: Update to use the Reminder instead
     @Override
     public void showReminder(@NonNull Reminder reminder) {
         if (reminder.getFrequencyChoices() != null) {
