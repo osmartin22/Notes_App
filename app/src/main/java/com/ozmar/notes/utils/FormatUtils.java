@@ -251,19 +251,19 @@ public class FormatUtils {
 
         int repeatType = choices.getRepeatEvery();
         switch (choices.getRepeatType()) {
-            case 0:
+            case 1:
                 // Repeats Daily
                 frequencyText += context.getResources().getQuantityString(R.plurals.repeatDay,
                         repeatType, repeatType);
                 break;
-            case 1:
+            case 2:
                 // Repeats Weekly (plus selected days)
                 frequencyText += context.getResources().getQuantityString(R.plurals.repeatWeek,
                         repeatType, repeatType);
                 assert choices.getDaysChosen() != null;
                 frequencyText += FormatUtils.getSelectedDays(choices.getDaysChosen());
                 break;
-            case 2:
+            case 3:
                 // Repeats Monthly (plus weekHelper RadioButton)
                 frequencyText += context.getResources().getQuantityString(R.plurals.repeatMonth,
                         repeatType, repeatType);
@@ -272,7 +272,7 @@ public class FormatUtils {
                             + FormatUtils.formatNthWeekOfMonth(dateTime, choices.getMonthWeekToRepeat()) + ")";
                 }
                 break;
-            case 3:
+            case 4:
                 // Repeats Yearly
                 frequencyText += context.getResources().getQuantityString(R.plurals.repeatYear,
                         repeatType, repeatType);

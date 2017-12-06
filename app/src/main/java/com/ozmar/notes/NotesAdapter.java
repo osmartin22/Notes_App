@@ -167,7 +167,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
 
     private void displayReminder(@Nullable ReminderPreview reminderPreview, TextView reminderText) {
         if (reminderPreview != null) {
-            if (reminderPreview.getIsRepeating() != -1) {
+            if (reminderPreview.getIsRepeating() != 0) {
                 reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
                         0, 0, 0);
             } else {

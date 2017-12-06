@@ -1,4 +1,4 @@
- package com.ozmar.notes.reminderDialog;
+package com.ozmar.notes.reminderDialog;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -28,13 +28,17 @@ import java.util.List;
 
 
 // TODO: Choosing one of the bottom spinner selections for the first time does not show the view
-    // Only after selecting it again or switching to another selection
-    // Setting the selection from a previous FrequencyChoice works fine
+// Only after selecting it again or switching to another selection
+// Setting the selection from a previous FrequencyChoice works fine
 public class FrequencyPickerFragment extends DialogFragment implements TextWatcher, View.OnClickListener,
         DatePickerFragment.OnDatePickedListener {
 
     private static final float TRANSPARENCY_ON = 0.5f;
     private static final float TRANSPARENCY_OFF = 1f;
+    private static final int REPEAT_DAILY = 1;
+    private static final int REPEAT_WEEKLY = 2;
+    private static final int REPEAT_MONTHLY = 3;
+    private static final int REPEAT_YEARLY = 4;
 
     private int timeUnitNumber = 1;
 
@@ -120,13 +124,14 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
 
     private void setUpFrequencyChoices(FrequencyChoices choices) {
         if (choices != null) {
-            if (choices.getRepeatType() == 1) {
+            if (choices.getRepeatType() == REPEAT_WEEKLY) {
                 switchToWeekly();
-            } else if (choices.getRepeatType() == 2) {
+            } else if (choices.getRepeatType() == REPEAT_MONTHLY) {
                 switchToMonthly();
             }
+
             mBinding.everyNumberEditText.setText(String.valueOf(choices.getRepeatEvery()));
-            mBinding.topSpinner.setSelection(choices.getRepeatType());
+            mBinding.topSpinner.setSelection(choices.getRepeatType() - 1);
 
             if (choices.getRepeatToDate() != 0) {
                 setUpCalendarTextView();
@@ -283,11 +288,12 @@ public class FrequencyPickerFragment extends DialogFragment implements TextWatch
                 int weekToRepeat = 0;
                 int dayOfWeekToRepeat = 0;
 
-                int topSpinnerPosition = mBinding.topSpinner.getSelectedItemPosition();
+                int topSpinnerPosition = mBinding.topSpinner.getSelectedItemPosition() + 1;
 
-                if (topSpinnerPosition == 1) {
+                if (topSpinnerPosition == REPEAT_WEEKLY) {
                     list = weeklyHelper.getCheckedButtons();
-                } else if (topSpinnerPosition == 2) {
+
+                } else if (topSpinnerPosition == REPEAT_MONTHLY) {
                     monthRepeatType = monthlyHelper.getCheckedButton();
                     weekToRepeat = monthlyHelper.getWeekToRepeat();
                     dayOfWeekToRepeat = monthlyHelper.getDayOfWeekToRepeat();

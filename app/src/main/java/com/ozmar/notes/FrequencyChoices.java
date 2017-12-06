@@ -47,7 +47,7 @@ public final class FrequencyChoices implements Parcelable {
 
     // Constructor for presets
     @Ignore
-    public FrequencyChoices(@IntRange(from = 0, to = 4) int repeatType, @Nullable List<Integer> daysChosen) {
+    public FrequencyChoices(@IntRange(from = 1, to = 4) int repeatType, @Nullable List<Integer> daysChosen) {
         this.repeatType = repeatType;
         this.repeatEvery = 1;
         this.repeatForever = 1;
@@ -57,7 +57,7 @@ public final class FrequencyChoices implements Parcelable {
         this.monthDayOfWeekToRepeat = 0;
         this.daysChosen = daysChosen;
 
-        if (repeatType == 2) {
+        if (repeatType == 3) {
             this.monthRepeatType = 0;
         } else {
             this.monthRepeatType = -1;
@@ -67,7 +67,7 @@ public final class FrequencyChoices implements Parcelable {
     }
 
     @Ignore
-    public FrequencyChoices(@IntRange(from = 0, to = 4) int repeatType, int repeatEvery,
+    public FrequencyChoices(@IntRange(from = 1, to = 4) int repeatType, int repeatEvery,
                             @IntRange(from = 0, to = 1) int repeatForever, long repeatToDate, int repeatEvents,
                             @IntRange(from = -1, to = 1) int monthRepeatType,
                             @IntRange(from = 0, to = 5) int monthWeekToRepeat,

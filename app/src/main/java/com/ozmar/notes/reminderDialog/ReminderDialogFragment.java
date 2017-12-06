@@ -34,9 +34,14 @@ public class ReminderDialogFragment extends DialogFragment
         implements DatePickerFragment.OnDatePickedListener, TimePickerFragment.OnTimePickedListener,
         FrequencyPickerFragment.onFrequencyPickedListener {
 
-    private final DateTime dateTimeNow = DateTime.now();
+    private static final int REPEAT_DAILY = 1;
+    private static final int REPEAT_WEEKLY = 2;
+    private static final int REPEAT_MONTHLY = 3;
+    private static final int REPEAT_YEARLY = 4;
+
     private int year, month, day;
     private int hour, minute;
+    private final DateTime dateTimeNow = DateTime.now();
 
     private NDSpinner dateSpinner, timeSpinner, frequencySpinner;
     private ReminderAdapter dateSpinnerAdapter, timeSpinnerAdapter;
@@ -388,12 +393,12 @@ public class ReminderDialogFragment extends DialogFragment
                     case 1:
                     case 3:
                     case 4:
-                        chosenFrequency = new FrequencyChoices(i - 1, null);
+                        chosenFrequency = new FrequencyChoices(i, null);
                         break;
 
                     case 2:
                         List<Integer> list = new ArrayList<>(Collections.singletonList(dateTimeNow.getDayOfWeek()));
-                        chosenFrequency = new FrequencyChoices(1, list);
+                        chosenFrequency = new FrequencyChoices(2, list);
                         break;
 
                     case 5:
@@ -485,7 +490,7 @@ public class ReminderDialogFragment extends DialogFragment
 
         long nextReminderTime = chosenDateTime.getMillis();
 
-        if (chosenFrequency.getRepeatType() == 1) {     // Weekly
+        if (chosenFrequency.getRepeatType() == REPEAT_WEEKLY) {     // Weekly
 
             assert chosenFrequency.getDaysChosen() != null;
             List<Integer> daysChosen = chosenFrequency.getDaysChosen();
@@ -497,7 +502,7 @@ public class ReminderDialogFragment extends DialogFragment
                         currentDayOfWeek, 1);
             }
 
-        } else if (chosenFrequency.getRepeatType() == 2) {   // Monthly
+        } else if (chosenFrequency.getRepeatType() == REPEAT_MONTHLY) {   // Monthly
 
             if (chosenFrequency.getMonthRepeatType() != 0) {
                 int days = ReminderUtils.nthWeekDayOfMonth(chosenDateTime.toLocalDate(),

@@ -170,19 +170,19 @@ public class ReminderUtils {
         DateTime dateTimeReminder = new DateTime(currentReminderTime);
 
         switch (choices.getRepeatType()) {
-            case 0:     // Daily
+            case 1:     // Daily
                 nextReminderTime = getNextDailyReminderTime(choices.getRepeatEvery(),
                         dateTimeReminder);
                 break;
 
-            case 1:     // Weekly
+            case 2:     // Weekly
                 assert choices.getDaysChosen() != null;
                 nextReminderTime = dateTimeReminder.getMillis() +
                         getNextWeeklyReminderTime(choices.getDaysChosen(),
                                 dateTimeReminder.getDayOfWeek(), choices.getRepeatEvery());
                 break;
 
-            case 2:     // Monthly
+            case 3:     // Monthly
                 if (choices.getMonthRepeatType() != 0) {
                     nextReminderTime = getNextMonthlyReminder(dateTimeReminder,
                             choices.getRepeatEvery(), choices.getMonthWeekToRepeat(),
@@ -192,7 +192,7 @@ public class ReminderUtils {
                 }
                 break;
 
-            case 3:     // Yearly
+            case 4:     // Yearly
                 nextReminderTime = getNextYearlyReminder(dateTimeReminder, choices.getRepeatEvery());
                 break;
         }
