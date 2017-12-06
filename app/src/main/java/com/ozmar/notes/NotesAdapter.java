@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.ozmar.notes.database.AppDatabase;
 import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.database.NotePreview;
 import com.ozmar.notes.database.ReminderPreview;
@@ -25,16 +24,11 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.reactivex.Maybe;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-
 public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int SHOW_TITLE = 0, SHOW_CONTENT = 1, SHOW_ALL = 2;
 
     private final Context context;
-    private int listUsed = 0;
 
     private final List<NoteAndReminderPreview> notes = new ArrayList<>();
     private final List<Integer> selectedIds = new ArrayList<>();
@@ -44,24 +38,10 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
 
-    private void getPreviewListResult(List<NoteAndReminderPreview> list) {
+    public void updateAdapterList(List<NoteAndReminderPreview> list) {
+        notes.clear();
         notes.addAll(list);
         notifyDataSetChanged();
-    }
-
-    public void updateAdapterList() {
-        Maybe.fromCallable(() -> AppDatabase.getAppDatabase().previewsDao().getListOfNotePreviews(listUsed))
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::getPreviewListResult);
-    }
-
-    public void setListUsed(int listUsed) {
-        this.listUsed = listUsed;
-    }
-
-    public int getListUsed() {
-        return listUsed;
     }
 
     public int getNoteIdAt(int position) {
@@ -73,7 +53,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, notes.size());
     }
-
 
     public void addAt(int position, NoteAndReminderPreview notePreview) {
         notes.add(position, notePreview);
@@ -103,6 +82,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void clearSelectedIds() {
         selectedIds.clear();
     }
+
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

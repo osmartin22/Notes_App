@@ -13,11 +13,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-// TODO: Separate database calls from presenter
-
 // TODO: Deleting a note through multi select does not cancel reminder notification
-
-// TODO: Decide if favorite of MainNote should be an int or boolean
 
 public class NoteEditorPresenter {
 

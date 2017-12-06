@@ -23,6 +23,8 @@ import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.databinding.ActivityMainBinding;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
 
+import java.util.List;
+
 import static android.support.v7.widget.DividerItemDecoration.HORIZONTAL;
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
@@ -44,15 +46,15 @@ public class MainActivity extends AppCompatActivity implements
     private ActionMode mActionMode;
 
     private ActivityMainBinding mBinding;
-    private MainActivityPresenter mainActivityPresenter;
+    private MainActivityPresenter mActivityPresenter;
 
     public void onFabClicked(View view) {
-        mainActivityPresenter.onNoteClick(-1, -1, notesAdapter.getListUsed());
+        mActivityPresenter.onNoteClick(-1, -1);
     }
 
     private void setUpRecyclerView() {
         notesAdapter = new NotesAdapter(MainActivity.this);
-        notesAdapter.updateAdapterList();
+        mActivityPresenter.onGetPreviewList(0);
 
         layoutChoice = preferences.getLayoutChoice();
         rv = mBinding.recyclerView;
@@ -67,11 +69,11 @@ public class MainActivity extends AppCompatActivity implements
         rv.addOnItemTouchListener(new RecyclerItemListener(MainActivity.this,
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
-                mainActivityPresenter.onNoteClick(notesAdapter.getNoteIdAt(position), position, notesAdapter.getListUsed());
+                mActivityPresenter.onNoteClick(notesAdapter.getNoteIdAt(position), position);
             }
 
             public void onLongClickItem(View view, final int position) {
-                // TODO: add back later
+                ((AppCompatActivity) view.getContext()).startSupportActionMode(mActionModeCallback);
             }
         }));
     }
@@ -93,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 super.onDrawerSlide(drawerView, slideOffset);
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
             }
         };
 
@@ -103,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements
         mBinding.navView.getMenu().getItem(0).setChecked(true);
 
 
-        mainActivityPresenter = new MainActivityPresenter(MainActivity.this);
+        mActivityPresenter = new MainActivityPresenter(MainActivity.this);
 
         setUpRecyclerView();
     }
@@ -132,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    private final ActionMode.Callback mCallback = new ActionMode.Callback() {
+    private final ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
         boolean menuActionPressed = false;
 
@@ -162,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements
                 case R.id.contextualUnarchive:
                 case R.id.contextualDelete:
                 case R.id.contextualRestore:
+                    actionMode.finish();
 //                    removeViews(mode, item);
 //                    multiSelectHelper.setItem(item);
                     return true;
@@ -219,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements
 
         switch (item.getItemId()) {
             case R.id.layout:
-                mainActivityPresenter.onLayoutIconClicked(layoutChoice);
+                mActivityPresenter.onLayoutIconClicked(layoutChoice);
                 return true;
         }
 
@@ -228,38 +234,42 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        notesAdapter.clearView();
-
+        int listToUse;
         switch (item.getItemId()) {
             case R.id.all_notes_drawer:
             default:
-                notesAdapter.setListUsed(0);
+                listToUse = 0;
                 mBinding.myToolbar.setTitle("Notes");
                 mBinding.fab.show();
                 break;
 
             case R.id.favorite_notes_drawer:
-                notesAdapter.setListUsed(1);
+                listToUse = 1;
                 mBinding.myToolbar.setTitle("Favorite Notes");
                 mBinding.fab.show();
                 break;
 
             case R.id.archive_drawer:
-                notesAdapter.setListUsed(2);
+                listToUse = 2;
                 mBinding.myToolbar.setTitle("Archive");
                 mBinding.fab.hide();
                 break;
 
             case R.id.recycle_bin_drawer:
-                notesAdapter.setListUsed(3);
+                listToUse = 3;
                 mBinding.myToolbar.setTitle("Trash");
                 mBinding.fab.hide();
                 break;
         }
 
-        notesAdapter.updateAdapterList();
+        mActivityPresenter.onGetPreviewList(listToUse);
         mBinding.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void updateAdapterList(List<NoteAndReminderPreview> list) {
+        notesAdapter.updateAdapterList(list);
     }
 
     @Override
@@ -273,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements
 
                 int noteId = bundle.getInt(getString(R.string.noteIdIntent), -1);
                 int notePosition = bundle.getInt(getString(R.string.notePositionIntent), -1);
-                int listUsed = bundle.getInt(getString(R.string.listUsedIntent), notesAdapter.getListUsed());
+                int listUsed = bundle.getInt(getString(R.string.listUsedIntent), mActivityPresenter.getListUsed());
                 int noteResult = bundle.getInt(getString(R.string.noteSuccessIntent), -1);
                 int noteEditorAction = bundle.getInt(getString(R.string.menuActionIntent), -1);
 
@@ -285,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
 
                 if (noteId != -1 && (noteEditorAction != -1 || noteResult != -1)) {
-                    mainActivityPresenter.getNotePreview(noteId, listUsed, notePosition,
+                    mActivityPresenter.onGetANotePreview(noteId, listUsed, notePosition,
                             noteResult, noteIsFavorite);
                 }
             }
@@ -320,15 +330,15 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     protected void onStart() {
-        if (mainActivityPresenter != null) {
-            mainActivityPresenter.onAttach(MainActivity.this);
+        if (mActivityPresenter != null) {
+            mActivityPresenter.onAttach(MainActivity.this);
         }
         super.onStart();
     }
 
     @Override
     protected void onPause() {
-        mainActivityPresenter.onDestroy();
+        mActivityPresenter.onDestroy();
         super.onPause();
     }
 
@@ -365,6 +375,10 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void openNoteEditorActivity(int noteId, int notePosition, int listUsed) {
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
+
         Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
 
         intent.putExtra(getString(R.string.noteIdIntent), noteId);
