@@ -291,12 +291,12 @@ public class NoteEditorActivity extends AppCompatActivity
 
 
     @Override
-    public void setupReminder(@NonNull MainNote note) {
+    public void setupReminderNotification(@NonNull MainNote note) {
 //        ReminderManager.start(getApplicationContext(), note);
     }
 
     @Override
-    public void cancelReminder(int noteId) {
+    public void cancelReminderNotification(int noteId) {
         ReminderManager.cancel(getApplicationContext(), noteId);
     }
 }

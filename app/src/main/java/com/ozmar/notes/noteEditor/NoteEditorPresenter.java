@@ -9,7 +9,6 @@ import com.ozmar.notes.database.MainNote;
 
 import javax.annotation.Nonnull;
 
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
@@ -94,17 +93,13 @@ public class NoteEditorPresenter {
 
         if (mMainNote != null) {
 
-            if (reminderModified) {
-                modifyReminder(mMainNote, mReminder);
-            }
-
             modifyNote(mMainNote, title, content);
 
+            if (reminderModified) {
+                modifyReminder(mMainNote, mReminder);
 
-            if (noteModified) {
-                observableUpdateNote(mMainNote, listUsed);
             } else {
-                mEditorView.goBackToMainActivity(mMainNote, noteChangesResult, listUsed);
+                observableUpdateNote(mMainNote, listUsed);
             }
 
         } else {
@@ -124,12 +119,24 @@ public class NoteEditorPresenter {
         noteChangesResult = updateNote(note, changesInNote, title, content);
     }
 
+    @NonNull
+    private ChangesInNote checkForDifferences(@NonNull MainNote note, @NonNull String title,
+                                              @NonNull String content) {
+
+        boolean titleChanged = !note.getTitle().equals(title);
+        boolean contentChanged = !note.getContent().equals(content);
+        boolean favoriteChanged = note.getFavorite() == 1 != favorite;
+
+        return new ChangesInNote(titleChanged, contentChanged, favoriteChanged);
+    }
+
     private int updateNote(@NonNull MainNote note, @NonNull ChangesInNote changes,
                            @NonNull String title, @NonNull String content) {
 
         int result = -1;
 
         if (changes.checkIfAllValuesFalse()) {
+            result = 0;
             noteModified = true;
 
             if (changes.isTitleChanged() || changes.isContentChanged()) {
@@ -149,22 +156,11 @@ public class NoteEditorPresenter {
 
         if (listUsed == 1 && changes.isFavoriteChanged()) {
             result = 3;
-        } else if (changes.checkIfAllValuesFalse()) {
+        } else if (reminderModified) {
             result = 0;
         }
 
         return result;
-    }
-
-    @NonNull
-    private ChangesInNote checkForDifferences(@NonNull MainNote note, @NonNull String title,
-                                              @NonNull String content) {
-
-        boolean titleChanged = !note.getTitle().equals(title);
-        boolean contentChanged = !note.getContent().equals(content);
-        boolean favoriteChanged = note.getFavorite() == 1 != favorite;
-
-        return new ChangesInNote(titleChanged, contentChanged, favoriteChanged);
     }
 
     private void createNewNote(@NonNull String title,
@@ -175,7 +171,7 @@ public class NoteEditorPresenter {
             mMainNote = new MainNote(title, content, System.currentTimeMillis(),
                     favorite ? 1 : 0, -1);
             observableAddReminder(mReminder);
-            mEditorView.setupReminder(mMainNote);
+            mEditorView.setupReminderNotification(mMainNote);
 
         } else {
             mMainNote = new MainNote(title, content, System.currentTimeMillis(),
@@ -195,26 +191,33 @@ public class NoteEditorPresenter {
                 updateReminder(note, reminder);
             }
 
+            if (noteModified) {
+                observableUpdateNote(note, listUsed);
+            } else {
+                mEditorView.goBackToMainActivity(note, noteChangesResult, listUsed);
+            }
+
         } else if (reminder != null) {      // Add reminder
             addReminder(note, reminder);
         }
     }
 
     private void addReminder(@Nonnull MainNote note, @Nonnull Reminder reminder) {
-        observableAddReminder(reminder);
-        mEditorView.setupReminder(note);
         noteModified = true;
+        reminder.setId(3);
+        observableAddReminder(reminder);
+        mEditorView.setupReminderNotification(note);
     }
 
     private void updateReminder(@Nonnull MainNote note, @Nonnull Reminder reminder) {
         observableUpdateReminder(reminder);
-        mEditorView.setupReminder(note);
+        mEditorView.setupReminderNotification(note);
     }
 
     private void deleteReminder(@Nonnull MainNote note) {
-        observableDeleteReminder(note.getReminderId());
-        mEditorView.cancelReminder(note.getReminderId());
         noteModified = true;
+        observableDeleteReminder(note.getReminderId());
+        mEditorView.cancelReminderNotification(note.getReminderId());
         note.setReminderId(-1);
     }
 
@@ -230,6 +233,10 @@ public class NoteEditorPresenter {
     }
 
 
+    private void resultUpdateNoteObservable() {
+        mEditorView.goBackToMainActivity(mMainNote, noteChangesResult, listUsed);
+    }
+
     private void resultAddNoteObservable(int id) {
         assert mMainNote != null;
         mMainNote.setId(id);
@@ -241,14 +248,16 @@ public class NoteEditorPresenter {
         setUpView(note);
     }
 
-    private void resultAddReminderObservable(int reminderId) {
+    private void resultAddReminderObservable(long reminderId) {
         assert mReminder != null;
         assert mMainNote != null;
-        mReminder.setId(reminderId);
-        mMainNote.setReminderId(reminderId);
+        mReminder.setId((int) reminderId);
+        mMainNote.setReminderId((int) reminderId);
 
         if (isNewNote) {
             observableAddNote(mMainNote);
+        } else {
+            observableUpdateNote(mMainNote, listUsed);
         }
     }
 
@@ -261,11 +270,11 @@ public class NoteEditorPresenter {
     private void observableUpdateNote(@Nonnull MainNote note, int listUsed) {
         mDisposable.add(mEditorInteractor.updateNote(note, listUsed)
                 .subscribeOn(Schedulers.io())
-                .subscribe(() -> mEditorView.goBackToMainActivity(mMainNote, noteChangesResult, listUsed)));
+                .subscribe(this::resultUpdateNoteObservable));
     }
 
     private void observableAddNote(@Nonnull MainNote note) {
-        mDisposable.add(Single.fromCallable(() -> mEditorInteractor.addNote(note))
+        mDisposable.add(mEditorInteractor.addNote(note)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aLong -> resultAddNoteObservable(aLong.intValue())));
@@ -286,14 +295,14 @@ public class NoteEditorPresenter {
     private void observableUpdateReminder(@Nonnull Reminder reminder) {
         mDisposable.add(mEditorInteractor.updateReminder(reminder)
                 .subscribeOn(Schedulers.io())
-                .subscribe());
+                .subscribe(this::resultUpdateNoteObservable));
     }
 
     private void observableAddReminder(@Nonnull Reminder reminder) {
-        mDisposable.add(Single.fromCallable(() -> mEditorInteractor.addReminder(reminder))
+        mDisposable.add(mEditorInteractor.addReminder(reminder)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> resultAddReminderObservable(aLong.intValue())));
+                .subscribe(this::resultAddReminderObservable));
     }
 
     private void observableDeleteReminder(int reminderId) {
@@ -327,6 +336,12 @@ public class NoteEditorPresenter {
     public void onReminderPicked(@Nonnull Reminder reminder, @Nonnull String newReminderText) {
         if (mReminder != reminder) {
             mReminder = reminder;
+
+            // Keep the id of the previous reminder
+            if (mMainNote != null && mMainNote.getReminderId() != -1) {
+                mReminder.setId(mMainNote.getReminderId());
+            }
+
             reminderModified = true;
         }
         mEditorView.updateReminderDisplay(newReminderText, mReminder.getFrequencyChoices());

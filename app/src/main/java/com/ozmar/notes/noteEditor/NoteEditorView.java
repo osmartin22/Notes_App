@@ -24,7 +24,7 @@ public interface NoteEditorView {
 
     void requestFocusOnContent();
 
-    void setupReminder(@NonNull MainNote note);
+    void setupReminderNotification(@NonNull MainNote note);
 
-    void cancelReminder(int noteId);
+    void cancelReminderNotification(int noteId);
 }

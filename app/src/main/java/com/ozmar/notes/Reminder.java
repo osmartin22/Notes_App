@@ -3,6 +3,7 @@ package com.ozmar.notes;
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -30,6 +31,13 @@ public final class Reminder implements Parcelable {
     private FrequencyChoices mFrequencyChoices;
 
 
+    public Reminder(int id, @Nonnull DateTime dateTime, @Nullable FrequencyChoices frequencyChoices) {
+        this.id = id;
+        mDateTime = dateTime;
+        mFrequencyChoices = frequencyChoices;
+    }
+
+    @Ignore
     public Reminder(@Nonnull DateTime dateTime, @Nullable FrequencyChoices frequencyChoices) {
         this.mDateTime = dateTime;
         this.mFrequencyChoices = frequencyChoices;

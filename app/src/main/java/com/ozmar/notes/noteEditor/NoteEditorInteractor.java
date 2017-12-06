@@ -27,8 +27,8 @@ public class NoteEditorInteractor {
         this.db = AppDatabase.getAppDatabase();
     }
 
-    public long addNote(@Nonnull MainNote note) {
-        return db.notesDao().addToUserNotes(note);
+    public Single<Long> addNote(@Nonnull MainNote note) {
+        return Single.fromCallable(() -> db.notesDao().addToUserNotes(note));
     }
 
     public Maybe<MainNote> getNote(int noteId, @IntRange(from = 0, to = 3) int listUsed) {
@@ -58,8 +58,8 @@ public class NoteEditorInteractor {
 //    }
 
 
-    public long addReminder(@Nonnull Reminder reminder) {
-        return db.remindersDao().addReminder(reminder);
+    public Single<Long> addReminder(@Nonnull Reminder reminder) {
+        return Single.fromCallable(() -> db.remindersDao().addReminder(reminder));
     }
 
     public Single<Reminder> getReminder(int reminderId) {
