@@ -65,7 +65,7 @@ public abstract class NotePreviewsDao {
     }
 
     @Transaction
-    public List<NoteAndReminderPreview> getListOfNotePreviews(int listUsed) {
+    public List<NoteAndReminderPreview> getListOfNotePreviews(@IntRange(from = 0, to = 3) int listUsed) {
 
         List<NoteAndReminderPreview> list = new ArrayList<>();
         if (listUsed != 3) {

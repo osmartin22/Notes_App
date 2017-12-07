@@ -30,10 +30,6 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
 // TODO: When deleting an entire note, make sure the reminder is cancelled if it exists
 
-// TODO: Rewrite parts of Undo Buffer to treat archive buttons in MainActivity and NoteEditorActivity as the same action
-
-// TODO: Change FrequencyChoices to never be NULL
-
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener, MainActivityView {
 
@@ -44,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements
     private MenuItem layoutIcon;
     private Preferences preferences;
     private ActionMode mActionMode;
+
+    private boolean isMultiSelect = false;
 
     private ActivityMainBinding mBinding;
     private MainActivityPresenter mActivityPresenter;
@@ -69,11 +67,17 @@ public class MainActivity extends AppCompatActivity implements
         rv.addOnItemTouchListener(new RecyclerItemListener(MainActivity.this,
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
-                mActivityPresenter.onNoteClick(notesAdapter.getNoteIdAt(position), position);
+                if (isMultiSelect) {
+                    multiSelect(position);
+                } else {
+                    mActivityPresenter.onNoteClick(notesAdapter.getNoteIdAt(position), position);
+                }
             }
 
             public void onLongClickItem(View view, final int position) {
                 ((AppCompatActivity) view.getContext()).startSupportActionMode(mActionModeCallback);
+                isMultiSelect = true;
+                multiSelect(position);
             }
         }));
     }
@@ -182,16 +186,9 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public void onDestroyActionMode(ActionMode actionMode) {
+            notesAdapter.clearSelectedPositions();
+            notesAdapter.notifyDataSetChanged();
             mActionMode = null;
-//            notesAdapter.clearSelectedIds();
-//
-//            // Clear buffer if a CAB item was not pressed (i.e. adding note, open drawer, back pressed)
-//            if (!menuItemPressed) {
-//                buffer.clearBuffer();
-//                notesAdapter.notifyDataSetChanged();
-//            }
-//
-//            menuItemPressed = false;
         }
     };
 
@@ -270,6 +267,23 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void updateAdapterList(List<NoteAndReminderPreview> list) {
         notesAdapter.updateAdapterList(list);
+    }
+
+    private void multiSelect(int notePosition) {
+        if (notesAdapter.getSelectedPositions().contains(notePosition)) {
+            notesAdapter.removeSelectedPosition(notePosition);
+
+        } else {
+            notesAdapter.addSelectedPosition(notePosition);
+        }
+
+        notesAdapter.notifyItemChanged(notePosition);
+        mActionMode.setSubtitle(Integer.toString(notesAdapter.getSelectedPositions().size()));
+
+        if (notesAdapter.getSelectedPositions().isEmpty()) {
+            isMultiSelect = false;
+            mActionMode.finish();
+        }
     }
 
     @Override

@@ -1,13 +1,13 @@
 package com.ozmar.notes.utils;
 
-import com.ozmar.notes.SingleNote;
+import com.ozmar.notes.database.NoteAndReminderPreview;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class BufferHelper {
-    private final List<SingleNote> notes;
+    private final List<NoteAndReminderPreview> notes;
     private final List<Integer> positions;
 
     public BufferHelper() {
@@ -15,7 +15,7 @@ public class BufferHelper {
         this.positions = new ArrayList<>();
     }
 
-    public List<SingleNote> getNotes() {
+    public List<NoteAndReminderPreview> getNotes() {
         return notes;
     }
 
@@ -27,12 +27,12 @@ public class BufferHelper {
         return notes.isEmpty();
     }
 
-    public void addToLists(SingleNote note, int position) {
+    public void addToLists(NoteAndReminderPreview note, int position) {
         this.notes.add(note);
         this.positions.add(position);
     }
 
-    public void removeFromLists(SingleNote note) {
+    public void removeFromLists(NoteAndReminderPreview note) {
         int position = this.notes.indexOf(note);
         this.notes.remove(note);
         this.positions.remove(position);

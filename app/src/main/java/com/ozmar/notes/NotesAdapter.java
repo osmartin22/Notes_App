@@ -31,7 +31,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     private final Context context;
 
     private final List<NoteAndReminderPreview> notes = new ArrayList<>();
-    private final List<Integer> selectedIds = new ArrayList<>();
+    private final List<Integer> selectedPositions = new ArrayList<>();
 
     public NotesAdapter(Context context) {
         this.context = context;
@@ -71,16 +71,28 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notifyItemRangeRemoved(0, size);
     }
 
-    public void addSelectedId(int position) {
-        this.selectedIds.add(position);
+    public void addSelectedPosition(int position) {
+        this.selectedPositions.add(position);
     }
 
-    public void removeSelectedId(int position) {
-        this.selectedIds.remove(Integer.valueOf(position));
+    public void removeSelectedPosition(int position) {
+        this.selectedPositions.remove(Integer.valueOf(position));
     }
 
-    public void clearSelectedIds() {
-        selectedIds.clear();
+    public void clearSelectedPositions() {
+        selectedPositions.clear();
+    }
+
+    public List<Integer> getSelectedPositions() {
+        return selectedPositions;
+    }
+
+    public List<NoteAndReminderPreview> getSelectedPreviews() {
+        List<NoteAndReminderPreview> list = new ArrayList<>();
+        for (Integer position : selectedPositions) {
+            list.add(notes.get(position));
+        }
+        return list;
     }
 
 
@@ -116,7 +128,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         NotePreview notePreview = notes.get(position).getNotePreview();
         ReminderPreview reminderPreview = notes.get(position).getReminderPreview();
 
-        if (selectedIds.contains(position)) {
+        if (selectedPositions.contains(position)) {
             ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.GRAY);
         } else {
             ((CardView) viewHolder.itemView).setCardBackgroundColor(Color.WHITE);

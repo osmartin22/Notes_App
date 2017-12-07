@@ -27,6 +27,12 @@ public class RecycleBinNote extends BaseNote {
         this.id = note.getId();
     }
 
+    @Ignore
+    public RecycleBinNote(ArchiveNote note) {
+        super(note);
+        this.id = note.getId();
+    }
+
     public int getId() {
         return id;
     }

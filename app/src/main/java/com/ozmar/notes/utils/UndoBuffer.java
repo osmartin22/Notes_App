@@ -1,7 +1,7 @@
 package com.ozmar.notes.utils;
 
 
-import com.ozmar.notes.SingleNote;
+import com.ozmar.notes.database.NoteAndReminderPreview;
 
 import java.util.List;
 
@@ -71,7 +71,7 @@ public class UndoBuffer {
     }
 
     // Add note and position to buffer
-    public void addDataToBuffer(SingleNote note, int position) {
+    public void addDataToBuffer(NoteAndReminderPreview note, int position) {
         if (currentBuffer == 0) {
             buffer0.addToLists(note, position);
         } else {
@@ -80,7 +80,7 @@ public class UndoBuffer {
     }
 
     // Remove note from buffer
-    public void removeDataFromBuffer(SingleNote note) {
+    public void removeDataFromBuffer(NoteAndReminderPreview note) {
         if (currentBuffer == 0) {
             buffer0.removeFromLists(note);
         } else {
@@ -107,7 +107,7 @@ public class UndoBuffer {
     }
 
     // Get notes of the current buffer in use
-    public List<SingleNote> currentBufferNotes() {
+    public List<NoteAndReminderPreview> currentBufferNotes() {
         if (currentBuffer == 0) {
             return buffer0.getNotes();
         } else {

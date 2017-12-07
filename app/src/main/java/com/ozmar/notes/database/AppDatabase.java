@@ -22,6 +22,8 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract NotePreviewsDao previewsDao();
 
+    public abstract MultiSelectDao multiSelectDao();
+
     public static void setUpAppDatabase(Context context) {
         if (INSTANCE == null) {
             INSTANCE =
