@@ -19,7 +19,7 @@ public abstract class MultiSelectDao {
 
 
     @Query("SELECT * FROM userNotes WHERE id IN(:noteIds)")
-    public abstract <T>Single<List<T>> getMainNotes(List<Integer> noteIds);
+    public abstract Single<List<MainNote>> getMainNotes(List<Integer> noteIds);
 
     @Insert
     public abstract void addListToMainNotes(List<MainNote> list);
@@ -29,7 +29,7 @@ public abstract class MultiSelectDao {
 
 
     @Query("SELECT * FROM archiveNotes WHERE id IN(:noteIds)")
-    public abstract <T>Single<List<T>> getArchiveNotes(List<Integer> noteIds);
+    public abstract Single<List<ArchiveNote>> getArchiveNotes(List<Integer> noteIds);
 
     @Insert
     public abstract void addListToArchiveNotes(List<ArchiveNote> list);
@@ -39,7 +39,7 @@ public abstract class MultiSelectDao {
 
 
     @Query("SELECT * FROM recycleBinNotes WHERE id IN(:noteIds)")
-    public abstract <T>Single<List<T>> getRecyclBinNotes(List<Integer> noteIds);
+    public abstract Single<List<RecycleBinNote>> getRecycleBinNotes(List<Integer> noteIds);
 
     @Insert
     public abstract void addListToRecycleBinNotes(List<RecycleBinNote> list);

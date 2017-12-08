@@ -1,11 +1,13 @@
 package com.ozmar.notes;
 
 
+import android.support.annotation.NonNull;
+import android.util.Log;
+
 import com.ozmar.notes.database.ArchiveNote;
 import com.ozmar.notes.database.MainNote;
 import com.ozmar.notes.database.RecycleBinNote;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -91,94 +93,102 @@ public class MainActivityPresenter {
     }
 
 
-    public void processChosenNotes(List<Integer> noteIds, int listToAddTo) {
-        mDisposable.add(mInteractor.getListOfNotes(noteIds, listUsed)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(list -> onRetrievedNotes(list, noteIds, listUsed, listToAddTo)));
-    }
+    // TODO: Remember to cancel reminder notifications when deleting reminders
+    public void processChosenNotes(@NonNull List<Integer> noteIds, int listToAddTo) {
 
-    private void onRetrievedNotes(List<Object> list, List<Integer> noteIds, int listUsed, int listToAddTo) {
+        if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
+            getListOfMainNotes(noteIds, listToAddTo);
+        } else if (listUsed == ARCHIVE_NOTES) {
+            getListOfArchiveNotes(noteIds, listToAddTo);
+        } else {
+            getListOfRecycleBinNotes(noteIds);
+        }
 
         deleteList(noteIds, listUsed);
-        if (listToAddTo == RECYCLE_BIN_NOTES) {
-            // TODO: Make sure to cancel reminder notifications
-            deleteReminders(list, listUsed);
-            addToRecycleBin(convertToRecycleBinList(list));
-
-        } else if (listToAddTo == ARCHIVE_NOTES) {
-            addToArchive(convertToArchiveList(list), listUsed);
-
-        } else if (listToAddTo == USER_NOTES) {
-            addToMain(convertToMainList(list), listUsed);
-        }
     }
 
-
-    private void deleteReminders(List<Object> list, int listUsed) {
-        if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
-            mDisposable.add(mInteractor.deleteRemindersFromMain(convertToMainList(list))
-                    .subscribeOn(Schedulers.io())
-                    .subscribe());
-
-        } else if (listUsed == ARCHIVE_NOTES) {
-            mDisposable.add(mInteractor.deleteRemindersFromArchive(convertToArchiveList(list))
-                    .subscribeOn(Schedulers.io())
-                    .subscribe());
-        }
-    }
-
-    private void deleteList(List<Integer> noteIds, int listUsed) {
+    private void deleteList(@NonNull List<Integer> noteIds, int listUsed) {
         mDisposable.add(mInteractor.deleteListOfNotes(noteIds, listUsed)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe());
     }
 
+    private void onProcessChosenNotesFinished() {
+        Log.d("Process Notes", "Finished processing");
+    }
 
-    private void addToMain(List<MainNote> list, int listUsed) {
-        mDisposable.add(mInteractor.addMainList(list, listUsed)
+
+    //---------------------------------------------------------------------------------------//
+    // Main specific
+    //---------------------------------------------------------------------------------------//
+    private void getListOfMainNotes(@NonNull List<Integer> noteIds, int listToAddTo) {
+        mDisposable.add(mInteractor.getListOfMainNotes(noteIds)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(list -> addMainListTo(list, listToAddTo)));
+    }
+
+    private void addMainListTo(@NonNull List<MainNote> list, int listToAddTo) {
+        if (listToAddTo == RECYCLE_BIN_NOTES) {
+            deleteRemindersFromMain(list);
+        }
+
+        mDisposable.add(mInteractor.addMainListTo(list, listToAddTo)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onProcessChosenNotesFinished));
+    }
+
+    private void deleteRemindersFromMain(@NonNull List<MainNote> list) {
+        mDisposable.add(mInteractor.deleteRemindersFromMain(list)
+                .subscribeOn(Schedulers.io())
                 .subscribe());
     }
 
-    private void addToArchive(List<ArchiveNote> list, int listUsed) {
-        mDisposable.add(mInteractor.addArchiveList(list, listUsed)
+
+    //---------------------------------------------------------------------------------------//
+    // Archive specific
+    //---------------------------------------------------------------------------------------//
+    private void getListOfArchiveNotes(@NonNull List<Integer> noteIds, int listToAddTo) {
+        mDisposable.add(mInteractor.getListOfArchiveNotes(noteIds)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(list -> addArchiveListTo(list, listToAddTo)));
+    }
+
+    private void addArchiveListTo(@NonNull List<ArchiveNote> list, int listToAddTo) {
+        if (listToAddTo == RECYCLE_BIN_NOTES) {
+            deleteRemindersFromArchive(list);
+        }
+
+        mDisposable.add(mInteractor.addArchiveListTo(list, listToAddTo)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onProcessChosenNotesFinished));
+    }
+
+    private void deleteRemindersFromArchive(@NonNull List<ArchiveNote> list) {
+        mDisposable.add(mInteractor.deleteRemindersFromArchive(list)
+                .subscribeOn(Schedulers.io())
                 .subscribe());
     }
 
-    private void addToRecycleBin(List<RecycleBinNote> list) {
-        mDisposable.add(mInteractor.addRecycleBinList(list)
+
+    //---------------------------------------------------------------------------------------//
+    // RecycleBin specific
+    //---------------------------------------------------------------------------------------//
+    private void getListOfRecycleBinNotes(@NonNull List<Integer> noteIds) {
+        mDisposable.add(mInteractor.getListOfRecycleBinNotes(noteIds)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe());
+                .subscribe(this::addRecycleBinListTo));
     }
 
-
-    private List<MainNote> convertToMainList(List<Object> list) {
-        List<MainNote> mainNoteList = new ArrayList<>();
-        for (Object o : list) {
-            mainNoteList.add((MainNote) o);
-        }
-        return mainNoteList;
-    }
-
-    private List<ArchiveNote> convertToArchiveList(List<Object> list) {
-        List<ArchiveNote> archiveNoteList = new ArrayList<>();
-        for (Object o : list) {
-            archiveNoteList.add((ArchiveNote) o);
-        }
-        return archiveNoteList;
-    }
-
-    private List<RecycleBinNote> convertToRecycleBinList(List<Object> list) {
-        List<RecycleBinNote> recycleBinNoteList = new ArrayList<>();
-        for (Object o : list) {
-            recycleBinNoteList.add((RecycleBinNote) o);
-        }
-        return recycleBinNoteList;
+    private void addRecycleBinListTo(@NonNull List<RecycleBinNote> list) {
+        mDisposable.add(mInteractor.addRecycleBinListToMain(list)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::onProcessChosenNotesFinished));
     }
 }

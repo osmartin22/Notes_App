@@ -1,6 +1,9 @@
 package com.ozmar.notes;
 
 
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
+
 import com.ozmar.notes.database.AppDatabase;
 import com.ozmar.notes.database.ArchiveNote;
 import com.ozmar.notes.database.MainNote;
@@ -28,16 +31,29 @@ public class MainActivityInteractor {
         this.db = AppDatabase.getAppDatabase();
     }
 
-    public Maybe<List<NoteAndReminderPreview>> getListOfPreviewsToShow(int listUsed) {
+    @NonNull
+    public Maybe<List<NoteAndReminderPreview>> getListOfPreviewsToShow(
+            @IntRange(from = 0, to = 3) int listUsed) {
         return Maybe.fromCallable(() -> db.previewsDao().getListOfNotePreviews(listUsed));
     }
 
-    public Maybe<NoteAndReminderPreview> getNotePreview(int noteId, int listUsed) {
+    @NonNull
+    public Maybe<NoteAndReminderPreview> getNotePreview(int noteId,
+                                                        @IntRange(from = 0, to = 3) int listUsed) {
         return Maybe.fromCallable(() -> db.previewsDao().getANotePreview(noteId, listUsed));
     }
 
 
-    public Completable deleteRemindersFromMain(List<MainNote> list) {
+    //---------------------------------------------------------------------------------------//
+    // Main specific
+    //---------------------------------------------------------------------------------------//
+    @NonNull
+    public Single<List<MainNote>> getListOfMainNotes(@NonNull List<Integer> noteIds) {
+        return db.multiSelectDao().getMainNotes(noteIds);
+    }
+
+    @NonNull
+    public Completable deleteRemindersFromMain(@NonNull List<MainNote> list) {
         List<Integer> reminderIds = new ArrayList<>();
         for (MainNote note : list) {
             if (note.getReminderId() != -1) {
@@ -47,7 +63,37 @@ public class MainActivityInteractor {
         return Completable.fromAction(() -> db.multiSelectDao().deleteReminders(reminderIds));
     }
 
-    public Completable deleteRemindersFromArchive(List<ArchiveNote> list) {
+    // Notes from Main can only be added to the Archive or RecycleBin list
+    @NonNull
+    public Completable addMainListTo(@NonNull List<MainNote> list, int listToAddTo) {
+        Completable completable = null;
+        if (listToAddTo == ARCHIVE_NOTES) {
+            completable = Completable.fromAction(() ->
+                    db.multiSelectDao().addMainListToArchive(list));
+
+        } else if (listToAddTo == RECYCLE_BIN_NOTES) {
+            completable = Completable.fromAction(() ->
+                    db.multiSelectDao().addMainListToRecycleBin(list));
+        }
+
+        if (completable == null) {
+            throw new IllegalArgumentException("Wrong listToAddTo value was passed");
+        }
+
+        return completable;
+    }
+
+
+    //---------------------------------------------------------------------------------------//
+    // Archive specific
+    //---------------------------------------------------------------------------------------//
+    @NonNull
+    public Single<List<ArchiveNote>> getListOfArchiveNotes(@NonNull List<Integer> noteIds) {
+        return db.multiSelectDao().getArchiveNotes(noteIds);
+    }
+
+    @NonNull
+    public Completable deleteRemindersFromArchive(@NonNull List<ArchiveNote> list) {
         List<Integer> reminderIds = new ArrayList<>();
         for (ArchiveNote note : list) {
             if (note.getReminderId() != -1) {
@@ -57,17 +103,39 @@ public class MainActivityInteractor {
         return Completable.fromAction(() -> db.multiSelectDao().deleteReminders(reminderIds));
     }
 
-    public <T> Single<List<T>> getListOfNotes(List<Integer> noteIds, int listUsed) {
-        if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
-            return db.multiSelectDao().getMainNotes(noteIds);
-        } else if (listUsed == ARCHIVE_NOTES) {
-            return db.multiSelectDao().getArchiveNotes(noteIds);
-        } else {
-            return db.multiSelectDao().getRecyclBinNotes(noteIds);
+    // Notes from the Archive can only be added to the Main or RecycleBin list
+    @NonNull
+    public Completable addArchiveListTo(@NonNull List<ArchiveNote> list, int listToAddTo) {
+        Completable completable = null;
+
+        if (listToAddTo == USER_NOTES) {
+            completable = Completable.fromAction(() ->
+                    db.multiSelectDao().addArchiveListToMainNote(list));
+
+        } else if (listToAddTo == RECYCLE_BIN_NOTES) {
+            completable = Completable.fromAction(() ->
+                    db.multiSelectDao().addArchiveListToRecycleBin(list));
         }
+
+        if (completable == null) {
+            throw new IllegalArgumentException("Wrong listToAddTo value was passed");
+        }
+
+        return completable;
     }
 
-    public Completable deleteListOfNotes(List<Integer> noteIds, int listUsed) {
+
+    //---------------------------------------------------------------------------------------//
+    // RecycleBin specific
+    //---------------------------------------------------------------------------------------//
+    @NonNull
+    public Single<List<RecycleBinNote>> getListOfRecycleBinNotes(@NonNull List<Integer> noteIds) {
+        return db.multiSelectDao().getRecycleBinNotes(noteIds);
+    }
+
+    @NonNull
+    public Completable deleteListOfNotes(@NonNull List<Integer> noteIds,
+                                         @IntRange(from = 0, to = 3) int listUsed) {
         if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
             return Completable.fromAction(() -> db.multiSelectDao().deleteMainNotes(noteIds));
         } else if (listUsed == ARCHIVE_NOTES) {
@@ -77,42 +145,9 @@ public class MainActivityInteractor {
         }
     }
 
-    public Completable addArchiveList(List<ArchiveNote> list, int listToAddTo) {
-        Completable completable = null;
-        if (listToAddTo == USER_NOTES) {
-            completable = Completable.fromAction(() -> db.multiSelectDao().addArchiveListToMainNote(list));
-        } else if (listToAddTo == RECYCLE_BIN_NOTES) {
-            completable = Completable.fromAction(() -> db.multiSelectDao().addArchiveListToRecycleBin(list));
-        }
-
-        return completable;
-    }
-
-    public Completable addMainList(List<MainNote> list, int listToAddTo) {
-        Completable completable = null;
-        if (listToAddTo == ARCHIVE_NOTES) {
-            completable = Completable.fromAction(() -> db.multiSelectDao().addMainListToArchive(list));
-        } else if (listToAddTo == RECYCLE_BIN_NOTES) {
-            completable = Completable.fromAction(() -> db.multiSelectDao().addMainListToRecycleBin(list));
-        }
-
-        return completable;
-    }
-
-    public Completable addRecycleBinList(List<RecycleBinNote> list) {
+    // Notes from the RecycleBin can only be added to the Main list
+    @NonNull
+    public Completable addRecycleBinListToMain(@NonNull List<RecycleBinNote> list) {
         return Completable.fromAction(() -> db.multiSelectDao().addRecycleBinListToMainNote(list));
-    }
-
-
-    public Completable addArchiveListToMain(List<ArchiveNote> list) {
-        return Completable.fromAction(() -> db.multiSelectDao().addArchiveListToMainNote(list));
-    }
-
-    public Completable addArchiveListToRecycleBin(List<ArchiveNote> list) {
-        return Completable.fromAction(() -> db.multiSelectDao().addArchiveListToRecycleBin(list));
-    }
-
-    public Completable addMainListToArchive(List<MainNote> list) {
-        return Completable.fromAction(() -> db.multiSelectDao().addMainListToArchive(list));
     }
 }

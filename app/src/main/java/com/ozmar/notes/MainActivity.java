@@ -33,6 +33,11 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener, MainActivityView {
 
+    private static final int USER_NOTES = 0;
+    private static final int FAVORITE_NOTES = 1;
+    private static final int ARCHIVE_NOTES = 2;
+    private static final int RECYCLE_BIN_NOTES = 3;
+
     private RecyclerView rv;
     private NotesAdapter notesAdapter;
 
@@ -145,17 +150,44 @@ public class MainActivity extends AppCompatActivity implements
 
         boolean menuActionPressed = false;
 
-        private void removeViews(ActionMode mode, MenuItem item) {
+        private void removePreviews(ActionMode mode, MenuItem item) {
             menuActionPressed = true;
-//            notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+            notesAdapter.removeSelectedViews();
 //            showSnackBar(item, 0);
-//            mode.finish();
+            mode.finish();
+        }
+
+        private void d(ActionMode mode, MenuItem item, int listToAddTo) {
+            mActivityPresenter.processChosenNotes(notesAdapter.getSelectedPreviewIds(), listToAddTo);
+            menuActionPressed = true;
+            notesAdapter.removeSelectedViews();
+//            showSnackBar(item, 0);
+            mode.finish();
+        }
+
+        private void setCABMenuItems(Menu menu, int listUsed) {
+            switch (listUsed) {
+                case 0:
+                case 1:
+                default:
+                    break;
+                case 2:
+                    menu.findItem(R.id.contextualArchive).setVisible(false);
+                    menu.findItem(R.id.contextualUnarchive).setVisible(true);
+                    break;
+                case 3:
+                    menu.findItem(R.id.contextualArchive).setVisible(false);
+                    menu.findItem(R.id.contextualDelete).setVisible(false);
+                    menu.findItem(R.id.contextualRestore).setVisible(true);
+                    menu.findItem(R.id.contextualDeleteForever).setVisible(true);
+            }
         }
 
         @Override
         public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
             mActionMode = actionMode;
-            mActionMode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
+            actionMode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
+            setCABMenuItems(menu, mActivityPresenter.getListUsed());
             return true;
         }
 
@@ -168,12 +200,16 @@ public class MainActivity extends AppCompatActivity implements
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
             switch (menuItem.getItemId()) {
                 case R.id.contextualArchive:
+                    d(actionMode, menuItem, ARCHIVE_NOTES);
+                    return true;
                 case R.id.contextualUnarchive:
+                    d(actionMode, menuItem, USER_NOTES);
+                    return true;
                 case R.id.contextualDelete:
+                    d(actionMode, menuItem, RECYCLE_BIN_NOTES);
+                    return true;
                 case R.id.contextualRestore:
-                    actionMode.finish();
-//                    removeViews(mode, item);
-//                    multiSelectHelper.setItem(item);
+                    d(actionMode, menuItem, USER_NOTES);
                     return true;
                 case R.id.contextualDeleteForever:
 //                    deleteForever(item);

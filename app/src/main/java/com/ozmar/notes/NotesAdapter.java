@@ -20,6 +20,7 @@ import com.ozmar.notes.viewHolders.NotesViewHolderTitle;
 import org.joda.time.DateTime;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -79,6 +80,78 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.selectedPositions.remove(Integer.valueOf(position));
     }
 
+    public void removeAllSelectedPreviews(){
+
+    }
+
+
+
+    public void removeSelectedViews() {
+        Collections.sort(selectedPositions);
+        int amountOfViews = notes.size();
+        int amountOfViewsRemoved = selectedPositions.size();
+        int minViewPositionChanged = selectedPositions.get(0);
+        int maxViewPositionChanged = selectedPositions.get(selectedPositions.size() - 1);
+        int remainingViews = amountOfViews - amountOfViewsRemoved;
+
+        // Deleted entire list
+        if (remainingViews == 0) {
+            clearView();
+
+            // Deleted notes have views no longer in use
+        } else if (remainingViews <= minViewPositionChanged) {
+            notes.subList(minViewPositionChanged, notes.size()).clear();
+            notifyItemRangeRemoved(minViewPositionChanged, amountOfViews);
+
+            // Deleted notes were consecutive
+        } else if (maxViewPositionChanged - minViewPositionChanged == amountOfViewsRemoved - 1) {
+            notes.subList(minViewPositionChanged, maxViewPositionChanged + 1).clear();
+            notifyItemRangeRemoved(minViewPositionChanged, maxViewPositionChanged + 1);
+            notifyItemRangeChanged(maxViewPositionChanged, amountOfViews);
+
+            // Random deletes
+        } else {
+            for (int i = amountOfViewsRemoved - 1; i >= 0; i--) {
+                int pos = selectedPositions.get(i);
+                notes.remove(pos);
+                notifyItemRemoved(pos);
+            }
+            notifyItemRangeChanged(minViewPositionChanged, amountOfViews);
+        }
+    }
+//
+//    public void addSelectedViews(List<Integer> position, List<SingleNote> addList) {
+//        int size = notes.size();
+//        int amountOfViewAdding = position.size();
+//        int minViewPositionChanged = Collections.min(position);
+//        int maxViewPositionChanged = Collections.max(position);
+//
+//        // Notes being added are consecutive
+//        if (maxViewPositionChanged - minViewPositionChanged == amountOfViewAdding - 1) {
+//            if (minViewPositionChanged != 0) {
+//                notes.addAll(minViewPositionChanged, addList);
+//            } else {
+//                notes.addAll(0, addList);
+//            }
+//
+//            notifyItemRangeInserted(minViewPositionChanged, maxViewPositionChanged);
+//            notifyItemRangeChanged(minViewPositionChanged, notes.size());
+//
+//        } else {        // Notes added at random
+//            for (int i = 0; i < amountOfViewAdding - 1; i++) {
+//                notes.add(position.get(i), addList.get(i));
+//            }
+//            notifyItemRangeChanged(minViewPositionChanged, size);
+//        }
+//    }
+
+
+
+
+
+
+
+
     public void clearSelectedPositions() {
         selectedPositions.clear();
     }
@@ -87,10 +160,10 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         return selectedPositions;
     }
 
-    public List<NoteAndReminderPreview> getSelectedPreviews() {
-        List<NoteAndReminderPreview> list = new ArrayList<>();
+    public List<Integer> getSelectedPreviewIds() {
+        List<Integer> list = new ArrayList<>();
         for (Integer position : selectedPositions) {
-            list.add(notes.get(position));
+            list.add(notes.get(position).getNotePreview().getId());
         }
         return list;
     }

@@ -270,6 +270,7 @@
     <string name="thirdNthWeek">third\u0020</string>
     <string name="fourthNthWeek">fourth\u0020</string>
     <string name="lastNthWeek">last\u0020</string>
+    <string name="title_activity_tes">tes</string>
 
 
 </resources>
