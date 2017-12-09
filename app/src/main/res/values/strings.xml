@@ -35,7 +35,7 @@
     <string name="deleteDialog">Delete</string>
     <string name="cancelDialog">Cancel</string>
 
-    <!-- String for trying to edit a Recycle notePreviewnote -->
+    <!-- String for trying to edit a RecycleVin note -->
     <string name="editRecycleBinNote">Can\'t edit notePreview in Trash</string>
 
 
@@ -239,7 +239,7 @@
     <string name="notificationId">Notification Id</string>
     <string name="notificationTitle">Notification Title</string>
     <string name="notificationContent">Notification Content</string>
-    <string name="notificationHasFrequency">Notification Has Frequency Choice</string>
+    <string name="notificationReminderRepeats">Notification Reminder repeats</string>
 
 
     <!-- SharedPreference strings -->

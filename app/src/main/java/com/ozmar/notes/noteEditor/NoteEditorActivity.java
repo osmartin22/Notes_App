@@ -25,7 +25,7 @@ import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.FormatUtils;
 
 // TODO: Notes/Reminders not updating properly(as a result also can't add a reminder to a note,
-        // although the reminder is created and saved in the database
+// although the reminder is created and saved in the database
 
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener, NoteEditorView {
@@ -291,8 +291,8 @@ public class NoteEditorActivity extends AppCompatActivity
 
 
     @Override
-    public void setupReminderNotification(@NonNull MainNote note) {
-//        ReminderManager.start(getApplicationContext(), note);
+    public void setupReminderNotification(@NonNull MainNote note, @NonNull Reminder reminder) {
+        ReminderManager.setUpReminder(getApplicationContext(), note, reminder);
     }
 
     @Override

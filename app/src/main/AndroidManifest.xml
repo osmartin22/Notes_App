@@ -19,16 +19,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".noteEditor.NoteEditorActivity"
-            android:windowSoftInputMode="adjustResize"></activity>
+            android:windowSoftInputMode="adjustResize">
+
+        </activity>
 
         <receiver android:name=".notifications.ReminderReceiver" />
 
-        <activity
-            android:name=".tes"
-            android:label="@string/title_activity_tes"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"></activity>
     </application>
 
 </manifest>

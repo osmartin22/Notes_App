@@ -120,7 +120,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 //
-//    public void addSelectedViews(List<Integer> position, List<SingleNote> addList) {
+//    public void addSelectedViews(List<Integer> position, List<MainNote> addList) {
 //        int size = notes.size();
 //        int amountOfViewAdding = position.size();
 //        int minViewPositionChanged = Collections.min(position);

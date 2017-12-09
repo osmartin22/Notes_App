@@ -63,7 +63,7 @@ public class NoteEditorInteractor {
     }
 
     public Single<Reminder> getReminder(int reminderId) {
-        return db.remindersDao().getReminder(reminderId);
+        return Single.fromCallable(()->db.remindersDao().getReminder(reminderId));
     }
 
     public Completable updateReminder(@Nonnull Reminder reminder) {

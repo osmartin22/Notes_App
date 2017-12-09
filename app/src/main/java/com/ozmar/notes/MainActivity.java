@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements
         new AlertDialog.Builder(MainActivity.this)
                 .setMessage("")
                 .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
-//                    List<SingleNote> temp = new ArrayList<>(buffer.currentBufferNotes());
+//                    List<MainNote> temp = new ArrayList<>(buffer.currentBufferNotes());
 //                    new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
 //                    notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
 //                    buffer.clearBuffer();

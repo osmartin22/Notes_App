@@ -6,77 +6,107 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 
-import com.ozmar.notes.DatabaseHandler;
 import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.R;
+import com.ozmar.notes.Reminder;
+import com.ozmar.notes.database.AppDatabase;
 import com.ozmar.notes.utils.ReminderUtils;
 
+import org.joda.time.DateTime;
 
+import io.reactivex.Completable;
+import io.reactivex.Single;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
+
+
+// TODO: Check if repeatEvents, or repeatToDate has not passed
+// If not, calculate next reminder
+// Check again if repeatToDate will be violated with the new reminder time
+
+// TODO: Possible optimization is to not immediately set an alarm manager when a new reminder is created
+// A reminder 2 months away does not need to be created.
+// Can have a separate alarm that runs every week that sets up any reminders that
+// will occur in that week
 public class ReminderReceiver extends BroadcastReceiver {
+
+    Context mContext;
+    String title, content;
+    int notificationId;
+    PendingResult mPendingResult;
+
+
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(@NonNull Context context, Intent intent) {
 
-        int id = intent.getIntExtra(context.getString(R.string.notificationId), 0);
-        String title = intent.getStringExtra(context.getString(R.string.notificationTitle));
-        String content = intent.getStringExtra(context.getString(R.string.notificationContent));
-        boolean hasFrequencyChoice = intent.getBooleanExtra(
-                context.getString(R.string.notificationHasFrequency), false);
+        mContext = context;
+        notificationId = intent.getIntExtra(context.getString(R.string.notificationId), 0);
+        title = intent.getStringExtra(context.getString(R.string.notificationTitle));
+        content = intent.getStringExtra(context.getString(R.string.notificationContent));
 
-        NotificationManager nManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        mPendingResult = goAsync();
+        if (AppDatabase.getAppDatabase() == null) {
+            AppDatabase.setUpAppDatabase(context);
+        }
+        getReminder(notificationId);
+
+        NotificationManager nManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (nManager != null) {
-            nManager.notify(id, NotificationHelper.buildNotification(context, title, content));
-        }
-
-        if (hasFrequencyChoice) {
-            long nextReminderTime = getNextReminderTime(context, id);
-            if (nextReminderTime != 0) {
-                ReminderManager.createReminder(context, id, title, content, nextReminderTime, true);
-            }
+            nManager.notify(notificationId, NotificationHelper.buildNotification(context, title,
+                    content));
         }
     }
 
-    // TODO: Check if repeatEvents, or repeatToDate has not passed
-    // If not, calculate next reminder
-    // Check again if repeatToDate will be violated with the new reminder time
+    private void getReminder(int reminderId) {
+        Single.fromCallable(() -> AppDatabase.getAppDatabase().remindersDao().getReminder(reminderId))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::processNextReminder);
+    }
 
-    // TODO: Possible optimization is to not immediately set an alarm manager when a new reminder is created
-    // A reminder 2 months away does not need to be created.
-    // Can have a separate alarm that runs every week that sets up any reminders that
-    // will occur in that week
+    private void processNextReminder(@NonNull Reminder reminder) {
 
-    public long getNextReminderTime(@NonNull Context context, int reminderId) {
-        DatabaseHandler db = new DatabaseHandler(context);
+        if (reminder.getFrequencyChoices() != null) {
 
-        long nextReminderTime = 0;
-        long currentReminderTime = db.getNextReminderTime(reminderId).nextReminderTime;
-        FrequencyChoices choices = db.getFrequencyChoice(reminderId);
+            int reminderId = reminder.getId();
+            boolean onEventsSatisfied = false;
+            boolean onDesiredEndDateSatisfied = false;
+            FrequencyChoices choices = reminder.getFrequencyChoices();
 
-        boolean onEventsSatisfied = false;
-        boolean onDesiredEndDateSatisfied = false;
-
-
-        if (choices != null) {
-            // User specified reminder to occur for X events
             if (choices.getRepeatEvents() > 0) {
-                int eventsOccurred = db.getEventsOccurred(reminderId) + 1;
-                db.updateEventsOccurred(reminderId, eventsOccurred);
-                onEventsSatisfied = eventsOccurred == choices.getRepeatEvents();
+                onEventsSatisfied = updateEventsOccurred(choices, reminderId);
 
-                // User specified an end date
             } else if (choices.getRepeatToDate() > 0) {
                 onDesiredEndDateSatisfied = choices.getRepeatToDate() < System.currentTimeMillis();
             }
 
             if (!(onEventsSatisfied || onDesiredEndDateSatisfied)) {
-                nextReminderTime = ReminderUtils.getNextRepeatReminder(choices, currentReminderTime);
+                long currentReminderTime = reminder.getDateTime().getMillis();
+                long nextReminderTime = ReminderUtils.getNextRepeatReminder(choices, currentReminderTime);
 
                 if (nextReminderTime > currentReminderTime) {
-                    db.updateNextReminderTime(reminderId, nextReminderTime);
+                    reminder.setDateTime(new DateTime(nextReminderTime));
+                    Completable.fromAction(() -> AppDatabase.getAppDatabase()
+                            .remindersDao().updateReminderTime(reminderId, nextReminderTime))
+                            .subscribeOn(Schedulers.io())
+                            .subscribe();
                 }
-            }
 
+                ReminderManager.createReminder(mContext, notificationId, title, content, nextReminderTime);
+            }
         }
-        return nextReminderTime;
+        mPendingResult.finish();
+    }
+
+    private boolean updateEventsOccurred(@NonNull FrequencyChoices choices, int reminderId) {
+        int eventsOccurred = choices.getRepeatEventsOccurred() + 1;
+        Completable.fromAction(() -> AppDatabase.getAppDatabase()
+                .remindersDao().updateEventsOccurred(reminderId, eventsOccurred))
+                .subscribeOn(Schedulers.io())
+                .subscribe();
+
+        return eventsOccurred == choices.getRepeatEvents();
     }
 }

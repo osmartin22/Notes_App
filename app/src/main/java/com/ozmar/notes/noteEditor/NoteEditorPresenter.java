@@ -167,7 +167,7 @@ public class NoteEditorPresenter {
             mMainNote = new MainNote(title, content, System.currentTimeMillis(),
                     favorite ? 1 : 0, -1);
             observableAddReminder(mReminder);
-            mEditorView.setupReminderNotification(mMainNote);
+            mEditorView.setupReminderNotification(mMainNote, mReminder);
 
         } else {
             mMainNote = new MainNote(title, content, System.currentTimeMillis(),
@@ -202,12 +202,12 @@ public class NoteEditorPresenter {
         noteModified = true;
         reminder.setId(3);
         observableAddReminder(reminder);
-        mEditorView.setupReminderNotification(note);
+        mEditorView.setupReminderNotification(note, reminder);
     }
 
     private void updateReminder(@Nonnull MainNote note, @Nonnull Reminder reminder) {
         observableUpdateReminder(reminder);
-        mEditorView.setupReminderNotification(note);
+        mEditorView.setupReminderNotification(note, reminder);
     }
 
     private void deleteReminder(@Nonnull MainNote note) {
