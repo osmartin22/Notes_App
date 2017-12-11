@@ -16,7 +16,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,10 +32,11 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
 // TODO: When deleting an entire note, make sure the reminder is cancelled if it exists
 
+// TODO: Sometimes when multi selecting a note, it gets removed from the list properly but is not added
+    // to the desired list. It is not shown in any of the lists
+
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener, MainActivityView {
-
-    private static final String TAG = "MultiSelect";
 
     private static final int USER_NOTES = 0;
     private static final int FAVORITE_NOTES = 1;
@@ -57,8 +57,6 @@ public class MainActivity extends AppCompatActivity implements
     private Preferences preferences;
     private ActionMode mActionMode;
     private Snackbar mSnackBar;
-
-    private boolean isMultiSelect = false;
 
     private ActivityMainBinding mBinding;
     private MainActivityPresenter mActivityPresenter;
@@ -125,18 +123,11 @@ public class MainActivity extends AppCompatActivity implements
         rv.addOnItemTouchListener(new RecyclerItemListener(MainActivity.this,
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
-                if (isMultiSelect) {
-                    multiSelect(position);
-                } else {
-                    mActivityPresenter.onNoteClick(notesAdapter.getNoteIdAt(position), position);
-                }
+                mActivityPresenter.onNoteClick(notesAdapter.getNoteIdAt(position), position);
             }
 
             public void onLongClickItem(View view, final int position) {
                 mActivityPresenter.onNoteLongClick(position);
-//                ((AppCompatActivity) view.getContext()).startSupportActionMode(mActionModeCallback);
-//                isMultiSelect = true;
-//                multiSelect(position);
             }
         }));
     }
@@ -239,6 +230,10 @@ public class MainActivity extends AppCompatActivity implements
             mActionMode.finish();
         }
 
+        if (mSnackBar != null) {
+            mSnackBar.dismiss();
+        }
+
         Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
         intent.putExtra(getString(R.string.noteIdIntent), noteId);
         intent.putExtra(getString(R.string.notePositionIntent), notePosition);
@@ -249,15 +244,6 @@ public class MainActivity extends AppCompatActivity implements
 
 
     private final ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
-
-        private void removePreviews(ActionMode mode, int cabAction, int listToAddTo) {
-//            mActivityPresenter.processChosenNotes(notesAdapter.getSelectedPreviewIds());
-            Log.d(TAG, "removePreviews()");
-            mActivityPresenter.setListToAddTo(listToAddTo);
-            notesAdapter.removeSelectedPreviews();
-            showSnackBar(cabAction);
-            mode.finish();
-        }
 
         private void setCABMenuItems(Menu menu, int listUsed) {
             switch (listUsed) {
@@ -292,23 +278,22 @@ public class MainActivity extends AppCompatActivity implements
 
         @Override
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            Log.d(TAG, "onActionItemClicked()");
             switch (menuItem.getItemId()) {
                 case R.id.contextualArchive:
-//                    mActivityPresenter.onMenuActionIconClicked(ARCHIVE, ARCHIVE_NOTES);
-                    removePreviews(actionMode, ARCHIVE, ARCHIVE_NOTES);
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviewIds(),
+                            ARCHIVE, ARCHIVE_NOTES);
                     return true;
                 case R.id.contextualUnarchive:
-//                    mActivityPresenter.onMenuActionIconClicked(UNARCHIVE, USER_NOTES);
-                    removePreviews(actionMode, UNARCHIVE, USER_NOTES);
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviewIds(),
+                            UNARCHIVE, USER_NOTES);
                     return true;
                 case R.id.contextualDelete:
-//                    mActivityPresenter.onMenuActionIconClicked(DELETE, RECYCLE_BIN_NOTES);
-                    removePreviews(actionMode, DELETE, RECYCLE_BIN_NOTES);
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviewIds(),
+                            DELETE, RECYCLE_BIN_NOTES);
                     return true;
                 case R.id.contextualRestore:
-//                    mActivityPresenter.onMenuActionIconClicked(RESTORE, USER_NOTES);
-                    removePreviews(actionMode, RESTORE, USER_NOTES);
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviewIds(),
+                            RESTORE, USER_NOTES);
                     return true;
                 case R.id.contextualDeleteForever:
 //                    deleteForever(item);
@@ -321,7 +306,6 @@ public class MainActivity extends AppCompatActivity implements
         // TODO: Fix so as to not call notifyDataSetChanged() every time
         @Override
         public void onDestroyActionMode(ActionMode actionMode) {
-            Log.d(TAG, "onDestroyActionMode()");
             notesAdapter.clearSelectedPositions();
             notesAdapter.notifyDataSetChanged();
             mActionMode = null;
@@ -329,8 +313,12 @@ public class MainActivity extends AppCompatActivity implements
     };
 
     @Override
+    public void finishMultiSelectCAB() {
+        mActionMode.finish();
+    }
+
+    @Override
     public void removeSelectedPreviews() {
-        Log.d(TAG, "removeSelectedPreviews()");
         notesAdapter.removeSelectedPreviews();
     }
 
@@ -342,7 +330,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void startMultiSelect(int position) {
         this.startSupportActionMode(mActionModeCallback);
-        isMultiSelect = true;
         multiSelect(position);
     }
 
@@ -359,16 +346,13 @@ public class MainActivity extends AppCompatActivity implements
         mActionMode.setSubtitle(Integer.toString(notesAdapter.getSelectedPositions().size()));
 
         if (notesAdapter.getSelectedPositions().isEmpty()) {
-
-            isMultiSelect = false;
-            mActionMode.finish();
+            mActivityPresenter.onEndMultiSelect();
         }
     }
 
 
     @Override
     public void showSnackBar(int cabAction) {
-        Log.d(TAG, "showSnackBar()");
         String message = getSnackBarMessage(cabAction, notesAdapter.getSelectedPositions().size());
 
         if (message != null) {
@@ -378,21 +362,12 @@ public class MainActivity extends AppCompatActivity implements
             mSnackBar.addCallback(new Snackbar.Callback() {
                 @Override
                 public void onDismissed(Snackbar transientBottomBar, int event) {
-                    Log.d(TAG, "onDismissed()");
-                    mActivityPresenter.processChosenNotes(notesAdapter.getSelectedPreviewIds());
+                    mActivityPresenter.processChosenNotes();
                     mSnackBar = null;
                 }
             });
         }
     }
-
-    private class UndoListener implements View.OnClickListener {
-        @Override
-        public void onClick(View view) {
-            mActivityPresenter.onUndoClicked();
-        }
-    }
-
 
     @Nullable
     private String getSnackBarMessage(int num, int size) {
@@ -409,6 +384,20 @@ public class MainActivity extends AppCompatActivity implements
                 return this.getResources().getQuantityString(R.plurals.deleteForever, size);
             default:
                 return null;
+        }
+    }
+
+    @Override
+    public void dismissSnackBar() {
+        if (mSnackBar != null) {
+            mSnackBar.dismiss();
+        }
+    }
+
+    private class UndoListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            mActivityPresenter.onUndoClicked();
         }
     }
 

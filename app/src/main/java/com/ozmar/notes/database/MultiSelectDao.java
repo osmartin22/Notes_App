@@ -3,6 +3,7 @@ package com.ozmar.notes.database;
 
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
+import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Transaction;
 
@@ -21,7 +22,7 @@ public abstract class MultiSelectDao {
     @Query("SELECT * FROM userNotes WHERE id IN(:noteIds)")
     public abstract Single<List<MainNote>> getMainNotes(List<Integer> noteIds);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract void addListToMainNotes(List<MainNote> list);
 
     @Query("DELETE FROM userNotes WHERE id IN(:noteIds)")
@@ -31,7 +32,7 @@ public abstract class MultiSelectDao {
     @Query("SELECT * FROM archiveNotes WHERE id IN(:noteIds)")
     public abstract Single<List<ArchiveNote>> getArchiveNotes(List<Integer> noteIds);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract void addListToArchiveNotes(List<ArchiveNote> list);
 
     @Query("DELETE FROM archiveNotes WHERE id IN(:noteIds)")
@@ -41,7 +42,7 @@ public abstract class MultiSelectDao {
     @Query("SELECT * FROM recycleBinNotes WHERE id IN(:noteIds)")
     public abstract Single<List<RecycleBinNote>> getRecycleBinNotes(List<Integer> noteIds);
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public abstract void addListToRecycleBinNotes(List<RecycleBinNote> list);
 
     @Query("DELETE FROM recycleBinNotes WHERE id IN(:noteIds)")

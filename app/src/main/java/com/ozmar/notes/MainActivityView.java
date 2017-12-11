@@ -17,22 +17,26 @@ public interface MainActivityView {
 
     void openNoteEditorActivity(int noteId, int notePosition, int listUsed);
 
-     void swapLayout(int layout);
+    void swapLayout(int layout);
 
-     void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
-                                   int noteModifiedResult, boolean noteIsFavorite);
+    void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
+                                  int noteModifiedResult, boolean noteIsFavorite);
 
-     void updateAdapterList(List<NoteAndReminderPreview> list);
+    void updateAdapterList(List<NoteAndReminderPreview> list);
 
-     void startMultiSelect(int position);
+    void startMultiSelect(int position);
 
-     void multiSelect(int position);
+    void multiSelect(int position);
 
-     void showSnackBar(int cabAction);
+    void showSnackBar(int cabAction);
 
-     void removeSelectedPreviews();
+    void removeSelectedPreviews();
 
-     void addBackSelectedPreviews();
+    void finishMultiSelectCAB();
+
+    void dismissSnackBar();
+
+    void addBackSelectedPreviews();
 
 //     void onDeleteForeverDialog();
 

@@ -80,10 +80,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.selectedPositions.remove(Integer.valueOf(position));
     }
 
-    public void removeAllSelectedPreviews() {
-
-    }
-
 
     public void removeSelectedPreviews() {
         Collections.sort(selectedPositions);
@@ -157,14 +153,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         List<Integer> list = new ArrayList<>();
         for (Integer position : selectedPositions) {
             list.add(notes.get(position).getNotePreview().getId());
-        }
-        return list;
-    }
-
-    public List<NoteAndReminderPreview> getSelectedPreviews() {
-        List<NoteAndReminderPreview> list = new ArrayList<>();
-        for (Integer position : selectedPositions) {
-            list.add(notes.get(position));
         }
         return list;
     }
