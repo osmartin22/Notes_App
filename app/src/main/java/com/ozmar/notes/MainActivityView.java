@@ -24,6 +24,16 @@ public interface MainActivityView {
 
      void updateAdapterList(List<NoteAndReminderPreview> list);
 
+     void startMultiSelect(int position);
+
+     void multiSelect(int position);
+
+     void showSnackBar(int cabAction);
+
+     void removeSelectedPreviews();
+
+     void addBackSelectedPreviews();
+
 //     void onDeleteForeverDialog();
 
 

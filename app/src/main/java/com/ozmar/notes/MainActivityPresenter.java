@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.ozmar.notes.database.ArchiveNote;
 import com.ozmar.notes.database.MainNote;
+import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.database.RecycleBinNote;
 
 import java.util.List;
@@ -23,9 +24,16 @@ public class MainActivityPresenter {
 
     private int listUsed = -1;
 
+    private int listToAddTo = -1;
+    private boolean isMultiSelect = false;
+    private boolean undoFlagPressed = false;
+
     private MainActivityView mActivityView;
     private MainActivityInteractor mInteractor;
     private CompositeDisposable mDisposable;
+
+    private List<Integer> selectedIds;
+    private List<NoteAndReminderPreview> listOfMultiSelect;
 
 
     public MainActivityPresenter(MainActivityView mActivityView) {
@@ -38,6 +46,30 @@ public class MainActivityPresenter {
         return listUsed;
     }
 
+    public int getListToAddTo() {
+        return listToAddTo;
+    }
+
+    public void setListToAddTo(int listToAddTo) {
+        this.listToAddTo = listToAddTo;
+    }
+
+    public boolean isUndoFlagPressed() {
+        return undoFlagPressed;
+    }
+
+    public void setUndoFlagPressed(boolean undoFlagPressed) {
+        this.undoFlagPressed = undoFlagPressed;
+    }
+
+    public boolean isMultiSelect() {
+        return isMultiSelect;
+    }
+
+    public void setMultiSelect(boolean multiSelect) {
+        isMultiSelect = multiSelect;
+    }
+
     public void onAttach(MainActivity mainActivityView) {
         this.mActivityView = mainActivityView;
         this.mInteractor = new MainActivityInteractor();
@@ -48,12 +80,32 @@ public class MainActivityPresenter {
         mDisposable.clear();
     }
 
-    public void onNoteLongClick() {
+    public void onNoteLongClick(int position) {
+        if (isMultiSelect) {
+            mActivityView.multiSelect(position);
 
+        } else {
+            isMultiSelect = true;
+            mActivityView.startMultiSelect(position);
+        }
     }
 
     public void onNoteClick(int noteId, int notePosition) {
-        mActivityView.openNoteEditorActivity(noteId, notePosition, listUsed);
+        if (isMultiSelect) {
+            mActivityView.multiSelect(notePosition);
+
+        } else {
+            mActivityView.openNoteEditorActivity(noteId, notePosition, listUsed);
+        }
+    }
+
+    public void onUndoClicked() {
+        undoFlagPressed = true;
+        // TODO: Decide how to handle a new note undo from NoteEditor
+        // Can maybe add a new note to the database
+        // Add note to notesAdapter but don't update views
+
+        // TODO: add back views
     }
 
     public void onLayoutIconClicked(int layoutChoice) {
@@ -80,8 +132,11 @@ public class MainActivityPresenter {
         }
     }
 
-    public void onMenuActionIconClicked() {
-
+    public void onMenuActionIconClicked(List<NoteAndReminderPreview> list, int cabAction, int listToAddTo) {
+        listOfMultiSelect = list;
+        this.listToAddTo = listToAddTo;
+        mActivityView.removeSelectedPreviews();
+        mActivityView.showSnackBar(cabAction);
     }
 
     public void onDeleteIconClicked() {
@@ -94,7 +149,7 @@ public class MainActivityPresenter {
 
 
     // TODO: Remember to cancel reminder notifications when deleting reminders
-    public void processChosenNotes(@NonNull List<Integer> noteIds, int listToAddTo) {
+    public void processChosenNotes(@NonNull List<Integer> noteIds) {
 
         if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
             getListOfMainNotes(noteIds, listToAddTo);
@@ -116,6 +171,10 @@ public class MainActivityPresenter {
 
     private void onProcessChosenNotesFinished() {
         Log.d("Process Notes", "Finished processing");
+        listToAddTo = -1;
+        isMultiSelect = false;
+        undoFlagPressed = false;
+        listOfMultiSelect = null;
     }
 
 

@@ -30,10 +30,11 @@ import io.reactivex.schedulers.Schedulers;
 // will occur in that week
 public class ReminderReceiver extends BroadcastReceiver {
 
-    Context mContext;
-    String title, content;
-    int notificationId;
-    PendingResult mPendingResult;
+    private Context mContext;
+    private String title, content;
+    private int notificationId;
+    private PendingResult mPendingResult;
+    private AppDatabase db;
 
 
     @Override
@@ -48,7 +49,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         if (AppDatabase.getAppDatabase() == null) {
             AppDatabase.setUpAppDatabase(context);
         }
-        getReminder(notificationId);
+        db = AppDatabase.getAppDatabase();
 
         NotificationManager nManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -57,10 +58,12 @@ public class ReminderReceiver extends BroadcastReceiver {
             nManager.notify(notificationId, NotificationHelper.buildNotification(context, title,
                     content));
         }
+
+        getReminder(notificationId);
     }
 
     private void getReminder(int reminderId) {
-        Single.fromCallable(() -> AppDatabase.getAppDatabase().remindersDao().getReminder(reminderId))
+        Single.fromCallable(() -> db.remindersDao().getReminder(reminderId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::processNextReminder);
@@ -88,8 +91,8 @@ public class ReminderReceiver extends BroadcastReceiver {
 
                 if (nextReminderTime > currentReminderTime) {
                     reminder.setDateTime(new DateTime(nextReminderTime));
-                    Completable.fromAction(() -> AppDatabase.getAppDatabase()
-                            .remindersDao().updateReminderTime(reminderId, nextReminderTime))
+                    Completable.fromAction(() -> db.remindersDao().updateReminderTime(reminderId,
+                            nextReminderTime))
                             .subscribeOn(Schedulers.io())
                             .subscribe();
                 }
@@ -97,13 +100,13 @@ public class ReminderReceiver extends BroadcastReceiver {
                 ReminderManager.createReminder(mContext, notificationId, title, content, nextReminderTime);
             }
         }
+
         mPendingResult.finish();
     }
 
     private boolean updateEventsOccurred(@NonNull FrequencyChoices choices, int reminderId) {
         int eventsOccurred = choices.getRepeatEventsOccurred() + 1;
-        Completable.fromAction(() -> AppDatabase.getAppDatabase()
-                .remindersDao().updateEventsOccurred(reminderId, eventsOccurred))
+        Completable.fromAction(() -> db.remindersDao().updateEventsOccurred(reminderId, eventsOccurred))
                 .subscribeOn(Schedulers.io())
                 .subscribe();
 

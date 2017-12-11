@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
@@ -14,6 +16,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -33,10 +36,18 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener, MainActivityView {
 
+    private static final String TAG = "MultiSelect";
+
     private static final int USER_NOTES = 0;
     private static final int FAVORITE_NOTES = 1;
     private static final int ARCHIVE_NOTES = 2;
     private static final int RECYCLE_BIN_NOTES = 3;
+
+    private static final int ARCHIVE = 0;
+    private static final int UNARCHIVE = 1;
+    private static final int DELETE = 2;
+    private static final int RESTORE = 3;
+    private static final int DELETE_FOREVER = 4;
 
     private RecyclerView rv;
     private NotesAdapter notesAdapter;
@@ -45,47 +56,13 @@ public class MainActivity extends AppCompatActivity implements
     private MenuItem layoutIcon;
     private Preferences preferences;
     private ActionMode mActionMode;
+    private Snackbar mSnackBar;
 
     private boolean isMultiSelect = false;
 
     private ActivityMainBinding mBinding;
     private MainActivityPresenter mActivityPresenter;
 
-    public void onFabClicked(View view) {
-        mActivityPresenter.onNoteClick(-1, -1);
-    }
-
-    private void setUpRecyclerView() {
-        notesAdapter = new NotesAdapter(MainActivity.this);
-        mActivityPresenter.onGetPreviewList(0);
-
-        layoutChoice = preferences.getLayoutChoice();
-        rv = mBinding.recyclerView;
-        rv.setHasFixedSize(true);
-
-        DividerItemDecoration decoration = new DividerItemDecoration(MainActivity.this, VERTICAL);
-        DividerItemDecoration decoration2 = new DividerItemDecoration(MainActivity.this, HORIZONTAL);
-        rv.addItemDecoration(decoration);
-        rv.addItemDecoration(decoration2);
-        rv.setAdapter(notesAdapter);
-
-        rv.addOnItemTouchListener(new RecyclerItemListener(MainActivity.this,
-                rv, new RecyclerItemListener.RecyclerTouchListener() {
-            public void onClickItem(View view, int position) {
-                if (isMultiSelect) {
-                    multiSelect(position);
-                } else {
-                    mActivityPresenter.onNoteClick(notesAdapter.getNoteIdAt(position), position);
-                }
-            }
-
-            public void onLongClickItem(View view, final int position) {
-                ((AppCompatActivity) view.getContext()).startSupportActionMode(mActionModeCallback);
-                isMultiSelect = true;
-                multiSelect(position);
-            }
-        }));
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -131,118 +108,38 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    private void restoreLayout(int layoutChoice) {
-        switch (layoutChoice) {
-            case 0:
-            default:
-                layoutIcon.setIcon(R.drawable.ic_linear_layout);
-                rv.setLayoutManager(new StaggeredGridLayoutManager(2,
-                        StaggeredGridLayoutManager.VERTICAL));
-                break;
-            case 1:
-                layoutIcon.setIcon(R.drawable.ic_staggered_grid_layout);
-                rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-        }
-    }
+    private void setUpRecyclerView() {
+        notesAdapter = new NotesAdapter(MainActivity.this);
+        mActivityPresenter.onGetPreviewList(0);
 
+        layoutChoice = preferences.getLayoutChoice();
+        rv = mBinding.recyclerView;
+        rv.setHasFixedSize(true);
 
-    private final ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+        DividerItemDecoration decoration = new DividerItemDecoration(MainActivity.this, VERTICAL);
+        DividerItemDecoration decoration2 = new DividerItemDecoration(MainActivity.this, HORIZONTAL);
+        rv.addItemDecoration(decoration);
+        rv.addItemDecoration(decoration2);
+        rv.setAdapter(notesAdapter);
 
-        boolean menuActionPressed = false;
-
-        private void removePreviews(ActionMode mode, MenuItem item) {
-            menuActionPressed = true;
-            notesAdapter.removeSelectedViews();
-//            showSnackBar(item, 0);
-            mode.finish();
-        }
-
-        private void d(ActionMode mode, MenuItem item, int listToAddTo) {
-            mActivityPresenter.processChosenNotes(notesAdapter.getSelectedPreviewIds(), listToAddTo);
-            menuActionPressed = true;
-            notesAdapter.removeSelectedViews();
-//            showSnackBar(item, 0);
-            mode.finish();
-        }
-
-        private void setCABMenuItems(Menu menu, int listUsed) {
-            switch (listUsed) {
-                case 0:
-                case 1:
-                default:
-                    break;
-                case 2:
-                    menu.findItem(R.id.contextualArchive).setVisible(false);
-                    menu.findItem(R.id.contextualUnarchive).setVisible(true);
-                    break;
-                case 3:
-                    menu.findItem(R.id.contextualArchive).setVisible(false);
-                    menu.findItem(R.id.contextualDelete).setVisible(false);
-                    menu.findItem(R.id.contextualRestore).setVisible(true);
-                    menu.findItem(R.id.contextualDeleteForever).setVisible(true);
+        rv.addOnItemTouchListener(new RecyclerItemListener(MainActivity.this,
+                rv, new RecyclerItemListener.RecyclerTouchListener() {
+            public void onClickItem(View view, int position) {
+                if (isMultiSelect) {
+                    multiSelect(position);
+                } else {
+                    mActivityPresenter.onNoteClick(notesAdapter.getNoteIdAt(position), position);
+                }
             }
-        }
 
-        @Override
-        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
-            mActionMode = actionMode;
-            actionMode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
-            setCABMenuItems(menu, mActivityPresenter.getListUsed());
-            return true;
-        }
-
-        @Override
-        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
-            return false;
-        }
-
-        @Override
-        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
-            switch (menuItem.getItemId()) {
-                case R.id.contextualArchive:
-                    d(actionMode, menuItem, ARCHIVE_NOTES);
-                    return true;
-                case R.id.contextualUnarchive:
-                    d(actionMode, menuItem, USER_NOTES);
-                    return true;
-                case R.id.contextualDelete:
-                    d(actionMode, menuItem, RECYCLE_BIN_NOTES);
-                    return true;
-                case R.id.contextualRestore:
-                    d(actionMode, menuItem, USER_NOTES);
-                    return true;
-                case R.id.contextualDeleteForever:
-//                    deleteForever(item);
-                    menuActionPressed = true;
-                    return true;
-                default:
-                    return false;
+            public void onLongClickItem(View view, final int position) {
+                mActivityPresenter.onNoteLongClick(position);
+//                ((AppCompatActivity) view.getContext()).startSupportActionMode(mActionModeCallback);
+//                isMultiSelect = true;
+//                multiSelect(position);
             }
-        }
-
-        @Override
-        public void onDestroyActionMode(ActionMode actionMode) {
-            notesAdapter.clearSelectedPositions();
-            notesAdapter.notifyDataSetChanged();
-            mActionMode = null;
-        }
-    };
-
-    private void deleteForever(MenuItem item) {
-//        String message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
-        new AlertDialog.Builder(MainActivity.this)
-                .setMessage("")
-                .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
-//                    List<MainNote> temp = new ArrayList<>(buffer.currentBufferNotes());
-//                    new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
-//                    notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
-//                    buffer.clearBuffer();
-//                    actionMode.finish();
-                })
-                .setNegativeButton(getString(R.string.cancelDialog), null)
-                .show();
+        }));
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -301,11 +198,156 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void updateAdapterList(List<NoteAndReminderPreview> list) {
-        notesAdapter.updateAdapterList(list);
+    public void swapLayout(int layout) {
+        switch (layout) {
+            case 0:
+            default:
+                layoutIcon.setIcon(R.drawable.ic_staggered_grid_layout);
+                rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                layoutChoice = 1;
+                break;
+            case 1:
+                layoutIcon.setIcon(R.drawable.ic_linear_layout);
+                rv.setLayoutManager(new StaggeredGridLayoutManager(2,
+                        StaggeredGridLayoutManager.VERTICAL));
+                layoutChoice = 0;
+                break;
+        }
     }
 
-    private void multiSelect(int notePosition) {
+    private void restoreLayout(int layoutChoice) {
+        switch (layoutChoice) {
+            case 0:
+            default:
+                layoutIcon.setIcon(R.drawable.ic_linear_layout);
+                rv.setLayoutManager(new StaggeredGridLayoutManager(2,
+                        StaggeredGridLayoutManager.VERTICAL));
+                break;
+            case 1:
+                layoutIcon.setIcon(R.drawable.ic_staggered_grid_layout);
+                rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+        }
+    }
+
+    public void onFabClicked(View view) {
+        mActivityPresenter.onNoteClick(-1, -1);
+    }
+
+    @Override
+    public void openNoteEditorActivity(int noteId, int notePosition, int listUsed) {
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
+
+        Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
+        intent.putExtra(getString(R.string.noteIdIntent), noteId);
+        intent.putExtra(getString(R.string.notePositionIntent), notePosition);
+        intent.putExtra(getString(R.string.listUsedIntent), listUsed);
+
+        startActivityForResult(intent, 1);
+    }
+
+
+    private final ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        private void removePreviews(ActionMode mode, int cabAction, int listToAddTo) {
+//            mActivityPresenter.processChosenNotes(notesAdapter.getSelectedPreviewIds());
+            Log.d(TAG, "removePreviews()");
+            mActivityPresenter.setListToAddTo(listToAddTo);
+            notesAdapter.removeSelectedPreviews();
+            showSnackBar(cabAction);
+            mode.finish();
+        }
+
+        private void setCABMenuItems(Menu menu, int listUsed) {
+            switch (listUsed) {
+                case 0:
+                case 1:
+                default:
+                    break;
+                case 2:
+                    menu.findItem(R.id.contextualArchive).setVisible(false);
+                    menu.findItem(R.id.contextualUnarchive).setVisible(true);
+                    break;
+                case 3:
+                    menu.findItem(R.id.contextualArchive).setVisible(false);
+                    menu.findItem(R.id.contextualDelete).setVisible(false);
+                    menu.findItem(R.id.contextualRestore).setVisible(true);
+                    menu.findItem(R.id.contextualDeleteForever).setVisible(true);
+            }
+        }
+
+        @Override
+        public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+            mActionMode = actionMode;
+            actionMode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
+            setCABMenuItems(menu, mActivityPresenter.getListUsed());
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode actionMode, Menu menu) {
+            return false;
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
+            Log.d(TAG, "onActionItemClicked()");
+            switch (menuItem.getItemId()) {
+                case R.id.contextualArchive:
+//                    mActivityPresenter.onMenuActionIconClicked(ARCHIVE, ARCHIVE_NOTES);
+                    removePreviews(actionMode, ARCHIVE, ARCHIVE_NOTES);
+                    return true;
+                case R.id.contextualUnarchive:
+//                    mActivityPresenter.onMenuActionIconClicked(UNARCHIVE, USER_NOTES);
+                    removePreviews(actionMode, UNARCHIVE, USER_NOTES);
+                    return true;
+                case R.id.contextualDelete:
+//                    mActivityPresenter.onMenuActionIconClicked(DELETE, RECYCLE_BIN_NOTES);
+                    removePreviews(actionMode, DELETE, RECYCLE_BIN_NOTES);
+                    return true;
+                case R.id.contextualRestore:
+//                    mActivityPresenter.onMenuActionIconClicked(RESTORE, USER_NOTES);
+                    removePreviews(actionMode, RESTORE, USER_NOTES);
+                    return true;
+                case R.id.contextualDeleteForever:
+//                    deleteForever(item);
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // TODO: Fix so as to not call notifyDataSetChanged() every time
+        @Override
+        public void onDestroyActionMode(ActionMode actionMode) {
+            Log.d(TAG, "onDestroyActionMode()");
+            notesAdapter.clearSelectedPositions();
+            notesAdapter.notifyDataSetChanged();
+            mActionMode = null;
+        }
+    };
+
+    @Override
+    public void removeSelectedPreviews() {
+        Log.d(TAG, "removeSelectedPreviews()");
+        notesAdapter.removeSelectedPreviews();
+    }
+
+    @Override
+    public void addBackSelectedPreviews() {
+
+    }
+
+    @Override
+    public void startMultiSelect(int position) {
+        this.startSupportActionMode(mActionModeCallback);
+        isMultiSelect = true;
+        multiSelect(position);
+    }
+
+    @Override
+    public void multiSelect(int notePosition) {
         if (notesAdapter.getSelectedPositions().contains(notePosition)) {
             notesAdapter.removeSelectedPosition(notePosition);
 
@@ -317,9 +359,79 @@ public class MainActivity extends AppCompatActivity implements
         mActionMode.setSubtitle(Integer.toString(notesAdapter.getSelectedPositions().size()));
 
         if (notesAdapter.getSelectedPositions().isEmpty()) {
+
             isMultiSelect = false;
             mActionMode.finish();
         }
+    }
+
+
+    @Override
+    public void showSnackBar(int cabAction) {
+        Log.d(TAG, "showSnackBar()");
+        String message = getSnackBarMessage(cabAction, notesAdapter.getSelectedPositions().size());
+
+        if (message != null) {
+            mSnackBar = Snackbar.make(findViewById(R.id.coordinatorLayout), message, Snackbar.LENGTH_LONG);
+            mSnackBar.setAction(R.string.snackBarUndoAction, new UndoListener());
+            mSnackBar.show();
+            mSnackBar.addCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar transientBottomBar, int event) {
+                    Log.d(TAG, "onDismissed()");
+                    mActivityPresenter.processChosenNotes(notesAdapter.getSelectedPreviewIds());
+                    mSnackBar = null;
+                }
+            });
+        }
+    }
+
+    private class UndoListener implements View.OnClickListener {
+        @Override
+        public void onClick(View view) {
+            mActivityPresenter.onUndoClicked();
+        }
+    }
+
+
+    @Nullable
+    private String getSnackBarMessage(int num, int size) {
+        switch (num) {
+            case ARCHIVE:
+                return this.getResources().getQuantityString(R.plurals.snackBarArchive, size);
+            case UNARCHIVE:
+                return this.getResources().getQuantityString(R.plurals.snackBarUnarchive, size);
+            case DELETE:
+                return this.getResources().getQuantityString(R.plurals.snackBarDelete, size);
+            case RESTORE:
+                return this.getResources().getQuantityString(R.plurals.snackBarRestore, size);
+            case DELETE_FOREVER:
+                return this.getResources().getQuantityString(R.plurals.deleteForever, size);
+            default:
+                return null;
+        }
+    }
+
+
+    private void deleteForever(MenuItem item) {
+//        String message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
+        String message = getSnackBarMessage(DELETE_FOREVER, notesAdapter.getSelectedPositions().size());
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage("")
+                .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
+//                    List<MainNote> temp = new ArrayList<>(buffer.currentBufferNotes());
+//                    new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
+//                    notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
+//                    buffer.clearBuffer();
+//                    actionMode.finish();
+                })
+                .setNegativeButton(getString(R.string.cancelDialog), null)
+                .show();
+    }
+
+    @Override
+    public void updateAdapterList(List<NoteAndReminderPreview> list) {
+        notesAdapter.updateAdapterList(list);
     }
 
     @Override
@@ -404,37 +516,4 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
     }
 
-
-    @Override
-    public void swapLayout(int layout) {
-        switch (layout) {
-            case 0:
-            default:
-                layoutIcon.setIcon(R.drawable.ic_staggered_grid_layout);
-                rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
-                layoutChoice = 1;
-                break;
-            case 1:
-                layoutIcon.setIcon(R.drawable.ic_linear_layout);
-                rv.setLayoutManager(new StaggeredGridLayoutManager(2,
-                        StaggeredGridLayoutManager.VERTICAL));
-                layoutChoice = 0;
-                break;
-        }
-    }
-
-    @Override
-    public void openNoteEditorActivity(int noteId, int notePosition, int listUsed) {
-        if (mActionMode != null) {
-            mActionMode.finish();
-        }
-
-        Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
-
-        intent.putExtra(getString(R.string.noteIdIntent), noteId);
-        intent.putExtra(getString(R.string.notePositionIntent), notePosition);
-        intent.putExtra(getString(R.string.listUsedIntent), listUsed);
-
-        startActivityForResult(intent, 1);
-    }
 }

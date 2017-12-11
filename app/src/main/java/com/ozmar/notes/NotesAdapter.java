@@ -80,13 +80,12 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.selectedPositions.remove(Integer.valueOf(position));
     }
 
-    public void removeAllSelectedPreviews(){
+    public void removeAllSelectedPreviews() {
 
     }
 
 
-
-    public void removeSelectedViews() {
+    public void removeSelectedPreviews() {
         Collections.sort(selectedPositions);
         int amountOfViews = notes.size();
         int amountOfViewsRemoved = selectedPositions.size();
@@ -119,37 +118,31 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             notifyItemRangeChanged(minViewPositionChanged, amountOfViews);
         }
     }
-//
-//    public void addSelectedViews(List<Integer> position, List<MainNote> addList) {
-//        int size = notes.size();
-//        int amountOfViewAdding = position.size();
-//        int minViewPositionChanged = Collections.min(position);
-//        int maxViewPositionChanged = Collections.max(position);
-//
-//        // Notes being added are consecutive
-//        if (maxViewPositionChanged - minViewPositionChanged == amountOfViewAdding - 1) {
-//            if (minViewPositionChanged != 0) {
-//                notes.addAll(minViewPositionChanged, addList);
-//            } else {
-//                notes.addAll(0, addList);
-//            }
-//
-//            notifyItemRangeInserted(minViewPositionChanged, maxViewPositionChanged);
-//            notifyItemRangeChanged(minViewPositionChanged, notes.size());
-//
-//        } else {        // Notes added at random
-//            for (int i = 0; i < amountOfViewAdding - 1; i++) {
-//                notes.add(position.get(i), addList.get(i));
-//            }
-//            notifyItemRangeChanged(minViewPositionChanged, size);
-//        }
-//    }
 
+    public void addSelectedPreviews(List<Integer> position, List<NoteAndReminderPreview> addList) {
+        int size = notes.size();
+        int amountOfViewAdding = position.size();
+        int minViewPositionChanged = Collections.min(position);
+        int maxViewPositionChanged = Collections.max(position);
 
+        // Notes being added are consecutive
+        if (maxViewPositionChanged - minViewPositionChanged == amountOfViewAdding - 1) {
+            if (minViewPositionChanged != 0) {
+                notes.addAll(minViewPositionChanged, addList);
+            } else {
+                notes.addAll(0, addList);
+            }
 
+            notifyItemRangeInserted(minViewPositionChanged, maxViewPositionChanged);
+            notifyItemRangeChanged(minViewPositionChanged, notes.size());
 
-
-
+        } else {        // Notes added at random
+            for (int i = 0; i < amountOfViewAdding - 1; i++) {
+                notes.add(position.get(i), addList.get(i));
+            }
+            notifyItemRangeChanged(minViewPositionChanged, size);
+        }
+    }
 
 
     public void clearSelectedPositions() {
@@ -164,6 +157,14 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         List<Integer> list = new ArrayList<>();
         for (Integer position : selectedPositions) {
             list.add(notes.get(position).getNotePreview().getId());
+        }
+        return list;
+    }
+
+    public List<NoteAndReminderPreview> getSelectedPreviews() {
+        List<NoteAndReminderPreview> list = new ArrayList<>();
+        for (Integer position : selectedPositions) {
+            list.add(notes.get(position));
         }
         return list;
     }

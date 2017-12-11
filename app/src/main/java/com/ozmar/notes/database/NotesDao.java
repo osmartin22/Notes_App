@@ -67,4 +67,6 @@ public interface NotesDao {
 
     @Query("DELETE FROM recycleBinNotes WHERE id = :noteId")
     void deleteFromRecycleBinNotes(int noteId);
+
+
 }

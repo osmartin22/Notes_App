@@ -27,8 +27,7 @@ public abstract class AppDatabase extends RoomDatabase {
     public static void setUpAppDatabase(Context context) {
         if (INSTANCE == null) {
             INSTANCE =
-                    Room.databaseBuilder(context.getApplicationContext(),
-                            AppDatabase.class, "notes-database")
+                    Room.databaseBuilder(context, AppDatabase.class, "notes-database")
                             .fallbackToDestructiveMigration()
                             .build();
         }
