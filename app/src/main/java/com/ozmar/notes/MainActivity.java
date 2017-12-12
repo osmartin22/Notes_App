@@ -33,7 +33,7 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 // TODO: When deleting an entire note, make sure the reminder is cancelled if it exists
 
 // TODO: Sometimes when multi selecting a note, it gets removed from the list properly but is not added
-    // to the desired list. It is not shown in any of the lists
+// to the desired list. It is not shown in any of the lists
 
 public class MainActivity extends AppCompatActivity implements
         NavigationView.OnNavigationItemSelectedListener, MainActivityView {
@@ -79,9 +79,7 @@ public class MainActivity extends AppCompatActivity implements
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 super.onDrawerSlide(drawerView, slideOffset);
-                if (mActionMode != null) {
-                    mActionMode.finish();
-                }
+                mActivityPresenter.onDrawerSlide();
             }
         };
 
@@ -91,19 +89,9 @@ public class MainActivity extends AppCompatActivity implements
         mBinding.navView.setNavigationItemSelectedListener(this);
         mBinding.navView.getMenu().getItem(0).setChecked(true);
 
-
         mActivityPresenter = new MainActivityPresenter(MainActivity.this);
 
         setUpRecyclerView();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
-            mBinding.drawerLayout.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
     }
 
     private void setUpRecyclerView() {
@@ -123,13 +111,22 @@ public class MainActivity extends AppCompatActivity implements
         rv.addOnItemTouchListener(new RecyclerItemListener(MainActivity.this,
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
-                mActivityPresenter.onNoteClick(notesAdapter.getNoteIdAt(position), position);
+                mActivityPresenter.onNoteClick(position);
             }
 
             public void onLongClickItem(View view, final int position) {
                 mActivityPresenter.onNoteLongClick(position);
             }
         }));
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mBinding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            mBinding.drawerLayout.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -221,32 +218,23 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     public void onFabClicked(View view) {
-        mActivityPresenter.onNoteClick(-1, -1);
+        mActivityPresenter.onNoteClick(-1);
     }
 
     @Override
-    public void openNoteEditorActivity(int noteId, int notePosition, int listUsed) {
-        if (mActionMode != null) {
-            mActionMode.finish();
-        }
-
-        if (mSnackBar != null) {
-            mSnackBar.dismiss();
-        }
-
+    public void openNoteEditorActivity(int notePosition, int listUsed) {
         Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
-        intent.putExtra(getString(R.string.noteIdIntent), noteId);
+        intent.putExtra(getString(R.string.noteIdIntent), notePosition != -1 ? notesAdapter.getNoteIdAt(notePosition) : -1);
         intent.putExtra(getString(R.string.notePositionIntent), notePosition);
         intent.putExtra(getString(R.string.listUsedIntent), listUsed);
 
         startActivityForResult(intent, 1);
     }
 
-
     private final ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
 
-        private void setCABMenuItems(Menu menu, int listUsed) {
-            switch (listUsed) {
+        private void setCABMenuItems(Menu menu) {
+            switch (mActivityPresenter.getListUsed()) {
                 case 0:
                 case 1:
                 default:
@@ -267,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements
         public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
             mActionMode = actionMode;
             actionMode.getMenuInflater().inflate(R.menu.contextual_action_menu, menu);
-            setCABMenuItems(menu, mActivityPresenter.getListUsed());
+            setCABMenuItems(menu);
             return true;
         }
 
@@ -280,19 +268,19 @@ public class MainActivity extends AppCompatActivity implements
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
             switch (menuItem.getItemId()) {
                 case R.id.contextualArchive:
-                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviewIds(),
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviews(),
                             ARCHIVE, ARCHIVE_NOTES);
                     return true;
                 case R.id.contextualUnarchive:
-                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviewIds(),
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviews(),
                             UNARCHIVE, USER_NOTES);
                     return true;
                 case R.id.contextualDelete:
-                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviewIds(),
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviews(),
                             DELETE, RECYCLE_BIN_NOTES);
                     return true;
                 case R.id.contextualRestore:
-                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviewIds(),
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviews(),
                             RESTORE, USER_NOTES);
                     return true;
                 case R.id.contextualDeleteForever:
@@ -306,15 +294,31 @@ public class MainActivity extends AppCompatActivity implements
         // TODO: Fix so as to not call notifyDataSetChanged() every time
         @Override
         public void onDestroyActionMode(ActionMode actionMode) {
-            notesAdapter.clearSelectedPositions();
-            notesAdapter.notifyDataSetChanged();
+            mActivityPresenter.onMultiSelectDestroy();
             mActionMode = null;
         }
     };
 
     @Override
     public void finishMultiSelectCAB() {
-        mActionMode.finish();
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
+    }
+
+    @Override
+    public void notifyEntireAdapter() {
+        notesAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public List<Integer> getSelectedPositions() {
+        return notesAdapter.getSelectedPositions();
+    }
+
+    @Override
+    public void clearSelectedPositions() {
+        notesAdapter.clearSelectedPositions();
     }
 
     @Override
@@ -323,8 +327,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void addBackSelectedPreviews() {
-
+    public void addBackSelectedPreviews(List<Integer> selectedPositions, List<NoteAndReminderPreview> selectedPreviews) {
+        notesAdapter.addSelectedPreviews(selectedPositions, selectedPreviews);
     }
 
     @Override
@@ -504,5 +508,4 @@ public class MainActivity extends AppCompatActivity implements
         AppDatabase.destroyInstance();
         super.onDestroy();
     }
-
 }

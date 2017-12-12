@@ -146,13 +146,13 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
     public List<Integer> getSelectedPositions() {
-        return selectedPositions;
+        return new ArrayList<>(selectedPositions);
     }
 
-    public List<Integer> getSelectedPreviewIds() {
-        List<Integer> list = new ArrayList<>();
+    public List<NoteAndReminderPreview> getSelectedPreviews() {
+        List<NoteAndReminderPreview> list = new ArrayList<>();
         for (Integer position : selectedPositions) {
-            list.add(notes.get(position).getNotePreview().getId());
+            list.add(notes.get(position));
         }
         return list;
     }

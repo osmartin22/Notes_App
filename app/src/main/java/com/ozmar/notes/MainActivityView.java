@@ -15,7 +15,7 @@ public interface MainActivityView {
 
 //    public void bufferIsFull();
 
-    void openNoteEditorActivity(int noteId, int notePosition, int listUsed);
+    void openNoteEditorActivity(int notePosition, int listUsed);
 
     void swapLayout(int layout);
 
@@ -30,13 +30,20 @@ public interface MainActivityView {
 
     void showSnackBar(int cabAction);
 
+    void notifyEntireAdapter();
+
+    List<Integer> getSelectedPositions();
+
+    void clearSelectedPositions();
+
     void removeSelectedPreviews();
+
+    void addBackSelectedPreviews(List<Integer> selectedPositions, List<NoteAndReminderPreview> selectedPreviews);
 
     void finishMultiSelectCAB();
 
     void dismissSnackBar();
 
-    void addBackSelectedPreviews();
 
 //     void onDeleteForeverDialog();
 
