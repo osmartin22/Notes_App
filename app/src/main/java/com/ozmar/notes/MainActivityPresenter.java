@@ -15,9 +15,8 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivityPresenter {
 
-    private static final String TAG = "MultiSelect";
+public class MainActivityPresenter {
 
     private static final int USER_NOTES = 0;
     private static final int FAVORITE_NOTES = 1;
@@ -38,7 +37,6 @@ public class MainActivityPresenter {
     private MainActivityInteractor mInteractor;
     private CompositeDisposable mDisposable;
 
-    private List<Integer> selectedIds;
     private List<Integer> selectedPositions;
     private List<NoteAndReminderPreview> selectedPreviews;
 
@@ -123,19 +121,23 @@ public class MainActivityPresenter {
         }
     }
 
-    public void onMenuActionIconClicked(List<NoteAndReminderPreview> selectedPreviews, int cabAction, int listToAddTo) {
+    public void onMenuActionIconClicked(@NonNull List<Integer> selectedPositions,
+                                        @NonNull List<NoteAndReminderPreview> selectedPreviews,
+                                        int cabAction, int listToAddTo) {
         menuActionIconClicked = true;
+        processingMultiSelect = true;
+        this.selectedPositions = selectedPositions;
         this.selectedPreviews = selectedPreviews;
-        this.selectedIds = getIdsOfSelectedPreviews(selectedPreviews);
         this.listToAddTo = listToAddTo;
+
         mActivityView.removeSelectedPreviews();
         mActivityView.showSnackBar(cabAction);
         mActivityView.finishMultiSelectCAB();
     }
 
-    private List<Integer> getIdsOfSelectedPreviews(List<NoteAndReminderPreview> list){
+    private List<Integer> getIdsOfSelectedPreviews(@NonNull List<NoteAndReminderPreview> list) {
         List<Integer> idsList = new ArrayList<>();
-        for (NoteAndReminderPreview preview : list){
+        for (NoteAndReminderPreview preview : list) {
             idsList.add(preview.getNotePreview().getId());
         }
         return idsList;
@@ -145,26 +147,7 @@ public class MainActivityPresenter {
     public void onUndoClicked() {
         undoClicked = true;
         isMultiSelect = false;
-
-//        mActivityView.dismissSnackBar();
-            mActivityView.addBackSelectedPreviews(selectedPositions, selectedPreviews);
-//        mActivityView.clearSelectedPositions(); // Maybe not necessary
-
-        listToAddTo = -1;
-        selectedIds = null;
-        selectedPreviews = null;
-        selectedPositions = null;
-
-
-        // TODO: Make function to get NoteAndReminderPreviews from selectedIds
-        // Store them here upon starting a multi select
-        // Set the list to null if I start processing the list
-
-        // TODO: Decide how to handle a new note undo from NoteEditor
-        // Can maybe add a new note to the database
-        // Add note to notesAdapter but don't update views
-
-        // TODO: add back views
+        mActivityView.addBackSelectedPreviews(selectedPositions, selectedPreviews);
     }
 
     public void onEndMultiSelect() {
@@ -182,32 +165,29 @@ public class MainActivityPresenter {
 
     public void onMultiSelectDestroy() {
         isMultiSelect = false;
-//        mActivityView.clearSelectedPositions();
 
-        // Set highlighted notes to unhighlighted if the user did an action that closed
-        // the CAB but was not one of the menu items
+        // Unhighlight notes if the user did an action that closed
+        // the CAB before the user pressed one of the CAB menu items
         if (!menuActionIconClicked) {
             mActivityView.notifyEntireAdapter();
-            mActivityView.clearSelectedPositions();
-        } else {
-            selectedPositions = mActivityView.getSelectedPositions();
-            mActivityView.clearSelectedPositions();
         }
 
+        mActivityView.clearSelectedPositions();
         menuActionIconClicked = false;
     }
 
     // TODO: Remember to cancel reminder notifications when deleting reminders
     public void processChosenNotes() {
 
-        mActivityView.clearSelectedPositions();
         if (undoClicked) {
             undoClicked = false;
+            processingMultiSelect = false;
+            listToAddTo = -1;
 
         } else {
-            processingMultiSelect = true;
-            processMultiSelectCount = 2;
-            selectedPreviews = null;
+            // Wait for two more threads to finish before allowing the user to switch the current list
+            processMultiSelectCount += 2;
+            List<Integer> selectedIds = getIdsOfSelectedPreviews(selectedPreviews);
 
             if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
                 getListOfMainNotes(selectedIds, listToAddTo);
@@ -219,6 +199,9 @@ public class MainActivityPresenter {
 
             deleteList(selectedIds, listUsed);
         }
+
+        selectedPositions = null;
+        selectedPreviews = null;
     }
 
     private void deleteList(@NonNull List<Integer> noteIds, int listUsed) {
@@ -229,11 +212,9 @@ public class MainActivityPresenter {
     }
 
     private void onProcessChosenNotesFinished() {
-        --processMultiSelectCount;
-        if (processMultiSelectCount == 0) {
+        if (--processMultiSelectCount == 0) {
             listToAddTo = -1;
             processingMultiSelect = false;
-            selectedIds = null;
 
             if (listRequestedDuringMultiSelect != -1) {
                 retrievePreviewList(listRequestedDuringMultiSelect);

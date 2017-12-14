@@ -66,11 +66,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notifyItemChanged(position);
     }
 
-    public void clearView() {
-        int size = notes.size();
-        notes.clear();
-        notifyItemRangeRemoved(0, size);
-    }
 
     public void addSelectedPosition(int position) {
         this.selectedPositions.add(position);
@@ -79,67 +74,6 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     public void removeSelectedPosition(int position) {
         this.selectedPositions.remove(Integer.valueOf(position));
     }
-
-
-    public void removeSelectedPreviews() {
-        Collections.sort(selectedPositions);
-        int amountOfViews = notes.size();
-        int amountOfViewsRemoved = selectedPositions.size();
-        int minViewPositionChanged = selectedPositions.get(0);
-        int maxViewPositionChanged = selectedPositions.get(selectedPositions.size() - 1);
-        int remainingViews = amountOfViews - amountOfViewsRemoved;
-
-        // Deleted entire list
-        if (remainingViews == 0) {
-            clearView();
-
-            // Deleted notes have views no longer in use
-        } else if (remainingViews <= minViewPositionChanged) {
-            notes.subList(minViewPositionChanged, notes.size()).clear();
-            notifyItemRangeRemoved(minViewPositionChanged, amountOfViews);
-
-            // Deleted notes were consecutive
-        } else if (maxViewPositionChanged - minViewPositionChanged == amountOfViewsRemoved - 1) {
-            notes.subList(minViewPositionChanged, maxViewPositionChanged + 1).clear();
-            notifyItemRangeRemoved(minViewPositionChanged, maxViewPositionChanged + 1);
-            notifyItemRangeChanged(maxViewPositionChanged, amountOfViews);
-
-            // Random deletes
-        } else {
-            for (int i = amountOfViewsRemoved - 1; i >= 0; i--) {
-                int pos = selectedPositions.get(i);
-                notes.remove(pos);
-                notifyItemRemoved(pos);
-            }
-            notifyItemRangeChanged(minViewPositionChanged, amountOfViews);
-        }
-    }
-
-    public void addSelectedPreviews(List<Integer> position, List<NoteAndReminderPreview> addList) {
-        int size = notes.size();
-        int amountOfViewAdding = position.size();
-        int minViewPositionChanged = Collections.min(position);
-        int maxViewPositionChanged = Collections.max(position);
-
-        // Notes being added are consecutive
-        if (maxViewPositionChanged - minViewPositionChanged == amountOfViewAdding - 1) {
-            if (minViewPositionChanged != 0) {
-                notes.addAll(minViewPositionChanged, addList);
-            } else {
-                notes.addAll(0, addList);
-            }
-
-            notifyItemRangeInserted(minViewPositionChanged, maxViewPositionChanged);
-            notifyItemRangeChanged(minViewPositionChanged, notes.size());
-
-        } else {        // Notes added at random
-            for (int i = 0; i < amountOfViewAdding - 1; i++) {
-                notes.add(position.get(i), addList.get(i));
-            }
-            notifyItemRangeChanged(minViewPositionChanged, size);
-        }
-    }
-
 
     public void clearSelectedPositions() {
         selectedPositions.clear();
@@ -155,6 +89,70 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
             list.add(notes.get(position));
         }
         return list;
+    }
+
+
+    public void clearView() {
+        int size = notes.size();
+        notes.clear();
+        notifyItemRangeRemoved(0, size);
+    }
+
+    public void removeSelectedPreviews() {
+        Collections.sort(selectedPositions);
+        int amountOfViewsDisplayed = notes.size();
+        int amountOfViewsRemoved = selectedPositions.size();
+        int minViewPositionChanged = selectedPositions.get(0);
+        int maxViewPositionChanged = selectedPositions.get(selectedPositions.size() - 1);
+        int remainingViews = amountOfViewsDisplayed - amountOfViewsRemoved;
+
+        // Deleted entire list
+        if (remainingViews == 0) {
+            clearView();
+
+            // Deleted notes have views no longer in use
+        } else if (remainingViews <= minViewPositionChanged) {
+            notes.subList(minViewPositionChanged, notes.size()).clear();
+            notifyItemRangeRemoved(minViewPositionChanged, amountOfViewsDisplayed);
+
+            // Deleted notes were consecutive
+        } else if (maxViewPositionChanged - minViewPositionChanged == amountOfViewsRemoved - 1) {
+            notes.subList(minViewPositionChanged, maxViewPositionChanged + 1).clear();
+            notifyItemRangeRemoved(minViewPositionChanged, maxViewPositionChanged + 1);
+            notifyItemRangeChanged(maxViewPositionChanged, amountOfViewsDisplayed);
+
+            // Random deletes
+        } else {
+            for (int i = amountOfViewsRemoved - 1; i >= 0; i--) {
+                int pos = selectedPositions.get(i);
+                notes.remove(pos);
+                notifyItemRemoved(pos);
+            }
+            notifyItemRangeChanged(minViewPositionChanged, amountOfViewsDisplayed);
+        }
+    }
+
+    public void addSelectedPreviews(List<Integer> position, List<NoteAndReminderPreview> addList) {
+        int amountOfViewsAdding = addList.size();
+        int minViewPositionChanged = Collections.min(position);
+        int maxViewPositionChanged = Collections.max(position);
+
+        // Notes being added are consecutive
+        if (maxViewPositionChanged - minViewPositionChanged == amountOfViewsAdding - 1) {
+            notes.addAll(minViewPositionChanged, addList);
+
+            notifyItemRangeInserted(minViewPositionChanged, maxViewPositionChanged);
+            notifyItemRangeChanged(minViewPositionChanged, notes.size());
+
+        } else {        // Notes added at random
+            int sizeOfCurrentDisplayedPreviews = notes.size();
+
+            for (int i = 0; i < amountOfViewsAdding; i++) {
+                notes.add(position.get(i), addList.get(i));
+                notifyItemInserted(position.get(i));
+            }
+            notifyItemRangeChanged(minViewPositionChanged, sizeOfCurrentDisplayedPreviews);
+        }
     }
 
 

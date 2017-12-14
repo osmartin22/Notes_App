@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 
 import com.ozmar.notes.database.NoteAndReminderPreview;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 public interface MainActivityView {
@@ -22,7 +24,7 @@ public interface MainActivityView {
     void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
                                   int noteModifiedResult, boolean noteIsFavorite);
 
-    void updateAdapterList(List<NoteAndReminderPreview> list);
+    void updateAdapterList(@NonNull List<NoteAndReminderPreview> list);
 
     void startMultiSelect(int position);
 
@@ -38,7 +40,8 @@ public interface MainActivityView {
 
     void removeSelectedPreviews();
 
-    void addBackSelectedPreviews(List<Integer> selectedPositions, List<NoteAndReminderPreview> selectedPreviews);
+    void addBackSelectedPreviews(@NonNull List<Integer> selectedPositions,
+                                 @NotNull List<NoteAndReminderPreview> selectedPreviews);
 
     void finishMultiSelectCAB();
 

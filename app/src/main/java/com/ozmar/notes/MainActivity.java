@@ -268,20 +268,20 @@ public class MainActivity extends AppCompatActivity implements
         public boolean onActionItemClicked(ActionMode actionMode, MenuItem menuItem) {
             switch (menuItem.getItemId()) {
                 case R.id.contextualArchive:
-                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviews(),
-                            ARCHIVE, ARCHIVE_NOTES);
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPositions(),
+                            notesAdapter.getSelectedPreviews(), ARCHIVE, ARCHIVE_NOTES);
                     return true;
                 case R.id.contextualUnarchive:
-                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviews(),
-                            UNARCHIVE, USER_NOTES);
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPositions(),
+                            notesAdapter.getSelectedPreviews(), UNARCHIVE, USER_NOTES);
                     return true;
                 case R.id.contextualDelete:
-                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviews(),
-                            DELETE, RECYCLE_BIN_NOTES);
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPositions(),
+                            notesAdapter.getSelectedPreviews(), DELETE, RECYCLE_BIN_NOTES);
                     return true;
                 case R.id.contextualRestore:
-                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPreviews(),
-                            RESTORE, USER_NOTES);
+                    mActivityPresenter.onMenuActionIconClicked(notesAdapter.getSelectedPositions(),
+                            notesAdapter.getSelectedPreviews(), RESTORE, USER_NOTES);
                     return true;
                 case R.id.contextualDeleteForever:
 //                    deleteForever(item);
@@ -327,7 +327,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void addBackSelectedPreviews(List<Integer> selectedPositions, List<NoteAndReminderPreview> selectedPreviews) {
+    public void addBackSelectedPreviews(@NonNull List<Integer> selectedPositions,
+                                        @NonNull List<NoteAndReminderPreview> selectedPreviews) {
         notesAdapter.addSelectedPreviews(selectedPositions, selectedPreviews);
     }
 
@@ -406,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
 
-    private void deleteForever(MenuItem item) {
+    private void deleteForever(@NonNull MenuItem item) {
 //        String message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
         String message = getSnackBarMessage(DELETE_FOREVER, notesAdapter.getSelectedPositions().size());
         new AlertDialog.Builder(MainActivity.this)
@@ -423,7 +424,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void updateAdapterList(List<NoteAndReminderPreview> list) {
+    public void updateAdapterList(@NonNull List<NoteAndReminderPreview> list) {
         notesAdapter.updateAdapterList(list);
     }
 
