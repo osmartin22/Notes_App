@@ -86,6 +86,7 @@ public abstract class MultiSelectDao {
     public void addArchiveListToMainNote(List<ArchiveNote> list) {
         List<MainNote> mainNoteList = new ArrayList<>();
         for (ArchiveNote note : list) {
+            note.setId(0);
             mainNoteList.add(new MainNote(note));
         }
 
@@ -96,6 +97,7 @@ public abstract class MultiSelectDao {
     public void addRecycleBinListToMainNote(List<RecycleBinNote> list) {
         List<MainNote> mainNoteList = new ArrayList<>();
         for (RecycleBinNote note : list) {
+            note.setId(0);
             mainNoteList.add(new MainNote(note));
         }
 
@@ -112,6 +114,7 @@ public abstract class MultiSelectDao {
 
         List<ArchiveNote> archiveNoteList = new ArrayList<>();
         for (MainNote note : list) {
+            note.setId(0);
             archiveNoteList.add(new ArchiveNote(note));
         }
 
@@ -127,6 +130,7 @@ public abstract class MultiSelectDao {
     public void addMainListToRecycleBin(List<MainNote> list) {
         List<RecycleBinNote> recycleBinNoteList = new ArrayList<>();
         for (MainNote note : list) {
+            note.setId(0);
             recycleBinNoteList.add(new RecycleBinNote(note));
         }
 
@@ -137,6 +141,7 @@ public abstract class MultiSelectDao {
     public void addArchiveListToRecycleBin(List<ArchiveNote> list) {
         List<RecycleBinNote> recycleBinNoteList = new ArrayList<>();
         for (ArchiveNote note : list) {
+            note.setId(0);
             recycleBinNoteList.add(new RecycleBinNote(note));
         }
 
