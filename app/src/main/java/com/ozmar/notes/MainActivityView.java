@@ -21,8 +21,12 @@ public interface MainActivityView {
 
     void swapLayout(int layout);
 
-    void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
-                                  int noteModifiedResult, boolean noteIsFavorite);
+    void removeAPreview(int position);
+
+    void addAPreview(@NonNull NoteAndReminderPreview preview, int position);
+
+    void updateAPreview(@NonNull NoteAndReminderPreview preview, int position);
+
 
     void updateAdapterList(@NonNull List<NoteAndReminderPreview> list);
 
@@ -30,11 +34,9 @@ public interface MainActivityView {
 
     void multiSelect(int position);
 
-    void showSnackBar(int cabAction);
+    void showSnackBar(int cabAction, int numOfNotesSelected);
 
     void notifyEntireAdapter();
-
-    List<Integer> getSelectedPositions();
 
     void clearSelectedPositions();
 

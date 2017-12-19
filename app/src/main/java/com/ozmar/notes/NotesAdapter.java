@@ -2,6 +2,7 @@ package com.ozmar.notes;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -39,7 +40,7 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
     }
 
 
-    public void updateAdapterList(List<NoteAndReminderPreview> list) {
+    public void updateAdapterList(@NonNull List<NoteAndReminderPreview> list) {
         notes.clear();
         notes.addAll(list);
         notifyDataSetChanged();
@@ -55,13 +56,13 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         notifyItemRangeChanged(position, notes.size());
     }
 
-    public void addAt(int position, NoteAndReminderPreview notePreview) {
+    public void addAt(@NonNull NoteAndReminderPreview notePreview, int position) {
         notes.add(position, notePreview);
         notifyItemInserted(position);
         notifyItemRangeChanged(position, notes.size());
     }
 
-    public void updateAt(int position, NoteAndReminderPreview notePreview) {
+    public void updateAt(@NonNull NoteAndReminderPreview notePreview, int position) {
         notes.set(position, notePreview);
         notifyItemChanged(position);
     }
@@ -79,10 +80,12 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         selectedPositions.clear();
     }
 
+    @NonNull
     public List<Integer> getSelectedPositions() {
         return new ArrayList<>(selectedPositions);
     }
 
+    @NonNull
     public List<NoteAndReminderPreview> getSelectedPreviews() {
         List<NoteAndReminderPreview> list = new ArrayList<>();
         for (Integer position : selectedPositions) {
@@ -132,7 +135,8 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    public void addSelectedPreviews(List<Integer> position, List<NoteAndReminderPreview> addList) {
+    public void addSelectedPreviews(@NonNull List<Integer> position,
+                                    @NonNull List<NoteAndReminderPreview> addList) {
         int amountOfViewsAdding = addList.size();
         int minViewPositionChanged = Collections.min(position);
         int maxViewPositionChanged = Collections.max(position);
@@ -217,19 +221,21 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         }
     }
 
-    private void displayReminder(@Nullable ReminderPreview reminderPreview, TextView reminderText) {
+    private void displayReminder(@Nullable ReminderPreview reminderPreview,
+                                 @NonNull TextView reminderText) {
         if (reminderPreview != null) {
             if (reminderPreview.getIsRepeating() != 0) {
-                reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_repeat_dark_gray_small,
-                        0, 0, 0);
+                reminderText.setCompoundDrawablesWithIntrinsicBounds(
+                        R.drawable.ic_repeat_dark_gray_small, 0, 0, 0);
             } else {
-                reminderText.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_reminder_dark_gray_small,
-                        0, 0, 0);
+                reminderText.setCompoundDrawablesWithIntrinsicBounds(
+                        R.drawable.ic_reminder_dark_gray_small, 0, 0, 0);
             }
 
             reminderText.setText(FormatUtils.getReminderText(context,
                     new DateTime(reminderPreview.getNextReminderTime())));
             reminderText.setVisibility(View.VISIBLE);
+
         } else {
             reminderText.setVisibility(View.GONE);
         }

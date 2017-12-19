@@ -9,12 +9,14 @@ import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.database.RecycleBinNote;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
+// TODO : Add ability to delete a note forever by multi select or in note editor
 
 public class MainActivityPresenter {
 
@@ -26,11 +28,11 @@ public class MainActivityPresenter {
     private int listUsed = -1;
 
     private int listToAddTo = -1;
-    private int listRequestedDuringMultiSelect = -1;
-    private int processMultiSelectCount = 0;
+    private int listRequestedBeforeProcessingDone = -1;
+    private int processingMenuActionCount = 0;
     private boolean isMultiSelect = false;
     private boolean undoClicked = false;
-    private boolean processingMultiSelect = false;
+    private boolean processingMenuAction = false;
     private boolean menuActionIconClicked = false;
 
     private MainActivityView mActivityView;
@@ -91,20 +93,89 @@ public class MainActivityPresenter {
         mActivityView.swapLayout(layoutChoice);
     }
 
-    public void onGetANotePreview(int noteId, int listUsed, int notePosition, int noteModifiedResult,
-                                  boolean noteIsFavorite) {
-        mDisposable.add(mInteractor.getNotePreview(noteId, listUsed)
+
+    public void onNoteEditorActivityResult(@NonNull NoteResult noteResult) {
+        mDisposable.add(mInteractor.getNotePreview(noteResult.getNoteId(), noteResult.getListUsed())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(noteAndReminderPreview -> mActivityView.noteModifiedInNoteEditor(
-                        noteAndReminderPreview, notePosition, listUsed, noteModifiedResult,
-                        noteIsFavorite)));
+                .subscribe(preview -> decideActivityResultAction(preview, noteResult)));
     }
 
+    private void decideActivityResultAction(@NonNull NoteAndReminderPreview preview,
+                                            @NonNull NoteResult noteResult) {
+
+        if (noteResult.getNoteEditorAction() != -1) {
+            menuActionInEditor(preview, noteResult);
+        } else {
+            noteModifiedInEditor(preview, noteResult);
+        }
+    }
+
+    private void menuActionInEditor(@NonNull NoteAndReminderPreview preview,
+                                    @NonNull NoteResult noteResult) {
+        selectedPreviews = new ArrayList<>(Collections.singleton(preview));
+        selectedPositions = new ArrayList<>(Collections.singleton(noteResult.getNotePosition()));
+        listToAddTo = getListToAddToFromMenuAction(noteResult.getNoteEditorAction());
+
+
+        // TODO: Make a sure a note that no longer belongs to a list after being edited is not
+        // added back to the list when undo is pressed
+        // i.e., In favorite list -> not no longer a favorite
+        // On undo, it should not be added back to the list as it no longer belongs to it
+        // Undo action should still be allowed
+        if (!noteResult.isNewNote()) {
+            mActivityView.removeAPreview(noteResult.getNotePosition());
+        }
+
+        mActivityView.showSnackBar(noteResult.getNoteEditorAction(), selectedPositions.size());
+    }
+
+    private void noteModifiedInEditor(@NonNull NoteAndReminderPreview preview,
+                                      @NonNull NoteResult noteResult) {
+        int noteModification = noteResult.getNoteModification();
+        int notePosition = noteResult.getNotePosition();
+        int listUsed = noteResult.getListUsed();
+
+        if (noteModification == 0) {    // Update rv with noteChanges to the note
+            mActivityView.updateAPreview(preview, notePosition);
+
+        } else if (noteModification == 1) {    // Update rv with new note
+            if (listUsed == 0) {
+                mActivityView.addAPreview(preview, notePosition);
+
+            } else if (listUsed == FAVORITE_NOTES && noteResult.isFavoriteNote()) {
+                mActivityView.addAPreview(preview, notePosition);
+            }
+
+        } else if (noteModification == 2) {    // Remove note from rv (Delete Forever)
+            mActivityView.removeAPreview(notePosition);
+
+        } else if (noteModification == 3) {    // Title/Content not modified but note is no longer a favorite
+            if (listUsed == FAVORITE_NOTES) {
+                mActivityView.removeAPreview(notePosition);
+            }
+        }
+    }
+
+    private int getListToAddToFromMenuAction(int menuAction) {
+        int listToAddTo = 0;
+
+        if (menuAction == 0) {
+            listToAddTo = ARCHIVE_NOTES;
+        } else if (menuAction == 1 || menuAction == 3) {
+            listToAddTo = USER_NOTES;
+        } else if (menuAction == 2) {
+            listToAddTo = RECYCLE_BIN_NOTES;
+        }
+
+        return listToAddTo;
+    }
+
+
     public void onGetPreviewList(int listUsed) {
-        if (processingMultiSelect) {
+        if (processingMenuAction) {
             mActivityView.dismissSnackBar();
-            listRequestedDuringMultiSelect = listUsed;
+            listRequestedBeforeProcessingDone = listUsed;
 
         } else {
             retrievePreviewList(listUsed);
@@ -125,13 +196,13 @@ public class MainActivityPresenter {
                                         @NonNull List<NoteAndReminderPreview> selectedPreviews,
                                         int cabAction, int listToAddTo) {
         menuActionIconClicked = true;
-        processingMultiSelect = true;
+        processingMenuAction = true;
         this.selectedPositions = selectedPositions;
         this.selectedPreviews = selectedPreviews;
         this.listToAddTo = listToAddTo;
 
         mActivityView.removeSelectedPreviews();
-        mActivityView.showSnackBar(cabAction);
+        mActivityView.showSnackBar(cabAction, selectedPositions.size());
         mActivityView.finishMultiSelectCAB();
     }
 
@@ -147,7 +218,9 @@ public class MainActivityPresenter {
     public void onUndoClicked() {
         undoClicked = true;
         isMultiSelect = false;
-        mActivityView.addBackSelectedPreviews(selectedPositions, selectedPreviews);
+        if (!selectedPreviews.isEmpty()) {
+            mActivityView.addBackSelectedPreviews(selectedPositions, selectedPreviews);
+        }
     }
 
     public void onEndMultiSelect() {
@@ -156,10 +229,6 @@ public class MainActivityPresenter {
     }
 
     public void onDeleteIconClicked() {
-
-    }
-
-    public void onActivityResult() {
 
     }
 
@@ -176,17 +245,18 @@ public class MainActivityPresenter {
         menuActionIconClicked = false;
     }
 
+
     // TODO: Remember to cancel reminder notifications when deleting reminders
     public void processChosenNotes() {
 
         if (undoClicked) {
             undoClicked = false;
-            processingMultiSelect = false;
+            processingMenuAction = false;
             listToAddTo = -1;
 
         } else {
             // Wait for two more threads to finish before allowing the user to switch the current list
-            processMultiSelectCount += 2;
+            processingMenuActionCount += 2;
             List<Integer> selectedIds = getIdsOfSelectedPreviews(selectedPreviews);
 
             if (listUsed == USER_NOTES || listUsed == FAVORITE_NOTES) {
@@ -210,13 +280,13 @@ public class MainActivityPresenter {
     }
 
     private void onProcessChosenNotesFinished() {
-        if (--processMultiSelectCount == 0) {
+        if (--processingMenuActionCount == 0) {
             listToAddTo = -1;
-            processingMultiSelect = false;
+            processingMenuAction = false;
 
-            if (listRequestedDuringMultiSelect != -1) {
-                retrievePreviewList(listRequestedDuringMultiSelect);
-                listRequestedDuringMultiSelect = -1;
+            if (listRequestedBeforeProcessingDone != -1) {
+                retrievePreviewList(listRequestedBeforeProcessingDone);
+                listRequestedBeforeProcessingDone = -1;
             }
         }
     }

@@ -312,11 +312,6 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public List<Integer> getSelectedPositions() {
-        return notesAdapter.getSelectedPositions();
-    }
-
-    @Override
     public void clearSelectedPositions() {
         notesAdapter.clearSelectedPositions();
     }
@@ -357,8 +352,8 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @Override
-    public void showSnackBar(int cabAction) {
-        String message = getSnackBarMessage(cabAction, notesAdapter.getSelectedPositions().size());
+    public void showSnackBar(int cabAction, int numOfNotesSelected) {
+        String message = getSnackBarMessage(cabAction, numOfNotesSelected);
 
         if (message != null) {
             mSnackBar = Snackbar.make(findViewById(R.id.coordinatorLayout), message, Snackbar.LENGTH_LONG);
@@ -440,49 +435,41 @@ public class MainActivity extends AppCompatActivity implements
                 int noteId = bundle.getInt(getString(R.string.noteIdIntent), -1);
                 int notePosition = bundle.getInt(getString(R.string.notePositionIntent), -1);
                 int listUsed = bundle.getInt(getString(R.string.listUsedIntent), mActivityPresenter.getListUsed());
-                int noteResult = bundle.getInt(getString(R.string.noteSuccessIntent), -1);
+                int noteModification = bundle.getInt(getString(R.string.noteSuccessIntent), -1);
                 int noteEditorAction = bundle.getInt(getString(R.string.menuActionIntent), -1);
-
-                boolean noteIsFavorite = bundle.getBoolean(getString(R.string.noteIsFavoriteIntent), false);
+                boolean isFavoriteNote = bundle.getBoolean(getString(R.string.noteIsFavoriteIntent), false);
 
                 boolean isNewNote = notePosition == -1;
                 if (isNewNote) {
                     notePosition = 0;
                 }
 
-                if (noteId != -1 && (noteEditorAction != -1 || noteResult != -1)) {
-                    mActivityPresenter.onGetANotePreview(noteId, listUsed, notePosition,
-                            noteResult, noteIsFavorite);
+                if (noteId != -1 && (noteEditorAction != -1 || noteModification != -1)) {
+                    mActivityPresenter.onNoteEditorActivityResult(
+                            new NoteResult(noteId, notePosition, listUsed, noteModification,
+                                    noteEditorAction, isFavoriteNote, isNewNote));
                 }
             }
         }
     }
 
+
     @Override
-    public void noteModifiedInNoteEditor(@NonNull NoteAndReminderPreview preview, int notePosition, int listUsed,
-                                         int noteModifiedResult, boolean noteIsFavorite) {
-
-        final int FAVORITE_NOTES = 1;
-
-        if (noteModifiedResult == 0) {    // Update rv with noteChanges to the note
-            notesAdapter.updateAt(notePosition, preview);
-
-        } else if (noteModifiedResult == 1) {    // Update rv with new note
-            if (listUsed == 0) {
-                notesAdapter.addAt(notePosition, preview);
-            } else if (listUsed == FAVORITE_NOTES && noteIsFavorite) {
-                notesAdapter.addAt(notePosition, preview);
-            }
-
-        } else if (noteModifiedResult == 2) {    // Remove note from rv (Delete Forever)
-            notesAdapter.removeAt(notePosition);
-
-        } else if (noteModifiedResult == 3) {    // Title/Content not modified but note is no longer a favorite
-            if (listUsed == FAVORITE_NOTES) {
-                notesAdapter.removeAt(notePosition);
-            }
-        }
+    public void removeAPreview(int position) {
+        notesAdapter.removeAt(position);
     }
+
+    @Override
+    public void addAPreview(@NonNull NoteAndReminderPreview preview, int position) {
+        notesAdapter.addAt(preview, position);
+    }
+
+    @Override
+    public void updateAPreview(@NonNull NoteAndReminderPreview preview, int position) {
+        notesAdapter.updateAt(preview, position);
+    }
+
+
 
     @Override
     protected void onStart() {
