@@ -10,7 +10,7 @@ import com.ozmar.notes.Reminder;
 
 
 @Database(entities = {MainNote.class, ArchiveNote.class, RecycleBinNote.class, Reminder.class},
-        version = 1, exportSchema = false)
+        version = 2, exportSchema = false)
 @TypeConverters({DaysChosenConverter.class, DateTimeConverter.class})
 public abstract class AppDatabase extends RoomDatabase {
 
