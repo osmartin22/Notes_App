@@ -113,21 +113,28 @@ public class MainActivityPresenter {
 
     private void menuActionInEditor(@NonNull NoteAndReminderPreview preview,
                                     @NonNull NoteResult noteResult) {
-        selectedPreviews = new ArrayList<>(Collections.singleton(preview));
-        selectedPositions = new ArrayList<>(Collections.singleton(noteResult.getNotePosition()));
-        listToAddTo = getListToAddToFromMenuAction(noteResult.getNoteEditorAction());
 
+        int numOfSelectedNotes;
 
-        // TODO: Make a sure a note that no longer belongs to a list after being edited is not
-        // added back to the list when undo is pressed
-        // i.e., In favorite list -> not no longer a favorite
-        // On undo, it should not be added back to the list as it no longer belongs to it
-        // Undo action should still be allowed
+        // Check if pressing the undo button in SnackBar will add back the note preview to the adapter
+        // i.e. Unfavoriting a note in the note editor and then archiving will remove the note preview
+        // when going back to the main activity. If looking at the list of all favorite notes,
+        // pressing Undo should not add the preview as the archived note is no longer a favorite
+        if (!(!noteResult.isFavoriteNote() && noteResult.getListUsed() == FAVORITE_NOTES)) {
+            selectedPreviews = new ArrayList<>(Collections.singleton(preview));
+            selectedPositions = new ArrayList<>(Collections.singleton(noteResult.getNotePosition()));
+            listToAddTo = getListToAddToFromMenuAction(noteResult.getNoteEditorAction());
+            numOfSelectedNotes = selectedPositions.size();
+
+        } else {
+            numOfSelectedNotes = 1;
+        }
+
         if (!noteResult.isNewNote()) {
             mActivityView.removeAPreview(noteResult.getNotePosition());
         }
 
-        mActivityView.showSnackBar(noteResult.getNoteEditorAction(), selectedPositions.size());
+        mActivityView.showSnackBar(noteResult.getNoteEditorAction(), numOfSelectedNotes);
     }
 
     private void noteModifiedInEditor(@NonNull NoteAndReminderPreview preview,
@@ -218,7 +225,7 @@ public class MainActivityPresenter {
     public void onUndoClicked() {
         undoClicked = true;
         isMultiSelect = false;
-        if (!selectedPreviews.isEmpty()) {
+        if (selectedPreviews != null && selectedPositions != null) {
             mActivityView.addBackSelectedPreviews(selectedPositions, selectedPreviews);
         }
     }
