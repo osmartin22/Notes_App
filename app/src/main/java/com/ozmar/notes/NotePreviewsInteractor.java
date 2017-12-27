@@ -18,7 +18,7 @@ import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 
-public class MainActivityInteractor {
+public class NotePreviewsInteractor {
 
     private static final int USER_NOTES = 0;
     private static final int FAVORITE_NOTES = 1;
@@ -27,7 +27,7 @@ public class MainActivityInteractor {
 
     private AppDatabase db;
 
-    public MainActivityInteractor() {
+    public NotePreviewsInteractor() {
         this.db = AppDatabase.getAppDatabase();
     }
 

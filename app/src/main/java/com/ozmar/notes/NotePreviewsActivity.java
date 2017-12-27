@@ -27,6 +27,8 @@ import com.ozmar.notes.noteEditor.NoteEditorActivity;
 
 import java.util.List;
 
+import dagger.android.AndroidInjection;
+
 import static android.support.v7.widget.DividerItemDecoration.HORIZONTAL;
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
@@ -35,8 +37,8 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 // TODO: Sometimes when multi selecting a note, it gets removed from the list properly but is not added
 // to the desired list. It is not shown in any of the lists
 
-public class MainActivity extends AppCompatActivity implements
-        NavigationView.OnNavigationItemSelectedListener, MainActivityView {
+public class NotePreviewsActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener, NotePreviewsView {
 
     private static final int USER_NOTES = 0;
     private static final int FAVORITE_NOTES = 1;
@@ -54,22 +56,23 @@ public class MainActivity extends AppCompatActivity implements
 
     private int layoutChoice;
     private MenuItem layoutIcon;
-    private Preferences preferences;
+    private SharedPreferencesHelper preferences;
     private ActionMode mActionMode;
     private Snackbar mSnackBar;
 
     private ActivityMainBinding mBinding;
-    private MainActivityPresenter mActivityPresenter;
+    private NotePreviewsPresenter mActivityPresenter;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
+        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         setSupportActionBar(mBinding.myToolbar);
-        preferences = new Preferences(MainActivity.this);
+        preferences = new SharedPreferencesHelper(NotePreviewsActivity.this);
         AppDatabase.setUpAppDatabase(getApplicationContext());
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -89,26 +92,26 @@ public class MainActivity extends AppCompatActivity implements
         mBinding.navView.setNavigationItemSelectedListener(this);
         mBinding.navView.getMenu().getItem(0).setChecked(true);
 
-        mActivityPresenter = new MainActivityPresenter(MainActivity.this);
+        mActivityPresenter = new NotePreviewsPresenter(NotePreviewsActivity.this);
 
         setUpRecyclerView();
     }
 
     private void setUpRecyclerView() {
-        notesAdapter = new NotesAdapter(MainActivity.this);
+        notesAdapter = new NotesAdapter(NotePreviewsActivity.this);
         mActivityPresenter.onGetPreviewList(0);
 
         layoutChoice = preferences.getLayoutChoice();
         rv = mBinding.recyclerView;
         rv.setHasFixedSize(true);
 
-        DividerItemDecoration decoration = new DividerItemDecoration(MainActivity.this, VERTICAL);
-        DividerItemDecoration decoration2 = new DividerItemDecoration(MainActivity.this, HORIZONTAL);
+        DividerItemDecoration decoration = new DividerItemDecoration(NotePreviewsActivity.this, VERTICAL);
+        DividerItemDecoration decoration2 = new DividerItemDecoration(NotePreviewsActivity.this, HORIZONTAL);
         rv.addItemDecoration(decoration);
         rv.addItemDecoration(decoration2);
         rv.setAdapter(notesAdapter);
 
-        rv.addOnItemTouchListener(new RecyclerItemListener(MainActivity.this,
+        rv.addOnItemTouchListener(new RecyclerItemListener(NotePreviewsActivity.this,
                 rv, new RecyclerItemListener.RecyclerTouchListener() {
             public void onClickItem(View view, int position) {
                 mActivityPresenter.onNoteClick(position);
@@ -191,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements
             case 0:
             default:
                 layoutIcon.setIcon(R.drawable.ic_staggered_grid_layout);
-                rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                rv.setLayoutManager(new LinearLayoutManager(NotePreviewsActivity.this));
                 layoutChoice = 1;
                 break;
             case 1:
@@ -213,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements
                 break;
             case 1:
                 layoutIcon.setIcon(R.drawable.ic_staggered_grid_layout);
-                rv.setLayoutManager(new LinearLayoutManager(MainActivity.this));
+                rv.setLayoutManager(new LinearLayoutManager(NotePreviewsActivity.this));
         }
     }
 
@@ -223,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void openNoteEditorActivity(int notePosition, int listUsed) {
-        Intent intent = new Intent(MainActivity.this, NoteEditorActivity.class);
+        Intent intent = new Intent(NotePreviewsActivity.this, NoteEditorActivity.class);
         intent.putExtra(getString(R.string.noteIdIntent), notePosition != -1 ? notesAdapter.getNoteIdAt(notePosition) : -1);
         intent.putExtra(getString(R.string.notePositionIntent), notePosition);
         intent.putExtra(getString(R.string.listUsedIntent), listUsed);
@@ -405,7 +408,7 @@ public class MainActivity extends AppCompatActivity implements
     private void deleteForever(@NonNull MenuItem item) {
 //        String message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
         String message = getSnackBarMessage(DELETE_FOREVER, notesAdapter.getSelectedPositions().size());
-        new AlertDialog.Builder(MainActivity.this)
+        new AlertDialog.Builder(NotePreviewsActivity.this)
                 .setMessage("")
                 .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
 //                    List<MainNote> temp = new ArrayList<>(buffer.currentBufferNotes());
@@ -474,7 +477,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onStart() {
         if (mActivityPresenter != null) {
-            mActivityPresenter.onAttach(MainActivity.this);
+            mActivityPresenter.onAttach(NotePreviewsActivity.this);
         }
         super.onStart();
     }

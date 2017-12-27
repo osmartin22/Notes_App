@@ -15,7 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.ozmar.notes.FrequencyChoices;
-import com.ozmar.notes.MainActivity;
+import com.ozmar.notes.NotePreviewsActivity;
 import com.ozmar.notes.R;
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.database.MainNote;
@@ -24,8 +24,10 @@ import com.ozmar.notes.notifications.ReminderManager;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.FormatUtils;
 
-// TODO: Notes/Reminders not updating properly(as a result also can't add a reminder to a note,
-// although the reminder is created and saved in the database
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
+
 
 public class NoteEditorActivity extends AppCompatActivity
         implements ReminderDialogFragment.OnReminderPickedListener, NoteEditorView {
@@ -40,18 +42,21 @@ public class NoteEditorActivity extends AppCompatActivity
 
     private MenuItem favoriteIcon;
     private ActivityNoteEditorBinding mBinding;
-    private NoteEditorPresenter noteEditorPresenter;
+
+    @Inject
+    NoteEditorPresenter noteEditorPresenter;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         setTheme(R.style.AppTheme);
+        AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_note_editor);
         setupToolbar();
 
-        noteEditorPresenter = new NoteEditorPresenter(NoteEditorActivity.this);
+//        noteEditorPresenter = new NoteEditorPresenter(NoteEditorActivity.this);
 
         Intent intent = getIntent();
         int noteId = intent.getIntExtra(getString(R.string.noteIdIntent), -1);
@@ -248,7 +253,7 @@ public class NoteEditorActivity extends AppCompatActivity
     @Override
     public void goBackToMainActivity(@Nullable MainNote note, int result, int listUsed) {
         if (note != null) {
-            Intent intent = new Intent(NoteEditorActivity.this, MainActivity.class);
+            Intent intent = new Intent(NoteEditorActivity.this, NotePreviewsActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
             intent.putExtra(getString(R.string.listUsedIntent), listUsed);

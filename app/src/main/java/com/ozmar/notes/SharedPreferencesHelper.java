@@ -6,13 +6,13 @@ import android.content.SharedPreferences;
 import org.joda.time.LocalTime;
 
 
-public class Preferences {
+public class SharedPreferencesHelper {
 
     private final Context context;
     private final SharedPreferences preferences;
     private SharedPreferences.Editor editor;
 
-    public Preferences(Context context) {
+    public SharedPreferencesHelper(Context context) {
         this.context = context;
         this.preferences = context.getSharedPreferences(context.getString(R.string.userSettingsPreference),
                 Context.MODE_PRIVATE);

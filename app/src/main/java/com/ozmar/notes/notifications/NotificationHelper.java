@@ -10,7 +10,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
-import com.ozmar.notes.MainActivity;
+import com.ozmar.notes.NotePreviewsActivity;
 import com.ozmar.notes.R;
 
 
@@ -38,7 +38,7 @@ public class NotificationHelper {
     }
 
     public static Notification buildNotification(Context context, String title, String content) {
-        Intent intent = new Intent(context, MainActivity.class);
+        Intent intent = new Intent(context, NotePreviewsActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
 

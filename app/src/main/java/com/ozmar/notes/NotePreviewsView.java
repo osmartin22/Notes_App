@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface MainActivityView {
+public interface NotePreviewsView {
 
 
     // Possible problem, FAB has the function launchNoteEditor()

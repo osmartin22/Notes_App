@@ -9,6 +9,7 @@ import com.ozmar.notes.database.ArchiveNote;
 import com.ozmar.notes.database.MainNote;
 
 import javax.annotation.Nonnull;
+import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
@@ -23,8 +24,9 @@ public class NoteEditorInteractor {
 
     private AppDatabase db;
 
-    public NoteEditorInteractor() {
-        this.db = AppDatabase.getAppDatabase();
+    @Inject
+    public NoteEditorInteractor(AppDatabase appDatabase) {
+        this.db = appDatabase;
     }
 
     public Single<Long> addNote(@Nonnull MainNote note) {
@@ -63,7 +65,7 @@ public class NoteEditorInteractor {
     }
 
     public Single<Reminder> getReminder(int reminderId) {
-        return Single.fromCallable(()->db.remindersDao().getReminder(reminderId));
+        return Single.fromCallable(() -> db.remindersDao().getReminder(reminderId));
     }
 
     public Completable updateReminder(@Nonnull Reminder reminder) {

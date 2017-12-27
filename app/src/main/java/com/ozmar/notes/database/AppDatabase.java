@@ -33,7 +33,6 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     }
 
-
     public static AppDatabase getAppDatabase() {
         return INSTANCE;
     }

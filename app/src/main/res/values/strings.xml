@@ -2,7 +2,7 @@
     <string name="app_name">Notes</string>
 
     <!-- Strings used for intents -->
-    <!-- Used to pass data between MainActivity and NoteEditorActivity -->
+    <!-- Used to pass data betwNotePreviewsActivityvity and NoteEditorActivity -->
     <string name="noteIdIntent">Note Id</string>
     <string name="listUsedIntent">List Used</string>
     <string name="noteSuccessIntent">Note Success</string>
@@ -26,7 +26,7 @@
     <string name="reminderNoteMenuItem">Add Reminder</string>
 
 
-    <!-- MenuItem names for MainActivity -->
+    <!-- MenuItem names NotePreviewsActivityvity -->
     <string name="layoutManager">Change Layout</string>
 
 
@@ -39,7 +39,7 @@
     <string name="editRecycleBinNote">Can\'t edit notePreview in Trash</string>
 
 
-    <!-- CAB menu items in MainActivity-->
+    <!-- CAB menu itemsNotePreviewsActivityvity-->
     <string name="deleteContextualMenuItem">Delete</string>
     <string name="archiveContextualMenuItem">Archive</string>
     <string name="unarchiveContextualMenuItem">Unarchive</string>

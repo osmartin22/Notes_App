@@ -13,7 +13,7 @@ import android.widget.AdapterView;
 import android.widget.Toast;
 
 import com.ozmar.notes.FrequencyChoices;
-import com.ozmar.notes.Preferences;
+import com.ozmar.notes.SharedPreferencesHelper;
 import com.ozmar.notes.R;
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.utils.FormatUtils;
@@ -56,7 +56,7 @@ public class ReminderDialogFragment extends DialogFragment
     private boolean frequencySpinnerTouched = false;
 
     private Context mContext;
-    private Preferences preferences;
+    private SharedPreferencesHelper preferences;
     private OnReminderPickedListener myCallback;
 
 
@@ -108,7 +108,7 @@ public class ReminderDialogFragment extends DialogFragment
         }
 
         View view = View.inflate(getActivity(), R.layout.reminder_dialog_layout, null);
-        preferences = new Preferences(mContext);
+        preferences = new SharedPreferencesHelper(mContext);
         setUpSpinnerStrings();
 
         createSpinners(view);

@@ -18,7 +18,7 @@ import io.reactivex.schedulers.Schedulers;
 
 // TODO : Add ability to delete a note forever by multi select or in note editor
 
-public class MainActivityPresenter {
+public class NotePreviewsPresenter {
 
     private static final int USER_NOTES = 0;
     private static final int FAVORITE_NOTES = 1;
@@ -35,17 +35,17 @@ public class MainActivityPresenter {
     private boolean processingMenuAction = false;
     private boolean menuActionIconClicked = false;
 
-    private MainActivityView mActivityView;
-    private MainActivityInteractor mInteractor;
+    private NotePreviewsView mActivityView;
+    private NotePreviewsInteractor mInteractor;
     private CompositeDisposable mDisposable;
 
     private List<Integer> selectedPositions;
     private List<NoteAndReminderPreview> selectedPreviews;
 
 
-    public MainActivityPresenter(MainActivityView mActivityView) {
+    public NotePreviewsPresenter(NotePreviewsView mActivityView) {
         this.mActivityView = mActivityView;
-        this.mInteractor = new MainActivityInteractor();
+        this.mInteractor = new NotePreviewsInteractor();
         this.mDisposable = new CompositeDisposable();
     }
 
@@ -53,9 +53,9 @@ public class MainActivityPresenter {
         return listUsed;
     }
 
-    public void onAttach(MainActivity mainActivityView) {
-        this.mActivityView = mainActivityView;
-        this.mInteractor = new MainActivityInteractor();
+    public void onAttach(NotePreviewsActivity notePreviewsActivityView) {
+        this.mActivityView = notePreviewsActivityView;
+        this.mInteractor = new NotePreviewsInteractor();
     }
 
     public void onDestroy() {

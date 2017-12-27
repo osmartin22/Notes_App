@@ -27,6 +27,8 @@ public class NoteEditorPresenter {
 
     private NoteEditorView mEditorView;
     private NoteEditorInteractor mEditorInteractor;
+
+
     private final CompositeDisposable mDisposable = new CompositeDisposable();
 
     @Nullable
@@ -36,9 +38,10 @@ public class NoteEditorPresenter {
     private Reminder mReminder;
 
 
-    public NoteEditorPresenter(@Nonnull NoteEditorView mEditorView) {
+    public NoteEditorPresenter(@Nonnull NoteEditorView mEditorView, NoteEditorInteractor noteEditorInteractor) {
         this.mEditorView = mEditorView;
-        this.mEditorInteractor = new NoteEditorInteractor();
+        this.mEditorInteractor = noteEditorInteractor;
+//        this.mEditorInteractor = mEditorInteractor;//new NoteEditorInteractor();
     }
 
     @Nullable
