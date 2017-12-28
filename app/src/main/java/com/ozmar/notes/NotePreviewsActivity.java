@@ -20,12 +20,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.ozmar.notes.database.AppDatabase;
 import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.databinding.ActivityMainBinding;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import dagger.android.AndroidInjection;
 
@@ -56,12 +57,16 @@ public class NotePreviewsActivity extends AppCompatActivity implements
 
     private int layoutChoice;
     private MenuItem layoutIcon;
-    private SharedPreferencesHelper preferences;
+
     private ActionMode mActionMode;
     private Snackbar mSnackBar;
 
+    @Inject
+    SharedPreferencesHelper preferences;
     private ActivityMainBinding mBinding;
-    private NotePreviewsPresenter mActivityPresenter;
+
+    @Inject
+    NotePreviewsPresenter mActivityPresenter;
 
 
     @Override
@@ -72,8 +77,7 @@ public class NotePreviewsActivity extends AppCompatActivity implements
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         setSupportActionBar(mBinding.myToolbar);
-        preferences = new SharedPreferencesHelper(NotePreviewsActivity.this);
-        AppDatabase.setUpAppDatabase(getApplicationContext());
+//        AppDatabase.setUpAppDatabase(getApplicationContext());
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mBinding.drawerLayout, mBinding.myToolbar,
@@ -92,7 +96,7 @@ public class NotePreviewsActivity extends AppCompatActivity implements
         mBinding.navView.setNavigationItemSelectedListener(this);
         mBinding.navView.getMenu().getItem(0).setChecked(true);
 
-        mActivityPresenter = new NotePreviewsPresenter(NotePreviewsActivity.this);
+//        mActivityPresenter = new NotePreviewsPresenter(NotePreviewsActivity.this);
 
         setUpRecyclerView();
     }
@@ -496,7 +500,6 @@ public class NotePreviewsActivity extends AppCompatActivity implements
 
     @Override
     protected void onDestroy() {
-        AppDatabase.destroyInstance();
         super.onDestroy();
     }
 }

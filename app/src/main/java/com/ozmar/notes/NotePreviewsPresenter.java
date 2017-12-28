@@ -43,9 +43,10 @@ public class NotePreviewsPresenter {
     private List<NoteAndReminderPreview> selectedPreviews;
 
 
-    public NotePreviewsPresenter(NotePreviewsView mActivityView) {
+    public NotePreviewsPresenter(@NonNull NotePreviewsView mActivityView,
+                                 @NonNull NotePreviewsInteractor notePreviewsInteractor) {
         this.mActivityView = mActivityView;
-        this.mInteractor = new NotePreviewsInteractor();
+        this.mInteractor = notePreviewsInteractor;
         this.mDisposable = new CompositeDisposable();
     }
 
@@ -53,9 +54,9 @@ public class NotePreviewsPresenter {
         return listUsed;
     }
 
+
     public void onAttach(NotePreviewsActivity notePreviewsActivityView) {
         this.mActivityView = notePreviewsActivityView;
-        this.mInteractor = new NotePreviewsInteractor();
     }
 
     public void onDestroy() {

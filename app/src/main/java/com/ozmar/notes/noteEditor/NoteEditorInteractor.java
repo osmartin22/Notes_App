@@ -9,7 +9,6 @@ import com.ozmar.notes.database.ArchiveNote;
 import com.ozmar.notes.database.MainNote;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
@@ -24,7 +23,6 @@ public class NoteEditorInteractor {
 
     private AppDatabase db;
 
-    @Inject
     public NoteEditorInteractor(AppDatabase appDatabase) {
         this.db = appDatabase;
     }

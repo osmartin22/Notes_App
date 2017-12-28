@@ -12,6 +12,7 @@ public class SharedPreferencesHelper {
     private final SharedPreferences preferences;
     private SharedPreferences.Editor editor;
 
+
     public SharedPreferencesHelper(Context context) {
         this.context = context;
         this.preferences = context.getSharedPreferences(context.getString(R.string.userSettingsPreference),

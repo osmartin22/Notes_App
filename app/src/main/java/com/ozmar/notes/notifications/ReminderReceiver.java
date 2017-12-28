@@ -14,6 +14,9 @@ import com.ozmar.notes.utils.ReminderUtils;
 
 import org.joda.time.DateTime;
 
+import javax.inject.Inject;
+
+import dagger.android.AndroidInjection;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -34,22 +37,20 @@ public class ReminderReceiver extends BroadcastReceiver {
     private String title, content;
     private int notificationId;
     private PendingResult mPendingResult;
-    private AppDatabase db;
+
+    @Inject
+    AppDatabase db;
 
 
     @Override
     public void onReceive(@NonNull Context context, Intent intent) {
-
+        AndroidInjection.inject(this, context);
         mContext = context;
         notificationId = intent.getIntExtra(context.getString(R.string.notificationId), 0);
         title = intent.getStringExtra(context.getString(R.string.notificationTitle));
         content = intent.getStringExtra(context.getString(R.string.notificationContent));
 
         mPendingResult = goAsync();
-        if (AppDatabase.getAppDatabase() == null) {
-            AppDatabase.setUpAppDatabase(context);
-        }
-        db = AppDatabase.getAppDatabase();
 
         NotificationManager nManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

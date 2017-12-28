@@ -27,8 +27,8 @@ public class NotePreviewsInteractor {
 
     private AppDatabase db;
 
-    public NotePreviewsInteractor() {
-        this.db = AppDatabase.getAppDatabase();
+    public NotePreviewsInteractor(AppDatabase appDatabase) {
+        this.db = appDatabase;
     }
 
     @NonNull

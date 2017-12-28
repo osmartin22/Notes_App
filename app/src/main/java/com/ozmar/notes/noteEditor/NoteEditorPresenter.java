@@ -38,10 +38,10 @@ public class NoteEditorPresenter {
     private Reminder mReminder;
 
 
-    public NoteEditorPresenter(@Nonnull NoteEditorView mEditorView, NoteEditorInteractor noteEditorInteractor) {
-        this.mEditorView = mEditorView;
-        this.mEditorInteractor = noteEditorInteractor;
-//        this.mEditorInteractor = mEditorInteractor;//new NoteEditorInteractor();
+    public NoteEditorPresenter(@Nonnull NoteEditorView noteEditorView,
+                               @NonNull NoteEditorInteractor noteEditorInteractor) {
+        mEditorView = noteEditorView;
+        mEditorInteractor = noteEditorInteractor;
     }
 
     @Nullable

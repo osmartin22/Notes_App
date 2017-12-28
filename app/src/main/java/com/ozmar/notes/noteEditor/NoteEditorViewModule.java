@@ -1,7 +1,4 @@
-package com.ozmar.notes.di;
-
-import com.ozmar.notes.noteEditor.NoteEditorActivity;
-import com.ozmar.notes.noteEditor.NoteEditorView;
+package com.ozmar.notes.noteEditor;
 
 import dagger.Binds;
 import dagger.Module;
