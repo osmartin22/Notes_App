@@ -1,8 +1,9 @@
-package com.ozmar.notes;
+package com.ozmar.notes.notePreviews;
 
 
 import android.support.annotation.NonNull;
 
+import com.ozmar.notes.NoteResult;
 import com.ozmar.notes.database.ArchiveNote;
 import com.ozmar.notes.database.MainNote;
 import com.ozmar.notes.database.NoteAndReminderPreview;
@@ -16,7 +17,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
-// TODO : Add ability to delete a note forever by multi select or in note editor
 
 public class NotePreviewsPresenter {
 

@@ -106,7 +106,7 @@ public class NoteEditorPresenter {
             boolean contentEmpty = content.isEmpty();
 
             if (!(titleEmpty && contentEmpty)) {
-                createNewNote(title, content);
+                createNewNote(title, content, mReminder);
             } else {
                 mEditorView.goBackToMainActivity(null, -1, listUsed);
             }
@@ -162,15 +162,15 @@ public class NoteEditorPresenter {
         return result;
     }
 
-    private void createNewNote(@NonNull String title,
-                               @NonNull String content) {
+    private void createNewNote(@NonNull String title, @NonNull String content,
+                               @Nullable Reminder reminder) {
         isNewNote = true;
-        if (mReminder != null) {
+        if (reminder != null) {
 
             mMainNote = new MainNote(title, content, System.currentTimeMillis(),
                     favorite ? 1 : 0, -1);
-            observableAddReminder(mReminder);
-            mEditorView.setupReminderNotification(mMainNote, mReminder);
+            observableAddReminder(reminder);
+            mEditorView.setupReminderNotification(mMainNote, reminder);
 
         } else {
             mMainNote = new MainNote(title, content, System.currentTimeMillis(),
@@ -342,18 +342,20 @@ public class NoteEditorPresenter {
             }
 
             reminderModified = true;
+            mEditorView.updateReminderDisplay(newReminderText, mReminder.getFrequencyChoices());
         }
-        mEditorView.updateReminderDisplay(newReminderText, mReminder.getFrequencyChoices());
     }
 
     public void onReminderDeleted() {
-        if (mMainNote != null && mMainNote.getReminderId() != -1) {
-            if (mReminder != null) {
+        if (mReminder != null) {
+
+            if (mMainNote != null && mMainNote.getReminderId() != -1) {
                 reminderModified = true;
                 mEditorInteractor.deleteReminder(mReminder);
             }
+
+            mReminder = null;
+            mEditorView.hideReminder();
         }
-        mReminder = null;
-        mEditorView.hideReminder();
     }
 }

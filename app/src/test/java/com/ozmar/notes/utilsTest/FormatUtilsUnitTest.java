@@ -1,4 +1,4 @@
-package com.ozmar.notes;
+package com.ozmar.notes.utilsTest;
 
 import android.support.annotation.NonNull;
 

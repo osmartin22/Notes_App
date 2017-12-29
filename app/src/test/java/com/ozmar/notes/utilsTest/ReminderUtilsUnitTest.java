@@ -1,5 +1,6 @@
-package com.ozmar.notes;
+package com.ozmar.notes.utilsTest;
 
+import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.utils.ReminderUtils;
 
 import junit.framework.Assert;

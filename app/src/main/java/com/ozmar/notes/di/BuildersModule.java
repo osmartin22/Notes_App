@@ -1,10 +1,12 @@
 package com.ozmar.notes.di;
 
 
-import com.ozmar.notes.NotePreviewsActivity;
+import com.ozmar.notes.notePreviews.NotePreviewsActivity;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
 import com.ozmar.notes.noteEditor.NoteEditorModule;
 import com.ozmar.notes.noteEditor.NoteEditorViewModule;
+import com.ozmar.notes.notePreviews.NotePreviewsModule;
+import com.ozmar.notes.notePreviews.NotePreviewsViewModule;
 import com.ozmar.notes.notifications.ReminderReceiver;
 
 import dagger.Module;

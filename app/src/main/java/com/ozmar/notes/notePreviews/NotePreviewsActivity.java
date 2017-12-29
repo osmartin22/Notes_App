@@ -1,4 +1,4 @@
-package com.ozmar.notes;
+package com.ozmar.notes.notePreviews;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -20,6 +20,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.ozmar.notes.NoteResult;
+import com.ozmar.notes.NotesAdapter;
+import com.ozmar.notes.R;
+import com.ozmar.notes.RecyclerItemListener;
+import com.ozmar.notes.SharedPreferencesHelper;
 import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.databinding.ActivityMainBinding;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
@@ -61,12 +66,13 @@ public class NotePreviewsActivity extends AppCompatActivity implements
     private ActionMode mActionMode;
     private Snackbar mSnackBar;
 
-    @Inject
-    SharedPreferencesHelper preferences;
     private ActivityMainBinding mBinding;
 
     @Inject
     NotePreviewsPresenter mActivityPresenter;
+
+    @Inject
+    SharedPreferencesHelper preferences;
 
 
     @Override
@@ -77,7 +83,6 @@ public class NotePreviewsActivity extends AppCompatActivity implements
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         setSupportActionBar(mBinding.myToolbar);
-//        AppDatabase.setUpAppDatabase(getApplicationContext());
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, mBinding.drawerLayout, mBinding.myToolbar,
@@ -95,8 +100,6 @@ public class NotePreviewsActivity extends AppCompatActivity implements
 
         mBinding.navView.setNavigationItemSelectedListener(this);
         mBinding.navView.getMenu().getItem(0).setChecked(true);
-
-//        mActivityPresenter = new NotePreviewsPresenter(NotePreviewsActivity.this);
 
         setUpRecyclerView();
     }
@@ -475,7 +478,6 @@ public class NotePreviewsActivity extends AppCompatActivity implements
     public void updateAPreview(@NonNull NoteAndReminderPreview preview, int position) {
         notesAdapter.updateAt(preview, position);
     }
-
 
 
     @Override

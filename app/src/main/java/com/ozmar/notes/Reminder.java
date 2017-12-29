@@ -16,7 +16,7 @@ import javax.annotation.Nonnull;
 // TODO: Update rest of code to handle null DateTimes
 
 @Entity(tableName = "remindersTable")
-public final class Reminder implements Parcelable {
+public final class Reminder implements Parcelable, Cloneable {
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "reminderId")
@@ -43,6 +43,11 @@ public final class Reminder implements Parcelable {
         this.mFrequencyChoices = frequencyChoices;
     }
 
+
+    @Override
+    public Reminder clone() throws CloneNotSupportedException {
+        return (Reminder) super.clone();
+    }
 
     public int getId() {
         return id;

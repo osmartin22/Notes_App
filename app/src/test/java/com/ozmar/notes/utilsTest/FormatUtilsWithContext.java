@@ -1,8 +1,10 @@
-package com.ozmar.notes;
+package com.ozmar.notes.utilsTest;
 
 
 import android.content.Context;
 
+import com.ozmar.notes.BuildConfig;
+import com.ozmar.notes.FrequencyChoices;
 import com.ozmar.notes.utils.FormatUtils;
 
 import org.joda.time.DateTime;

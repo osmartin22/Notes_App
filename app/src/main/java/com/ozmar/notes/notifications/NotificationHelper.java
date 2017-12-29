@@ -10,7 +10,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.support.v4.app.NotificationCompat;
 
-import com.ozmar.notes.NotePreviewsActivity;
+import com.ozmar.notes.notePreviews.NotePreviewsActivity;
 import com.ozmar.notes.R;
 
 

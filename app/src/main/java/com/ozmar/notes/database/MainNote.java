@@ -9,7 +9,7 @@ import android.arch.persistence.room.PrimaryKey;
 import javax.annotation.Nonnull;
 
 @Entity(tableName = "userNotes")
-public class MainNote extends BaseNote {
+public class MainNote extends BaseNote implements Cloneable{
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
@@ -54,6 +54,10 @@ public class MainNote extends BaseNote {
         this.reminderId = -1;
     }
 
+    @Override
+    public MainNote clone() throws CloneNotSupportedException {
+        return (MainNote) super.clone();
+    }
 
     public int getId() {
         return id;

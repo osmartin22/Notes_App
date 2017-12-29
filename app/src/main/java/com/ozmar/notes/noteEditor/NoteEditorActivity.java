@@ -15,7 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.ozmar.notes.FrequencyChoices;
-import com.ozmar.notes.NotePreviewsActivity;
+import com.ozmar.notes.notePreviews.NotePreviewsActivity;
 import com.ozmar.notes.R;
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.database.MainNote;

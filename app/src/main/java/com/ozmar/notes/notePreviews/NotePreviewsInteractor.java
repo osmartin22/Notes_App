@@ -1,4 +1,4 @@
-package com.ozmar.notes;
+package com.ozmar.notes.notePreviews;
 
 
 import android.support.annotation.IntRange;

@@ -1,8 +1,8 @@
-package com.ozmar.notes.di;
+package com.ozmar.notes.notePreviews;
 
 
-import com.ozmar.notes.NotePreviewsActivity;
-import com.ozmar.notes.NotePreviewsView;
+import com.ozmar.notes.notePreviews.NotePreviewsActivity;
+import com.ozmar.notes.notePreviews.NotePreviewsView;
 
 import dagger.Binds;
 import dagger.Module;
