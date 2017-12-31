@@ -2,7 +2,7 @@
     <string name="app_name">Notes</string>
 
     <!-- Strings used for intents -->
-    <!-- Used to pass data betwNotePreviewsActivityvity and NoteEditorActivity -->
+    <!-- Used to pass data between NotePreviewsActivity and NoteEditorActivity -->
     <string name="noteIdIntent">Note Id</string>
     <string name="listUsedIntent">List Used</string>
     <string name="noteSuccessIntent">Note Success</string>
@@ -26,20 +26,20 @@
     <string name="reminderNoteMenuItem">Add Reminder</string>
 
 
-    <!-- MenuItem names NotePreviewsActivityvity -->
+    <!-- MenuItem names NotePreviewsActivity -->
     <string name="layoutManager">Change Layout</string>
 
 
     <!-- Strings used for delete dialog fragment -->
-    <string name="messageDialog">Do you want to delete this notePreview?</string>
+    <string name="messageDialog">Do you want to delete this note?</string>
     <string name="deleteDialog">Delete</string>
     <string name="cancelDialog">Cancel</string>
 
     <!-- String for trying to edit a RecycleVin note -->
-    <string name="editRecycleBinNote">Can\'t edit notePreview in Trash</string>
+    <string name="editRecycleBinNote">Can\'t edit note in Trash</string>
 
 
-    <!-- CAB menu itemsNotePreviewsActivityvity-->
+    <!-- CAB menu itemsNotePreviewsActivity-->
     <string name="deleteContextualMenuItem">Delete</string>
     <string name="archiveContextualMenuItem">Archive</string>
     <string name="unarchiveContextualMenuItem">Unarchive</string>
@@ -48,7 +48,7 @@
 
     <!-- Delete forever dialog strings -->
     <plurals name="deleteForever">
-        <item quantity="one">Delete notePreview forever?</item>
+        <item quantity="one">Delete note forever?</item>
         <item quantity="other">Delete notes forever?</item>
     </plurals>
 

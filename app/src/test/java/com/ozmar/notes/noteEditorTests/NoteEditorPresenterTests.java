@@ -37,6 +37,15 @@ import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
 public class NoteEditorPresenterTests {
 
+    private static final int USER_NOTES = 0;
+    private static final int FAVORITE_NOTES = 1;
+    private static final int ARCHIVE_NOTES = 2;
+    private static final int RECYCLE_BIN_NOTES = 3;
+
+    private static final String newReminderText = "New Reminder Text";
+    private static final String updateTitle = "Updated Title";
+    private static final String updateContent = "Updated Content";
+
     @Mock
     private NoteEditorView mNoteEditorView;
 
@@ -47,8 +56,6 @@ public class NoteEditorPresenterTests {
 
     private MainNote mNote;
     private Reminder mReminder;
-
-    private final String newReminderText = "New Reminder Text";
 
 
     @BeforeClass
@@ -105,7 +112,7 @@ public class NoteEditorPresenterTests {
     // Tests involving initializing the presenter with/without a note and reminder
     @Test
     public void initializeWithoutNote_IsCorrect() throws Exception {
-        int listUsed = 0;
+        int listUsed = USER_NOTES;
         initializeWithoutNoteAndReminder(listUsed);
         Assert.assertEquals(listUsed, mEditorPresenter.getListUsed());
         verify(mNoteEditorView, times(1)).requestFocusOnContent();
@@ -113,14 +120,14 @@ public class NoteEditorPresenterTests {
 
     @Test
     public void initializeWithReminder_IsCorrect() throws Exception {
-        int listUsed = 1;
+        int listUsed = FAVORITE_NOTES;
         initializeWithReminder(listUsed);
         assertInitialization(mNote, false, listUsed);
     }
 
     @Test
     public void initializeWithoutReminder_IsCorrect() throws Exception {
-        int listUsed = 0;
+        int listUsed = ARCHIVE_NOTES;
         initializeWithoutReminder(listUsed);
         assertInitialization(mNote, true, listUsed);
     }
@@ -144,8 +151,7 @@ public class NoteEditorPresenterTests {
 
     @Test
     public void receivedCorrectReminder() throws Exception {
-        int listUsed = 0;
-        initializeWithReminder(listUsed);
+        initializeWithReminder(USER_NOTES);
 
         Assert.assertEquals(mReminder, mEditorPresenter.getReminder());
         verify(mNoteEditorView, times(1)).showReminder(mReminder);
@@ -224,7 +230,7 @@ public class NoteEditorPresenterTests {
     // Tests for saving a new note with/without a reminder
     @Test
     public void onSaveNote_NewEmptyNote_IsCorrect() throws Exception {
-        int listUsed = 0;
+        int listUsed = USER_NOTES;
         initializeWithoutNoteAndReminder(listUsed);
         mEditorPresenter.onSaveNote("", "");
         verify(mNoteEditorView, times(1)).goBackToMainActivity(null, -1, listUsed);
@@ -232,7 +238,7 @@ public class NoteEditorPresenterTests {
 
     @Test
     public void onSaveNote_NewNoteWithoutReminder_IsCorrect() throws Exception {
-        int listUsed = 0;
+        int listUsed = USER_NOTES;
         initializeWithoutNoteAndReminder(listUsed);
 
         // Using argument matcher since the MainNote is created in a private function and when() does
@@ -246,7 +252,7 @@ public class NoteEditorPresenterTests {
 
     @Test
     public void onSaveNote_NewNoteWithReminder_IsCorrect() throws Exception {
-        int listUsed = 0;
+        int listUsed = USER_NOTES;
         initializeWithoutNoteAndReminder(listUsed);
 
         // Using argument matcher since the MainNote is created in a private function and when() does
@@ -268,7 +274,7 @@ public class NoteEditorPresenterTests {
     // Tests for saving a preexisting note with/without a reminder
     @Test
     public void onSaveNote_SameNote_IsCorrect() throws Exception {
-        int listUsed = 0;
+        int listUsed = USER_NOTES;
         initializeWithoutReminder(listUsed);
 
         mEditorPresenter.onSaveNote(mNote.getTitle(), mNote.getContent());
@@ -279,11 +285,11 @@ public class NoteEditorPresenterTests {
 
     @Test
     public void onSaveNote_UpdateNoteWithoutReminder_IsCorrect() throws Exception {
-        int listUsed = 0;
+        int listUsed = USER_NOTES;
         initializeWithoutReminder(listUsed);
 
         when(mEditorInteractor.updateNote(mNote, listUsed)).thenReturn(Completable.complete());
-        mEditorPresenter.onSaveNote("Updated Title", "Updated Content");
+        mEditorPresenter.onSaveNote(updateTitle, updateContent);
 
         verify(mEditorInteractor, times(1)).updateNote(mNote, listUsed);
         verify(mNoteEditorView, times(1)).goBackToMainActivity(mNote, 0, listUsed);
@@ -291,11 +297,11 @@ public class NoteEditorPresenterTests {
 
     @Test
     public void onSaveNote_UpdateNoteWithReminder_IsCorrect() throws Exception {
-        int listUsed = 0;
+        int listUsed = USER_NOTES;
         initializeWithReminder(listUsed);
 
         when(mEditorInteractor.updateNote(mNote, listUsed)).thenReturn(Completable.complete());
-        mEditorPresenter.onSaveNote("Updated Title", "Updated Content");
+        mEditorPresenter.onSaveNote(updateTitle, updateContent);
 
         verify(mEditorInteractor, times(0)).updateReminder(any(Reminder.class));
         verify(mEditorInteractor, times(1)).updateNote(mNote, listUsed);
@@ -303,8 +309,8 @@ public class NoteEditorPresenterTests {
     }
 
     @Test
-    public void onSaveNote_UpdateNoteWithChangesToReminder_IsCorrect() throws Exception {
-        int listUsed = 0;
+    public void onSaveNote_UpdateNoteAndReminder_IsCorrect() throws Exception {
+        int listUsed = ARCHIVE_NOTES;
         initializeWithReminder(listUsed);
 
         Reminder newReminder = mReminder.clone();
@@ -313,11 +319,110 @@ public class NoteEditorPresenterTests {
 
         when(mEditorInteractor.updateNote(mNote, listUsed)).thenReturn(Completable.complete());
         when(mEditorInteractor.updateReminder(newReminder)).thenReturn(Completable.complete());
-        mEditorPresenter.onSaveNote("Updated Title", "Updated Content");
+        mEditorPresenter.onSaveNote(updateTitle, updateContent);
 
         verify(mEditorInteractor, times(1)).updateReminder(newReminder);
         verify(mEditorInteractor, times(1)).updateNote(mNote, listUsed);
         verify(mNoteEditorView, times(1)).goBackToMainActivity(mNote, 0, listUsed);
+    }
+
+
+    // Tests for updating/deleting/adding the reminder
+    @Test
+    public void onSaveNote_SameNoteUpdateReminder_IsCorrect() throws Exception {
+        int listUsed = FAVORITE_NOTES;
+        initializeWithReminder(listUsed);
+
+        Reminder newReminder = mReminder.clone();
+        newReminder.setDateTime(DateTime.now());
+        addReminderToPresenter(newReminder);
+
+        when(mEditorInteractor.updateReminder(newReminder)).thenReturn(Completable.complete());
+        mEditorPresenter.onSaveNote(mNote.getTitle(), mNote.getContent());
+
+        verify(mEditorInteractor, times(1)).updateReminder(newReminder);
+        verify(mEditorInteractor, times(0)).updateNote(mNote, listUsed);
+        verify(mNoteEditorView, times(1)).goBackToMainActivity(mNote, 0, listUsed);
+    }
+
+    @Test
+    public void onSaveNote_SameNoteDeleteReminder_IsCorrect() throws Exception {
+        int listUsed = USER_NOTES;
+        initializeWithReminder(listUsed);
+
+        mEditorPresenter.onReminderDeleted();
+        when(mEditorInteractor.updateNote(mNote, listUsed)).thenReturn(Completable.complete());
+        when(mEditorInteractor.deleteReminder(mNote.getReminderId())).thenReturn(Completable.complete());
+        mEditorPresenter.onSaveNote(mNote.getTitle(), mNote.getContent());
+
+        verify(mEditorInteractor, times(1)).deleteReminder(mReminder.getId());
+        verify(mNoteEditorView, times(1)).cancelReminderNotification(mReminder.getId());
+        verify(mEditorInteractor, times(1)).updateNote(mNote, listUsed);
+        verify(mNoteEditorView, times(1)).goBackToMainActivity(mNote, 0, listUsed);
+    }
+
+    @Test
+    public void onSaveNote_UpdateNoteDeleteReminder_IsCorrect() throws Exception {
+        int listUsed = USER_NOTES;
+        initializeWithReminder(listUsed);
+
+        mEditorPresenter.onReminderDeleted();
+        when(mEditorInteractor.updateNote(mNote, listUsed)).thenReturn(Completable.complete());
+        when(mEditorInteractor.deleteReminder(mNote.getReminderId())).thenReturn(Completable.complete());
+        mEditorPresenter.onSaveNote(updateTitle, updateContent);
+
+        verify(mEditorInteractor, times(1)).deleteReminder(mReminder.getId());
+        verify(mNoteEditorView, times(1)).cancelReminderNotification(mReminder.getId());
+        verify(mEditorInteractor, times(1)).updateNote(mNote, listUsed);
+        verify(mNoteEditorView, times(1)).goBackToMainActivity(mNote, 0, listUsed);
+    }
+
+    @Test
+    public void onSaveNote_UpdateNoteAddReminder_IsCorrect() throws Exception {
+        int listUsed = USER_NOTES;
+        initializeWithoutReminder(listUsed);
+
+        addReminderToPresenter(mReminder);
+        when(mEditorInteractor.updateNote(mNote, listUsed)).thenReturn(Completable.complete());
+        when(mEditorInteractor.addReminder(mReminder)).thenReturn(Single.just((long) mReminder.getId()));
+        mEditorPresenter.onSaveNote(updateTitle, updateContent);
+
+        verify(mEditorInteractor, times(1)).addReminder(mReminder);
+        verify(mEditorInteractor, times(1)).updateNote(mNote, listUsed);
+        verify(mNoteEditorView, times(1)).setupReminderNotification(mNote, mReminder);
+        verify(mNoteEditorView, times(1)).goBackToMainActivity(mNote, 0, listUsed);
+    }
+
+
+    // Test if the correct value is returned when a note is unfavorited while the current list
+    // looked at in NotePreviewsActivity is the favorite list
+    @Test
+    public void onSaveNote_UnFavoriteNote_IsCorrect() throws Exception {
+        int listUsed = FAVORITE_NOTES;
+        initializeWithoutReminder(listUsed);
+
+        addReminderToPresenter(mReminder);
+        when(mEditorInteractor.updateNote(mNote, listUsed)).thenReturn(Completable.complete());
+        when(mEditorInteractor.addReminder(mReminder)).thenReturn(Single.just((long) mReminder.getId()));
+        mEditorPresenter.onFavoriteClicked();
+        mEditorPresenter.onSaveNote(updateTitle, updateContent);
+
+        verify(mEditorInteractor, times(1)).addReminder(mReminder);
+        verify(mEditorInteractor, times(1)).updateNote(mNote, listUsed);
+        verify(mNoteEditorView, times(1)).setupReminderNotification(mNote, mReminder);
+        verify(mNoteEditorView, times(1)).goBackToMainActivity(mNote, 3, listUsed);
+    }
+
+
+    // Method should only be called when the list viewed is the Recycle Bin list
+    @Test
+    public void onDeleteForever_RecycleBin_IsCorrect() throws Exception {
+        int listUsed = RECYCLE_BIN_NOTES;
+        initializeWithoutReminder(listUsed);
+
+        mEditorPresenter.onDeleteNoteForever();
+
+        verify(mNoteEditorView, times(1)).goBackToMainActivity(mNote, 2, listUsed);
     }
 
 

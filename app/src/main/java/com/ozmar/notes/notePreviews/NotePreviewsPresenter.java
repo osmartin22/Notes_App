@@ -157,6 +157,9 @@ public class NotePreviewsPresenter {
 
         } else if (noteModification == 2) {    // Remove note from rv (Delete Forever)
             mActivityView.removeAPreview(notePosition);
+            mDisposable.add(mInteractor.deleteNoteFromRecycleBin(preview.getNotePreview().getId())
+                    .subscribeOn(Schedulers.io())
+                    .subscribe());
 
         } else if (noteModification == 3) {    // Title/Content not modified but note is no longer a favorite
             if (listUsed == FAVORITE_NOTES) {

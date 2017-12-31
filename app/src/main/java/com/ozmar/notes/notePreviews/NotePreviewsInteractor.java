@@ -43,6 +43,9 @@ public class NotePreviewsInteractor {
         return Maybe.fromCallable(() -> db.previewsDao().getANotePreview(noteId, listUsed));
     }
 
+    public Completable deleteNoteFromRecycleBin(int noteId) {
+        return Completable.fromAction(() -> db.notesDao().deleteFromRecycleBinNotes(noteId));
+    }
 
     //---------------------------------------------------------------------------------------//
     // Main specific

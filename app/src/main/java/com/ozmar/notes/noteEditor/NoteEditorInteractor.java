@@ -53,11 +53,6 @@ public class NoteEditorInteractor {
         });
     }
 
-//    public Completable deleteNote(){
-//
-//    }
-
-
     public Single<Long> addReminder(@Nonnull Reminder reminder) {
         return Single.fromCallable(() -> db.remindersDao().addReminder(reminder));
     }
