@@ -80,7 +80,7 @@ public class NoteEditorPresenterTests {
     }
 
     @Before
-    public void setUpNoteEditorPresenterWithNoteAndReminder() throws Exception {
+    public void setUp() throws Exception {
         mEditorPresenter = new NoteEditorPresenter(mNoteEditorView, mEditorInteractor);
 
         mNote = new MainNote(1, "Test Title", "Test Content", 1, 1, 0, -1);

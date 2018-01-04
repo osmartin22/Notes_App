@@ -232,7 +232,7 @@ public class NoteEditorPresenter {
                 needToUpdateNote = true;
                 deleteReminder(note);
 
-            } else {        // Update reminder
+            } else {
                 updateReminder(note, reminder);
             }
 
@@ -243,14 +243,9 @@ public class NoteEditorPresenter {
                 mEditorView.goBackToMainActivity(note, noteChangesResult, listUsed);
             }
 
-        } else if (reminder != null) {      // Add reminder
-            addReminder(note, reminder);
+        } else if (reminder != null) {
+            observableAddReminder(reminder);
         }
-    }
-
-    private void addReminder(@Nonnull MainNote note, @Nonnull Reminder reminder) {
-        observableAddReminder(reminder);
-        mEditorView.setupReminderNotification(note, reminder);
     }
 
     private void updateReminder(@Nonnull MainNote note, @Nonnull Reminder reminder) {
@@ -337,6 +332,7 @@ public class NoteEditorPresenter {
         mReminder.setId((int) reminderId);
         mMainNote.setReminderId((int) reminderId);
 
+        mEditorView.setupReminderNotification(mMainNote, mReminder);
         if (isNewNote) {
             observableAddNote(mMainNote);
         } else {
