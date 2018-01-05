@@ -105,7 +105,6 @@ public class NoteEditorPresenter {
 
             if (mMainNote != null && mMainNote.getReminderId() != -1) {
                 reminderModified = true;
-                mEditorInteractor.deleteReminder(mReminder);
             }
 
             mReminder = null;
@@ -171,7 +170,6 @@ public class NoteEditorPresenter {
             mMainNote = new MainNote(title, content, System.currentTimeMillis(),
                     favorite ? 1 : 0, -1);
             observableAddReminder(reminder);
-            mEditorView.setupReminderNotification(mMainNote, reminder);
 
         } else {
             mMainNote = new MainNote(title, content, System.currentTimeMillis(),

@@ -13,6 +13,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+
         <activity android:name=".notePreviews.NotePreviewsActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,7 +28,7 @@
 
         </activity>
 
-        <receiver android:name=".notifications.ReminderReceiver" />
+        <receiver android:name=".notifications.ReminderNotificationReceiver" />
 
     </application>
 

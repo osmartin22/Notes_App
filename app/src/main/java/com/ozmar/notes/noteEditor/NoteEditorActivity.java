@@ -20,7 +20,7 @@ import com.ozmar.notes.R;
 import com.ozmar.notes.Reminder;
 import com.ozmar.notes.database.MainNote;
 import com.ozmar.notes.databinding.ActivityNoteEditorBinding;
-import com.ozmar.notes.notifications.ReminderManager;
+import com.ozmar.notes.notifications.ReminderNotificationManager;
 import com.ozmar.notes.reminderDialog.ReminderDialogFragment;
 import com.ozmar.notes.utils.FormatUtils;
 
@@ -297,11 +297,11 @@ public class NoteEditorActivity extends AppCompatActivity
 
     @Override
     public void setupReminderNotification(@NonNull MainNote note, @NonNull Reminder reminder) {
-        ReminderManager.setUpReminder(getApplicationContext(), note, reminder);
+        ReminderNotificationManager.setUpReminderAlarm(getApplicationContext(), note, reminder);
     }
 
     @Override
     public void cancelReminderNotification(int noteId) {
-        ReminderManager.cancel(getApplicationContext(), noteId);
+        ReminderNotificationManager.cancelAlarm(getApplicationContext(), noteId);
     }
 }

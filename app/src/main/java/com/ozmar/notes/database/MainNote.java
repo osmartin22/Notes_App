@@ -9,7 +9,7 @@ import android.arch.persistence.room.PrimaryKey;
 import javax.annotation.Nonnull;
 
 @Entity(tableName = "userNotes")
-public class MainNote extends BaseNote implements Cloneable{
+public class MainNote extends BaseNote implements Cloneable {
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
@@ -57,6 +57,56 @@ public class MainNote extends BaseNote implements Cloneable{
     @Override
     public MainNote clone() throws CloneNotSupportedException {
         return (MainNote) super.clone();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof MainNote)) {
+            return false;
+        }
+
+        MainNote note = (MainNote) obj;
+
+        return note.getTitle().equals(getTitle()) &&
+                note.getContent().equals(getContent()) &&
+                note.getTimeCreated() == getTimeCreated() &&
+                note.getTimeModified() == getTimeModified() &&
+                note.favorite == favorite &&
+                note.reminderId == reminderId;
+    }
+
+    @Override
+    public int hashCode() {
+        int prime = 31;
+        int result = 17;
+        result = prime * result + id;
+        result = prime * result + getTitle().hashCode();
+        result = prime * result + getContent().hashCode();
+        result = prime * result + getFavorite();
+        result = prime * result + Long.valueOf(getTimeCreated()).hashCode();
+        result = prime * result + Long.valueOf(getTimeModified()).hashCode();
+        result = prime * result + reminderId;
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getClass().getSimpleName()).append("[ ");
+        sb.append("Id: ").append(id);
+        sb.append(",    Title: ").append(getTitle());
+        sb.append(",    Content: ").append(getContent());
+        sb.append(",    Favorite: ").append(getFavorite());
+        sb.append(",    TimeModified: ").append(getTimeCreated());
+        sb.append(",    ReminderTime: ").append(getTimeModified());
+        sb.append(",    ReminderId: ").append(reminderId);
+        sb.append(" ]");
+
+        return sb.toString();
     }
 
     public int getId() {

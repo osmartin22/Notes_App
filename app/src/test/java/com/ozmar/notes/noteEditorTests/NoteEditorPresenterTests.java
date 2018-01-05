@@ -209,10 +209,8 @@ public class NoteEditorPresenterTests {
     public void onReminderDeleted_WithNoteAndReminder_IsCorrect() throws Exception {
         initializeWithReminder(0);
 
-        when(mEditorInteractor.deleteReminder(mReminder)).thenReturn(Completable.complete());
         mEditorPresenter.onReminderDeleted();
 
-        verify(mEditorInteractor, times(1)).deleteReminder(mReminder);
         verify(mNoteEditorView, times(1)).hideReminder();
     }
 

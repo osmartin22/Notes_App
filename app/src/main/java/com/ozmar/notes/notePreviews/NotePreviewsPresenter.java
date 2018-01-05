@@ -319,6 +319,7 @@ public class NotePreviewsPresenter {
 
         if (listToAddTo == RECYCLE_BIN_NOTES) {
             deleteRemindersFromMain(list);
+            mActivityView.cancelReminderNotifications(getReminderIds(list));
         }
 
         mDisposable.add(mInteractor.addMainListTo(list, listToAddTo)
@@ -331,6 +332,15 @@ public class NotePreviewsPresenter {
         mDisposable.add(mInteractor.deleteRemindersFromMain(list)
                 .subscribeOn(Schedulers.io())
                 .subscribe());
+    }
+
+    private List<Integer> getReminderIds(@NonNull List<MainNote> list) {
+        List<Integer> reminderIds = new ArrayList<>();
+        for (MainNote note : list) {
+            reminderIds.add(note.getReminderId());
+        }
+
+        return reminderIds;
     }
 
 

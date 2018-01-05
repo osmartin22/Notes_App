@@ -7,7 +7,7 @@ import com.ozmar.notes.noteEditor.NoteEditorModule;
 import com.ozmar.notes.noteEditor.NoteEditorViewModule;
 import com.ozmar.notes.notePreviews.NotePreviewsModule;
 import com.ozmar.notes.notePreviews.NotePreviewsViewModule;
-import com.ozmar.notes.notifications.ReminderReceiver;
+import com.ozmar.notes.notifications.ReminderNotificationReceiver;
 
 import dagger.Module;
 import dagger.android.ContributesAndroidInjector;
@@ -23,6 +23,6 @@ public abstract class BuildersModule {
     abstract NoteEditorActivity bindNoteEditorActivity();
 
     @ContributesAndroidInjector
-    abstract ReminderReceiver bindReminderReceiver();
+    abstract ReminderNotificationReceiver bindReminderReceiver();
 
 }

@@ -31,11 +31,9 @@ import io.reactivex.schedulers.Schedulers;
 // A reminder 2 months away does not need to be created.
 // Can have a separate alarm that runs every week that sets up any reminders that
 // will occur in that week
-public class ReminderReceiver extends BroadcastReceiver {
+public class ReminderNotificationReceiver extends BroadcastReceiver {
 
-    private Context mContext;
     private String title, content;
-    private int notificationId;
     private PendingResult mPendingResult;
 
     @Inject
@@ -45,8 +43,8 @@ public class ReminderReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(@NonNull Context context, Intent intent) {
         AndroidInjection.inject(this, context);
-        mContext = context;
-        notificationId = intent.getIntExtra(context.getString(R.string.notificationId), 0);
+
+        int notificationId = intent.getIntExtra(context.getString(R.string.notificationId), 0);
         title = intent.getStringExtra(context.getString(R.string.notificationTitle));
         content = intent.getStringExtra(context.getString(R.string.notificationContent));
 
@@ -60,17 +58,17 @@ public class ReminderReceiver extends BroadcastReceiver {
                     content));
         }
 
-        getReminder(notificationId);
+        getReminder(context, notificationId);
     }
 
-    private void getReminder(int reminderId) {
+    private void getReminder(Context context, int reminderId) {
         Single.fromCallable(() -> db.remindersDao().getReminder(reminderId))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(this::processNextReminder);
+                .subscribe(reminder -> processNextReminder(context, reminder));
     }
 
-    private void processNextReminder(@NonNull Reminder reminder) {
+    private void processNextReminder(@NonNull Context context, @NonNull Reminder reminder) {
 
         if (reminder.getFrequencyChoices() != null) {
 
@@ -98,7 +96,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                             .subscribe();
                 }
 
-                ReminderManager.createReminder(mContext, notificationId, title, content, nextReminderTime);
+                ReminderNotificationManager.createReminderAlarm(context, reminderId, title, content, nextReminderTime);
             }
         }
 

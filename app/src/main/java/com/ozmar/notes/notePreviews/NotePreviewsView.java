@@ -49,6 +49,7 @@ public interface NotePreviewsView {
 
     void dismissSnackBar();
 
+    void cancelReminderNotifications(@NonNull List<Integer> ReminderIds);
 
 //     void onDeleteForeverDialog();
 

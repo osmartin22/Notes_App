@@ -28,6 +28,7 @@ import com.ozmar.notes.SharedPreferencesHelper;
 import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.databinding.ActivityMainBinding;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
+import com.ozmar.notes.notifications.ReminderNotificationManager;
 
 import java.util.List;
 
@@ -409,6 +410,11 @@ public class NotePreviewsActivity extends AppCompatActivity implements
         public void onClick(View view) {
             mActivityPresenter.onUndoClicked();
         }
+    }
+
+    @Override
+    public void cancelReminderNotifications(@NonNull List<Integer> reminderIds) {
+        ReminderNotificationManager.cancelListOfAlarms(getApplicationContext(), reminderIds);
     }
 
 
