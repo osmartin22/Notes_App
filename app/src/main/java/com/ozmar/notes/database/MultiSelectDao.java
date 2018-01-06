@@ -49,35 +49,6 @@ public abstract class MultiSelectDao {
     public abstract void deleteRecycleBinNotes(List<Integer> noteIds);
 
 
-//    //---------------------------------------------------------------------------------------//
-//    // Delete from reminders table transactions
-//    //---------------------------------------------------------------------------------------//
-//
-//    @Transaction
-//    public void deleteRemindersListInMain(List<MainNote> list) {
-//        List<Integer> reminderIds = new ArrayList<>();
-//        for (MainNote note : list) {
-//            if (note.getReminderId() != -1) {
-//                reminderIds.add(note.getReminderId());
-//            }
-//        }
-//
-//        deleteReminders(reminderIds);
-//    }
-//
-//    @Transaction
-//    public void deleteRemindersListInArchive(List<ArchiveNote> list) {
-//        List<Integer> reminderIds = new ArrayList<>();
-//        for (ArchiveNote note : list) {
-//            if (note.getReminderId() != -1) {
-//                reminderIds.add(note.getReminderId());
-//            }
-//        }
-//
-//        deleteReminders(reminderIds);
-//    }
-
-
     //---------------------------------------------------------------------------------------//
     // Add to MainNote table transactions
     //---------------------------------------------------------------------------------------//

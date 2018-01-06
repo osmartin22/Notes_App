@@ -44,11 +44,6 @@ public final class Reminder implements Parcelable, Cloneable {
     }
 
 
-    @Override
-    public Reminder clone() throws CloneNotSupportedException {
-        return (Reminder) super.clone();
-    }
-
     public int getId() {
         return id;
     }
@@ -75,6 +70,12 @@ public final class Reminder implements Parcelable, Cloneable {
         mFrequencyChoices = frequencyChoices;
     }
 
+
+    @Override
+    public Reminder clone() throws CloneNotSupportedException {
+        return (Reminder) super.clone();
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == this) {
@@ -87,9 +88,44 @@ public final class Reminder implements Parcelable, Cloneable {
 
         Reminder reminder = (Reminder) obj;
 
-        return reminder.mDateTime == mDateTime &&
-                reminder.mFrequencyChoices == mFrequencyChoices;
+        boolean frequencyChoiceTheSame = false;
+        if (reminder.mFrequencyChoices != null && mFrequencyChoices != null) {
+            frequencyChoiceTheSame = reminder.mFrequencyChoices.equals(mFrequencyChoices);
+        } else if (reminder.getFrequencyChoices() == null && mFrequencyChoices == null) {
+            frequencyChoiceTheSame = true;
+        }
+
+        return reminder.mDateTime.equals(mDateTime) &&
+                frequencyChoiceTheSame;
     }
+
+    @Override
+    public int hashCode() {
+        int prime = 31;
+        int result = 17;
+        result = prime * result + id;
+        result = prime * result + mDateTime.hashCode();
+        if (mFrequencyChoices != null) {
+            result = prime * result + mFrequencyChoices.hashCode();
+        } else {
+            result = prime * result;
+        }
+
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getClass().getSimpleName()).append("[ ");
+        sb.append("Id: ").append(id);
+        sb.append(",    Next Reminder Time: ").append(mDateTime);
+        sb.append(",    Reminder Repeat: ").append(mFrequencyChoices);
+        sb.append(" ]");
+
+        return sb.toString();
+    }
+
 
     public Reminder(Parcel in) {
         this.mDateTime = new DateTime(in.readLong());

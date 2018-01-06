@@ -155,6 +155,21 @@ public final class FrequencyChoices implements Parcelable {
 
         FrequencyChoices choices = (FrequencyChoices) obj;
 
+        boolean daysChosenTheSame = false;
+
+        // Treat empty list as null
+        // Room returns an empty list instead of null
+        // List should never be empty if it was created through the UI
+        if (choices.daysChosen != null) {
+            if (choices.daysChosen.isEmpty() && (daysChosen == null || daysChosen.isEmpty())) {
+                daysChosenTheSame = true;
+            } else {
+                daysChosenTheSame = choices.daysChosen.containsAll(daysChosen);
+            }
+        } else if (daysChosen == null || daysChosen.isEmpty()) {
+            daysChosenTheSame = true;
+        }
+
         return choices.repeatType == repeatType &&
                 choices.repeatEvery == repeatEvery &&
                 choices.repeatForever == repeatForever &&
@@ -163,8 +178,44 @@ public final class FrequencyChoices implements Parcelable {
                 choices.monthRepeatType == monthRepeatType &&
                 choices.monthWeekToRepeat == monthWeekToRepeat &&
                 choices.monthDayOfWeekToRepeat == monthDayOfWeekToRepeat &&
-                choices.daysChosen.containsAll(daysChosen) &&
+                daysChosenTheSame &&
                 choices.repeatEventsOccurred == repeatEventsOccurred;
+    }
+
+    @Override
+    public int hashCode() {
+        int prime = 31;
+        int result = 17;
+        result = prime * result + repeatType;
+        result = prime * result + repeatEvery;
+        result = prime * result + repeatForever;
+        result = (int) (prime * result + repeatToDate);
+        result = prime * result + repeatEvents;
+        result = prime * result + monthRepeatType;
+        result = prime * result + monthWeekToRepeat;
+        result = prime * result + monthDayOfWeekToRepeat;
+        result = prime * result + daysChosen.hashCode();
+        result = prime * result + repeatEventsOccurred;
+
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(this.getClass().getSimpleName()).append("[ ");
+        sb.append("Repeat Type: ").append(repeatType);
+        sb.append(",    Repeats every: ").append(repeatEvery);
+        sb.append(",    Repeats Forever: ").append(repeatForever);
+        sb.append(",    Repeats to specific date: ").append(repeatToDate);
+        sb.append(",    Repeats for: ").append(repeatEvents).append(" event(s)");
+        sb.append(",    Month Repeat Type: ").append(monthRepeatType);
+        sb.append(",    Week of the month to repeat: ").append(monthWeekToRepeat);
+        sb.append(",    Days of the week chosen: ").append(daysChosen);
+        sb.append(",    Repeat Events Occurred: ").append(repeatEventsOccurred);
+        sb.append(" ]");
+
+        return sb.toString();
     }
 
     public FrequencyChoices(Parcel in) {

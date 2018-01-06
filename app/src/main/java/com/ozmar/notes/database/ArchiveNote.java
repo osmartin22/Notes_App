@@ -9,7 +9,7 @@ import android.arch.persistence.room.PrimaryKey;
 import javax.annotation.Nonnull;
 
 @Entity(tableName = "archiveNotes")
-public class ArchiveNote extends BaseNote {
+public class ArchiveNote extends BaseNote implements Cloneable{
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
@@ -33,6 +33,11 @@ public class ArchiveNote extends BaseNote {
         this.reminderId = note.getReminderId();
     }
 
+
+    @Override
+    public ArchiveNote clone() throws CloneNotSupportedException {
+        return (ArchiveNote) super.clone();
+    }
 
     @Override
     public boolean equals(Object obj) {

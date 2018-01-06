@@ -62,7 +62,7 @@ public class NotesDaoTests {
 
 
     @Test
-    public void getUsersWhenNoUserInserted() {
+    public void getUsersWhenNoUserInserted() throws Exception{
         mDb.notesDao().getAUserNote(1)
                 .test()
                 .assertNoValues();

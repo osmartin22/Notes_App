@@ -9,7 +9,7 @@ import android.arch.persistence.room.PrimaryKey;
 import javax.annotation.Nonnull;
 
 @Entity(tableName = "recycleBinNotes")
-public class RecycleBinNote extends BaseNote {
+public class RecycleBinNote extends BaseNote implements Cloneable{
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "id")
@@ -31,6 +31,11 @@ public class RecycleBinNote extends BaseNote {
     public RecycleBinNote(ArchiveNote note) {
         super(note);
         this.id = note.getId();
+    }
+
+    @Override
+    public RecycleBinNote clone() throws CloneNotSupportedException {
+        return (RecycleBinNote) super.clone();
     }
 
     @Override
