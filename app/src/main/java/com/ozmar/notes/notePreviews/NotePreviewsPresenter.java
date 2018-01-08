@@ -239,8 +239,12 @@ public class NotePreviewsPresenter {
         mActivityView.finishMultiSelectCAB();
     }
 
-    public void onDeleteIconClicked() {
-
+    public void onDeleteIconClicked(@NonNull List<NoteAndReminderPreview> selectedPositions) {
+        mActivityView.removeSelectedPreviews();
+        mActivityView.finishMultiSelectCAB();
+        List<Integer> selectedIds = getIdsOfSelectedPreviews(selectedPositions);
+        deleteList(selectedIds, RECYCLE_BIN_NOTES);
+        processingMenuActionCount++;
     }
 
     public void onMultiSelectDestroy() {
@@ -266,7 +270,8 @@ public class NotePreviewsPresenter {
             listToAddTo = -1;
 
         } else {
-            // Wait for two more threads to finish before allowing the user to switch the current list
+            // Increase threads to wait for by two for every multi select process, decreases as
+            // each process completes
             processingMenuActionCount += 2;
             List<Integer> selectedIds = getIdsOfSelectedPreviews(selectedPreviews);
 
@@ -319,7 +324,7 @@ public class NotePreviewsPresenter {
 
         if (listToAddTo == RECYCLE_BIN_NOTES) {
             deleteRemindersFromMain(list);
-            mActivityView.cancelReminderNotifications(getReminderIds(list));
+            mActivityView.cancelReminderNotifications(getReminderIdsMain(list));
         }
 
         mDisposable.add(mInteractor.addMainListTo(list, listToAddTo)
@@ -334,9 +339,18 @@ public class NotePreviewsPresenter {
                 .subscribe());
     }
 
-    private List<Integer> getReminderIds(@NonNull List<MainNote> list) {
+    private List<Integer> getReminderIdsMain(@NonNull List<MainNote> list) {
         List<Integer> reminderIds = new ArrayList<>();
         for (MainNote note : list) {
+            reminderIds.add(note.getReminderId());
+        }
+
+        return reminderIds;
+    }
+
+    private List<Integer> getReminderIdsArchive(@NonNull List<ArchiveNote> list) {
+        List<Integer> reminderIds = new ArrayList<>();
+        for (ArchiveNote note : list) {
             reminderIds.add(note.getReminderId());
         }
 
@@ -360,6 +374,7 @@ public class NotePreviewsPresenter {
 
         if (listToAddTo == RECYCLE_BIN_NOTES) {
             deleteRemindersFromArchive(list);
+            mActivityView.cancelReminderNotifications(getReminderIdsArchive(list));
         }
 
         mDisposable.add(mInteractor.addArchiveListTo(list, listToAddTo)

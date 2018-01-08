@@ -295,14 +295,13 @@ public class NotePreviewsActivity extends AppCompatActivity implements
                             notesAdapter.getSelectedPreviews(), RESTORE, USER_NOTES);
                     return true;
                 case R.id.contextualDeleteForever:
-//                    deleteForever(item);
+                    deleteForever(notesAdapter.getSelectedPreviews());
                     return true;
                 default:
                     return false;
             }
         }
 
-        // TODO: Fix so as to not call notifyDataSetChanged() every time
         @Override
         public void onDestroyActionMode(ActionMode actionMode) {
             mActivityPresenter.onMultiSelectDestroy();
@@ -418,12 +417,12 @@ public class NotePreviewsActivity extends AppCompatActivity implements
     }
 
 
-    private void deleteForever(@NonNull MenuItem item) {
-//        String message = itemHelper.multiSelectMessage(item, buffer.currentBufferSize());
+    private void deleteForever(@NonNull List<NoteAndReminderPreview> selectedPreviews) {
         String message = getSnackBarMessage(DELETE_FOREVER, notesAdapter.getSelectedPositions().size());
         new AlertDialog.Builder(NotePreviewsActivity.this)
-                .setMessage("")
+                .setMessage(message)
                 .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
+                    mActivityPresenter.onDeleteIconClicked(selectedPreviews);
 //                    List<MainNote> temp = new ArrayList<>(buffer.currentBufferNotes());
 //                    new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
 //                    notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
