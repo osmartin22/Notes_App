@@ -51,7 +51,5 @@ public interface NotePreviewsView {
 
     void cancelReminderNotifications(@NonNull List<Integer> ReminderIds);
 
-//     void onDeleteForeverDialog();
-
 
 }

@@ -261,7 +261,6 @@ public class NotePreviewsPresenter {
     }
 
 
-    // TODO: Remember to cancel reminder notifications when deleting reminders
     public void processChosenNotes() {
 
         if (undoClicked) {

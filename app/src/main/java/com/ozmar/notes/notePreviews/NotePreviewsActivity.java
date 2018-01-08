@@ -423,11 +423,6 @@ public class NotePreviewsActivity extends AppCompatActivity implements
                 .setMessage(message)
                 .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
                     mActivityPresenter.onDeleteIconClicked(selectedPreviews);
-//                    List<MainNote> temp = new ArrayList<>(buffer.currentBufferNotes());
-//                    new BasicDBAsync(db, temp, null, notesAdapter.getListUsed(), 3).execute();
-//                    notesAdapter.removeSelectedViews(buffer.currentBufferPositions());
-//                    buffer.clearBuffer();
-//                    actionMode.finish();
                 })
                 .setNegativeButton(getString(R.string.cancelDialog), null)
                 .show();
