@@ -26,7 +26,7 @@ import com.ozmar.notes.R;
 import com.ozmar.notes.RecyclerItemListener;
 import com.ozmar.notes.SharedPreferencesHelper;
 import com.ozmar.notes.database.NoteAndReminderPreview;
-import com.ozmar.notes.databinding.ActivityMainBinding;
+import com.ozmar.notes.databinding.ActivityNotePreviewsBinding;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
 import com.ozmar.notes.notifications.ReminderNotificationManager;
 
@@ -67,13 +67,13 @@ public class NotePreviewsActivity extends AppCompatActivity implements
     private ActionMode mActionMode;
     private Snackbar mSnackBar;
 
-    private ActivityMainBinding mBinding;
+    private ActivityNotePreviewsBinding mBinding;
 
     @Inject
-    NotePreviewsPresenter mActivityPresenter;
+    public NotePreviewsPresenter mActivityPresenter;
 
     @Inject
-    SharedPreferencesHelper preferences;
+    public SharedPreferencesHelper preferences;
 
 
     @Override
@@ -82,7 +82,7 @@ public class NotePreviewsActivity extends AppCompatActivity implements
         AndroidInjection.inject(this);
         super.onCreate(savedInstanceState);
 
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_note_previews);
         setSupportActionBar(mBinding.myToolbar);
 
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

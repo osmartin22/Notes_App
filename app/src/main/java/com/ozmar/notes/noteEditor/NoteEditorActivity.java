@@ -44,7 +44,7 @@ public class NoteEditorActivity extends AppCompatActivity
     private ActivityNoteEditorBinding mBinding;
 
     @Inject
-    NoteEditorPresenter noteEditorPresenter;
+    public NoteEditorPresenter noteEditorPresenter;
 
 
     @Override
@@ -55,8 +55,6 @@ public class NoteEditorActivity extends AppCompatActivity
 
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_note_editor);
         setupToolbar();
-
-//        noteEditorPresenter = new NoteEditorPresenter(NoteEditorActivity.this);
 
         Intent intent = getIntent();
         int noteId = intent.getIntExtra(getString(R.string.noteIdIntent), -1);
@@ -94,11 +92,11 @@ public class NoteEditorActivity extends AppCompatActivity
             }
 
         } else {
-            menu.findItem(R.id.restore_note).setVisible(true);
-            menu.findItem(R.id.delete_note_forever).setVisible(true);
-            menu.findItem(R.id.delete_note).setVisible(false);
-            menu.findItem(R.id.archive_note).setVisible(false);
             menu.findItem(R.id.favorite_note).setVisible(false);
+            menu.findItem(R.id.archive_note).setVisible(false);
+            menu.findItem(R.id.delete_note).setVisible(false);
+            menu.findItem(R.id.delete_note_forever).setVisible(true);
+            menu.findItem(R.id.restore_note).setVisible(true);
         }
     }
 
@@ -196,6 +194,7 @@ public class NoteEditorActivity extends AppCompatActivity
                         Toast.LENGTH_SHORT).show();
             } else {
                 view.performClick();
+                view.setFocusable(true);
                 view.setFocusableInTouchMode(true);
                 view.requestFocus();
             }
