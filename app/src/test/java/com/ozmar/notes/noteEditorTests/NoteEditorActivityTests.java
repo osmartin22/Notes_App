@@ -1,5 +1,6 @@
 package com.ozmar.notes.noteEditorTests;
 
+import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -42,6 +43,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 
 
@@ -194,19 +196,15 @@ public class NoteEditorActivityTests {
         assertFalse(menu.findItem(R.id.archive_note).isVisible());
     }
 
-
-    // TODO: Finish test
     @Test
     public void reminderFragmentCreated() throws Exception {
-//        when(mEditorPresenter.getReminder()).thenReturn(null);
-//        mActivity.addReminder(null);
-//
-//        Intent intent = Shadows.shadowOf(mActivity).peekNextStartedActivity();
-//
-////        Shadows.shadowOf(mActivity).fra
-//
-//        Assert.assertEquals(NoteEditorActivity.class.getCanonicalName(),
-//                intent.getComponent().getClassName());
+        buildActivity(-1, 0);
+
+        when(mEditorPresenter.getReminder()).thenReturn(createReminder());
+        mActivity.addReminder(null);
+
+        FragmentManager fragmentManager = mActivity.getSupportFragmentManager();
+        assertNotNull(fragmentManager.findFragmentByTag("reminder_dialog_layout"));
     }
 
     @Test
@@ -279,6 +277,8 @@ public class NoteEditorActivityTests {
 
         Drawable expectedDrawable = mActivity.getDrawable(R.drawable.ic_reminder_dark_gray_small);
         Bitmap actualBitMap = ((BitmapDrawable) reminderText.getCompoundDrawables()[0]).getBitmap();
+
+        assert expectedDrawable != null;
         Bitmap expectedBitMap = ((BitmapDrawable) expectedDrawable).getBitmap();
 
         assertEquals(expectedBitMap.toString(), actualBitMap.toString());
@@ -300,6 +300,7 @@ public class NoteEditorActivityTests {
         Drawable expectedDrawable = mActivity.getDrawable(R.drawable.ic_repeat_dark_gray_small);
 
         Bitmap actualBitMap = ((BitmapDrawable) actualDrawable[0]).getBitmap();
+        //noinspection ConstantConditions
         Bitmap expectedBitMap = ((BitmapDrawable) expectedDrawable).getBitmap();
         assertEquals(expectedBitMap.toString(), actualBitMap.toString());
     }
@@ -315,6 +316,7 @@ public class NoteEditorActivityTests {
 
         Drawable expectedFavorite = mActivity.getDrawable(R.drawable.ic_favorite_star_on);
         Bitmap actualFavoriteBitMap = ((BitmapDrawable) favorite.getIcon()).getBitmap();
+        //noinspection ConstantConditions
         Bitmap expectedFavoriteBitMap = ((BitmapDrawable) expectedFavorite).getBitmap();
 
         assertEquals(expectedFavoriteBitMap.toString(), actualFavoriteBitMap.toString());
@@ -331,6 +333,7 @@ public class NoteEditorActivityTests {
 
         Drawable expectedFavorite = mActivity.getDrawable(R.drawable.ic_favorite_star_off);
         Bitmap actualFavoriteBitMap = ((BitmapDrawable) favorite.getIcon()).getBitmap();
+        //noinspection ConstantConditions
         Bitmap expectedFavoriteBitMap = ((BitmapDrawable) expectedFavorite).getBitmap();
 
         assertEquals(expectedFavoriteBitMap.toString(), actualFavoriteBitMap.toString());
@@ -350,6 +353,7 @@ public class NoteEditorActivityTests {
         assertEquals(View.VISIBLE, reminderText.getVisibility());
 
         Drawable expectedDrawable = mActivity.getDrawable(R.drawable.ic_reminder_dark_gray_small);
+        //noinspection ConstantConditions
         Bitmap expectedBitMap = ((BitmapDrawable) expectedDrawable).getBitmap();
         Bitmap actualBitMap = ((BitmapDrawable) reminderText.getCompoundDrawables()[0]).getBitmap();
 
@@ -370,6 +374,7 @@ public class NoteEditorActivityTests {
         assertEquals(View.VISIBLE, reminderText.getVisibility());
 
         Drawable expectedDrawable = mActivity.getDrawable(R.drawable.ic_repeat_dark_gray_small);
+        //noinspection ConstantConditions
         Bitmap expectedBitMap = ((BitmapDrawable) expectedDrawable).getBitmap();
         Bitmap actualBitMap = ((BitmapDrawable) reminderText.getCompoundDrawables()[0]).getBitmap();
 
@@ -387,9 +392,12 @@ public class NoteEditorActivityTests {
     }
 
 
-    // TODO: Finish test
     @Test
-    public void goBackToNotePreviewsActivity() throws Exception {
+    public void goBackToNotePreviewsActivity_ActivityOpened_NoActivityStack() throws Exception {
+        buildActivity(-1, 0);
 
+        mActivity.goBackToMainActivity(createNote(), 0, 0);
+        assertTrue(mActivity.isTaskRoot());
     }
+
 }

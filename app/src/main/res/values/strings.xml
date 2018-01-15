@@ -16,6 +16,13 @@
     <string name="titleEditText">Title</string>
 
 
+    <!-- Toolbar title when selecting notes in NotePreviewsActivity -->
+    <string name="toolbarMainNotes">Notes</string>
+    <string name="toolbarFavoriteNotes">Favorite Notes</string>
+    <string name="toolbarArchiveNotes">Archive</string>
+    <string name="toolbarRecycleBinNotes">Trash</string>
+
+
     <!-- MenuItem names for NoteEditorActivity-->
     <string name="favoriteNoteMenuItem">Favorite Note</string>
     <string name="archiveNoteMenuItem">Archive Note</string>
@@ -35,11 +42,11 @@
     <string name="deleteDialog">Delete</string>
     <string name="cancelDialog">Cancel</string>
 
-    <!-- String for trying to edit a RecycleVin note -->
+    <!-- String for trying to edit a RecycleBin note -->
     <string name="editRecycleBinNote">Can\'t edit note in Trash</string>
 
 
-    <!-- CAB menu itemsNotePreviewsActivity-->
+    <!-- CAB menu items in NotePreviewsActivity-->
     <string name="deleteContextualMenuItem">Delete</string>
     <string name="archiveContextualMenuItem">Archive</string>
     <string name="unarchiveContextualMenuItem">Unarchive</string>

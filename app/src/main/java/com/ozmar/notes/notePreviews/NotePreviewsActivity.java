@@ -107,7 +107,7 @@ public class NotePreviewsActivity extends AppCompatActivity implements
 
     private void setUpRecyclerView() {
         notesAdapter = new NotesAdapter(NotePreviewsActivity.this);
-        mActivityPresenter.onGetPreviewList(0);
+//        mActivityPresenter.onGetPreviewList(0);
 
         layoutChoice = preferences.getLayoutChoice();
         rv = mBinding.recyclerView;
@@ -130,6 +130,7 @@ public class NotePreviewsActivity extends AppCompatActivity implements
             }
         }));
     }
+
 
     @Override
     public void onBackPressed() {
@@ -168,26 +169,26 @@ public class NotePreviewsActivity extends AppCompatActivity implements
             case R.id.all_notes_drawer:
             default:
                 listToUse = 0;
-                mBinding.myToolbar.setTitle("Notes");
-                mBinding.fab.show();
+                mBinding.myToolbar.setTitle(getString(R.string.toolbarMainNotes));
+                mBinding.fab.setVisibility(View.VISIBLE);
                 break;
 
             case R.id.favorite_notes_drawer:
                 listToUse = 1;
-                mBinding.myToolbar.setTitle("Favorite Notes");
-                mBinding.fab.show();
+                mBinding.myToolbar.setTitle(getString(R.string.toolbarFavoriteNotes));
+                mBinding.fab.setVisibility(View.VISIBLE);
                 break;
 
             case R.id.archive_drawer:
                 listToUse = 2;
-                mBinding.myToolbar.setTitle("Archive");
-                mBinding.fab.hide();
+                mBinding.myToolbar.setTitle(getString(R.string.toolbarArchiveNotes));
+                mBinding.fab.setVisibility(View.INVISIBLE);
                 break;
 
             case R.id.recycle_bin_drawer:
                 listToUse = 3;
-                mBinding.myToolbar.setTitle("Trash");
-                mBinding.fab.hide();
+                mBinding.myToolbar.setTitle(getString(R.string.toolbarRecycleBinNotes));
+                mBinding.fab.setVisibility(View.INVISIBLE);
                 break;
         }
 
@@ -421,9 +422,8 @@ public class NotePreviewsActivity extends AppCompatActivity implements
         String message = getSnackBarMessage(DELETE_FOREVER, notesAdapter.getSelectedPositions().size());
         new AlertDialog.Builder(NotePreviewsActivity.this)
                 .setMessage(message)
-                .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i) -> {
-                    mActivityPresenter.onDeleteIconClicked(selectedPreviews);
-                })
+                .setPositiveButton(getString(R.string.deleteDialog), (dialogInterface, i)
+                        -> mActivityPresenter.onDeleteIconClicked(selectedPreviews))
                 .setNegativeButton(getString(R.string.cancelDialog), null)
                 .show();
     }
@@ -482,9 +482,16 @@ public class NotePreviewsActivity extends AppCompatActivity implements
 
     @Override
     protected void onStart() {
+
         if (mActivityPresenter != null) {
             mActivityPresenter.onAttach(NotePreviewsActivity.this);
+
+            // TODO: Test this
+            if (notesAdapter.isAdapterEmpty()) {
+                mActivityPresenter.onGetPreviewList(0);
+            }
         }
+
         super.onStart();
     }
 

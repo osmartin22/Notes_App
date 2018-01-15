@@ -39,6 +39,9 @@ public class NotesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
         this.context = context;
     }
 
+    public boolean isAdapterEmpty() {
+        return notes.isEmpty();
+    }
 
     public void updateAdapterList(@NonNull List<NoteAndReminderPreview> list) {
         notes.clear();

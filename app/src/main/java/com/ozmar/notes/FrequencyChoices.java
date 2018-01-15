@@ -161,11 +161,10 @@ public final class FrequencyChoices implements Parcelable {
         // Room returns an empty list instead of null
         // List should never be empty if it was created through the UI
         if (choices.daysChosen != null) {
-            if (choices.daysChosen.isEmpty() && (daysChosen == null || daysChosen.isEmpty())) {
-                daysChosenTheSame = true;
-            } else {
-                daysChosenTheSame = choices.daysChosen.containsAll(daysChosen);
-            }
+            daysChosenTheSame = choices.daysChosen.isEmpty() &&
+                    (daysChosen == null || daysChosen.isEmpty()) ||
+                    choices.daysChosen.containsAll(daysChosen);
+
         } else if (daysChosen == null || daysChosen.isEmpty()) {
             daysChosenTheSame = true;
         }

@@ -94,6 +94,7 @@ public class RemindersDaoTests {
         Assert.assertEquals(mReminder, mDb.remindersDao().getReminder(mReminder.getId()));
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Test
     public void updateEventsOccurred() throws Exception {
         updateReminder(mReminder);
@@ -103,6 +104,7 @@ public class RemindersDaoTests {
             int eventsOccurred = mReminder.getFrequencyChoices().getRepeatEventsOccurred() + 1;
             mDb.remindersDao().updateEventsOccurred(mReminder.getId(), eventsOccurred);
 
+            //noinspection ConstantConditions
             int databaseEventsOccurred = mDb.remindersDao().getReminder(mReminder.getId()).getFrequencyChoices().getRepeatEventsOccurred();
             Assert.assertEquals(eventsOccurred, databaseEventsOccurred);
 
