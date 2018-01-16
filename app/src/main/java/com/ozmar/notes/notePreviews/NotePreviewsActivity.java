@@ -29,6 +29,7 @@ import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.databinding.ActivityNotePreviewsBinding;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
 import com.ozmar.notes.notifications.ReminderNotificationManager;
+import com.ozmar.notes.settings.SettingsFragment;
 
 import java.util.List;
 
@@ -164,7 +165,8 @@ public class NotePreviewsActivity extends AppCompatActivity implements
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int listToUse;
+        int listToUse = -1;
+
         switch (item.getItemId()) {
             case R.id.all_notes_drawer:
             default:
@@ -190,11 +192,24 @@ public class NotePreviewsActivity extends AppCompatActivity implements
                 mBinding.myToolbar.setTitle(getString(R.string.toolbarRecycleBinNotes));
                 mBinding.fab.setVisibility(View.INVISIBLE);
                 break;
+
+            case R.id.settings_drawer:
+                createSettingsFragment();
+                break;
         }
 
-        mActivityPresenter.onGetPreviewList(listToUse);
+        if (listToUse != -1) {
+            mActivityPresenter.onGetPreviewList(listToUse);
+        }
+
         mBinding.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void createSettingsFragment() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.coordinatorLayout, new SettingsFragment())
+                .commit();
     }
 
     @Override

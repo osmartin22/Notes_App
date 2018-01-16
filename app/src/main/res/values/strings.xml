@@ -92,6 +92,7 @@
     <string name="favoriteNotesDrawer">Favorite Notes</string>
     <string name="archiveNotesDrawer">Archive</string>
     <string name="recycleBinNotesDrawer">Trash</string>
+    <string name="settingsDrawer">Settings</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 

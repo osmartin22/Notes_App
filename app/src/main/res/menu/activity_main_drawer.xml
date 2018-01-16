@@ -18,6 +18,11 @@
             android:id="@+id/recycle_bin_drawer"
             android:icon="@drawable/ic_recycle_bin_dark_gray"
             android:title="@string/recycleBinNotesDrawer" />
+
+        <item
+            android:id="@+id/settings_drawer"
+            android:icon="@drawable/ic_settings"
+            android:title="@string/settingsDrawer" />
     </group>
 
 </menu>
