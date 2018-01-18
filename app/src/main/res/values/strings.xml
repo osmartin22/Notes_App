@@ -21,6 +21,7 @@
     <string name="toolbarFavoriteNotes">Favorite Notes</string>
     <string name="toolbarArchiveNotes">Archive</string>
     <string name="toolbarRecycleBinNotes">Trash</string>
+    <string name="toolbarSettings">Settings</string>
 
 
     <!-- MenuItem names for NoteEditorActivity-->
@@ -253,15 +254,15 @@
     <!-- SharedPreference strings -->
     <string name="userSettingsPreference">User Settings</string>
     <string name="layoutChoicePreference">Layout Choice Preference</string>
-    <string name="deleteTrashXDaysPreference">Delete Trash After X Days Preference</string>
-    <string name="morningHourPreference">Morning Hour Preference</string>
-    <string name="morningMinutePreference">Morning Minute Preference</string>
-    <string name="afternoonHourPreference">Afternoon Hour Preference</string>
-    <string name="afternoonMinutePreference">Afternoon Minute Preference</string>
-    <string name="eveningHourPreference">Evening Hour Preference</string>
-    <string name="eveningMinutePreference">Evening Minute Preference</string>
-    <string name="nightHourPreference">Night Hour Preference</string>
-    <string name="nightMinutePreference">Night Minute Preference</string>
+    <string name="emptyTrashInXDays">Empty trash in X days</string>
+    <string name="morningTimePreference">Morning Time Preference</string>
+    <string name="afternoonTimePreference">Afternoon Time Preference</string>
+    <string name="eveningTimePreference">Evening Time Preference</string>
+    <string name="nightTimePreference">Night Time Preference</string>
+    <string name="morningPreference">Morning</string>
+    <string name="afternoonPreference">Afternoon</string>
+    <string name="eveningPreference">Evening</string>
+    <string name="nightPreference">Night</string>
 
 
     <!-- FormatUtils strings -->

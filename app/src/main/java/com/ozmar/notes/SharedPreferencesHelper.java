@@ -2,6 +2,8 @@ package com.ozmar.notes;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
+import android.support.v7.preference.PreferenceManager;
 
 import org.joda.time.LocalTime;
 
@@ -15,8 +17,7 @@ public class SharedPreferencesHelper {
 
     public SharedPreferencesHelper(Context context) {
         this.context = context;
-        this.preferences = context.getSharedPreferences(context.getString(R.string.userSettingsPreference),
-                Context.MODE_PRIVATE);
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(context);
     }
 
     public int getLayoutChoice() {
@@ -30,64 +31,80 @@ public class SharedPreferencesHelper {
     }
 
     public int getDaysInTrash() {
-        return preferences.getInt(context.getString(R.string.deleteTrashXDaysPreference), 1);
+        return preferences.getInt(context.getString(R.string.emptyTrashInXDays), 1);
     }
 
     public void setDaysInTrash(int days) {
         editor = preferences.edit();
-        editor.putInt(context.getString(R.string.deleteTrashXDaysPreference), days);
+        editor.putInt(context.getString(R.string.emptyTrashInXDays), days);
         editor.apply();
     }
 
-    public LocalTime getMorningTime() {
-        int hour = preferences.getInt(context.getString(R.string.morningHourPreference), 8);
-        int minute = preferences.getInt(context.getString(R.string.morningMinutePreference), 0);
+
+    @NonNull
+    private LocalTime createLocalTime(int timeInMinutes){
+        int hour = timeInMinutes / 60;
+        int minute = timeInMinutes % 60;
         return new LocalTime(hour, minute);
     }
 
-    public void setMorningTime(int hour, int minute) {
+    public LocalTime getMorningTime() {
+        int timeInMinutes = preferences.getInt(context.getString(R.string.morningTimePreference), 480);
+        return createLocalTime(timeInMinutes);
+    }
+
+    public int getMorningTimeInMinutes() {
+        return preferences.getInt(context.getString(R.string.morningTimePreference), 480);
+    }
+
+    public void setMorningTime(int timeInMinutes) {
         editor = preferences.edit();
-        editor.putInt(context.getString(R.string.morningHourPreference), hour);
-        editor.putInt(context.getString(R.string.morningMinutePreference), minute);
+        editor.putInt(context.getString(R.string.morningTimePreference), timeInMinutes);
         editor.apply();
     }
 
     public LocalTime getAfternoonTime() {
-        int hour = preferences.getInt(context.getString(R.string.afternoonHourPreference), 13);
-        int minute = preferences.getInt(context.getString(R.string.afternoonMinutePreference), 0);
-        return new LocalTime(hour, minute);
+        int timeInMinutes = preferences.getInt(context.getString(R.string.afternoonTimePreference), 720);
+        return createLocalTime(timeInMinutes);
     }
 
-    public void setAfternoonTime(int hour, int minute) {
+    public int getAfternoonTimeInMinutes() {
+        return preferences.getInt(context.getString(R.string.afternoonTimePreference), 780);
+    }
+
+    public void setAfternoonTime(int timeInMinutes) {
         editor = preferences.edit();
-        editor.putInt(context.getString(R.string.afternoonHourPreference), hour);
-        editor.putInt(context.getString(R.string.afternoonMinutePreference), minute);
+        editor.putInt(context.getString(R.string.afternoonTimePreference), timeInMinutes);
         editor.apply();
     }
 
     public LocalTime getEveningTime() {
-        int hour = preferences.getInt(context.getString(R.string.eveningHourPreference), 18);
-        int minute = preferences.getInt(context.getString(R.string.eveningMinutePreference), 0);
-        return new LocalTime(hour, minute);
+        int timeInMinutes = preferences.getInt(context.getString(R.string.eveningTimePreference), 1020);
+        return createLocalTime(timeInMinutes);
     }
 
-    public void setEveningTime(int hour, int minute) {
+    public int getEveningTimeInMinutes() {
+        return preferences.getInt(context.getString(R.string.eveningTimePreference), 1080);
+    }
+
+    public void setEveningTime(int timeInMinutes) {
         editor = preferences.edit();
-        editor.putInt(context.getString(R.string.eveningHourPreference), hour);
-        editor.putInt(context.getString(R.string.eveningMinutePreference), minute);
+        editor.putInt(context.getString(R.string.eveningTimePreference), timeInMinutes);
         editor.apply();
     }
 
     public LocalTime getNightTime() {
-        int hour = preferences.getInt(context.getString(R.string.nightHourPreference), 20);
-        int minute = preferences.getInt(context.getString(R.string.nightMinutePreference), 0);
-        return new LocalTime(hour, minute);
+        int timeInMinutes = preferences.getInt(context.getString(R.string.nightTimePreference), 1200);
+        return createLocalTime(timeInMinutes);
     }
 
-    public void setNightTime(int hour, int minute) {
+    public int getNightTimeInMinutes() {
+        return preferences.getInt(context.getString(R.string.nightTimePreference), 1200);
+    }
+
+    public void setNightTime(int timeInMinutes) {
         editor = preferences.edit();
-        editor.putInt(context.getString(R.string.nightHourPreference), hour);
-        editor.putInt(context.getString(R.string.nightMinutePreference), minute);
+        editor.putInt(context.getString(R.string.nightTimePreference), timeInMinutes);
         editor.apply();
     }
 }

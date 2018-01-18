@@ -29,7 +29,7 @@ import com.ozmar.notes.database.NoteAndReminderPreview;
 import com.ozmar.notes.databinding.ActivityNotePreviewsBinding;
 import com.ozmar.notes.noteEditor.NoteEditorActivity;
 import com.ozmar.notes.notifications.ReminderNotificationManager;
-import com.ozmar.notes.settings.SettingsFragment;
+import com.ozmar.notes.settings.SettingsActivity;
 
 import java.util.List;
 
@@ -93,7 +93,9 @@ public class NotePreviewsActivity extends AppCompatActivity implements
             @Override
             public void onDrawerSlide(View drawerView, float slideOffset) {
                 super.onDrawerSlide(drawerView, slideOffset);
-                mActivityPresenter.onDrawerSlide();
+                if (mActivityPresenter != null) {
+                    mActivityPresenter.onDrawerSlide();
+                }
             }
         };
 
@@ -194,7 +196,7 @@ public class NotePreviewsActivity extends AppCompatActivity implements
                 break;
 
             case R.id.settings_drawer:
-                createSettingsFragment();
+                openSettingsActivity();
                 break;
         }
 
@@ -206,10 +208,10 @@ public class NotePreviewsActivity extends AppCompatActivity implements
         return true;
     }
 
-    private void createSettingsFragment() {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.coordinatorLayout, new SettingsFragment())
-                .commit();
+    @Override
+    public void openSettingsActivity() {
+        Intent intent = new Intent(NotePreviewsActivity.this, SettingsActivity.class);
+        startActivity(intent);
     }
 
     @Override

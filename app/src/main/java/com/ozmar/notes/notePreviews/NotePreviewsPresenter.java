@@ -65,7 +65,9 @@ public class NotePreviewsPresenter {
     }
 
     public void onDrawerSlide() {
-        mActivityView.finishMultiSelectCAB();
+        if (mActivityView != null) {
+            mActivityView.finishMultiSelectCAB();
+        }
     }
 
     public void onNoteClick(int notePosition) {
