@@ -53,5 +53,7 @@ public interface NotePreviewsView {
 
     void openSettingsActivity();
 
+    int getDaysForTrashDeletion();
+
 
 }

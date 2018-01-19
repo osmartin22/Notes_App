@@ -8,7 +8,7 @@
             android:inputType="number"
             android:key="@string/emptyTrashInXDays"
             android:maxLength="2"
-            android:title="Delete note after X days in the trash" />
+            android:title="Delete note after X days in Trash" />
 
     </android.support.v7.preference.PreferenceCategory>
 

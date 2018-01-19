@@ -12,6 +12,7 @@ import com.ozmar.notes.database.RecycleBinNote;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -26,6 +27,7 @@ public class NotePreviewsPresenter {
     private static final int RECYCLE_BIN_NOTES = 3;
 
     private int listUsed = -1;
+    private int currentNavSelection;
 
     private int listToAddTo = -1;
     private int listRequestedBeforeProcessingDone = -1;
@@ -54,6 +56,13 @@ public class NotePreviewsPresenter {
         return listUsed;
     }
 
+    public int getCurrentNavSelection() {
+        return currentNavSelection;
+    }
+
+    public void setCurrentNavSelection(int currentNavSelection) {
+        this.currentNavSelection = currentNavSelection;
+    }
 
     public void onAttach(NotePreviewsActivity notePreviewsActivityView) {
         this.mActivityView = notePreviewsActivityView;
@@ -198,11 +207,56 @@ public class NotePreviewsPresenter {
     private void retrievePreviewList(int listUsed) {
         if (this.listUsed != listUsed) {
             this.listUsed = listUsed;
-            mDisposable.add(mInteractor.getListOfPreviewsToShow(listUsed)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(list -> mActivityView.updateAdapterList(list)));
+
+            if (listUsed == RECYCLE_BIN_NOTES) {
+                getAllRecycleBinNotes();
+            } else {
+                fetchPreviewsForList(listUsed);
+            }
         }
+    }
+
+    private void fetchPreviewsForList(int listUsed) {
+        mDisposable.add(mInteractor.getListOfPreviewsToShow(listUsed)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(list -> mActivityView.updateAdapterList(list)));
+    }
+
+    private void getAllRecycleBinNotes() {
+        mDisposable.add(mInteractor.getAllRecycleBinNotes()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::checkTrashForDeletion));
+    }
+
+    private void checkTrashForDeletion(List<RecycleBinNote> list) {
+        long timeInMillis = TimeUnit.DAYS.toMillis(mActivityView.getDaysForTrashDeletion());
+        List<RecycleBinNote> notesToDelete = new ArrayList<>();
+
+        for (RecycleBinNote note : list) {
+            if (note.getTimeModified() + timeInMillis < System.currentTimeMillis()) {
+                notesToDelete.add(note);
+            }
+        }
+
+        if (notesToDelete.isEmpty()) {
+            fetchPreviewsForList(RECYCLE_BIN_NOTES);
+        } else {
+            deleteOldNotesFromTrash(notesToDelete);
+        }
+    }
+
+    private void deleteOldNotesFromTrash(List<RecycleBinNote> list) {
+        List<Integer> noteIds = new ArrayList<>();
+        for (RecycleBinNote note : list) {
+            noteIds.add(note.getId());
+        }
+
+        mDisposable.add(mInteractor.deleteListOfNotes(noteIds, RECYCLE_BIN_NOTES)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(() -> fetchPreviewsForList(RECYCLE_BIN_NOTES)));
     }
 
     public void onMenuActionIconClicked(@NonNull List<Integer> selectedPositions,
@@ -409,5 +463,11 @@ public class NotePreviewsPresenter {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onProcessChosenNotesFinished));
+    }
+
+    private void updateLAstModifiedForRecycleBinNotes(List<RecycleBinNote> list) {
+        for (RecycleBinNote note : list) {
+            note.setTimeModified(System.currentTimeMillis());
+        }
     }
 }

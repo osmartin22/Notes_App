@@ -8,7 +8,10 @@ import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
 import android.arch.persistence.room.Update;
 
+import java.util.List;
+
 import io.reactivex.Maybe;
+import io.reactivex.Single;
 
 
 @Dao
@@ -58,6 +61,9 @@ public interface NotesDao {
 
     @Query("SELECT * FROM recycleBinNotes WHERE id = :noteId")
     Maybe<RecycleBinNote> getARecycleBinNotes(int noteId);
+
+    @Query("SELECT * FROM recycleBinNotes")
+    Single<List<RecycleBinNote>> getAllRecycleBinNotes();
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     long addToRecycleBinNotes(RecycleBinNote note);

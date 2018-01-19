@@ -131,6 +131,10 @@ public class NotePreviewsInteractor {
     //---------------------------------------------------------------------------------------//
     // RecycleBin specific
     //---------------------------------------------------------------------------------------//
+    @NonNull Single<List<RecycleBinNote>> getAllRecycleBinNotes(){
+        return db.notesDao().getAllRecycleBinNotes();
+    }
+
     @NonNull
     public Single<List<RecycleBinNote>> getListOfRecycleBinNotes(@NonNull List<Integer> noteIds) {
         return db.multiSelectDao().getRecycleBinNotes(noteIds);

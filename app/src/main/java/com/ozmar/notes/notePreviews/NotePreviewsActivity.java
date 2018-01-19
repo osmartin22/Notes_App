@@ -175,24 +175,28 @@ public class NotePreviewsActivity extends AppCompatActivity implements
                 listToUse = 0;
                 mBinding.myToolbar.setTitle(getString(R.string.toolbarMainNotes));
                 mBinding.fab.setVisibility(View.VISIBLE);
+                mActivityPresenter.setCurrentNavSelection(0);
                 break;
 
             case R.id.favorite_notes_drawer:
                 listToUse = 1;
                 mBinding.myToolbar.setTitle(getString(R.string.toolbarFavoriteNotes));
                 mBinding.fab.setVisibility(View.VISIBLE);
+                mActivityPresenter.setCurrentNavSelection(1);
                 break;
 
             case R.id.archive_drawer:
                 listToUse = 2;
                 mBinding.myToolbar.setTitle(getString(R.string.toolbarArchiveNotes));
                 mBinding.fab.setVisibility(View.INVISIBLE);
+                mActivityPresenter.setCurrentNavSelection(2);
                 break;
 
             case R.id.recycle_bin_drawer:
                 listToUse = 3;
                 mBinding.myToolbar.setTitle(getString(R.string.toolbarRecycleBinNotes));
                 mBinding.fab.setVisibility(View.INVISIBLE);
+                mActivityPresenter.setCurrentNavSelection(3);
                 break;
 
             case R.id.settings_drawer:
@@ -496,20 +500,34 @@ public class NotePreviewsActivity extends AppCompatActivity implements
         notesAdapter.updateAt(preview, position);
     }
 
+    @Override
+    public int getDaysForTrashDeletion() {
+        return preferences.getDaysInTrash();
+    }
 
     @Override
     protected void onStart() {
-
         if (mActivityPresenter != null) {
             mActivityPresenter.onAttach(NotePreviewsActivity.this);
 
-            // TODO: Test this
-            if (notesAdapter.isAdapterEmpty()) {
+            int listUsed = mActivityPresenter.getListUsed();
+            if(listUsed == -1){
                 mActivityPresenter.onGetPreviewList(0);
+            } else {
+                mActivityPresenter.onGetPreviewList(listUsed);
             }
+
         }
 
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mBinding.navView.getMenu().getItem(4).setChecked(false);
+        mBinding.navView.setCheckedItem(mActivityPresenter.getCurrentNavSelection());
+        mBinding.navView.getMenu().getItem(mActivityPresenter.getCurrentNavSelection()).setChecked(true);
     }
 
     @Override
