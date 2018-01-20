@@ -102,6 +102,7 @@ public abstract class MultiSelectDao {
         List<RecycleBinNote> recycleBinNoteList = new ArrayList<>();
         for (MainNote note : list) {
             note.setId(0);
+            note.setTimeModified(System.currentTimeMillis());
             recycleBinNoteList.add(new RecycleBinNote(note));
         }
 
@@ -113,6 +114,7 @@ public abstract class MultiSelectDao {
         List<RecycleBinNote> recycleBinNoteList = new ArrayList<>();
         for (ArchiveNote note : list) {
             note.setId(0);
+            note.setTimeModified(System.currentTimeMillis());
             recycleBinNoteList.add(new RecycleBinNote(note));
         }
 

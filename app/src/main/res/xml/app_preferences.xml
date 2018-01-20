@@ -8,7 +8,8 @@
             android:inputType="number"
             android:key="@string/emptyTrashInXDays"
             android:maxLength="2"
-            android:title="Delete note after X days in Trash" />
+            android:dialogMessage="@string/emptyTrashMessage"
+            android:title="@string/emptyTrashTitle" />
 
     </android.support.v7.preference.PreferenceCategory>
 

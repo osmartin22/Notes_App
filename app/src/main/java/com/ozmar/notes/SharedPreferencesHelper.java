@@ -31,7 +31,9 @@ public class SharedPreferencesHelper {
     }
 
     public int getDaysInTrash() {
-        return preferences.getInt(context.getString(R.string.emptyTrashInXDays), 1);
+        // Preference becomes string even though only numbers are allowed for the settings
+        // Must get string then convert to int to avoid ClassCastException
+        return Integer.valueOf(preferences.getString(context.getString(R.string.emptyTrashInXDays), "7"));
     }
 
     public void setDaysInTrash(int days) {
@@ -42,7 +44,7 @@ public class SharedPreferencesHelper {
 
 
     @NonNull
-    private LocalTime createLocalTime(int timeInMinutes){
+    private LocalTime createLocalTime(int timeInMinutes) {
         int hour = timeInMinutes / 60;
         int minute = timeInMinutes % 60;
         return new LocalTime(hour, minute);

@@ -264,6 +264,9 @@
     <string name="eveningPreference">Evening</string>
     <string name="nightPreference">Night</string>
 
+    <string name="emptyTrashTitle">Delete note after X days in Trash</string>
+    <string name="emptyTrashMessage">Note: Setting to zero will erase all notes in the Trash</string>
+
 
     <!-- FormatUtils strings -->
 
